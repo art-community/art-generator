@@ -42,6 +42,13 @@ subprojects {
     apply(plugin = "com.jfrog.artifactory")
     apply(plugin = "maven-publish")
 
+    dependencies {
+        compileOnly("org.projectlombok:lombok:1.18.12")
+        annotationProcessor("org.projectlombok:lombok:1.18.12")
+        testCompileOnly("org.projectlombok:lombok:1.18.12")
+        testAnnotationProcessor("org.projectlombok:lombok:1.18.12")
+    }
+
     if (bintrayUser.isNullOrEmpty() || bintrayKey.isNullOrEmpty()) {
         return@subprojects
     }
