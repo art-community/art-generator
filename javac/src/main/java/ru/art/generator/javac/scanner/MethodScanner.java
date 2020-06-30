@@ -2,17 +2,20 @@ package ru.art.generator.javac.scanner;
 
 import com.sun.source.tree.*;
 import com.sun.source.util.*;
+import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import lombok.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.source.tree.Tree.Kind.*;
+import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static com.sun.tools.javac.util.List.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
-import static javax.lang.model.element.Modifier.*;
+import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
 import java.util.List;
 import java.util.*;
 
@@ -51,6 +54,33 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
             JCMethodDecl methodDeclaration = classMethods.get(function).methodDeclaration;
             JCIdent requestType = (JCIdent) methodDeclaration.getParameters().head.getType();
             JCIdent responseType = (JCIdent) methodDeclaration.getReturnType();
+
+            JCClassDecl requestClass = (JCClassDecl) elements.getTree(requestType.sym);
+            JCClassDecl responseClass = (JCClassDecl) elements.getTree(responseType.sym);
+
+            ListBuffer<JCTree> requestFields = new ListBuffer<>();
+            requestFields.addAll(requestClass.defs);
+            requestFields.add(maker.VarDef(
+                    maker.Modifiers(InterfaceVarFlags),
+                    elements.getName("to" + requestType.getName().toString()),
+                    maker.TypeApply(maker.Ident(elements.getName("ValueToModelMapper")), of(requestType, maker.Ident(elements.getName("Entity")))),
+                    maker.Lambda(of(maker.VarDef(new Symbol.VarSymbol(PARAMETER, elements.getName("entity"), elements.getTypeElement("ru.art.entity.Entity").type, requestClass.sym), null)),
+                            maker.Apply(
+                                    nil(),
+                                    maker.Select(
+                                            maker.Apply(
+                                                    nil(),
+                                                    maker.Select(
+                                                            maker.Apply(nil(), maker.Select(requestType, elements.getName("builder")), nil()),
+                                                            elements.getName("input")),
+                                                    of(maker.Apply(nil(), maker.Select(maker.Ident(elements.getName("entity")), elements.getName("getString")), of(maker.Literal("input"))))),
+                                            elements.getName("build")),
+                                    nil())
+                            )
+                    )
+            );
+
+            requestClass.defs = requestFields.toList();
 
             JCMethodInvocation rsocketApply = maker.Apply(
                     nil(),
@@ -103,6 +133,9 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
         ListBuffer<JCTree> definitions = new ListBuffer<>();
         definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.rsocket.function")), elements.getName("RsocketServiceFunction")), false));
         definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.rsocket.server")), elements.getName("RsocketServer")), false));
+        definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.entity.mapper")), elements.getName("ValueToModelMapper")), false));
+        definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.entity.mapper")), elements.getName("ValueFromModelMapper")), false));
+        definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.entity")), elements.getName("Entity")), false));
         definitions.addAll(mainPackage.defs);
 
         mainPackage.defs = definitions.toList();
@@ -141,6 +174,7 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
                 .forEach(method -> classMethods.put(method.getName().toString(), new ClassMethod(classDeclaration, method)));
         return super.visitClass(node, trees);
     }
+
 
     @AllArgsConstructor
     private class ClassMethod {

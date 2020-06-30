@@ -11,11 +11,6 @@ public class Main {
     static
     class Request {
         private final String input;
-
-        public static ValueToModelMapper<Request, Entity> toRequest = entity -> Request.builder()
-                .input(entity.getString("input"))
-                .build();
-
         public static ValueFromModelMapper<Request, Entity> fromRequest = request -> Entity.entityBuilder()
                 .stringField("input", request.input)
                 .build();
