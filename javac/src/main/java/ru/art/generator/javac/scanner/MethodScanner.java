@@ -1,21 +1,19 @@
 package ru.art.generator.javac.scanner;
 
+import com.sun.codemodel.internal.*;
 import com.sun.source.tree.*;
 import com.sun.source.util.*;
-import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import lombok.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.source.tree.Tree.Kind.*;
-import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static com.sun.tools.javac.util.List.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.element.Modifier.*;
 import java.util.List;
 import java.util.*;
 
@@ -60,25 +58,8 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
 
             ListBuffer<JCTree> requestFields = new ListBuffer<>();
             requestFields.addAll(requestClass.defs);
-            requestFields.add(maker.VarDef(
-                    maker.Modifiers(InterfaceVarFlags),
-                    elements.getName("to" + requestType.getName().toString()),
-                    maker.TypeApply(maker.Ident(elements.getName("ValueToModelMapper")), of(requestType, maker.Ident(elements.getName("Entity")))),
-                    maker.Lambda(of(maker.VarDef(new Symbol.VarSymbol(PARAMETER, elements.getName("entity"), elements.getTypeElement("ru.art.entity.Entity").type, requestClass.sym), null)),
-                            maker.Apply(
-                                    nil(),
-                                    maker.Select(
-                                            maker.Apply(
-                                                    nil(),
-                                                    maker.Select(
-                                                            maker.Apply(nil(), maker.Select(requestType, elements.getName("builder")), nil()),
-                                                            elements.getName("input")),
-                                                    of(maker.Apply(nil(), maker.Select(maker.Ident(elements.getName("entity")), elements.getName("getString")), of(maker.Literal("input"))))),
-                                            elements.getName("build")),
-                                    nil())
-                            )
-                    )
-            );
+
+            ListBuffer<JStatement> statements = new ListBuffer<>();
 
             requestClass.defs = requestFields.toList();
 
