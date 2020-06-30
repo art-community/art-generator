@@ -4,8 +4,6 @@ import lombok.*;
 import ru.art.entity.*;
 import ru.art.entity.mapper.*;
 import ru.art.generator.javac.Module;
-import ru.art.rsocket.function.*;
-import static ru.art.rsocket.function.RsocketServiceFunction.*;
 
 public class Main {
     @Getter

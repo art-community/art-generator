@@ -18,7 +18,8 @@ import java.util.*;
 
 public class MethodScanner extends TreePathScanner<Object, Trees> {
     private final Map<String, ClassMethod> classMethods = new LinkedHashMap<>();
-    private JCMethodDecl mainDeclaration;
+    private JCMethodDecl mainMethodDeclaration;
+    private JCClassDecl mainClassDeclaration;
     private final TreeMaker maker;
     private final JavacElements elements;
 
@@ -30,15 +31,15 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
     @Override
     public Object scan(TreePath path, Trees trees) {
         Object scanResult = super.scan(path, trees);
-        if (isNull(mainDeclaration)) {
+        if (isNull(mainMethodDeclaration)) {
             return scanResult;
         }
-        JCBlock mainBody = mainDeclaration.getBody();
+        JCBlock mainBody = mainMethodDeclaration.getBody();
         ListBuffer<JCStatement> mainStatements = new ListBuffer<>();
 
         List<String> rsocketFunctions = mainBody.stats
                 .stream()
-                .map(JCTree::getTree)
+                .map(statement -> ((JCExpressionStatement) statement).getExpression())
                 .filter(expression -> expression.getKind() == METHOD_INVOCATION)
                 .map(invocation -> ((JCMethodInvocation) invocation))
                 .filter(invocation -> ((JCIdent) invocation.getMethodSelect()).name.toString().equals("rsocket"))
@@ -79,8 +80,8 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
                     of(maker.Reference(
                             INVOKE,
                             elements.getName(function),
-                            ((JCIdent) classMethods.get(function).classDeclaration.getTree()),
-                            nil())
+                            maker.Ident(elements.getName(classMethods.get(function).classDeclaration.name.toString())),
+                            null)
                     )
             );
 
@@ -91,21 +92,28 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
                         nil(),
                         maker.Select(maker.Apply(
                                 nil(),
-                                maker.Select(maker.Ident(elements.getName("ru.art.rsocket.server.RsocketServer")), elements.getName("rsocketTcpServer")),
+                                maker.Select(maker.Ident(elements.getName("RsocketServer")), elements.getName("rsocketTcpServer")),
                                 nil()
                         ), elements.getName("await")),
                         nil()
                 ))
         );
         mainBody.stats = mainStatements.toList();
-        System.out.println(mainBody);
+        JCCompilationUnit mainPackage = elements.getTreeAndTopLevel(mainClassDeclaration.sym, null, null).snd;
+        ListBuffer<JCTree> definitions = new ListBuffer<>();
+        definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.rsocket.function")), elements.getName("RsocketServiceFunction")), false));
+        definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.rsocket.server")), elements.getName("RsocketServer")), false));
+        definitions.addAll(mainPackage.defs);
+
+        mainPackage.defs = definitions.toList();
+        System.out.println(mainPackage);
         return scanResult;
     }
 
     @Override
     public Object visitMethod(MethodTree node, Trees trees) {
-        if (node.getName().toString().equals("main") && isNull(mainDeclaration)) {
-            mainDeclaration = (JCMethodDecl) node;
+        if (node.getName().toString().equals("main") && isNull(mainMethodDeclaration)) {
+            mainMethodDeclaration = (JCMethodDecl) node;
             return super.visitMethod(node, trees);
         }
         return super.visitMethod(node, trees);
@@ -117,6 +125,11 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
         if (node.getMembers().stream().anyMatch(member -> member.getKind() == VARIABLE)) {
             return super.visitClass(node, trees);
         }
+
+        if (node.getMembers().stream().anyMatch(member -> member.getKind() == METHOD && ((JCMethodDecl) member).name.toString().equals("main"))) {
+            mainClassDeclaration = (JCClassDecl) node;
+        }
+
         node.getMembers()
                 .stream()
                 .filter(member -> member.getKind() == METHOD)
