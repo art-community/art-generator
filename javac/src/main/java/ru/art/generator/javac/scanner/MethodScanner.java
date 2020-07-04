@@ -2,7 +2,6 @@ package ru.art.generator.javac.scanner;
 
 import com.sun.source.tree.*;
 import com.sun.source.util.*;
-import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
@@ -38,6 +37,7 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
         }
         JCBlock mainBody = mainMethodDeclaration.getBody();
         ListBuffer<JCStatement> mainStatements = new ListBuffer<>();
+        mainStatements.add(maker.Exec(maker.Apply(nil(), maker.Select(maker.Ident(elements.getName("AgileConfigurationsActivator")), elements.getName("useAgileConfigurations")), nil())));
 
         List<String> rsocketFunctions = mainBody.stats
                 .stream()
@@ -48,7 +48,7 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
                 .map(invocation -> ((JCIdent) invocation.getArguments().head).name.toString())
                 .collect(toList());
 
-
+        int current = maker.pos;
         rsocketFunctions.forEach(function -> {
             JCMethodDecl methodDeclaration = classMethods.get(function).methodDeclaration;
             JCIdent requestType = (JCIdent) methodDeclaration.getParameters().head.getType();
@@ -58,40 +58,18 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
             JCClassDecl responseClass = (JCClassDecl) elements.getTree(responseType.sym);
 
             maker.at(requestClass.pos);
-
             ListBuffer<JCTree> requestFields = new ListBuffer<>();
             requestFields.addAll(requestClass.defs);
-
-            JCVariableDecl parameter = maker.VarDef(
-                    maker.Modifiers(PARAMETER),
-                    elements.getName("request"),
-                    null,
-                    null
-            );
-            JCLambda lambda = maker.Lambda(of(parameter),
-                    maker.Apply(
-                            nil(),
-                            maker.Select(
-                                    maker.Apply(
-                                            nil(),
-                                            maker.Select(
-                                                    maker.Apply(nil(), maker.Select(requestType, elements.getName("builder")), nil()),
-                                                    elements.getName("input")),
-                                            of(maker.Literal("test"))),
-                                    elements.getName("build")),
-                            nil())
-            );
-
-            parameter.pos = maker.pos;
-
-            JCTypeApply typeApply = maker.TypeApply(maker.Ident(elements.getName("ValueToModelMapper")), of(requestType, maker.Ident(elements.getName("Entity"))));
-
-            JCVariableDecl field = maker.VarDef(maker.Modifiers(InterfaceVarFlags), elements.getName("to" + requestType.getName().toString()), typeApply, lambda);
-
-            requestFields.add(field);
-
+            requestFields.add(generateToRequestField(requestType));
             requestClass.defs = requestFields.toList();
 
+            maker.at(responseClass.pos);
+            ListBuffer<JCTree> responseFields = new ListBuffer<>();
+            responseFields.addAll(responseClass.defs);
+            responseFields.add(generateFromResponseField(responseType));
+            responseClass.defs = responseFields.toList();
+
+            maker.at(current);
             JCMethodInvocation rsocketApply = maker.Apply(
                     nil(),
                     maker.Select(maker.Ident(elements.getName("RsocketServiceFunction")), elements.getName("rsocket")),
@@ -145,12 +123,65 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
         definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.rsocket.server")), elements.getName("RsocketServer")), false));
         definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.entity.mapper")), elements.getName("ValueToModelMapper")), false));
         definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.entity.mapper")), elements.getName("ValueFromModelMapper")), false));
+        definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.config.extensions.activator")), elements.getName("AgileConfigurationsActivator")), false));
         definitions.add(maker.Import(maker.Select(maker.Ident(elements.getName("ru.art.entity")), elements.getName("Entity")), false));
         definitions.addAll(mainPackage.defs);
 
         mainPackage.defs = definitions.toList();
         System.out.println(mainPackage);
         return scanResult;
+    }
+
+    private JCVariableDecl generateToRequestField(JCIdent requestType) {
+        JCLambda lambda = maker.Lambda(of(
+                maker.VarDef(
+                        maker.Modifiers(PARAMETER),
+                        elements.getName("request"),
+                        null,
+                        null
+                )),
+                maker.Apply(
+                        nil(),
+                        maker.Select(
+                                maker.Apply(
+                                        nil(),
+                                        maker.Select(
+                                                maker.Apply(nil(), maker.Select(requestType, elements.getName("builder")), nil()),
+                                                elements.getName("input")),
+                                        of(maker.Literal("test"))),
+                                elements.getName("build")),
+                        nil())
+        );
+
+        JCTypeApply typeApply = maker.TypeApply(maker.Ident(elements.getName("ValueToModelMapper")), of(requestType, maker.Ident(elements.getName("Entity"))));
+
+        return maker.VarDef(maker.Modifiers(InterfaceVarFlags), elements.getName("to" + requestType.getName().toString()), typeApply, lambda);
+    }
+
+    private JCVariableDecl generateFromResponseField(JCIdent responseType) {
+        JCLambda lambda = maker.Lambda(of(
+                maker.VarDef(
+                        maker.Modifiers(PARAMETER),
+                        elements.getName("response"),
+                        null,
+                        null
+                )),
+                maker.Apply(
+                        nil(),
+                        maker.Select(
+                                maker.Apply(
+                                        nil(),
+                                        maker.Select(
+                                                maker.Apply(nil(), maker.Select(maker.Ident(elements.getName("Entity")), elements.getName("entityBuilder")), nil()),
+                                                elements.getName("stringField")),
+                                        of(maker.Literal("test"), maker.Literal("test"))),
+                                elements.getName("build")),
+                        nil())
+        );
+
+        JCTypeApply typeApply = maker.TypeApply(maker.Ident(elements.getName("ValueFromModelMapper")), of(responseType, maker.Ident(elements.getName("Entity"))));
+
+        return maker.VarDef(maker.Modifiers(InterfaceVarFlags), elements.getName("from" + responseType.getName().toString()), typeApply, lambda);
     }
 
     @Override

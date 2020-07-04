@@ -1,0 +1,6 @@
+rsocket:
+  server:
+    webSocketPort: 10001
+logging:
+  colored: true
+  asynchronous: true
