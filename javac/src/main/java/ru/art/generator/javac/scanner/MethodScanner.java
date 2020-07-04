@@ -1,19 +1,20 @@
 package ru.art.generator.javac.scanner;
 
-import com.sun.codemodel.internal.*;
 import com.sun.source.tree.*;
 import com.sun.source.util.*;
+import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import lombok.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.source.tree.Tree.Kind.*;
+import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static com.sun.tools.javac.util.List.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
-import static javax.lang.model.element.Modifier.*;
+import javax.lang.model.element.*;
 import java.util.List;
 import java.util.*;
 
@@ -33,7 +34,7 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
     public Object scan(TreePath path, Trees trees) {
         Object scanResult = super.scan(path, trees);
         if (isNull(mainMethodDeclaration)) {
-            return scanResult;
+            return null;
         }
         JCBlock mainBody = mainMethodDeclaration.getBody();
         ListBuffer<JCStatement> mainStatements = new ListBuffer<>();
@@ -56,10 +57,38 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
             JCClassDecl requestClass = (JCClassDecl) elements.getTree(requestType.sym);
             JCClassDecl responseClass = (JCClassDecl) elements.getTree(responseType.sym);
 
+            maker.at(requestClass.pos);
+
             ListBuffer<JCTree> requestFields = new ListBuffer<>();
             requestFields.addAll(requestClass.defs);
 
-            ListBuffer<JStatement> statements = new ListBuffer<>();
+            JCVariableDecl parameter = maker.VarDef(
+                    maker.Modifiers(PARAMETER),
+                    elements.getName("request"),
+                    null,
+                    null
+            );
+            JCLambda lambda = maker.Lambda(of(parameter),
+                    maker.Apply(
+                            nil(),
+                            maker.Select(
+                                    maker.Apply(
+                                            nil(),
+                                            maker.Select(
+                                                    maker.Apply(nil(), maker.Select(requestType, elements.getName("builder")), nil()),
+                                                    elements.getName("input")),
+                                            of(maker.Literal("test"))),
+                                    elements.getName("build")),
+                            nil())
+            );
+
+            parameter.pos = maker.pos;
+
+            JCTypeApply typeApply = maker.TypeApply(maker.Ident(elements.getName("ValueToModelMapper")), of(requestType, maker.Ident(elements.getName("Entity"))));
+
+            JCVariableDecl field = maker.VarDef(maker.Modifiers(InterfaceVarFlags), elements.getName("to" + requestType.getName().toString()), typeApply, lambda);
+
+            requestFields.add(field);
 
             requestClass.defs = requestFields.toList();
 
@@ -148,8 +177,8 @@ public class MethodScanner extends TreePathScanner<Object, Trees> {
                 .stream()
                 .filter(member -> member.getKind() == METHOD)
                 .map(member -> (JCMethodDecl) member)
-                .filter(method -> method.getModifiers().getFlags().contains(PUBLIC))
-                .filter(method -> method.getModifiers().getFlags().contains(STATIC))
+                .filter(method -> method.getModifiers().getFlags().contains(Modifier.PUBLIC))
+                .filter(method -> method.getModifiers().getFlags().contains(Modifier.STATIC))
                 .filter(method -> !method.getName().toString().equals("<init>"))
                 .filter(method -> !method.getName().toString().equals("main"))
                 .forEach(method -> classMethods.put(method.getName().toString(), new ClassMethod(classDeclaration, method)));
