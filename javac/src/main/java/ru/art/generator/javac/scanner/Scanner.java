@@ -34,9 +34,10 @@ public class Scanner extends TreePathScanner<Object, Trees> {
             return result;
         }
 
-        putExistedClass(classDeclaration.name.toString(), ExistedClass.builder()
+        JCCompilationUnit packageUnit = elements.getTreeAndTopLevel(classDeclaration.sym, null, null).snd;
+        putExistedClass(packageUnit.getPackageName().toString() + DOT + classDeclaration.name.toString(), ExistedClass.builder()
                 .name(classDeclaration.name.toString())
-                .packageUnit(elements.getTreeAndTopLevel(classDeclaration.sym, null, null).snd)
+                .packageUnit(packageUnit)
                 .declaration(classDeclaration)
                 .methods(classDeclaration.getMembers()
                         .stream()

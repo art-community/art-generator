@@ -16,7 +16,6 @@ public class GenerationService {
     private void generateClassMethodNames() {
         getExistedClasses()
                 .values()
-                .stream()
                 .forEach(existed -> addFields(existed, methodNames(existed).toClass().fields().values()));
     }
 }
