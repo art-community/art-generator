@@ -16,9 +16,9 @@ public class GenerationService {
     }
 
     private void generateClassMethodNames() {
-        getExistedClasses().values()
+        getExistedClasses()
+                .values()
                 .stream()
-                .map(ClassMethodNamesModel::new)
-                .forEach(model -> addInnerClass(mainClass(), model.toClass()));
+                .forEach(existed -> addFields(existed, new ClassMethodNamesModel(existed).toClass().fields().values()));
     }
 }

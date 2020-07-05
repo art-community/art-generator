@@ -22,6 +22,7 @@ public class ClassMethodNamesModel {
                 continue;
             }
             classModel.field(entry.getKey(), newField()
+                    .modifiers(PUBLIC | STATIC)
                     .name(entry.getKey())
                     .type(type(String.class.getName()))
                     .constant(entry.getKey()));
