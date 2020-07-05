@@ -8,6 +8,7 @@ import java.util.*;
 @Getter
 @Builder
 public class ExistedClass {
+    private final String name;
     private final JCClassDecl declaration;
     private final JCCompilationUnit packageUnit;
 

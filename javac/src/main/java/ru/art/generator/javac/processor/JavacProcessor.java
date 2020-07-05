@@ -3,14 +3,15 @@ package ru.art.generator.javac.processor;
 import com.google.auto.service.*;
 import com.sun.source.util.*;
 import com.sun.tools.javac.api.*;
+import com.sun.tools.javac.main.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.processing.*;
 import com.sun.tools.javac.tree.*;
-import ru.art.generator.javac.annotation.*;
+import com.sun.tools.javac.util.*;
 import ru.art.generator.javac.context.*;
-import ru.art.generator.javac.scanner.*;
+import ru.art.generator.javac.scanner.Scanner;
 import static javax.lang.model.SourceVersion.*;
-import static ru.art.generator.javac.context.GenerationContext.initialized;
+import static ru.art.generator.javac.service.GenerationService.*;
 import javax.annotation.processing.*;
 import javax.lang.model.element.*;
 import java.util.*;
@@ -31,16 +32,22 @@ public class JavacProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        if (initialized()) {
-            return true;
+        if (roundEnvironment.processingOver()) {
+            generate();
+            return false;
         }
+        JavaCompiler compiler = JavaCompiler.instance(processingEnvironment.getContext());
         TreeMaker maker = TreeMaker.instance(processingEnvironment.getContext());
         JavacElements elements = JavacElements.instance(processingEnvironment.getContext());
+        GenerationContextInitializer.GenerationContextInitializerBuilder initializerBuilder = GenerationContextInitializer.builder()
+                .options(Options.instance(processingEnvironment.getContext()))
+                .processingEnvironment(processingEnvironment)
+                .compiler(compiler)
+                .elements(elements)
+                .maker(maker);
+        Scanner scanner = new Scanner(elements, initializerBuilder);
         for (Element rootElement : roundEnvironment.getRootElements()) {
-            if (rootElement.getAnnotation(Module.class) != null) {
-                new MainScanner(maker, elements).scan(trees.getPath(rootElement), trees);
-                return true;
-            }
+            scanner.scan(trees.getPath(rootElement), trees);
         }
         return true;
     }
