@@ -48,5 +48,6 @@ public class ClassMutationService {
                 .collect(toList()));
         newPackageDefinitions.add(currentPackageDefinitions.last());
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
+        System.out.println(existedClass.getPackageUnit());
     }
 }
