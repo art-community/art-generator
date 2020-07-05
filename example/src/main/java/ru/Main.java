@@ -8,6 +8,8 @@ import static ru.art.generator.javac.model.ModuleModel.*;
 public class Main {
     @Configurator
     public static ModuleModel configure() {
-        return module().service(MyService.class);
+        return module().serve(server -> server
+                .rsocket(MyService.class, MyService.myMethod)
+                .rsocket("myFunction"));
     }
 }

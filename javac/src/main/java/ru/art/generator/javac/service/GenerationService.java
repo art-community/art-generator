@@ -32,7 +32,7 @@ public class GenerationService {
             return;
         }
         ModuleModel model = loadModel();
-        System.out.println(model.getServices());
+        System.out.println(model);
         if (isNull(mainMethod())) {
             addMethod(mainClass(), newMethod()
                     .modifiers(PUBLIC | STATIC)
@@ -45,7 +45,7 @@ public class GenerationService {
                                             maker().Select(maker().Ident(elements().getName("System")), elements().getName("out")),
                                             elements().getName("println")
                                     ),
-                                    of(maker().Literal("Registered classes:" + model.getServices().stream().map(Class::getName).collect(joining())))
+                                    of(maker().Literal("Model:" + model))
 
                             )
                             )
