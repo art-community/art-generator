@@ -10,7 +10,7 @@ art {
 }
 
 dependencies {
-    compileOnly(project(":javac"))
+    implementation(project(":javac"))
     annotationProcessor(project(":javac"))
 }
 

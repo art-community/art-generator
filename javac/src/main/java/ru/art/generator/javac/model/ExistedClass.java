@@ -3,6 +3,7 @@ package ru.art.generator.javac.model;
 import com.sun.tools.javac.code.*;
 import lombok.*;
 import static com.sun.tools.javac.tree.JCTree.*;
+import static ru.art.generator.javac.constants.Constants.DOT;
 import java.util.*;
 
 @Getter
@@ -20,6 +21,10 @@ public class ExistedClass {
 
     public String getPackageName() {
         return packageUnit.getPackageName().toString();
+    }
+
+    public String getFullName() {
+        return getPackageName() + DOT + getName();
     }
 
     public Type getType() {

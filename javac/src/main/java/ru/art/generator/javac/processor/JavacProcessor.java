@@ -49,6 +49,6 @@ public class JavacProcessor extends AbstractProcessor {
         for (Element rootElement : roundEnvironment.getRootElements()) {
             scanner.scan(trees.getPath(rootElement), trees);
         }
-        return true;
+        return false;
     }
 }

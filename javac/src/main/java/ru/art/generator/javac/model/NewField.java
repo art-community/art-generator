@@ -18,7 +18,6 @@ public class NewField {
     private String name;
     private long modifiers;
     private TypeModel type;
-
     private Supplier<JCExpression> initializer;
 
     public NewField constant(Object value) {
@@ -37,9 +36,7 @@ public class NewField {
     public JCVariableDecl generate() {
         JCModifiers modifiers = maker().Modifiers(this.modifiers);
         Name name = elements().getName(this.name);
-        JCExpression type = this.type.isArray()
-                ? maker().TypeArray(maker().Ident(elements().getName(this.type.getTypeSimpleName())))
-                : maker().Ident(elements().getName(this.type.getTypeSimpleName()));
+        JCExpression type = this.type.generate();
         JCExpression initializationExpression = initializer.get();
         return maker().VarDef(modifiers, name, type, initializationExpression);
     }

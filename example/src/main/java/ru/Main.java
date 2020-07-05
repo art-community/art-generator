@@ -1,11 +1,13 @@
 package ru;
 
 import ru.art.generator.javac.annotation.*;
-import java.util.*;
+import ru.art.generator.javac.model.*;
+import static ru.art.generator.javac.model.ModuleModel.*;
 
 @Module
 public class Main {
-    public static void main(String[] args) {
-        System.out.println(Arrays.toString(MyService.methods));
+    @Configurator
+    public static ModuleModel configure() {
+        return module().service(MyService.class);
     }
 }

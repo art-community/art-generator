@@ -2,10 +2,12 @@ package ru.art.generator.javac.scanner;
 
 import com.sun.source.tree.*;
 import com.sun.source.util.*;
+import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.tree.JCTree.*;
+import com.sun.tools.javac.util.List;
 import lombok.*;
-import ru.art.generator.javac.context.*;
+import ru.art.generator.javac.annotation.*;
 import ru.art.generator.javac.context.GenerationContextInitializer.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.source.tree.Tree.Kind.METHOD;
@@ -18,6 +20,7 @@ import static javax.lang.model.element.Modifier.*;
 import static ru.art.generator.javac.constants.Constants.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import static ru.art.generator.javac.factory.CollectionsFactory.*;
+import java.util.*;
 
 @AllArgsConstructor
 public class Scanner extends TreePathScanner<Object, Trees> {
@@ -53,7 +56,7 @@ public class Scanner extends TreePathScanner<Object, Trees> {
                         .collect(toMap(ExistedField::getName, identity())))
                 .build());
 
-        classDeclaration.getMembers()
+        Optional<JCMethodDecl> mainMethodDeclaration = classDeclaration.getMembers()
                 .stream()
                 .filter(member -> member.getKind() == METHOD)
                 .map(member -> (JCMethodDecl) member)
@@ -62,9 +65,28 @@ public class Scanner extends TreePathScanner<Object, Trees> {
                 .filter(method -> nonNull(method.getReturnType().type))
                 .filter(method -> nonNull(method.getReturnType().type.getTag()))
                 .filter(method -> method.getReturnType().type.getTag().equals(VOID))
-                .findFirst()
-                .ifPresent(method -> initializeContext(classDeclaration, method));
+                .findFirst();
 
+        List<JCAnnotation> annotations = classDeclaration.getModifiers().getAnnotations();
+        if (isNull(annotations) || annotations.isEmpty()) {
+            return result;
+        }
+        boolean hasModuleAnnotation = annotations
+                .stream()
+                .map(JCAnnotation::getAnnotationType)
+                .filter(Objects::nonNull)
+                .map(annotation -> ((JCIdent) annotation).sym)
+                .filter(Objects::nonNull)
+                .map(Symbol::getQualifiedName)
+                .filter(Objects::nonNull)
+                .anyMatch(name -> name.toString().equals(Module.class.getName()));
+        if (isNull(mainClass()) && hasModuleAnnotation) {
+            if (mainMethodDeclaration.isPresent()) {
+                initializeContext(classDeclaration, mainMethodDeclaration.get());
+                return result;
+            }
+            initializeContext(classDeclaration);
+        }
         return result;
     }
 
@@ -86,5 +108,20 @@ public class Scanner extends TreePathScanner<Object, Trees> {
                 .build();
 
         initialize(initializerBuilder.mainClass(mainClass).mainMethod(mainMethod).build());
+    }
+
+    private void initializeContext(JCClassDecl classDeclaration) {
+        JCCompilationUnit packageUnit = elements.getTreeAndTopLevel(classDeclaration.sym, null, null).snd;
+        if (isNull(packageUnit)) {
+            return;
+        }
+
+        ExistedClass mainClass = ExistedClass.builder()
+                .name(classDeclaration.name.toString())
+                .declaration(classDeclaration)
+                .packageUnit(packageUnit)
+                .build();
+
+        initialize(initializerBuilder.mainClass(mainClass).build());
     }
 }
