@@ -1,14 +1,12 @@
 package ru.art.generator.javac.service;
 
-import com.sun.source.tree.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.model.*;
-import static com.sun.source.tree.Tree.Kind.CLASS;
-import static java.util.stream.Collectors.toList;
-import static ru.art.generator.javac.context.GenerationContext.elements;
-import static ru.art.generator.javac.context.GenerationContext.maker;
+import static com.sun.source.tree.Tree.Kind.*;
+import static java.util.stream.Collectors.*;
+import static ru.art.generator.javac.context.GenerationContext.*;
 
 @UtilityClass
 public class ClassMutationService {

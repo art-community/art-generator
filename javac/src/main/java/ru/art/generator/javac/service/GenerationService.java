@@ -11,10 +11,14 @@ public class GenerationService {
     @SneakyThrows
     public void generate() {
         System.out.println("Generation started");
+        generateClassMethodNames();
+        System.out.println(mainClass().getPackageUnit());
+    }
+
+    private void generateClassMethodNames() {
         getExistedClasses().values()
                 .stream()
-                .map(ClassMethodsConstantsModel::new)
+                .map(ClassMethodNamesModel::new)
                 .forEach(model -> addInnerClass(mainClass(), model.toClass()));
-        System.out.println(mainClass().getPackageUnit());
     }
 }

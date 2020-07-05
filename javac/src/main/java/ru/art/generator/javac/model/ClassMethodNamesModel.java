@@ -9,12 +9,12 @@ import static ru.art.generator.javac.model.TypeModel.*;
 import java.util.*;
 
 @RequiredArgsConstructor
-public class ClassMethodsConstantsModel {
+public class ClassMethodNamesModel {
     private final ExistedClass from;
 
     public NewClass toClass() {
         NewClass classModel = newClass()
-                .name(from.getName() + "Fields")
+                .name(from.getName() + "Methods")
                 .modifiers(PUBLIC | STATIC | INTERFACE);
 
         for (Map.Entry<String, ExistedMethod> entry : from.getMethods().entrySet()) {
