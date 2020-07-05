@@ -15,14 +15,14 @@ public class TypeModel {
         if (name.startsWith(JAVA_PACKAGE_PREFIX)) {
             jdk = true;
             hasPackage = false;
-            typeFullName = typeSimpleName = name.substring(name.lastIndexOf('.'));
+            typeFullName = typeSimpleName = name.substring(name.lastIndexOf('.') + 1);
             return;
         }
         jdk = false;
         if (name.contains(".")) {
             hasPackage = true;
-            typeFullName = name;
-            typeSimpleName = name.substring(name.lastIndexOf('.'));
+            typeFullName = name.substring(0, name.lastIndexOf('.'));
+            typeSimpleName = name.substring(name.lastIndexOf('.') + 1);
             return;
         }
         hasPackage = false;

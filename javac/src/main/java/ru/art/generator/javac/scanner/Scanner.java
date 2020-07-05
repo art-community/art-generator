@@ -6,6 +6,7 @@ import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import lombok.*;
 import ru.art.generator.javac.context.*;
+import ru.art.generator.javac.context.GenerationContextInitializer.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.source.tree.Tree.Kind.METHOD;
 import static com.sun.source.tree.Tree.Kind.*;
@@ -21,7 +22,7 @@ import static ru.art.generator.javac.factory.CollectionsFactory.*;
 @AllArgsConstructor
 public class Scanner extends TreePathScanner<Object, Trees> {
     private final JavacElements elements;
-    private final GenerationContextInitializer.GenerationContextInitializerBuilder initializerBuilder;
+    private final GenerationContextInitializerBuilder initializerBuilder;
 
     @Override
     public Object visitClass(ClassTree node, Trees trees) {

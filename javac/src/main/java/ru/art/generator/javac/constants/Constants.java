@@ -1,12 +1,9 @@
 package ru.art.generator.javac.constants;
 
-import lombok.experimental.*;
-
-@UtilityClass
-public class Constants {
-    public String INIT_METHOD_NAME = "<init>";
-    public String MAIN_METHOD_NAME = "main";
-    public String MODULE_METHOD_NAME = "module";
-    public String SERVICE_METHOD_NAME = "service";
-    public String JAVA_PACKAGE_PREFIX = "java.";
+public interface Constants {
+    String INIT_METHOD_NAME = "<init>";
+    String MAIN_METHOD_NAME = "main";
+    String MODULE_METHOD_NAME = "module";
+    String SERVICE_METHOD_NAME = "service";
+    String JAVA_PACKAGE_PREFIX = "java.";
 }

@@ -9,8 +9,8 @@ import lombok.*;
 import ru.art.generator.javac.model.*;
 import java.util.*;
 
-@Builder
 @Getter
+@Builder
 public class GenerationContextInitializer {
     private final JavacProcessingEnvironment processingEnvironment;
     private final Options options;

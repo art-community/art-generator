@@ -10,10 +10,11 @@ import static ru.art.generator.javac.service.ClassMutationService.*;
 public class GenerationService {
     @SneakyThrows
     public void generate() {
+        System.out.println("Generation started");
         getExistedClasses().values()
                 .stream()
-                .map(existed -> new ClassMethodsModel(existed))
+                .map(ClassMethodsConstantsModel::new)
                 .forEach(model -> addInnerClass(mainClass(), model.toClass()));
-        System.out.println("Generation started");
+        System.out.println(mainClass().getPackageUnit());
     }
 }
