@@ -1,6 +1,7 @@
 package ru;
 
 import ru.art.generator.javac.annotation.*;
+import ru.art.generator.javac.annotation.Module;
 import ru.art.generator.javac.model.*;
 import static ru.art.generator.javac.model.ModuleModel.*;
 
