@@ -34,7 +34,7 @@ public class TypeModel {
             primitiveTypeTag = existedType.get();
             return;
         }
-        if (name.startsWith(ARRAY_MARKER )) {
+        if (name.startsWith(ARRAY_MARKER)) {
             array = true;
             String elementsType = name.substring(ARRAY_ELEMENTS_CLASS_NAME_INDEX);
             parseTypeName(elementsType.substring(0, elementsType.length() - 1));
@@ -54,8 +54,9 @@ public class TypeModel {
         jdk = false;
         if (name.contains(DOT)) {
             hasPackage = true;
-            typeFullName = name.substring(0, name.lastIndexOf(DOT));
+            String packageName = name.substring(0, name.lastIndexOf(DOT));
             typeSimpleName = name.substring(name.lastIndexOf(DOT) + 1);
+            typeFullName = packageName + DOT + typeSimpleName;
             return;
         }
         hasPackage = false;

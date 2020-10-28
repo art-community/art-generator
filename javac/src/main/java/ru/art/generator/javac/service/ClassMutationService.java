@@ -11,6 +11,7 @@ import static java.util.stream.Collectors.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import static ru.art.generator.javac.model.ImportModel.*;
 import java.util.*;
+import java.util.stream.*;
 
 @UtilityClass
 public class ClassMutationService {
@@ -55,6 +56,34 @@ public class ClassMutationService {
 
     public void addMethod(ExistedClass existedClass, NewMethod method) {
         addMethods(existedClass, singletonList(method));
+    }
+
+    public void replaceMethod(ExistedClass existedClass, String currentMethod, NewMethod method) {
+        maker().at(existedClass.getDeclaration().pos);
+        ListBuffer<JCTree> classDefinitions = new ListBuffer<>();
+        classDefinitions.addAll(existedClass
+                .getDeclaration()
+                .defs
+                .stream()
+                .filter(definition -> definition.getKind() != METHOD || !((JCTree.JCMethodDecl) definition).name.toString().equals(currentMethod))
+                .collect(toList())
+        );
+        classDefinitions.add(method.generate());
+        existedClass.getDeclaration().defs = classDefinitions.toList();
+
+        ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
+        List<JCTree> currentPackageDefinitions = existedClass.getPackageUnit().defs;
+        newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
+        newPackageDefinitions.addAll(Stream.of(method)
+                .map(NewMethod::returnType)
+                .filter(type -> type.isHasPackage() && !type.isJdk())
+                .map(type -> importClass(type.getTypeFullName()))
+                .map(newImport -> maker().Import(maker().Select(
+                        maker().Ident(elements().getName(newImport.getPackagePart())), elements().getName(newImport.getImportPart())),
+                        newImport.isAsStatic()))
+                .collect(toList()));
+        newPackageDefinitions.add(currentPackageDefinitions.last());
+        existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
 
     public void addMethods(ExistedClass existedClass, Collection<NewMethod> methods) {

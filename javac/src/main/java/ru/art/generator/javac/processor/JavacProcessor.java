@@ -9,6 +9,7 @@ import com.sun.tools.javac.processing.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import ru.art.generator.javac.context.*;
+import ru.art.generator.javac.context.GenerationContextInitializer.*;
 import ru.art.generator.javac.scanner.Scanner;
 import static javax.lang.model.SourceVersion.*;
 import static ru.art.generator.javac.constants.Constants.Annotations.*;
@@ -40,7 +41,7 @@ public class JavacProcessor extends AbstractProcessor {
         JavaCompiler compiler = JavaCompiler.instance(processingEnvironment.getContext());
         TreeMaker maker = TreeMaker.instance(processingEnvironment.getContext());
         JavacElements elements = JavacElements.instance(processingEnvironment.getContext());
-        GenerationContextInitializer.GenerationContextInitializerBuilder initializerBuilder = GenerationContextInitializer.builder()
+        GenerationContextInitializerBuilder initializerBuilder = GenerationContextInitializer.builder()
                 .options(Options.instance(processingEnvironment.getContext()))
                 .processingEnvironment(processingEnvironment)
                 .compiler(compiler)

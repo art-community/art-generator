@@ -35,4 +35,8 @@ public interface Constants {
     interface ExceptionMessages {
         String MODULE_CONFIGURATOR_NOT_FOUND_EXCEPTION = "Module configurator method not found";
     }
+
+    interface MethodNames {
+        String CONFIGURE_METHOD_NAME = "configure";
+    }
 }
