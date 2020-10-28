@@ -15,7 +15,7 @@ public class ClassMethodNamesModel {
 
     public NewClass toClass() {
         NewClass classModel = newClass()
-                .name(from.getName() + "Methods")
+                .name(from.getName() + METHODS_SUFFIX)
                 .modifiers(PUBLIC | STATIC | INTERFACE);
 
         Set<String> set = setOf();
@@ -30,8 +30,8 @@ public class ClassMethodNamesModel {
                     .type(type(String.class.getName()))
                     .constant(entry.getKey()));
         }
-        classModel.field("methods", newField().modifiers(PUBLIC | STATIC | FINAL)
-                .name("methods")
+        classModel.field(METHODS_FIELD, newField().modifiers(PUBLIC | STATIC | FINAL)
+                .name(METHODS_FIELD)
                 .type(type(String[].class.getName()))
                 .arrayOf(type(String.class.getName()), set));
         return classModel;

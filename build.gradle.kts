@@ -4,9 +4,14 @@ import groovy.lang.*
 import org.jfrog.gradle.plugin.artifactory.dsl.*
 import org.jfrog.gradle.plugin.artifactory.task.*
 
+val bintrayUser: String? by project
+val bintrayKey: String? by project
+val version: String? by project
+
 plugins {
     `maven-publish`
-    java
+    idea
+    `java-library`
     id("com.jfrog.bintray") version "1.8.4"
     id("com.jfrog.artifactory") version "4.10.0"
 }
@@ -14,10 +19,6 @@ plugins {
 tasks.withType(Wrapper::class.java) {
     gradleVersion = "6.0"
 }
-
-val bintrayUser: String? by project
-val bintrayKey: String? by project
-val version: String? by project
 
 group = "io.github.art"
 
@@ -33,20 +34,19 @@ subprojects {
         jcenter()
         mavenCentral()
         maven {
-            url = uri("https://oss.jfrog.org/oss-snapshot-local")
+            url = uri("https://repo.spring.io/milestone")
         }
     }
 
-    apply(plugin = "java")
     apply(plugin = "com.jfrog.bintray")
     apply(plugin = "com.jfrog.artifactory")
     apply(plugin = "maven-publish")
+    apply(plugin = "java-library")
 
     dependencies {
-        compileOnly("org.projectlombok:lombok:1.18.12")
-        annotationProcessor("org.projectlombok:lombok:1.18.12")
-        testCompileOnly("org.projectlombok:lombok:1.18.12")
-        testAnnotationProcessor("org.projectlombok:lombok:1.18.12")
+        val lombokVersion: String by project
+        compileOnly("org.projectlombok", "lombok", lombokVersion)
+        annotationProcessor("org.projectlombok", "lombok", lombokVersion)
     }
 
     if (bintrayUser.isNullOrEmpty() || bintrayKey.isNullOrEmpty()) {

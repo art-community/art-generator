@@ -3,7 +3,7 @@ package ru.art.generator.javac.model;
 import com.sun.tools.javac.code.*;
 import lombok.*;
 import static com.sun.tools.javac.tree.JCTree.*;
-import static ru.art.generator.javac.constants.Constants.DOT;
+import static io.art.core.constants.StringConstants.DOT;
 import java.util.*;
 
 @Getter

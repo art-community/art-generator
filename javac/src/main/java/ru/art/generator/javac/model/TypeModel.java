@@ -2,9 +2,11 @@ package ru.art.generator.javac.model;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.tree.JCTree.*;
+import io.art.core.constants.*;
 import lombok.*;
 import ru.art.generator.javac.exception.*;
 import static com.sun.tools.javac.code.Symbol.*;
+import static io.art.core.constants.StringConstants.DOT;
 import static java.util.Arrays.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -46,14 +48,14 @@ public class TypeModel {
         if (name.startsWith(JAVA_PACKAGE_PREFIX)) {
             jdk = true;
             hasPackage = false;
-            typeFullName = typeSimpleName = name.substring(name.lastIndexOf('.') + 1);
+            typeFullName = typeSimpleName = name.substring(name.lastIndexOf(DOT) + 1);
             return;
         }
         jdk = false;
-        if (name.contains(".")) {
+        if (name.contains(DOT)) {
             hasPackage = true;
-            typeFullName = name.substring(0, name.lastIndexOf('.'));
-            typeSimpleName = name.substring(name.lastIndexOf('.') + 1);
+            typeFullName = name.substring(0, name.lastIndexOf(DOT));
+            typeSimpleName = name.substring(name.lastIndexOf(DOT) + 1);
             return;
         }
         hasPackage = false;

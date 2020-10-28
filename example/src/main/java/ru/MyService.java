@@ -5,6 +5,6 @@ import lombok.experimental.*;
 @UtilityClass
 public class MyService {
     public Response myMethod(Request request) {
-        return null;
+        return Response.builder().value(request.getValue()).build();
     }
 }

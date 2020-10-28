@@ -6,7 +6,7 @@ import com.sun.tools.javac.util.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.source.tree.Tree.Kind.*;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import static ru.art.generator.javac.model.ImportModel.*;
@@ -51,7 +51,6 @@ public class ClassMutationService {
                 .collect(toList()));
         newPackageDefinitions.add(currentPackageDefinitions.last());
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
-        System.out.println(existedClass.getPackageUnit());
     }
 
     public void addMethod(ExistedClass existedClass, NewMethod method) {
@@ -78,6 +77,5 @@ public class ClassMutationService {
                 .collect(toList()));
         newPackageDefinitions.add(currentPackageDefinitions.last());
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
-        System.out.println(existedClass.getPackageUnit());
     }
 }

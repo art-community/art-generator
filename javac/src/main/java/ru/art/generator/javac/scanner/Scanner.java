@@ -7,12 +7,12 @@ import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import lombok.*;
-import ru.art.generator.javac.annotation.*;
 import ru.art.generator.javac.context.GenerationContextInitializer.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.source.tree.Tree.Kind.METHOD;
 import static com.sun.source.tree.Tree.Kind.*;
 import static com.sun.tools.javac.code.TypeTag.*;
+import static io.art.core.constants.StringConstants.*;
 import static java.util.Objects.*;
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
@@ -56,21 +56,11 @@ public class Scanner extends TreePathScanner<Object, Trees> {
                         .collect(toMap(ExistedField::getName, identity())))
                 .build());
 
-        Optional<JCMethodDecl> mainMethodDeclaration = classDeclaration.getMembers()
-                .stream()
-                .filter(member -> member.getKind() == METHOD)
-                .map(member -> (JCMethodDecl) member)
-                .filter(method -> method.getModifiers().getFlags().containsAll(setOf(STATIC, PUBLIC)))
-                .filter(method -> nonNull(method.getReturnType()))
-                .filter(method -> nonNull(method.getReturnType().type))
-                .filter(method -> nonNull(method.getReturnType().type.getTag()))
-                .filter(method -> method.getReturnType().type.getTag().equals(VOID))
-                .findFirst();
-
         List<JCAnnotation> annotations = classDeclaration.getModifiers().getAnnotations();
         if (isNull(annotations) || annotations.isEmpty()) {
             return result;
         }
+
         boolean hasModuleAnnotation = annotations
                 .stream()
                 .map(JCAnnotation::getAnnotationType)
@@ -79,22 +69,30 @@ public class Scanner extends TreePathScanner<Object, Trees> {
                 .filter(Objects::nonNull)
                 .map(Symbol::getQualifiedName)
                 .filter(Objects::nonNull)
-                .anyMatch(name -> name.toString().equals(Module.class.getName()));
+                .anyMatch(name -> name.toString().equals(MODULE_ANNOTATION_NAME));
+
         if (isNull(mainClass()) && hasModuleAnnotation) {
+            Optional<JCMethodDecl> mainMethodDeclaration = classDeclaration.getMembers()
+                    .stream()
+                    .filter(member -> member.getKind() == METHOD)
+                    .map(member -> (JCMethodDecl) member)
+                    .filter(method -> method.getModifiers().getFlags().containsAll(setOf(STATIC, PUBLIC)))
+                    .filter(method -> nonNull(method.getReturnType()))
+                    .filter(method -> nonNull(method.getReturnType().type))
+                    .filter(method -> nonNull(method.getReturnType().type.getTag()))
+                    .filter(method -> method.getReturnType().type.getTag().equals(VOID))
+                    .findFirst();
             if (mainMethodDeclaration.isPresent()) {
-                initializeContext(classDeclaration, mainMethodDeclaration.get());
+                initializeContext(packageUnit, classDeclaration, mainMethodDeclaration.get());
                 return result;
             }
-            initializeContext(classDeclaration);
+            initializeContext(packageUnit, classDeclaration);
         }
+
         return result;
     }
 
-    private void initializeContext(JCClassDecl classDeclaration, JCMethodDecl methodDeclaration) {
-        JCCompilationUnit packageUnit = elements.getTreeAndTopLevel(classDeclaration.sym, null, null).snd;
-        if (isNull(packageUnit)) {
-            return;
-        }
+    private void initializeContext(JCCompilationUnit packageUnit, JCClassDecl classDeclaration, JCMethodDecl methodDeclaration) {
         ExistedMethod mainMethod = ExistedMethod.builder()
                 .declaration(methodDeclaration)
                 .name(MAIN_METHOD_NAME)
@@ -110,12 +108,7 @@ public class Scanner extends TreePathScanner<Object, Trees> {
         initialize(initializerBuilder.mainClass(mainClass).mainMethod(mainMethod).build());
     }
 
-    private void initializeContext(JCClassDecl classDeclaration) {
-        JCCompilationUnit packageUnit = elements.getTreeAndTopLevel(classDeclaration.sym, null, null).snd;
-        if (isNull(packageUnit)) {
-            return;
-        }
-
+    private void initializeContext(JCCompilationUnit packageUnit, JCClassDecl classDeclaration) {
         ExistedClass mainClass = ExistedClass.builder()
                 .name(classDeclaration.name.toString())
                 .declaration(classDeclaration)

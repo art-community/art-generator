@@ -1,6 +1,7 @@
 package ru.art.generator.javac.model;
 
 import lombok.*;
+import static io.art.core.constants.StringConstants.*;
 
 @Getter
 public class ImportModel {
@@ -10,17 +11,17 @@ public class ImportModel {
 
     public ImportModel(String importText, boolean all, boolean asStatic) {
         this.asStatic = asStatic;
-        if (!importText.contains(".")) {
+        if (!importText.contains(DOT)) {
             packagePart = importText;
-            importPart = "";
+            importPart = EMPTY_STRING;
             return;
         }
-        packagePart = importText.substring(0, importText.lastIndexOf('.'));
+        packagePart = importText.substring(0, importText.lastIndexOf(DOT));
         if (all) {
-            importPart = "*";
+            importPart = WILDCARD;
             return;
         }
-        importPart = importText.substring(importText.lastIndexOf('.') + 1);
+        importPart = importText.substring(importText.lastIndexOf(DOT) + 1);
     }
 
     public static ImportModel importClass(String importText) {
