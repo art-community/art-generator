@@ -13,7 +13,6 @@ public interface Constants {
     int ARRAY_ELEMENTS_CLASS_NAME_INDEX = 2;
     String METHODS_SUFFIX = "Methods";
     String METHODS_FIELD = "methods";
-    String CLASSPATH_ARGUMENT = "-cp";
 
     ImmutableSet<String> IGNORING_METHODS = ImmutableSet.of(
             INIT_METHOD_NAME,

@@ -1,9 +1,9 @@
 package ru.art.generator.javac.model;
 
+import com.google.common.collect.*;
 import lombok.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static ru.art.generator.javac.constants.Constants.*;
-import static ru.art.generator.javac.factory.CollectionsFactory.*;
 import static ru.art.generator.javac.model.NewClass.*;
 import static ru.art.generator.javac.model.NewField.*;
 import static ru.art.generator.javac.model.TypeModel.*;
@@ -17,8 +17,7 @@ public class ClassMethodNamesModel {
         NewClass classModel = newClass()
                 .name(from.getName() + METHODS_SUFFIX)
                 .modifiers(PUBLIC | STATIC | INTERFACE);
-
-        Set<String> set = setOf();
+        ImmutableSet.Builder<String> set = ImmutableSet.builder();
         for (Map.Entry<String, ExistedMethod> entry : from.getMethods().entrySet()) {
             if (IGNORING_METHODS.contains(entry.getKey())) {
                 continue;
@@ -30,11 +29,13 @@ public class ClassMethodNamesModel {
                     .type(type(String.class.getName()))
                     .constant(entry.getKey()));
         }
-        classModel.field(METHODS_FIELD, newField().modifiers(PUBLIC | STATIC | FINAL)
+        NewField methodsField = newField()
+                .modifiers(PUBLIC | STATIC | FINAL)
                 .name(METHODS_FIELD)
                 .type(type(String[].class.getName()))
-                .arrayOf(type(String.class.getName()), set));
-        return classModel;
+                .arrayOf(type(String.class.getName()), set.build());
+
+        return classModel.field(METHODS_FIELD, methodsField);
     }
 
     public static ClassMethodNamesModel methodNames(ExistedClass from) {

@@ -1,5 +1,6 @@
 package ru.art.generator.javac.scanner;
 
+import com.google.common.collect.*;
 import com.sun.source.tree.*;
 import com.sun.source.util.*;
 import com.sun.tools.javac.code.*;
@@ -17,9 +18,9 @@ import static java.util.Objects.*;
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
 import static javax.lang.model.element.Modifier.*;
+import static ru.art.generator.javac.constants.Constants.Annotations.*;
 import static ru.art.generator.javac.constants.Constants.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
-import static ru.art.generator.javac.factory.CollectionsFactory.*;
 import java.util.*;
 
 @AllArgsConstructor
@@ -38,7 +39,7 @@ public class Scanner extends TreePathScanner<Object, Trees> {
         }
 
         JCCompilationUnit packageUnit = elements.getTreeAndTopLevel(classDeclaration.sym, null, null).snd;
-        putExistedClass(packageUnit.getPackageName().toString() + DOT + classDeclaration.name.toString(), ExistedClass.builder()
+        ExistedClass existedClass = ExistedClass.builder()
                 .name(classDeclaration.name.toString())
                 .packageUnit(packageUnit)
                 .declaration(classDeclaration)
@@ -54,7 +55,8 @@ public class Scanner extends TreePathScanner<Object, Trees> {
                         .map(member -> (JCVariableDecl) member)
                         .map(member -> ExistedField.builder().name(member.name.toString()).declaration(member).build())
                         .collect(toMap(ExistedField::getName, identity())))
-                .build());
+                .build();
+        putExistedClass(packageUnit.getPackageName().toString() + DOT + classDeclaration.name.toString(), existedClass);
 
         List<JCAnnotation> annotations = classDeclaration.getModifiers().getAnnotations();
         if (isNull(annotations) || annotations.isEmpty()) {
@@ -76,7 +78,7 @@ public class Scanner extends TreePathScanner<Object, Trees> {
                     .stream()
                     .filter(member -> member.getKind() == METHOD)
                     .map(member -> (JCMethodDecl) member)
-                    .filter(method -> method.getModifiers().getFlags().containsAll(setOf(STATIC, PUBLIC)))
+                    .filter(method -> method.getModifiers().getFlags().containsAll(ImmutableSet.of(STATIC, PUBLIC)))
                     .filter(method -> nonNull(method.getReturnType()))
                     .filter(method -> nonNull(method.getReturnType().type))
                     .filter(method -> nonNull(method.getReturnType().type.getTag()))
