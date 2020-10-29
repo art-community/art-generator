@@ -2,10 +2,10 @@ package ru.art.generator.javac.service;
 
 import io.art.model.identifier.*;
 import io.art.model.module.*;
-import lombok.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.exception.*;
-import static com.sun.tools.javac.main.Option.*;
+import ru.art.generator.javac.loader.*;
+import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
@@ -18,17 +18,13 @@ import static ru.art.generator.javac.model.NewConfiguratorMethodModel.*;
 import static ru.art.generator.javac.service.ClassMutationService.*;
 import static ru.art.generator.javac.service.CompileService.*;
 import static ru.art.generator.javac.service.MapperGenerationService.*;
-import java.io.*;
 import java.lang.reflect.*;
-import java.net.*;
 import java.util.*;
 
 @UtilityClass
 public class ModelService {
-    private URLClassLoader loader;
-
-    @SneakyThrows
     public void generateModelImplementation() {
+        GeneratorClassLoader loader = classLoader();
         ModuleModel model = loadModel();
         for (IdentifierModel identifier : model.getServerModel().getRsocketIdentifiers()) {
             Class<?> asClass = identifier.getAsClass();
@@ -36,7 +32,7 @@ public class ModelService {
                 loader.loadClass(asClass.getName());
                 List<Method> methods = stream(asClass
                         .getMethods())
-                        .filter(method -> (method.getModifiers() & Modifier.PUBLIC) != 0)
+                        .filter(method -> isPublic(method.getModifiers()))
                         .filter(method -> !IGNORING_METHODS.contains(method.getName()))
                         .collect(toList());
                 for (Method method : methods) {
@@ -47,15 +43,12 @@ public class ModelService {
             }
         }
         replaceMethod(mainClass(), CONFIGURE_METHOD_NAME, configuratorMethod(model).generate());
-        loader.close();
     }
 
     private ModuleModel loadModel() {
         recompile();
         try {
-            URL[] urls = new URL[]{new File(options().get(D)).toURI().toURL()};
-            loader = new URLClassLoader(urls, GenerationService.class.getClassLoader());
-            Class<?> mainClass = loader.loadClass(mainClass().getFullName());
+            Class<?> mainClass = classLoader().loadClass(mainClass().getFullName());
             Method configuratorMethod = stream(mainClass.getMethods())
                     .filter(ModelService::hasConfiguratorAnnotation)
                     .findFirst()

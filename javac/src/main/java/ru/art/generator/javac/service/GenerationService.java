@@ -17,6 +17,7 @@ public class GenerationService {
         }
         generateClassMethodNames();
         generateModelImplementation();
+        classLoader().close();
     }
 
 

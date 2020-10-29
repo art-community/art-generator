@@ -6,6 +6,7 @@ import com.sun.tools.javac.processing.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import lombok.*;
+import ru.art.generator.javac.loader.*;
 import ru.art.generator.javac.model.*;
 import java.util.*;
 
@@ -19,5 +20,4 @@ public class GenerationContextInitializer {
     private final JavacElements elements;
     private final ExistedClass mainClass;
     private final ExistedMethod mainMethod;
-    private final Map<String, ExistedClass> existedClasses;
 }

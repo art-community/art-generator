@@ -26,7 +26,7 @@ public class JavacProcessor extends AbstractProcessor {
     private JavacProcessingEnvironment processingEnvironment;
 
     @Override
-    public synchronized void init(ProcessingEnvironment processingEnvironment) {
+    public void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
         this.processingEnvironment = (JavacProcessingEnvironment) processingEnvironment;
         trees = (JavacTrees) Trees.instance(processingEnvironment);
