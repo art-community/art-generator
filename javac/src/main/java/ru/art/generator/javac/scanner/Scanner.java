@@ -19,8 +19,8 @@ import static java.util.Objects.*;
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
 import static javax.lang.model.element.Modifier.*;
-import static ru.art.generator.javac.constants.Constants.Annotations.*;
-import static ru.art.generator.javac.constants.Constants.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.Annotations.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import java.util.*;
 

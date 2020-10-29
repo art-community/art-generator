@@ -2,7 +2,7 @@ package ru.art.generator.javac.constants;
 
 import com.google.common.collect.*;
 
-public interface Constants {
+public interface GeneratorConstants {
     String INIT_METHOD_NAME = "<init>";
     String EQUALS_METHOD_NAME = "equals";
     String HASH_CODE_METHOD_NAME = "hashCode";

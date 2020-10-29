@@ -45,8 +45,8 @@ public class ClassMutationService {
         newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
         newPackageDefinitions.addAll(fields.stream()
                 .map(NewField::type)
-                .filter(type -> type.isHasPackage() && !type.isJdk())
-                .map(type -> importClass(type.getTypeFullName()))
+                .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
+                .map(type -> importClass(type.getFullName()))
                 .map(newImport -> maker().Import(maker().Select(
                         maker().Ident(elements().getName(newImport.getPackagePart())), elements().getName(newImport.getImportPart())),
                         newImport.isAsStatic()))
@@ -77,8 +77,8 @@ public class ClassMutationService {
         newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
         newPackageDefinitions.addAll(Stream.of(method)
                 .map(NewMethod::returnType)
-                .filter(type -> type.isHasPackage() && !type.isJdk())
-                .map(type -> importClass(type.getTypeFullName()))
+                .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
+                .map(type -> importClass(type.getFullName()))
                 .map(newImport -> maker().Import(maker().Select(
                         maker().Ident(elements().getName(newImport.getPackagePart())), elements().getName(newImport.getImportPart())),
                         newImport.isAsStatic()))
@@ -99,8 +99,8 @@ public class ClassMutationService {
         newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
         newPackageDefinitions.addAll(methods.stream()
                 .map(NewMethod::returnType)
-                .filter(type -> type.isHasPackage() && !type.isJdk())
-                .map(type -> importClass(type.getTypeFullName()))
+                .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
+                .map(type -> importClass(type.getFullName()))
                 .map(newImport -> maker().Import(maker().Select(
                         maker().Ident(elements().getName(newImport.getPackagePart())), elements().getName(newImport.getImportPart())),
                         newImport.isAsStatic()))

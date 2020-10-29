@@ -1,9 +1,5 @@
 package ru;
 
-import com.google.common.collect.*;
-import io.art.entity.immutable.*;
-import io.art.entity.mapper.*;
-import io.art.entity.mapping.*;
 import io.art.model.annotation.*;
 import io.art.model.module.*;
 import static io.art.model.module.ModuleModel.*;
@@ -12,7 +8,6 @@ import static io.art.model.module.ModuleModel.*;
 public class Main {
     @Configurator
     public static ModuleModel configure() {
-        ImmutableMap.Builder<Class, ValueToModelMapper> builder = ImmutableMap.builder();
         return module().serve(server -> server.rsocket(MyService.class));
     }
 

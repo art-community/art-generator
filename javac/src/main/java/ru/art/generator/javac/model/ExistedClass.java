@@ -27,6 +27,13 @@ public class ExistedClass {
                 .anyMatch(definition -> definition.getKind() == INTERFACE && name.equals(((JCClassDecl) definition).name.toString()));
     }
 
+    public boolean hasInnerClass(String name) {
+        return declaration
+                .defs
+                .stream()
+                .anyMatch(definition -> definition.getKind() == CLASS && name.equals(((JCClassDecl) definition).name.toString()));
+    }
+
     public String getPackageName() {
         return packageUnit.getPackageName().toString();
     }

@@ -12,7 +12,7 @@ import ru.art.generator.javac.context.*;
 import ru.art.generator.javac.context.GenerationContextInitializer.*;
 import ru.art.generator.javac.scanner.Scanner;
 import static javax.lang.model.SourceVersion.*;
-import static ru.art.generator.javac.constants.Constants.Annotations.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.Annotations.*;
 import static ru.art.generator.javac.service.GenerationService.*;
 import javax.annotation.processing.*;
 import javax.lang.model.element.*;

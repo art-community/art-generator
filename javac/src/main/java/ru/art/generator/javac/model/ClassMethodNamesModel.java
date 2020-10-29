@@ -3,10 +3,9 @@ package ru.art.generator.javac.model;
 import com.google.common.collect.*;
 import lombok.*;
 import static com.sun.tools.javac.code.Flags.*;
-import static ru.art.generator.javac.constants.Constants.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.*;
 import static ru.art.generator.javac.model.NewClass.*;
 import static ru.art.generator.javac.model.NewField.*;
-import static ru.art.generator.javac.model.TypeModel.*;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -26,14 +25,14 @@ public class ClassMethodNamesModel {
             classModel.field(entry.getKey(), newField()
                     .modifiers(PUBLIC | STATIC | FINAL)
                     .name(entry.getKey())
-                    .type(type(String.class.getName()))
+                    .type(TypeModel.type(String.class.getName()))
                     .constant(entry.getKey()));
         }
         NewField methodsField = newField()
                 .modifiers(PUBLIC | STATIC | FINAL)
                 .name(METHODS_FIELD)
-                .type(type(String[].class.getName()))
-                .arrayOf(type(String.class.getName()), set.build());
+                .type(TypeModel.type(String[].class.getName()))
+                .arrayOf(TypeModel.type(String.class.getName()), set.build());
 
         return classModel.field(METHODS_FIELD, methodsField);
     }

@@ -6,7 +6,7 @@ import lombok.experimental.*;
 import static com.sun.tools.javac.main.Option.*;
 import static io.art.core.constants.ArrayConstants.*;
 import static java.util.stream.Collectors.*;
-import static ru.art.generator.javac.constants.Constants.ProcessorOptions.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.ProcessorOptions.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import java.io.*;
 

@@ -2,7 +2,7 @@ package ru.art.generator.javac.service;
 
 import lombok.*;
 import lombok.experimental.*;
-import static ru.art.generator.javac.constants.Constants.ProcessorOptions.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.ProcessorOptions.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import static ru.art.generator.javac.model.ClassMethodNamesModel.*;
 import static ru.art.generator.javac.service.ClassMutationService.*;
