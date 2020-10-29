@@ -8,18 +8,16 @@ import ru.art.generator.javac.loader.*;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
-import static java.util.stream.Collectors.*;
 import static ru.art.generator.javac.constants.Constants.Annotations.*;
 import static ru.art.generator.javac.constants.Constants.ExceptionMessages.*;
 import static ru.art.generator.javac.constants.Constants.*;
 import static ru.art.generator.javac.constants.Constants.MethodNames.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
-import static ru.art.generator.javac.model.NewConfiguratorMethodModel.*;
+import static ru.art.generator.javac.model.NewConfigureMethodModel.*;
 import static ru.art.generator.javac.service.ClassMutationService.*;
 import static ru.art.generator.javac.service.CompileService.*;
 import static ru.art.generator.javac.service.MapperGenerationService.*;
 import java.lang.reflect.*;
-import java.util.*;
 
 @UtilityClass
 public class ModelService {
@@ -30,19 +28,16 @@ public class ModelService {
             Class<?> asClass = identifier.getAsClass();
             if (nonNull(asClass)) {
                 loader.loadClass(asClass.getName());
-                List<Method> methods = stream(asClass
-                        .getMethods())
-                        .filter(method -> isPublic(method.getModifiers()))
-                        .filter(method -> !IGNORING_METHODS.contains(method.getName()))
-                        .collect(toList());
-                for (Method method : methods) {
-                    Class<?> returnType = method.getReturnType();
-                    generateMappers(returnType);
+                for (Method method : asClass.getMethods()) {
+                    if (isPublic(method.getModifiers()) && !IGNORING_METHODS.contains(method.getName())) {
+                        Class<?> returnType = method.getReturnType();
+                        generateMappers(returnType);
+                    }
                 }
-
+                continue;
             }
         }
-        replaceMethod(mainClass(), CONFIGURE_METHOD_NAME, configuratorMethod(model).generate());
+        replaceMethod(mainClass(), CONFIGURE_METHOD_NAME, configureMethod(model));
     }
 
     private ModuleModel loadModel() {

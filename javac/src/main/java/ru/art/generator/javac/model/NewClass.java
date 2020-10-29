@@ -20,7 +20,7 @@ public class NewClass {
     private Map<String, NewField> fields = new LinkedHashMap<>();
     private Map<String, NewMethod> methods = new LinkedHashMap<>();
 
-    public NewClass withImport(ImportModel importModel) {
+    public NewClass addImport(ImportModel importModel) {
         imports.add(importModel);
         return this;
     }

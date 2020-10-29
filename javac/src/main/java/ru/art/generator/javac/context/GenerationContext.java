@@ -29,6 +29,8 @@ public class GenerationContext {
 
     private static final AtomicReference<ExistedMethod> mainMethod = new AtomicReference<>();
 
+    private static final AtomicReference<ExistedMethod> configureMethod = new AtomicReference<>();
+
     private static final AtomicReference<GeneratorClassLoader> classLoader = new AtomicReference<>();
 
     private static final ConcurrentHashMap<String, ExistedClass> existedClasses = new ConcurrentHashMap<>();
@@ -73,6 +75,10 @@ public class GenerationContext {
         return mainMethod.get();
     }
 
+    public static ExistedMethod configureMethod() {
+        return configureMethod.get();
+    }
+
     public static GeneratorClassLoader classLoader() {
         return classLoader.get();
     }
@@ -86,6 +92,7 @@ public class GenerationContext {
             GenerationContext.elements.set(initializer.getElements());
             GenerationContext.mainClass.set(initializer.getMainClass());
             GenerationContext.mainMethod.set(initializer.getMainMethod());
+            GenerationContext.configureMethod.set(initializer.getConfigureMethod());
             GenerationContext.classLoader.set(new GeneratorClassLoader());;
         }
     }

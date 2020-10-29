@@ -5,6 +5,7 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import lombok.*;
 import lombok.experimental.*;
+import ru.art.generator.javac.service.*;
 import static com.sun.tools.javac.code.TypeTag.*;
 import static com.sun.tools.javac.util.List.*;
 import static java.util.stream.Collectors.*;
@@ -22,7 +23,7 @@ public class NewField {
     private Supplier<JCExpression> initializer;
 
     public NewField asNull() {
-        initializer = () -> maker().Literal(BOT, null);
+        initializer = MakerService::nullValue;
         return this;
     }
 

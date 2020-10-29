@@ -20,4 +20,5 @@ public class GenerationContextInitializer {
     private final JavacElements elements;
     private final ExistedClass mainClass;
     private final ExistedMethod mainMethod;
+    private final ExistedMethod configureMethod;
 }

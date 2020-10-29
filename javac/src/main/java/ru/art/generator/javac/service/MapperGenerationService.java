@@ -6,7 +6,6 @@ import io.art.entity.mapper.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.tools.javac.code.Flags.*;
-import static io.art.core.constants.StringConstants.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import static ru.art.generator.javac.model.ImportModel.importClass;
 import static ru.art.generator.javac.model.ImportModel.importPackage;
@@ -33,8 +32,8 @@ public class MapperGenerationService {
                 .returnType(type(ImmutableMap.class.getName(), ImmutableList.of(type(Class.class.getName()), type(ValueToModelMapper.class.getName()))))
                 .modifiers(STATIC)
                 .statement(() -> maker().VarDef(
-                        maker().Modifiers(0L),
-                        elements().getName("builder"),
+                        emptyModifiers(),
+                        name("builder"),
                         maker().TypeApply(
                                 ident("ImmutableMap.Builder"),
                                 List.of(
@@ -53,9 +52,9 @@ public class MapperGenerationService {
         NewClass interfaceClass = newClass()
                 .modifiers(INTERFACE)
                 .name("Mappers")
-                .withImport(importClass(ValueToModelMapper.class.getName()))
-                .withImport(importClass(ValueFromModelMapper.class.getName()))
-                .withImport(importPackage("com.google.common.collect"))
+                .addImport(importClass(ValueToModelMapper.class.getName()))
+                .addImport(importClass(ValueFromModelMapper.class.getName()))
+                .addImport(importPackage("com.google.common.collect"))
                 .field("toModel", toModel)
                 .field("fromModel", fromModel)
                 .method("createToModelMappers", createToModelMappers);
