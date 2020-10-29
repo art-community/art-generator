@@ -39,10 +39,10 @@ public class ModelService {
                         generateMappers(returnType);
                     }
                 }
-                addFields(existedClass, methodNames(existedClass, methodNames.build()).generateFields());
+                replaceFields(existedClass, methodNames(existedClass, methodNames.build()).generateFields());
             }
         }
-        replaceMethod(mainClass(), CONFIGURE_METHOD_NAME, configureMethod(model));
+        replaceMethod(mainClass(), configureMethod(model));
     }
 
     private ModuleModel loadModel() {

@@ -39,15 +39,15 @@ public class MapperGenerationService {
                 .name(CREATE_MAPPERS)
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
-                .statement(() -> generateRegistryVariable(registryType))
-                .statement(() -> generateCreateRegistryMethodContent(modelClass))
-                .statement(() -> maker().Return(ident(MAPPERS)));
+                .statement(() -> generateMappersVariable(registryType))
+                .statement(() -> generateMappersContent(modelClass))
+                .statement(() -> returnVariable(MAPPERS));
 
         NewMethod mappersMethod = newMethod()
                 .returnType(registryType)
                 .name(MAPPERS)
                 .modifiers(PUBLIC | STATIC)
-                .statement(() -> maker().Return(ident(MAPPERS)));
+                .statement(() -> returnVariable(MAPPERS));
 
         NewClass configurationClass = newClass()
                 .modifiers(PUBLIC | STATIC)
@@ -70,7 +70,7 @@ public class MapperGenerationService {
         replaceInnerClass(mainClass(), configurationClass);
     }
 
-    private JCTree.JCExpressionStatement generateCreateRegistryMethodContent(Class<?> modelClass) {
+    private JCTree.JCExpressionStatement generateMappersContent(Class<?> modelClass) {
         return maker().Exec(applyMethod(MAPPERS, PUT_TO_MODEL, List.of(
                 classReference(modelClass),
                 newLambda()
@@ -86,7 +86,7 @@ public class MapperGenerationService {
                         .generate())));
     }
 
-    private JCTree.JCVariableDecl generateRegistryVariable(TypeModel registryType) {
+    private JCTree.JCVariableDecl generateMappersVariable(TypeModel registryType) {
         return newVariable()
                 .name(MAPPERS)
                 .initializer(() -> newObject(registryType))

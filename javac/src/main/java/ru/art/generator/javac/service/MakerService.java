@@ -23,12 +23,18 @@ public class MakerService {
         return maker().Modifiers(0L);
     }
 
+
     public JCLiteral nullValue() {
         return maker().Literal(BOT, null);
     }
 
+
+    public JCExpressionStatement execMethodCall(String variable, String method) {
+        return maker().Exec(maker().Apply(List.nil(), select(variable, method), List.nil()));
+    }
+
     public JCReturn returnMethodCall(String variable, String method) {
-        return maker().Return(maker().Apply(List.nil(), maker().Select(ident(variable), name(method)), List.nil()));
+        return maker().Return(maker().Apply(List.nil(), select(variable, method), List.nil()));
     }
 
 
@@ -37,7 +43,7 @@ public class MakerService {
     }
 
     public JCMethodInvocation applyClassMethod(TypeModel classType, String method, List<JCExpression> arguments) {
-        return maker().Apply(List.nil(), maker().Select(classType.generate(), name(method)), arguments);
+        return maker().Apply(List.nil(), select(classType, method), arguments);
     }
 
 
@@ -51,20 +57,20 @@ public class MakerService {
 
 
     public JCMethodInvocation applyMethod(String owner, String method) {
-        return maker().Apply(List.nil(), maker().Select(ident(owner), name(method)), List.nil());
+        return maker().Apply(List.nil(), select(owner, method), List.nil());
     }
 
     public JCMethodInvocation applyMethod(String owner, String method, List<JCExpression> arguments) {
-        return maker().Apply(List.nil(), maker().Select(ident(owner), name(method)), arguments);
+        return maker().Apply(List.nil(), select(owner, method), arguments);
     }
 
 
     public JCMethodInvocation applyMethod(JCExpression owner, String method) {
-        return maker().Apply(List.nil(), maker().Select(owner, name(method)), List.nil());
+        return maker().Apply(List.nil(), select(owner, method), List.nil());
     }
 
     public JCMethodInvocation applyMethod(JCExpression owner, String method, List<JCExpression> arguments) {
-        return maker().Apply(List.nil(), maker().Select(owner, name(method)), arguments);
+        return maker().Apply(List.nil(), select(owner, method), arguments);
     }
 
 
@@ -72,9 +78,11 @@ public class MakerService {
         return maker().NewClass(null, List.nil(), classType.generate(), List.nil(), null);
     }
 
-    public JCFieldAccess classReference(Class<?> owner) {
-        return maker().Select(type(owner).generate(), name(CLASS_KEYWORD));
+
+    public JCExpression classReference(Class<?> owner) {
+        return select(type(owner), CLASS_KEYWORD);
     }
+
 
     public JCExpression select(TypeModel owner, String member) {
         return maker().Select(owner.generate(), name(member));
@@ -86,5 +94,9 @@ public class MakerService {
 
     public JCExpression select(JCExpression owner, String member) {
         return maker().Select(owner, name(member));
+    }
+
+    public JCReturn returnVariable(String reference) {
+        return maker().Return(ident(reference));
     }
 }
