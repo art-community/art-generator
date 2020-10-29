@@ -24,7 +24,7 @@ import static ru.art.generator.javac.service.ToModelMapperGenerationService.*;
 
 @UtilityClass
 public class MapperGenerationService {
-    public void generateMappers(Class<?> modelClass, Class<?>[] parameterClasses) {
+    public void generateMappers(Class<?> returnClass, Class<?>[] parameterClasses) {
         TypeModel registryType = type(MappersRegistry.class);
 
         NewField mappersField = newField()
@@ -32,14 +32,6 @@ public class MapperGenerationService {
                 .modifiers(PRIVATE | FINAL | STATIC)
                 .type(registryType)
                 .initializer(() -> applyMethod(CREATE_MAPPERS));
-
-        NewMethod createMappersMethod = newMethod()
-                .name(CREATE_MAPPERS)
-                .returnType(registryType)
-                .modifiers(PRIVATE | STATIC)
-                .statement(() -> generateMappersVariable(registryType))
-                .statement(() -> generatePutToModel(modelClass))
-                .statement(() -> returnVariable(MAPPERS));
 
         NewMethod mappersMethod = newMethod()
                 .returnType(registryType)
@@ -62,10 +54,23 @@ public class MapperGenerationService {
                 .addImport(importClass(ValueFromModelMapper.class.getName()))
                 .addImport(importClass(MappersRegistry.class.getName()))
                 .field(MAPPERS, mappersField)
-                .method(CREATE_MAPPERS, createMappersMethod)
+                .method(CREATE_MAPPERS, generateCreateMappersMethod(returnClass, registryType, parameterClasses))
                 .method(MAPPERS, mappersMethod);
 
         replaceInnerClass(mainClass(), configurationClass);
+    }
+
+    private NewMethod generateCreateMappersMethod(Class<?> returnClass, TypeModel registryType, Class<?>[] parameterClasses) {
+        NewMethod createMappersMethod = newMethod()
+                .name(CREATE_MAPPERS)
+                .returnType(registryType)
+                .modifiers(PRIVATE | STATIC)
+                .statement(() -> generateMappersVariable(registryType))
+                .statement(() -> generatePutToModel(returnClass));
+        for (Class<?> parameterClass : parameterClasses) {
+            createMappersMethod.statement(() -> generatePutToModel(parameterClass));
+        }
+        return createMappersMethod.statement(() -> returnVariable(MAPPERS));
     }
 
     private JCExpressionStatement generatePutToModel(Class<?> modelClass) {
