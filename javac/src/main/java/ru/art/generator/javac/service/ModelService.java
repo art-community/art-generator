@@ -12,7 +12,6 @@ import static java.util.Arrays.*;
 import static java.util.Objects.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.Annotations.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.ExceptionMessages.*;
-import static ru.art.generator.javac.constants.GeneratorConstants.MethodNames.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import static ru.art.generator.javac.model.ClassMethodNamesModel.*;
 import static ru.art.generator.javac.model.NewConfigureMethod.configureMethod;
@@ -35,8 +34,7 @@ public class ModelService {
                 for (Method method : asClass.getDeclaredMethods()) {
                     if (isPublic(method.getModifiers())) {
                         methodNames.add(method.getName());
-                        Class<?> returnType = method.getReturnType();
-                        generateMappers(returnType);
+                        generateMappers(method.getReturnType(), method.getParameterTypes());
                     }
                 }
                 replaceFields(existedClass, methodNames(existedClass, methodNames.build()).generateFields());

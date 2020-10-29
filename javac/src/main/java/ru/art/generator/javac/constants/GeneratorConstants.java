@@ -36,6 +36,7 @@ public interface GeneratorConstants {
         String BUILDER = "builder";
         String BUILD = "build";
         String MAP = "map";
+        String GET_PREFIX = "get";
 
         interface PrimitiveMappingMethods {
             String toString = "toString";

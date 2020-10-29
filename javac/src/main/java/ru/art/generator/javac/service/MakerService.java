@@ -29,12 +29,12 @@ public class MakerService {
     }
 
 
-    public JCExpressionStatement execMethodCall(String variable, String method) {
-        return maker().Exec(maker().Apply(List.nil(), select(variable, method), List.nil()));
+    public JCExpressionStatement execMethodCall(String variable, String method, List<JCExpression> arguments) {
+        return maker().Exec(maker().Apply(List.nil(), select(variable, method), arguments));
     }
 
-    public JCReturn returnMethodCall(String variable, String method) {
-        return maker().Return(maker().Apply(List.nil(), select(variable, method), List.nil()));
+    public JCReturn returnMethodCall(String variable, String method, List<JCExpression> arguments) {
+        return maker().Return(maker().Apply(List.nil(), select(variable, method), arguments));
     }
 
 
