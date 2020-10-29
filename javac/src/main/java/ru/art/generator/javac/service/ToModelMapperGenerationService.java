@@ -32,23 +32,24 @@ public class ToModelMapperGenerationService {
             if (getterName.startsWith(GET_PREFIX)) {
                 String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
                 Class<?> fieldType = method.getReturnType();
-                builderInvocation = applyMethod(builderInvocation, fieldName, generateFieldMapping(fieldName, fieldType));
+                builderInvocation = applyMethod(builderInvocation, fieldName, List.of(generateFieldMapping(fieldName, fieldType)));
             }
         }
         return applyMethod(builderInvocation, BUILD);
     }
 
-    private static List<JCExpression> generateFieldMapping(String fieldName, Class<?> fieldType) {
+    private static JCMethodInvocation generateFieldMapping(String fieldName, Class<?> fieldType) {
+        ListBuffer<JCExpression> mapping = new ListBuffer<>();
+        mapping.add(maker().Literal(fieldName));
+
         if (String.class.equals(fieldType)) {
-            List<JCExpression> mapping = List.of(maker().Literal(fieldName), select(type(PrimitiveMapping.class), toString));
-            return List.of(applyMethod(VALUE, MAP, mapping));
+            mapping.add(select(type(PrimitiveMapping.class), toString));
         }
 
         if (Integer.class.equals(fieldType)) {
-            List<JCExpression> mapping = List.of(maker().Literal(fieldName), select(type(PrimitiveMapping.class), toInt));
-            return List.of(applyMethod(VALUE, MAP, mapping));
+            mapping.add(select(type(PrimitiveMapping.class), toInt));
         }
 
-        throw new IllegalStateException();
+        return applyMethod(VALUE, MAP, mapping.toList());
     }
 }

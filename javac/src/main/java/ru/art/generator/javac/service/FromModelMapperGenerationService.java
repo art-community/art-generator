@@ -38,14 +38,18 @@ public class FromModelMapperGenerationService {
     }
 
     private static JCMethodInvocation generateFieldMapping(JCMethodInvocation builderInvocation, String fieldName, Class<?> fieldType) {
+        ListBuffer<JCExpression> mapping = new ListBuffer<>();
+        mapping.add(maker().Literal(fieldName));
+        mapping.add(newLambda().expression(() -> applyMethod(MODEL, GET_PREFIX + capitalize(fieldName))).generate());
+
         if (String.class.equals(fieldType)) {
-            List<JCExpression> mapping = List.of(maker().Literal(fieldName),
-                    newLambda().expression(() -> applyMethod(MODEL, GET_PREFIX + capitalize(fieldName))).generate(),
-                    select(type(PrimitiveMapping.class), fromString)
-            );
-            return applyMethod(builderInvocation, LAZY_PUT, mapping);
+            mapping.add(select(type(PrimitiveMapping.class), fromString));
         }
 
-        throw new IllegalStateException();
+        if (Integer.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), fromInt));
+        }
+
+        return applyMethod(builderInvocation, LAZY_PUT, mapping.toList());
     }
 }
