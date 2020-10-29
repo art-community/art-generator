@@ -1,6 +1,5 @@
 package ru.art.generator.javac.model;
 
-import com.sun.codemodel.internal.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;

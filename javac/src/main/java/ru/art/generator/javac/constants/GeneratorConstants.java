@@ -1,33 +1,12 @@
 package ru.art.generator.javac.constants;
 
-import com.google.common.collect.*;
-
 public interface GeneratorConstants {
-    String INIT_METHOD_NAME = "<init>";
-    String EQUALS_METHOD_NAME = "equals";
-    String HASH_CODE_METHOD_NAME = "hashCode";
-    String TO_STRING_METHOD_NAME = "toString";
     String MAIN_METHOD_NAME = "main";
-    String WAIT_METHOD_NAME = "wait";
-    String NOTIFY_METHOD_NAME = "notify";
     String CLASS_KEYWORD = "class";
     String JAVA_PACKAGE_PREFIX = "java.";
     String ARRAY_MARKER = "[";
     int ARRAY_ELEMENTS_CLASS_NAME_INDEX = 2;
-    String METHODS_SUFFIX = "Methods";
-    String METHODS_FIELD = "methods";
-
-    ImmutableSet<String> IGNORING_METHODS = ImmutableSet.of(
-            INIT_METHOD_NAME,
-            EQUALS_METHOD_NAME,
-            HASH_CODE_METHOD_NAME,
-            TO_STRING_METHOD_NAME,
-            MAIN_METHOD_NAME,
-            WAIT_METHOD_NAME,
-            NOTIFY_METHOD_NAME,
-            "notifyAll",
-            "getClass"
-    );
+    String CONFIGURATION_CLASS_NAME = "Configuration";
 
     interface Annotations {
         String MODULE_ANNOTATION_NAME = "io.art.model.annotation.Module";
@@ -46,5 +25,20 @@ public interface GeneratorConstants {
     interface MethodNames {
         String CONFIGURE_METHOD_NAME = "configure";
         String MODULE_METHOD_NAME = "module";
+    }
+
+    interface MappersConstants {
+        String CREATE_MAPPERS = "createMappers";
+        String MAPPERS = "mappers";
+        String PUT_TO_MODEL = "putToModel";
+        String PUT_FROM_MODEL = "putFromModel";
+        String VALUE = "value";
+        String BUILDER = "builder";
+        String BUILD = "build";
+        String MAP = "map";
+
+        interface PrimitiveMappingMethods {
+            String toString = "toString";
+        }
     }
 }

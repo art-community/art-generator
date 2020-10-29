@@ -1,5 +1,6 @@
 package ru.art.generator.javac.service;
 
+import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.entity.immutable.*;
 import io.art.entity.mapper.*;
@@ -8,6 +9,9 @@ import io.art.entity.registry.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.tools.javac.code.Flags.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.MappersConstants.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.toString;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import static ru.art.generator.javac.model.ImportModel.*;
 import static ru.art.generator.javac.model.NewClass.*;
@@ -26,49 +30,67 @@ public class MapperGenerationService {
         TypeModel registryType = type(MappersRegistry.class);
 
         NewField mappersField = newField()
-                .name("mappers")
+                .name(MAPPERS)
                 .modifiers(PRIVATE | FINAL | STATIC)
                 .type(registryType)
-                .initializer(() -> MakerService.applyMethod("createMappers"));
+                .initializer(() -> applyMethod(CREATE_MAPPERS));
 
         NewMethod createMappersMethod = newMethod()
-                .name("createMappers")
+                .name(CREATE_MAPPERS)
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
-                .statement(() -> newVariable()
-                        .name("registry")
-                        .initializer(() -> newObject(registryType))
-                        .type(registryType)
-                        .generate())
-                .statement(() -> maker().Exec(applyMethod("registry", "putToModel", List.of(
-                        classReference(modelClass),
-                        newLambda()
-                                .parameter(newParameter(type(Entity.class), "value"))
-                                .expression(() -> applyMethod(
-                                        applyMethod(
-                                                applyClassMethod(type(modelClass.getName()), "builder"),
-                                                "value",
-                                                List.of(applyMethod("value", "map", List.of(maker().Literal("value"), select(type(PrimitiveMapping.class), "toString"))))
-                                        ),
-                                        "build")
-                                )
-                                .generate())))
-                )
-                .statement(() -> maker().Return(ident("registry")));
+                .statement(() -> generateRegistryVariable(registryType))
+                .statement(() -> generateCreateRegistryMethodContent(modelClass))
+                .statement(() -> maker().Return(ident(MAPPERS)));
+
+        NewMethod mappersMethod = newMethod()
+                .returnType(registryType)
+                .name(MAPPERS)
+                .modifiers(PUBLIC | STATIC)
+                .statement(() -> maker().Return(ident(MAPPERS)));
 
         NewClass configurationClass = newClass()
                 .modifiers(PUBLIC | STATIC)
-                .name("Configuration")
+                .name(CONFIGURATION_CLASS_NAME)
                 .addImport(importClass(PrimitiveMapping.class.getName()))
+                .addImport(importClass(ArrayMapping.class.getName()))
+                .addImport(importClass(EntityMapping.class.getName()))
+                .addImport(importClass(BinaryMapping.class.getName()))
+                .addImport(importClass(ArrayValue.class.getName()))
+                .addImport(importClass(BinaryValue.class.getName()))
                 .addImport(importClass(Entity.class.getName()))
                 .addImport(importClass(Value.class.getName()))
                 .addImport(importClass(ValueToModelMapper.class.getName()))
                 .addImport(importClass(ValueFromModelMapper.class.getName()))
                 .addImport(importClass(MappersRegistry.class.getName()))
-                .field("mappers", mappersField)
-                .method("createMappers", createMappersMethod)
-                .method("mappers", newMethod().returnType(registryType).name("mappers").modifiers(PUBLIC | STATIC).statement(() -> maker().Return(ident("mappers"))));
+                .field(MAPPERS, mappersField)
+                .method(CREATE_MAPPERS, createMappersMethod)
+                .method(MAPPERS, mappersMethod);
 
         replaceInnerClass(mainClass(), configurationClass);
+    }
+
+    private JCTree.JCExpressionStatement generateCreateRegistryMethodContent(Class<?> modelClass) {
+        return maker().Exec(applyMethod(MAPPERS, PUT_TO_MODEL, List.of(
+                classReference(modelClass),
+                newLambda()
+                        .parameter(newParameter(type(Entity.class), VALUE))
+                        .expression(() -> applyMethod(
+                                applyMethod(
+                                        applyClassMethod(type(modelClass.getName()), BUILDER),
+                                        VALUE,
+                                        List.of(applyMethod(VALUE, MAP, List.of(maker().Literal(VALUE), select(type(PrimitiveMapping.class), toString))))
+                                ),
+                                BUILD)
+                        )
+                        .generate())));
+    }
+
+    private JCTree.JCVariableDecl generateRegistryVariable(TypeModel registryType) {
+        return newVariable()
+                .name(MAPPERS)
+                .initializer(() -> newObject(registryType))
+                .type(registryType)
+                .generate();
     }
 }
