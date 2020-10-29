@@ -68,14 +68,18 @@ public class MappersGenerationService {
                 .name(CREATE_MAPPERS)
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
-                .statement(() -> generateMappersVariable(registryType))
-                .statement(() -> generatePutToModel(returnClass))
-                .statement(() -> generatePutFromModel(returnClass));
+                .statement(() -> generateMappersVariable(registryType));
+
+        createMappersMethod.statement(() -> generatePutToModel(returnClass));
         for (Class<?> parameterClass : parameterClasses) {
-            createMappersMethod
-                    .statement(() -> generatePutToModel(parameterClass))
-                    .statement(() -> generatePutFromModel(parameterClass));
+            createMappersMethod.statement(() -> generatePutToModel(parameterClass));
         }
+
+        createMappersMethod.statement(() -> generatePutFromModel(returnClass));
+        for (Class<?> parameterClass : parameterClasses) {
+            createMappersMethod.statement(() -> generatePutFromModel(parameterClass));
+        }
+
         return createMappersMethod.statement(() -> returnVariable(MAPPERS));
     }
 
