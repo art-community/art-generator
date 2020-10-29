@@ -19,10 +19,10 @@ public class NewMethod {
     private long modifiers;
     private TypeModel returnType;
 
-    private java.util.List<ParameterModel> parameters = new LinkedList<>();
+    private java.util.List<NewParameter> parameters = new LinkedList<>();
     private java.util.List<Supplier<JCStatement>> statements = new LinkedList<>();
 
-    public NewMethod parameter(ParameterModel parameter) {
+    public NewMethod parameter(NewParameter parameter) {
         parameters.add(parameter);
         return this;
     }
@@ -37,7 +37,7 @@ public class NewMethod {
         Name name = elements().getName(this.name);
         JCExpression type = returnType.generate();
         JCBlock body = maker().Block(0L, from(statements.stream().map(Supplier::get).collect(toList())));
-        List<JCVariableDecl> parameters = this.parameters.stream().map(ParameterModel::generate).collect(toList());
+        List<JCVariableDecl> parameters = this.parameters.stream().map(NewParameter::generate).collect(toList());
         return maker().MethodDef(modifiers, name, type, nil(), from(parameters), nil(), body, null);
     }
 

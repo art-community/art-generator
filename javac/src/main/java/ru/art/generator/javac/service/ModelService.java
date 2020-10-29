@@ -13,7 +13,7 @@ import static ru.art.generator.javac.constants.GeneratorConstants.ExceptionMessa
 import static ru.art.generator.javac.constants.GeneratorConstants.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.MethodNames.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
-import static ru.art.generator.javac.model.NewConfigureMethodModel.*;
+import static ru.art.generator.javac.model.NewConfigureMethod.*;
 import static ru.art.generator.javac.service.ClassMutationService.*;
 import static ru.art.generator.javac.service.CompileService.*;
 import static ru.art.generator.javac.service.MapperGenerationService.*;

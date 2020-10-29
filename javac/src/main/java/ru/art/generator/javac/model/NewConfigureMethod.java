@@ -10,7 +10,7 @@ import static ru.art.generator.javac.model.NewMethod.*;
 import static ru.art.generator.javac.service.MakerService.*;
 
 @UtilityClass
-public class NewConfigureMethodModel {
+public class NewConfigureMethod {
     public static NewMethod configureMethod(ModuleModel model) {
         return newMethod()
                 .modifiers(PUBLIC | STATIC)

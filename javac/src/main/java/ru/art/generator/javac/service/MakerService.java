@@ -5,8 +5,9 @@ import com.sun.tools.javac.util.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.tools.javac.code.TypeTag.*;
-import static com.sun.tools.javac.util.List.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.CLASS_KEYWORD;
 import static ru.art.generator.javac.context.GenerationContext.*;
+import static ru.art.generator.javac.model.TypeModel.type;
 
 @UtilityClass
 public class MakerService {
@@ -27,18 +28,40 @@ public class MakerService {
     }
 
     public JCReturn returnMethodCall(String variable, String method) {
-        return maker().Return(maker().Apply(nil(), maker().Select(ident(variable), elements().getName(method)), nil()));
+        return maker().Return(maker().Apply(List.nil(), maker().Select(ident(variable), name(method)), List.nil()));
     }
 
-    public JCMethodInvocation callClassMethod(TypeModel classType, String method) {
-        return maker().Apply(nil(), maker().Select(classType.generate(), elements().getName(method)), nil());
+    public JCMethodInvocation applyClassMethod(TypeModel classType, String method) {
+        return applyClassMethod(classType, method, List.nil());
     }
 
-    public JCMethodInvocation callMethod(String method) {
-        return maker().Apply(nil(), ident(method), nil());
+    public JCMethodInvocation applyClassMethod(TypeModel classType, String method, List<JCExpression> arguments) {
+        return maker().Apply(List.nil(), maker().Select(classType.generate(), name(method)), arguments);
     }
+
+    public JCMethodInvocation applyMethod(String method) {
+        return maker().Apply(List.nil(), ident(method), List.nil());
+    }
+
+    public JCMethodInvocation applyMethod(String method, List<JCExpression> arguments) {
+        return maker().Apply(List.nil(), ident(method), arguments);
+    }
+
+
+    public JCMethodInvocation applyMethod(String owner, String method) {
+        return maker().Apply(List.nil(), maker().Select(ident(owner), name(method)), List.nil());
+    }
+
+    public JCMethodInvocation applyMethod(String owner, String method, List<JCExpression> arguments) {
+        return maker().Apply(List.nil(), maker().Select(ident(owner), name(method)), arguments);
+    }
+
 
     public JCNewClass newObject(TypeModel classType) {
-        return maker().NewClass(null, List.<JCExpression>nil(), classType.generate(), nil(), null);
+        return maker().NewClass(null, List.nil(), classType.generate(), List.nil(), null);
+    }
+
+    public JCFieldAccess classReference(Class<?> owner) {
+        return maker().Select(type(owner).generate(), name(CLASS_KEYWORD));
     }
 }

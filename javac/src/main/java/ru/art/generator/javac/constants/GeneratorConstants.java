@@ -8,6 +8,7 @@ public interface GeneratorConstants {
     String HASH_CODE_METHOD_NAME = "hashCode";
     String TO_STRING_METHOD_NAME = "toString";
     String MAIN_METHOD_NAME = "main";
+    String CLASS_KEYWORD = "class";
     String JAVA_PACKAGE_PREFIX = "java.";
     String ARRAY_MARKER = "[";
     int ARRAY_ELEMENTS_CLASS_NAME_INDEX = 2;

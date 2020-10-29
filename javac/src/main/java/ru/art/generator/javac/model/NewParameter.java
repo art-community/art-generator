@@ -9,12 +9,12 @@ import static ru.art.generator.javac.context.GenerationContext.*;
 @Getter
 @EqualsAndHashCode
 @RequiredArgsConstructor
-public class ParameterModel {
+public class NewParameter {
     private final String name;
     private final TypeModel type;
 
-    public static ParameterModel parameter(TypeModel type, String name) {
-        return new ParameterModel(name, type);
+    public static NewParameter newParameter(TypeModel type, String name) {
+        return new NewParameter(name, type);
     }
 
     public JCVariableDecl generate() {
