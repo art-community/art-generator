@@ -25,10 +25,18 @@ public class ClassMutationService {
         ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
         List<JCTree> currentPackageDefinitions = existedClass.getPackageUnit().defs;
         newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
-        newPackageDefinitions.addAll(inner.imports().stream().map(newImport -> maker().Import(maker().Select(maker().Ident(elements().getName(newImport.getPackagePart())),
-                elements().getName(newImport.getImportPart())),
-                newImport.isAsStatic()))
-                .collect(toList()));
+        java.util.List<JCTree.JCImport> imports = inner.imports()
+                .stream()
+                .distinct()
+                .map(newImport -> maker().Import(
+                        maker().Select(
+                                maker().Ident(elements().getName(newImport.getPackagePart())),
+                                elements().getName(newImport.getImportPart())
+                        ),
+                        newImport.isAsStatic())
+                )
+                .collect(toList());
+        newPackageDefinitions.addAll(imports);
         newPackageDefinitions.add(currentPackageDefinitions.last());
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
@@ -43,14 +51,20 @@ public class ClassMutationService {
         ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
         List<JCTree> currentPackageDefinitions = existedClass.getPackageUnit().defs;
         newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
-        newPackageDefinitions.addAll(fields.stream()
+        java.util.List<JCTree.JCImport> imports = fields.stream()
+                .distinct()
                 .map(NewField::type)
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
                 .map(type -> importClass(type.getFullName()))
-                .map(newImport -> maker().Import(maker().Select(
-                        maker().Ident(elements().getName(newImport.getPackagePart())), elements().getName(newImport.getImportPart())),
-                        newImport.isAsStatic()))
-                .collect(toList()));
+                .map(newImport -> maker().Import(
+                        maker().Select(
+                                maker().Ident(elements().getName(newImport.getPackagePart())),
+                                elements().getName(newImport.getImportPart())
+                        ),
+                        newImport.isAsStatic())
+                )
+                .collect(toList());
+        newPackageDefinitions.addAll(imports);
         newPackageDefinitions.add(currentPackageDefinitions.last());
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
@@ -75,14 +89,19 @@ public class ClassMutationService {
         ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
         List<JCTree> currentPackageDefinitions = existedClass.getPackageUnit().defs;
         newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
-        newPackageDefinitions.addAll(Stream.of(method)
+        java.util.List<JCTree.JCImport> imports = Stream.of(method)
                 .map(NewMethod::returnType)
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
                 .map(type -> importClass(type.getFullName()))
-                .map(newImport -> maker().Import(maker().Select(
-                        maker().Ident(elements().getName(newImport.getPackagePart())), elements().getName(newImport.getImportPart())),
-                        newImport.isAsStatic()))
-                .collect(toList()));
+                .map(newImport -> maker().Import(
+                        maker().Select(
+                                maker().Ident(elements().getName(newImport.getPackagePart())),
+                                elements().getName(newImport.getImportPart())
+                        ),
+                        newImport.isAsStatic())
+                )
+                .collect(toList());
+        newPackageDefinitions.addAll(imports);
         newPackageDefinitions.add(currentPackageDefinitions.last());
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
@@ -97,14 +116,20 @@ public class ClassMutationService {
         ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
         List<JCTree> currentPackageDefinitions = existedClass.getPackageUnit().defs;
         newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
-        newPackageDefinitions.addAll(methods.stream()
+        java.util.List<JCTree.JCImport> imports = methods.stream()
                 .map(NewMethod::returnType)
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
                 .map(type -> importClass(type.getFullName()))
-                .map(newImport -> maker().Import(maker().Select(
-                        maker().Ident(elements().getName(newImport.getPackagePart())), elements().getName(newImport.getImportPart())),
-                        newImport.isAsStatic()))
-                .collect(toList()));
+                .distinct()
+                .map(newImport -> maker().Import(
+                        maker().Select(
+                                maker().Ident(elements().getName(newImport.getPackagePart())),
+                                elements().getName(newImport.getImportPart())
+                        ),
+                        newImport.isAsStatic())
+                )
+                .collect(toList());
+        newPackageDefinitions.addAll(imports);
         newPackageDefinitions.add(currentPackageDefinitions.last());
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }

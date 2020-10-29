@@ -5,8 +5,6 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import lombok.*;
 import lombok.experimental.*;
-import ru.art.generator.javac.service.*;
-import static com.sun.tools.javac.code.TypeTag.*;
 import static com.sun.tools.javac.util.List.*;
 import static java.util.stream.Collectors.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
@@ -21,11 +19,6 @@ public class NewField {
     private long modifiers;
     private TypeModel type;
     private Supplier<JCExpression> initializer;
-
-    public NewField asNull() {
-        initializer = MakerService::nullValue;
-        return this;
-    }
 
     public NewField constant(Object value) {
         initializer = () -> maker().Literal(value);

@@ -1,8 +1,7 @@
 package ru.art.generator.javac.service;
 
-import com.google.common.collect.*;
-import com.sun.tools.javac.util.*;
 import io.art.entity.mapper.*;
+import io.art.entity.registry.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.tools.javac.code.Flags.*;
@@ -22,43 +21,30 @@ public class MapperGenerationService {
         if (mainClass().hasInnerInterface("Mappers")) {
             return;
         }
-        NewField toModel = newField()
-                .name("toModel")
-                .type(type(ImmutableMap.class.getName(), ImmutableList.of(type(Class.class.getName()), type(ValueToModelMapper.class.getName()))))
-                .asNull();
+        NewField mappersField = newField()
+                .name("mappers")
+                .type(type(MappersRegistry.class))
+                .initializer(() -> MakerService.callMethod("createMappers"));
 
-        NewMethod createToModelMappers = newMethod()
-                .name("createToModelMappers")
-                .returnType(type(ImmutableMap.class.getName(), ImmutableList.of(type(Class.class.getName()), type(ValueToModelMapper.class.getName()))))
+        NewMethod createMappersMethod = newMethod()
+                .name("createMappers")
+                .returnType(type(MappersRegistry.class))
                 .modifiers(STATIC)
                 .statement(() -> newVariable()
-                        .name("builder")
-                        .initializer(() -> callClassMethod(type(ImmutableMap.class.getName()), "builder"))
-                        .type(type(
-                                ImmutableMap.class.getName(),
-                                "Builder",
-                                List.of(
-                                        type(Class.class.getName()),
-                                        type(ValueToModelMapper.class.getName())
-                                )
-                        ))
+                        .name("registry")
+                        .initializer(() -> newObject(type(MappersRegistry.class)))
+                        .type(type(MappersRegistry.class))
                         .generate())
-                .statement(() -> returnMethodCall("builder", "build"));
-
-        NewField fromModel = newField()
-                .name("fromModel")
-                .type(type(ImmutableMap.class.getName(), ImmutableList.of(type(Class.class.getName()), type(ValueFromModelMapper.class.getName()))))
-                .asNull();
+                .statement(() -> maker().Return(ident("registry")));
 
         NewClass interfaceClass = newClass()
                 .modifiers(INTERFACE)
                 .name("Mappers")
                 .addImport(importClass(ValueToModelMapper.class.getName()))
                 .addImport(importClass(ValueFromModelMapper.class.getName()))
-                .addImport(importPackage("com.google.common.collect"))
-                .field("toModel", toModel)
-                .field("fromModel", fromModel)
-                .method("createToModelMappers", createToModelMappers);
+                .addImport(importClass(MappersRegistry.class.getName()))
+                .field("mappers", mappersField)
+                .method("createMappers", createMappersMethod);
 
         addInnerClass(mainClass(), interfaceClass);
     }

@@ -1,13 +1,11 @@
 package ru.art.generator.javac.model;
 
-import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import lombok.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.service.*;
-import static com.sun.tools.javac.code.Flags.LocalVarFlags;
 import static com.sun.tools.javac.util.List.*;
 import static java.util.stream.Collectors.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
@@ -42,7 +40,7 @@ public class NewVariable {
     }
 
     public JCTree.JCVariableDecl generate() {
-        JCTree.JCModifiers modifiers = maker().Modifiers(this.modifiers | LocalVarFlags);
+        JCTree.JCModifiers modifiers = maker().Modifiers(this.modifiers);
         Name name = elements().getName(this.name);
         JCTree.JCExpression type = this.type.generate();
         JCTree.JCExpression initializationExpression = initializer.get();

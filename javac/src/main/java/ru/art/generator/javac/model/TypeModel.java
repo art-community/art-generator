@@ -17,13 +17,16 @@ import java.util.*;
 public class TypeModel {
     private final String outerTypeName;
     private final String innerTypeName;
-    private String packageName;
-    private final boolean array;
     private final List<TypeModel> parameters;
-    private TypeTag primitiveType;
-    private boolean jdk;
+
+    private String packageName = EMPTY_STRING;
     private String fullName;
     private String name;
+
+    private TypeTag primitiveType;
+
+    private boolean jdk;
+    private boolean array;
 
     private TypeModel(String outerTypeName, String innerTypeName, List<TypeModel> parameters) {
         this.outerTypeName = outerTypeName;
@@ -33,7 +36,6 @@ public class TypeModel {
                 .filter(tag -> tag.name().toLowerCase().equals(outerTypeName.toLowerCase()))
                 .findFirst();
         if (existedType.isPresent()) {
-            array = false;
             primitiveType = existedType.get();
             name = outerTypeName;
             return;
@@ -44,34 +46,34 @@ public class TypeModel {
             parseTypeName(elementsType.substring(0, elementsType.length() - 1));
             return;
         }
-        array = false;
         parseTypeName(outerTypeName);
     }
 
-    private void parseTypeName(String name) {
-        if (name.startsWith(JAVA_PACKAGE_PREFIX)) {
+    private void parseTypeName(String outerTypeName) {
+        if (outerTypeName.startsWith(JAVA_PACKAGE_PREFIX)) {
             jdk = true;
-            packageName = name.substring(name.lastIndexOf(DOT) + 1);
-            this.name = fullName = name;
+            packageName = outerTypeName.substring(0, outerTypeName.lastIndexOf(DOT));
+            name = outerTypeName.substring(outerTypeName.lastIndexOf(packageName) + packageName.length() + 1);
+            fullName = outerTypeName;
             return;
         }
-        jdk = false;
-        if (name.contains(DOT)) {
-            packageName = name.substring(0, name.lastIndexOf(DOT));
+        if (outerTypeName.contains(DOT)) {
+            packageName = outerTypeName.substring(0, outerTypeName.lastIndexOf(DOT));
+            String nameWithoutPackage = outerTypeName.substring(outerTypeName.lastIndexOf(packageName) + packageName.length() + 1);
             if (!innerTypeName.isEmpty()) {
-                this.name = name.substring(name.lastIndexOf(packageName) + 1) + DOT + innerTypeName;
-                fullName = name + DOT + innerTypeName;
+                name = nameWithoutPackage + DOT + innerTypeName;
+                fullName = outerTypeName + DOT + innerTypeName;
+                return;
             }
-            this.name = name.substring(name.lastIndexOf(packageName) + 1) + DOT + innerTypeName;
-            fullName = name;
+            name = nameWithoutPackage;
+            fullName = outerTypeName;
             return;
         }
-        packageName = EMPTY_STRING;
         if (!innerTypeName.isEmpty()) {
-            this.name = fullName = name + DOT + innerTypeName;
+            name = fullName = outerTypeName + DOT + innerTypeName;
             return;
         }
-        this.name = fullName = name;
+        this.name = fullName = outerTypeName;
     }
 
     public JCExpression generate() {
@@ -83,11 +85,22 @@ public class TypeModel {
                     .stream()
                     .map(TypeModel::generate)
                     .collect(toList()));
-            return maker().TypeApply(maker().Ident(elements().getName(name)), arguments);
+            return maker().TypeApply(isArray()
+                    ? maker().TypeArray(maker().Ident(elements().getName(name)))
+                    : maker().Ident(elements().getName(name)), arguments);
         }
         return isArray()
                 ? maker().TypeArray(maker().Ident(elements().getName(name)))
                 : maker().Ident(elements().getName(name));
+    }
+
+
+    public static TypeModel type(Class<?> typeClass) {
+        return type(typeClass, emptyList());
+    }
+
+    public static TypeModel type(Class<?> typeClass, List<TypeModel> parameters) {
+        return type(typeClass.getName(), parameters);
     }
 
     public static TypeModel type(String name) {

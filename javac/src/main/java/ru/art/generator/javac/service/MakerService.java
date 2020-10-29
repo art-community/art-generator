@@ -33,4 +33,12 @@ public class MakerService {
     public JCMethodInvocation callClassMethod(TypeModel classType, String method) {
         return maker().Apply(nil(), maker().Select(classType.generate(), elements().getName(method)), nil());
     }
+
+    public JCMethodInvocation callMethod(String method) {
+        return maker().Apply(nil(), ident(method), nil());
+    }
+
+    public JCNewClass newObject(TypeModel classType) {
+        return maker().NewClass(null, List.<JCExpression>nil(), classType.generate(), nil(), null);
+    }
 }
