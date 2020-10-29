@@ -8,6 +8,8 @@ public interface GeneratorConstants {
     String HASH_CODE_METHOD_NAME = "hashCode";
     String TO_STRING_METHOD_NAME = "toString";
     String MAIN_METHOD_NAME = "main";
+    String WAIT_METHOD_NAME = "wait";
+    String NOTIFY_METHOD_NAME = "notify";
     String CLASS_KEYWORD = "class";
     String JAVA_PACKAGE_PREFIX = "java.";
     String ARRAY_MARKER = "[";
@@ -20,7 +22,11 @@ public interface GeneratorConstants {
             EQUALS_METHOD_NAME,
             HASH_CODE_METHOD_NAME,
             TO_STRING_METHOD_NAME,
-            MAIN_METHOD_NAME
+            MAIN_METHOD_NAME,
+            WAIT_METHOD_NAME,
+            NOTIFY_METHOD_NAME,
+            "notifyAll",
+            "getClass"
     );
 
     interface Annotations {

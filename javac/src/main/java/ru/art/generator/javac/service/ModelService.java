@@ -1,19 +1,21 @@
 package ru.art.generator.javac.service;
 
+import com.google.common.collect.*;
 import io.art.model.identifier.*;
 import io.art.model.module.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.exception.*;
 import ru.art.generator.javac.loader.*;
+import ru.art.generator.javac.model.*;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.Annotations.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.ExceptionMessages.*;
-import static ru.art.generator.javac.constants.GeneratorConstants.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.MethodNames.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
-import static ru.art.generator.javac.model.NewConfigureMethod.*;
+import static ru.art.generator.javac.model.ClassMethodNamesModel.*;
+import static ru.art.generator.javac.model.NewConfigureMethod.configureMethod;
 import static ru.art.generator.javac.service.ClassMutationService.*;
 import static ru.art.generator.javac.service.CompileService.*;
 import static ru.art.generator.javac.service.MapperGenerationService.*;
@@ -28,13 +30,16 @@ public class ModelService {
             Class<?> asClass = identifier.getAsClass();
             if (nonNull(asClass)) {
                 loader.loadClass(asClass.getName());
-                for (Method method : asClass.getMethods()) {
-                    if (isPublic(method.getModifiers()) && !IGNORING_METHODS.contains(method.getName())) {
+                ExistedClass existedClass = getExistedClass(asClass.getName());
+                ImmutableSet.Builder<String> methodNames = ImmutableSet.builder();
+                for (Method method : asClass.getDeclaredMethods()) {
+                    if (isPublic(method.getModifiers())) {
+                        methodNames.add(method.getName());
                         Class<?> returnType = method.getReturnType();
                         generateMappers(returnType);
                     }
                 }
-                continue;
+                addFields(existedClass, methodNames(existedClass, methodNames.build()).generateFields());
             }
         }
         replaceMethod(mainClass(), CONFIGURE_METHOD_NAME, configureMethod(model));

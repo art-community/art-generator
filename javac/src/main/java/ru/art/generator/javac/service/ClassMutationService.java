@@ -41,6 +41,70 @@ public class ClassMutationService {
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
 
+    public void replaceInnerInterface(ExistedClass existedClass, NewClass inner) {
+        maker().at(existedClass.getDeclaration().pos);
+        ListBuffer<JCTree> classDefinitions = new ListBuffer<>();
+        classDefinitions.addAll(existedClass
+                .getDeclaration()
+                .defs
+                .stream()
+                .filter(definition -> definition.getKind() != INTERFACE || !((JCTree.JCClassDecl) definition).name.toString().equals(inner.name()))
+                .collect(toList())
+        );
+        classDefinitions.add(inner.generate());
+        existedClass.getDeclaration().defs = classDefinitions.toList();
+
+        ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
+        List<JCTree> currentPackageDefinitions = existedClass.getPackageUnit().defs;
+        newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
+        java.util.List<JCTree.JCImport> imports = inner.imports()
+                .stream()
+                .distinct()
+                .map(newImport -> maker().Import(
+                        maker().Select(
+                                maker().Ident(elements().getName(newImport.getPackagePart())),
+                                elements().getName(newImport.getImportPart())
+                        ),
+                        newImport.isAsStatic())
+                )
+                .collect(toList());
+        newPackageDefinitions.addAll(imports);
+        newPackageDefinitions.add(currentPackageDefinitions.last());
+        existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
+    }
+
+    public void replaceInnerClass(ExistedClass existedClass, NewClass inner) {
+        maker().at(existedClass.getDeclaration().pos);
+        ListBuffer<JCTree> classDefinitions = new ListBuffer<>();
+        classDefinitions.addAll(existedClass
+                .getDeclaration()
+                .defs
+                .stream()
+                .filter(definition -> definition.getKind() != CLASS || !((JCTree.JCClassDecl) definition).name.toString().equals(inner.name()))
+                .collect(toList())
+        );
+        classDefinitions.add(inner.generate());
+        existedClass.getDeclaration().defs = classDefinitions.toList();
+
+        ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
+        List<JCTree> currentPackageDefinitions = existedClass.getPackageUnit().defs;
+        newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
+        java.util.List<JCTree.JCImport> imports = inner.imports()
+                .stream()
+                .distinct()
+                .map(newImport -> maker().Import(
+                        maker().Select(
+                                maker().Ident(elements().getName(newImport.getPackagePart())),
+                                elements().getName(newImport.getImportPart())
+                        ),
+                        newImport.isAsStatic())
+                )
+                .collect(toList());
+        newPackageDefinitions.addAll(imports);
+        newPackageDefinitions.add(currentPackageDefinitions.last());
+        existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
+    }
+
     public void addFields(ExistedClass existedClass, Collection<NewField> fields) {
         maker().at(existedClass.getDeclaration().pos);
         ListBuffer<JCTree> classDefinitions = new ListBuffer<>();

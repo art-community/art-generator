@@ -5,9 +5,9 @@ import com.sun.tools.javac.util.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.tools.javac.code.TypeTag.*;
-import static ru.art.generator.javac.constants.GeneratorConstants.CLASS_KEYWORD;
+import static ru.art.generator.javac.constants.GeneratorConstants.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
-import static ru.art.generator.javac.model.TypeModel.type;
+import static ru.art.generator.javac.model.TypeModel.*;
 
 @UtilityClass
 public class MakerService {
@@ -31,6 +31,7 @@ public class MakerService {
         return maker().Return(maker().Apply(List.nil(), maker().Select(ident(variable), name(method)), List.nil()));
     }
 
+
     public JCMethodInvocation applyClassMethod(TypeModel classType, String method) {
         return applyClassMethod(classType, method, List.nil());
     }
@@ -38,6 +39,7 @@ public class MakerService {
     public JCMethodInvocation applyClassMethod(TypeModel classType, String method, List<JCExpression> arguments) {
         return maker().Apply(List.nil(), maker().Select(classType.generate(), name(method)), arguments);
     }
+
 
     public JCMethodInvocation applyMethod(String method) {
         return maker().Apply(List.nil(), ident(method), List.nil());
@@ -57,11 +59,32 @@ public class MakerService {
     }
 
 
+    public JCMethodInvocation applyMethod(JCExpression owner, String method) {
+        return maker().Apply(List.nil(), maker().Select(owner, name(method)), List.nil());
+    }
+
+    public JCMethodInvocation applyMethod(JCExpression owner, String method, List<JCExpression> arguments) {
+        return maker().Apply(List.nil(), maker().Select(owner, name(method)), arguments);
+    }
+
+
     public JCNewClass newObject(TypeModel classType) {
         return maker().NewClass(null, List.nil(), classType.generate(), List.nil(), null);
     }
 
     public JCFieldAccess classReference(Class<?> owner) {
         return maker().Select(type(owner).generate(), name(CLASS_KEYWORD));
+    }
+
+    public JCExpression select(TypeModel owner, String member) {
+        return maker().Select(owner.generate(), name(member));
+    }
+
+    public JCExpression select(String owner, String member) {
+        return maker().Select(ident(owner), name(member));
+    }
+
+    public JCExpression select(JCExpression owner, String member) {
+        return maker().Select(owner, name(member));
     }
 }

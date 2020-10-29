@@ -15,15 +15,8 @@ public class GenerationService {
         if (processingEnvironment().getOptions().get(DISABLE_OPTION) != null) {
             return;
         }
-        generateClassMethodNames();
         generateModelImplementation();
         classLoader().close();
     }
 
-
-    private void generateClassMethodNames() {
-        getExistedClasses()
-                .values()
-                .forEach(existed -> addFields(existed, methodNames(existed).toClass().fields().values()));
-    }
 }
