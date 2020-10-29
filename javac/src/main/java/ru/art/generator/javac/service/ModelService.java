@@ -17,7 +17,7 @@ import static ru.art.generator.javac.model.ClassMethodNamesModel.*;
 import static ru.art.generator.javac.model.NewConfigureMethod.configureMethod;
 import static ru.art.generator.javac.service.ClassMutationService.*;
 import static ru.art.generator.javac.service.CompileService.*;
-import static ru.art.generator.javac.service.MapperGenerationService.*;
+import static ru.art.generator.javac.service.MappersGenerationService.*;
 import java.lang.reflect.*;
 
 @UtilityClass

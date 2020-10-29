@@ -9,6 +9,7 @@ import io.art.entity.registry.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.tools.javac.code.Flags.*;
+import static java.util.Arrays.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.MappersConstants.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
@@ -19,11 +20,12 @@ import static ru.art.generator.javac.model.NewMethod.*;
 import static ru.art.generator.javac.model.NewVariable.*;
 import static ru.art.generator.javac.model.TypeModel.*;
 import static ru.art.generator.javac.service.ClassMutationService.*;
+import static ru.art.generator.javac.service.FromModelMapperGenerationService.*;
 import static ru.art.generator.javac.service.MakerService.*;
 import static ru.art.generator.javac.service.ToModelMapperGenerationService.*;
 
 @UtilityClass
-public class MapperGenerationService {
+public class MappersGenerationService {
     public void generateMappers(Class<?> returnClass, Class<?>[] parameterClasses) {
         TypeModel registryType = type(MappersRegistry.class);
 
@@ -42,6 +44,7 @@ public class MapperGenerationService {
         NewClass configurationClass = newClass()
                 .modifiers(PUBLIC | STATIC)
                 .name(CONFIGURATION_CLASS_NAME)
+                .addImport(importClass(returnClass.getName()))
                 .addImport(importClass(PrimitiveMapping.class.getName()))
                 .addImport(importClass(ArrayMapping.class.getName()))
                 .addImport(importClass(EntityMapping.class.getName()))
@@ -56,7 +59,7 @@ public class MapperGenerationService {
                 .field(MAPPERS, mappersField)
                 .method(CREATE_MAPPERS, generateCreateMappersMethod(returnClass, registryType, parameterClasses))
                 .method(MAPPERS, mappersMethod);
-
+        stream(parameterClasses).forEach(parameter -> configurationClass.addImport(importClass(parameter.getName())));
         replaceInnerClass(mainClass(), configurationClass);
     }
 
@@ -66,15 +69,22 @@ public class MapperGenerationService {
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> generateMappersVariable(registryType))
-                .statement(() -> generatePutToModel(returnClass));
+                .statement(() -> generatePutToModel(returnClass))
+                .statement(() -> generatePutFromModel(returnClass));
         for (Class<?> parameterClass : parameterClasses) {
-            createMappersMethod.statement(() -> generatePutToModel(parameterClass));
+            createMappersMethod
+                    .statement(() -> generatePutToModel(parameterClass))
+                    .statement(() -> generatePutFromModel(parameterClass));
         }
         return createMappersMethod.statement(() -> returnVariable(MAPPERS));
     }
 
     private JCExpressionStatement generatePutToModel(Class<?> modelClass) {
         return execMethodCall(MAPPERS, PUT_TO_MODEL, List.of(classReference(modelClass), generateToModelMapper(modelClass)));
+    }
+
+    private JCExpressionStatement generatePutFromModel(Class<?> modelClass) {
+        return execMethodCall(MAPPERS, PUT_FROM_MODEL, List.of(classReference(modelClass), generateFromModelMapper(modelClass)));
     }
 
     private JCVariableDecl generateMappersVariable(TypeModel registryType) {

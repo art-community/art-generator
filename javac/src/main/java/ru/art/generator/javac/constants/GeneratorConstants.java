@@ -33,7 +33,10 @@ public interface GeneratorConstants {
         String PUT_TO_MODEL = "putToModel";
         String PUT_FROM_MODEL = "putFromModel";
         String VALUE = "value";
+        String MODEL = "model";
         String BUILDER = "builder";
+        String ENTITY_BUILDER = "entityBuilder";
+        String LAZY_PUT = "lazyPut";
         String BUILD = "build";
         String MAP = "map";
         String GET_PREFIX = "get";
@@ -41,6 +44,8 @@ public interface GeneratorConstants {
         interface PrimitiveMappingMethods {
             String toString = "toString";
             String toInt = "toInt";
+            String fromString = "fromString";
+            String fromInt = "fromInt";
         }
     }
 }
