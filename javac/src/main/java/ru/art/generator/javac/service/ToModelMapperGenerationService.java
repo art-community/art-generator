@@ -8,6 +8,7 @@ import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.MappersConstants.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.toString;
+import static ru.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import static ru.art.generator.javac.model.NewLambda.*;
 import static ru.art.generator.javac.model.NewParameter.*;
@@ -31,15 +32,23 @@ public class ToModelMapperGenerationService {
             if (getterName.startsWith(GET_PREFIX)) {
                 String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
                 Class<?> fieldType = method.getReturnType();
-                if (String.class.equals(fieldType)) {
-                    List<JCExpression> mapMethodArguments = List.of(maker().Literal(fieldName), select(type(PrimitiveMapping.class), toString));
-                    List<JCExpression> builderMethodArguments = List.of(applyMethod(VALUE, MAP, mapMethodArguments));
-                    builderInvocation = applyMethod(builderInvocation, fieldName, builderMethodArguments);
-
-                }
+                builderInvocation = applyMethod(builderInvocation, fieldName, generateFieldMapping(fieldName, fieldType));
             }
         }
         return applyMethod(builderInvocation, BUILD);
     }
 
+    private static List<JCExpression> generateFieldMapping(String fieldName, Class<?> fieldType) {
+        if (String.class.equals(fieldType)) {
+            List<JCExpression> mapping = List.of(maker().Literal(fieldName), select(type(PrimitiveMapping.class), toString));
+            return List.of(applyMethod(VALUE, MAP, mapping));
+        }
+
+        if (Integer.class.equals(fieldType)) {
+            List<JCExpression> mapping = List.of(maker().Literal(fieldName), select(type(PrimitiveMapping.class), toInt));
+            return List.of(applyMethod(VALUE, MAP, mapping));
+        }
+
+        throw new IllegalStateException();
+    }
 }

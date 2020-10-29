@@ -40,6 +40,7 @@ public interface GeneratorConstants {
 
         interface PrimitiveMappingMethods {
             String toString = "toString";
+            String toInt = "toInt";
         }
     }
 }
