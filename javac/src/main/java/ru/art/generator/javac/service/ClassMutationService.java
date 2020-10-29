@@ -1,6 +1,5 @@
 package ru.art.generator.javac.service;
 
-import com.sun.source.tree.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
@@ -20,7 +19,7 @@ public class ClassMutationService {
     public void replaceFields(ExistedClass existedClass, Collection<NewField> fields) {
         maker().at(existedClass.getDeclaration().pos);
         ListBuffer<JCTree> classDefinitions = new ListBuffer<>();
-        java.util.List<JCTree> definitions = filterDefinitions(existedClass,
+        ListBuffer<JCTree> definitions = filterDefinitions(existedClass,
                 VARIABLE,
                 definition -> fields.stream().noneMatch(field -> field.name().equals(((JCVariableDecl) definition).name.toString()))
         );
@@ -92,12 +91,12 @@ public class ClassMutationService {
         return newPackageDefinitions;
     }
 
-    private static java.util.List<JCTree> filterDefinitions(ExistedClass existedClass, Tree.Kind kind, Predicate<JCTree> filter) {
+    private static ListBuffer<JCTree> filterDefinitions(ExistedClass existedClass, Kind kind, Predicate<JCTree> filter) {
         return existedClass
                 .getDeclaration()
                 .defs
                 .stream()
                 .filter(definition -> definition.getKind() != kind || filter.test(definition))
-                .collect(toList());
+                .collect(toCollection(ListBuffer::new));
     }
 }
