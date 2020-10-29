@@ -18,7 +18,8 @@ import java.util.stream.*;
 @UtilityClass
 public class ClassMutationService {
     public void replaceFields(ExistedClass existedClass, Collection<NewField> fields) {
-        ListBuffer<JCTree> classDefinitions = prepareToMutation(existedClass);
+        maker().at(existedClass.getDeclaration().pos);
+        ListBuffer<JCTree> classDefinitions = new ListBuffer<>();
         java.util.List<JCTree> definitions = filterDefinitions(existedClass,
                 VARIABLE,
                 definition -> fields.stream().noneMatch(field -> field.name().equals(((JCVariableDecl) definition).name.toString()))
@@ -36,8 +37,9 @@ public class ClassMutationService {
     }
 
     public void replaceMethod(ExistedClass existedClass, NewMethod method) {
-        ListBuffer<JCTree> classDefinitions = prepareToMutation(existedClass);
-        classDefinitions.addAll(filterDefinitions(existedClass, METHOD, definition -> ((JCMethodDecl) definition).name.toString().equals(method.name())));
+        maker().at(existedClass.getDeclaration().pos);
+        ListBuffer<JCTree> classDefinitions = new ListBuffer<>();
+        classDefinitions.addAll(filterDefinitions(existedClass, METHOD, definition -> !((JCMethodDecl) definition).name.toString().equals(method.name())));
         classDefinitions.add(method.generate());
         existedClass.getDeclaration().defs = classDefinitions.toList();
         Set<ImportModel> importModels = Stream.of(method)
@@ -50,8 +52,9 @@ public class ClassMutationService {
     }
 
     public void replaceInnerInterface(ExistedClass existedClass, NewClass inner) {
-        ListBuffer<JCTree> classDefinitions = prepareToMutation(existedClass);
-        classDefinitions.addAll(filterDefinitions(existedClass, INTERFACE, definition -> ((JCClassDecl) definition).name.toString().equals(inner.name())));
+        maker().at(existedClass.getDeclaration().pos);
+        ListBuffer<JCTree> classDefinitions = new ListBuffer<>();
+        classDefinitions.addAll(filterDefinitions(existedClass, INTERFACE, definition -> !((JCClassDecl) definition).name.toString().equals(inner.name())));
         classDefinitions.add(inner.generate());
         existedClass.getDeclaration().defs = classDefinitions.toList();
         ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, inner.imports());
@@ -59,21 +62,15 @@ public class ClassMutationService {
     }
 
     public void replaceInnerClass(ExistedClass existedClass, NewClass inner) {
-        ListBuffer<JCTree> classDefinitions = prepareToMutation(existedClass);
-        classDefinitions.addAll(filterDefinitions(existedClass, CLASS, definition -> ((JCClassDecl) definition).name.toString().equals(inner.name())));
+        maker().at(existedClass.getDeclaration().pos);
+        ListBuffer<JCTree> classDefinitions = new ListBuffer<>();
+        classDefinitions.addAll(filterDefinitions(existedClass, CLASS, definition -> !((JCClassDecl) definition).name.toString().equals(inner.name())));
         classDefinitions.add(inner.generate());
         existedClass.getDeclaration().defs = classDefinitions.toList();
         ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, inner.imports());
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
 
-
-    private static ListBuffer<JCTree> prepareToMutation(ExistedClass existedClass) {
-        maker().at(existedClass.getDeclaration().pos);
-        ListBuffer<JCTree> classDefinitions = new ListBuffer<>();
-        classDefinitions.addAll(existedClass.getDeclaration().defs);
-        return classDefinitions;
-    }
 
     private static ListBuffer<JCTree> addImports(ExistedClass existedClass, Set<ImportModel> newImports) {
         ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
