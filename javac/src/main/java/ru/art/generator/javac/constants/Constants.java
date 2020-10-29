@@ -38,5 +38,6 @@ public interface Constants {
 
     interface MethodNames {
         String CONFIGURE_METHOD_NAME = "configure";
+        String MODULE_METHOD_NAME = "module";
     }
 }

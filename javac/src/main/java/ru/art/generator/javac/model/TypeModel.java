@@ -2,30 +2,29 @@ package ru.art.generator.javac.model;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.tree.JCTree.*;
-import io.art.core.constants.*;
 import lombok.*;
-import ru.art.generator.javac.exception.*;
-import static com.sun.tools.javac.code.Symbol.*;
-import static io.art.core.constants.StringConstants.DOT;
+import static io.art.core.constants.StringConstants.*;
 import static java.util.Arrays.*;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
+import static java.util.Collections.*;
+import static java.util.Objects.*;
+import static java.util.stream.Collectors.*;
 import static ru.art.generator.javac.constants.Constants.*;
-import static ru.art.generator.javac.context.GenerationContext.elements;
-import static ru.art.generator.javac.context.GenerationContext.maker;
+import static ru.art.generator.javac.context.GenerationContext.*;
 import java.util.*;
 
 @Getter
 @EqualsAndHashCode
 public class TypeModel {
     private final boolean array;
+    private final List<TypeModel> parameters;
     private TypeTag primitiveTypeTag;
     private boolean jdk;
     private boolean hasPackage;
     private String typeFullName;
     private String typeSimpleName;
 
-    private TypeModel(String name) {
+    private TypeModel(String name, List<TypeModel> parameters) {
+        this.parameters = parameters;
         Optional<TypeTag> existedType = stream(TypeTag.values())
                 .filter(tag -> tag.name().toLowerCase().equals(name.toLowerCase()))
                 .findFirst();
@@ -67,13 +66,23 @@ public class TypeModel {
         if (nonNull(primitiveTypeTag)) {
             return maker().TypeIdent(primitiveTypeTag);
         }
+        if (!parameters.isEmpty()) {
+            com.sun.tools.javac.util.List<JCExpression> arguments = com.sun.tools.javac.util.List.from(parameters
+                    .stream()
+                    .map(TypeModel::generate)
+                    .collect(toList()));
+            return maker().TypeApply(maker().Ident(elements().getName(getTypeSimpleName())), arguments);
+        }
         return isArray()
                 ? maker().TypeArray(maker().Ident(elements().getName(getTypeSimpleName())))
                 : maker().Ident(elements().getName(getTypeSimpleName()));
     }
 
-
     public static TypeModel type(String name) {
-        return new TypeModel(name);
+        return type(name, emptyList());
+    }
+
+    public static TypeModel type(String name, List<TypeModel> parameters) {
+        return new TypeModel(name, parameters);
     }
 }

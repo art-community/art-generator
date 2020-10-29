@@ -5,5 +5,5 @@ import lombok.*;
 @Value
 @Builder
 public class Request {
-    private final String value;
+    String value;
 }

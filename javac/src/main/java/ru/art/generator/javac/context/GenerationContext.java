@@ -7,6 +7,7 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import lombok.*;
 import ru.art.generator.javac.model.*;
+import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -30,6 +31,8 @@ public class GenerationContext {
     private static final AtomicReference<ExistedClass> mainClass = new AtomicReference<>();
 
     private static final AtomicReference<ExistedMethod> mainMethod = new AtomicReference<>();
+
+    private static final AtomicReference<URLClassLoader> classLoader = new AtomicReference<>();
 
     private static final ConcurrentHashMap<String, ExistedClass> existedClasses = new ConcurrentHashMap<>();
 

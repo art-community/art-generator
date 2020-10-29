@@ -18,6 +18,12 @@ public class NewClass {
     private long modifiers;
     private Set<ImportModel> imports = new LinkedHashSet<>();
     private Map<String, NewField> fields = new LinkedHashMap<>();
+    private Map<String, NewMethod> methods = new LinkedHashMap<>();
+
+    public NewClass withImport(ImportModel importModel) {
+        imports.add(importModel);
+        return this;
+    }
 
     public NewClass field(String name, NewField field) {
         fields.put(name, field);
@@ -27,12 +33,20 @@ public class NewClass {
         return this;
     }
 
+    public NewClass method(String name, NewMethod method) {
+        methods.put(name, method);
+        return this;
+    }
+
     public JCClassDecl generate() {
         JCModifiers modifiers = maker().Modifiers(this.modifiers);
         Name name = elements().getName(this.name);
         ListBuffer<JCTree> definitions = new ListBuffer<>();
         for (NewField field : fields.values()) {
             definitions.add(field.generate());
+        }
+        for (NewMethod method : methods.values()) {
+            definitions.add(method.generate());
         }
         return maker().ClassDef(modifiers, name, nil(), null, nil(), definitions.toList());
     }

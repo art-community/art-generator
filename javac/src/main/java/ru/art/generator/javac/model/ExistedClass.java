@@ -2,8 +2,9 @@ package ru.art.generator.javac.model;
 
 import com.sun.tools.javac.code.*;
 import lombok.*;
+import static com.sun.source.tree.Tree.Kind.*;
 import static com.sun.tools.javac.tree.JCTree.*;
-import static io.art.core.constants.StringConstants.DOT;
+import static io.art.core.constants.StringConstants.*;
 import java.util.*;
 
 @Getter
@@ -18,6 +19,13 @@ public class ExistedClass {
 
     @Singular("field")
     private final Map<String, ExistedField> fields;
+
+    public boolean hasInnerInterface(String name) {
+        return declaration
+                .defs
+                .stream()
+                .anyMatch(definition -> definition.getKind() == INTERFACE && name.equals(((JCClassDecl) definition).name.toString()));
+    }
 
     public String getPackageName() {
         return packageUnit.getPackageName().toString();

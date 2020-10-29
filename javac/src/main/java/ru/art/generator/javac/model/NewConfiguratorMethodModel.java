@@ -2,7 +2,6 @@ package ru.art.generator.javac.model;
 
 import io.art.model.module.*;
 import lombok.*;
-import ru.art.generator.javac.service.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.util.List.*;
 import static ru.art.generator.javac.constants.Constants.MethodNames.*;
@@ -22,7 +21,7 @@ public class NewConfiguratorMethodModel {
                 .modifiers(PUBLIC | STATIC)
                 .name(CONFIGURE_METHOD_NAME)
                 .returnType(type(ModuleModel.class.getName()))
-                .statement(() -> maker().Return(maker().Apply(nil(), ident("module"), nil())));
+                .statement(() -> maker().Return(maker().Apply(nil(), ident(MODULE_METHOD_NAME), nil())));
     }
 
     public static NewConfiguratorMethodModel configuratorMethod(ModuleModel model) {

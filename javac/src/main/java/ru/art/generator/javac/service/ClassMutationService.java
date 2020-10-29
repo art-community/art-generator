@@ -27,7 +27,8 @@ public class ClassMutationService {
         newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
         newPackageDefinitions.addAll(inner.imports().stream().map(newImport -> maker().Import(maker().Select(maker().Ident(elements().getName(newImport.getPackagePart())),
                 elements().getName(newImport.getImportPart())),
-                newImport.isAsStatic())).collect(toList()));
+                newImport.isAsStatic()))
+                .collect(toList()));
         newPackageDefinitions.add(currentPackageDefinitions.last());
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
