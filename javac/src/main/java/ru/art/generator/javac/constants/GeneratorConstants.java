@@ -7,6 +7,8 @@ public interface GeneratorConstants {
     String ARRAY_MARKER = "[";
     int ARRAY_ELEMENTS_CLASS_NAME_INDEX = 2;
     String CONFIGURATION_CLASS_NAME = "Configuration";
+    String BUILDER_METHOD_NAME = "builder";
+    String BUILD_METHOD_NAME = "build";
 
     interface Annotations {
         String MODULE_ANNOTATION_NAME = "io.art.model.annotation.Module";
@@ -34,10 +36,8 @@ public interface GeneratorConstants {
         String PUT_FROM_MODEL = "putFromModel";
         String VALUE = "value";
         String MODEL = "model";
-        String BUILDER = "builder";
         String ENTITY_BUILDER = "entityBuilder";
         String LAZY_PUT = "lazyPut";
-        String BUILD = "build";
         String MAP = "map";
         String GET_PREFIX = "get";
 

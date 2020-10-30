@@ -6,6 +6,7 @@ import io.art.entity.immutable.*;
 import io.art.entity.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static ru.art.generator.javac.constants.GeneratorConstants.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.MappersConstants.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.toString;
 import static ru.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
@@ -26,7 +27,7 @@ public class ToModelMapperGenerationService {
     }
 
     private static JCMethodInvocation generateContent(Class<?> modelClass) {
-        JCMethodInvocation builderInvocation = applyClassMethod(type(modelClass.getName()), BUILDER);
+        JCMethodInvocation builderInvocation = applyClassMethod(type(modelClass.getName()), BUILDER_METHOD_NAME);
         for (Method method : modelClass.getDeclaredMethods()) {
             String getterName = method.getName();
             if (getterName.startsWith(GET_PREFIX)) {
@@ -35,7 +36,7 @@ public class ToModelMapperGenerationService {
                 builderInvocation = applyMethod(builderInvocation, fieldName, List.of(generateFieldMapping(fieldName, fieldType)));
             }
         }
-        return applyMethod(builderInvocation, BUILD);
+        return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
     private static JCMethodInvocation generateFieldMapping(String fieldName, Class<?> fieldType) {

@@ -28,7 +28,7 @@ public class ModelService {
         for (IdentifierModel identifier : model.getServerModel().getRsocketIdentifiers()) {
             Class<?> asClass = identifier.getAsClass();
             if (nonNull(asClass)) {
-                loader.loadClass(asClass.getName());
+                asClass = loader.loadClass(asClass.getName());
                 ExistedClass existedClass = getExistedClass(asClass.getName());
                 ImmutableSet.Builder<String> methodNames = ImmutableSet.builder();
                 for (Method method : asClass.getDeclaredMethods()) {

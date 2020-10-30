@@ -29,6 +29,11 @@ public class MakerService {
     }
 
 
+    public JCLiteral literal(String literal) {
+        return maker().Literal(literal);
+    }
+
+
     public JCExpressionStatement execMethodCall(String variable, String method, List<JCExpression> arguments) {
         return maker().Exec(maker().Apply(List.nil(), select(variable, method), arguments));
     }
