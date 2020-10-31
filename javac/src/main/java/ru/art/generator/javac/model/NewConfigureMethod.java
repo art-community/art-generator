@@ -9,6 +9,7 @@ import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static ru.art.generator.javac.constants.GeneratorConstants.MethodNames.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
+import static ru.art.generator.javac.model.ImportModel.*;
 import static ru.art.generator.javac.model.NewBuilder.*;
 import static ru.art.generator.javac.model.NewLambda.*;
 import static ru.art.generator.javac.model.NewMethod.*;
@@ -23,8 +24,12 @@ public class NewConfigureMethod {
                 .modifiers(PUBLIC | STATIC)
                 .name(CONFIGURE_METHOD_NAME)
                 .returnType(type(ModuleModel.class.getName()))
+                .addImport(importClass(ServerModel.class.getName()))
+                .addImport(importClass(ServiceSpecification.class.getName()))
+                .addImport(importClass(ServiceMethodSpecification.class.getName()))
+                .addImport(importClass(MethodProcessingMode.class.getName()))
                 .statement(() -> maker().Return(
-                        applyMethod(MODULE_METHOD_NAME, "serve", List.of(
+                        applyMethod(applyMethod(MODULE_METHOD_NAME), "serve", List.of(
                                 newLambda()
                                         .parameter(newParameter(type(ServerModel.class), "server"))
                                         .expression(() -> applyMethod("server", "rsocket", List.of(

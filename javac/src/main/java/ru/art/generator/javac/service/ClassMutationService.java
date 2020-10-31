@@ -3,10 +3,12 @@ package ru.art.generator.javac.service;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.core.extensions.*;
 import lombok.experimental.*;
 import ru.art.generator.javac.model.*;
 import static com.sun.source.tree.Tree.Kind.*;
 import static com.sun.tools.javac.tree.JCTree.*;
+import static io.art.core.extensions.CollectionExtensions.*;
 import static java.util.stream.Collectors.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import static ru.art.generator.javac.model.ImportModel.*;
@@ -46,7 +48,7 @@ public class ClassMutationService {
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
                 .map(type -> importClass(type.getFullName()))
                 .collect(toSet());
-        ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, importModels);
+        ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, combine(importModels, method.classImports()));
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
 

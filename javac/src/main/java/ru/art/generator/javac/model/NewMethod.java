@@ -5,6 +5,7 @@ import com.sun.tools.javac.util.*;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.util.List.*;
+import static io.art.core.factory.CollectionsFactory.*;
 import static java.util.stream.Collectors.*;
 import static ru.art.generator.javac.context.GenerationContext.*;
 import java.util.List;
@@ -19,8 +20,15 @@ public class NewMethod {
     private long modifiers;
     private TypeModel returnType;
 
+    private Set<ImportModel> classImports = setOf();
+
     private java.util.List<NewParameter> parameters = new LinkedList<>();
     private java.util.List<Supplier<JCStatement>> statements = new LinkedList<>();
+
+    public NewMethod addImport(ImportModel importModel) {
+        classImports.add(importModel);
+        return this;
+    }
 
     public NewMethod parameter(NewParameter parameter) {
         parameters.add(parameter);

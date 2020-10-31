@@ -1,6 +1,7 @@
 package ru;
 
 import io.art.entity.registry.*;
+import io.art.launcher.*;
 import io.art.model.annotation.*;
 import io.art.model.module.*;
 import io.art.server.registry.*;
@@ -9,7 +10,7 @@ import static io.art.model.module.ModuleModel.*;
 @Module
 public class Example {
     public static void main(String[] args) {
-        System.out.println(Configuration.mappers());
+        ModuleLauncher.launch(configure());
     }
 
     @Configurator

@@ -40,7 +40,7 @@ public class FromModelMapperGenerationService {
 
     private static JCMethodInvocation generateFieldMapping(JCMethodInvocation builderInvocation, String fieldName, Class<?> fieldType) {
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
-        mapping.add(maker().Literal(fieldName));
+        mapping.add(literal(fieldName));
         mapping.add(newLambda().expression(() -> applyMethod(MODEL, GET_PREFIX + capitalize(fieldName))).generate());
 
         if (String.class.equals(fieldType)) {
