@@ -17,8 +17,6 @@ import java.util.function.*;
 @Setter
 @Accessors(fluent = true)
 public class NewLambda {
-    private String name;
-    private long modifiers;
     private List<NewParameter> parameters = new LinkedList<>();
     private Supplier<JCExpression> expression;
     private List<Supplier<JCStatement>> statements = new LinkedList<>();

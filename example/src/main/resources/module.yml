@@ -1,0 +1,5 @@
+rsocket:
+  server:
+    transport:
+      port: 5678
+      mode: ws

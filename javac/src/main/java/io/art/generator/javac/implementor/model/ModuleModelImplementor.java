@@ -6,8 +6,6 @@ import lombok.experimental.*;
 import static io.art.generator.javac.constants.GeneratorConstants.Annotations.*;
 import static io.art.generator.javac.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.javac.context.GenerationContext.*;
-import static io.art.generator.javac.model.NewConfigureMethod.configureMethod;
-import static io.art.generator.javac.service.ClassMutationService.*;
 import static io.art.generator.javac.implementor.model.ServerModelImplementor.*;
 import static java.util.Arrays.*;
 import java.lang.reflect.*;
@@ -17,7 +15,7 @@ public class ModuleModelImplementor {
     public void implementModuleModel() {
         ModuleModel model = loadModel();
         implementServerModel(model.getServerModel());
-        replaceMethod(mainClass(), configureMethod(model));
+        ;
     }
 
     private ModuleModel loadModel() {

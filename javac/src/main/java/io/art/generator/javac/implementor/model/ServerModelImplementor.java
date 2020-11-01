@@ -21,7 +21,7 @@ public class ServerModelImplementor {
             serviceClass = loader.loadClass(serviceClass.getName());
             for (Method method : serviceClass.getDeclaredMethods()) {
                 if (isPublic(method.getModifiers())) {
-                    implementMethodMapping(method.getReturnType(), method.getParameterTypes());
+                    implementMethodMapping(serviceClass, method.getReturnType(), method.getParameterTypes());
                 }
             }
         }
