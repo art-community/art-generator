@@ -2,7 +2,7 @@ dependencies {
     implementation(project(":javac"))
     implementation(project(":core"))
     implementation(project(":server"))
-    implementation(project(":entity"))
+    implementation(project(":value"))
     implementation(project(":logging"))
     implementation(project(":launcher"))
     implementation(project(":model"))
