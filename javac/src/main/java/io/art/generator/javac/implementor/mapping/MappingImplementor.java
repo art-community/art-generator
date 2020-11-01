@@ -7,7 +7,9 @@ import io.art.generator.javac.model.*;
 import io.art.launcher.*;
 import io.art.model.configurator.*;
 import io.art.model.module.*;
+import io.art.server.decorator.*;
 import io.art.server.implementation.*;
+import io.art.server.model.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
 import io.art.value.immutable.*;
@@ -25,9 +27,10 @@ import static io.art.generator.javac.implementor.mapping.ToModelMapperImplemento
 import static io.art.generator.javac.model.ImportModel.*;
 import static io.art.generator.javac.model.NewBuilder.*;
 import static io.art.generator.javac.model.NewClass.*;
-import static io.art.generator.javac.model.NewConfigureMethod.decorateMethod;
+import static io.art.generator.javac.model.NewConfigureMethod.*;
 import static io.art.generator.javac.model.NewField.*;
 import static io.art.generator.javac.model.NewMethod.*;
+import static io.art.generator.javac.model.NewParameter.*;
 import static io.art.generator.javac.model.NewVariable.*;
 import static io.art.generator.javac.model.TypeModel.*;
 import static io.art.generator.javac.service.ClassMutationService.*;
@@ -69,6 +72,9 @@ public class MappingImplementor {
                 .addImport(importClass(ValueConfiguratorModel.class.getName()))
                 .addImport(importClass(ModuleModel.class.getName()))
                 .addImport(importClass(ServerConfiguratorModel.class.getName()))
+                .addImport(importClass(ServiceLoggingDecorator.class.getName()))
+                .addImport(importClass(ServiceMethodIdentifier.class.getName()))
+                .addImport(importClass(MethodDecoratorScope.class.getName()))
                 .field("model", model)
                 .method("mappers", generateMappersMethod(returnClass, registryType, parameterClasses))
                 .method("services", generateServicesMethod(serviceClass, type(ServiceSpecificationRegistry.class)))
@@ -79,7 +85,7 @@ public class MappingImplementor {
                 .modifiers(PUBLIC | STATIC)
                 .name("main")
                 .returnType(type(void.class))
-                .parameter(NewParameter.newParameter(type(String[].class), "args"))
+                .parameter(newParameter(type(String[].class), "args"))
                 .addClassImport(importClass(ModuleLauncher.class.getName()))
                 .statement(() -> maker().Exec(applyClassMethod(type(ModuleLauncher.class), "launch", List.of(select(mainClass().getName() + CONFIGURATOR_CLASS_NAME_SUFFIX, "model")))));
         replaceMethod(mainClass(), mainMethod);
@@ -123,6 +129,18 @@ public class MappingImplementor {
                                         .method("outputMode", select(type(MethodProcessingMode.class), "BLOCKING"))
                                         .method("inputMapper", applyMethod(applyMethod("mappers"), "getToModel", List.of(select("Request", "class"))))
                                         .method("outputMapper", applyMethod(applyMethod("mappers"), "getFromModel", List.of(select("Response", "class"))))
+                                        .method("inputDecorator", newObject(type(ServiceLoggingDecorator.class), List.of(
+                                                applyClassMethod(type(ServiceMethodIdentifier.class),
+                                                        "serviceMethod",
+                                                        List.of(literal(serviceClass.getSimpleName()), literal("myMethod"))),
+                                                select(type(MethodDecoratorScope.class), "INPUT")
+                                        )))
+                                        .method("outputDecorator", newObject(type(ServiceLoggingDecorator.class), List.of(
+                                                applyClassMethod(type(ServiceMethodIdentifier.class),
+                                                        "serviceMethod",
+                                                        List.of(literal(serviceClass.getSimpleName()), literal("myMethod"))),
+                                                select(type(MethodDecoratorScope.class), "OUTPUT")
+                                        )))
                                         .method("implementation", applyClassMethod(type(ServiceMethodImplementation.class), "handler", List.of(
                                                 maker().Reference(INVOKE, name("myMethod"), type(serviceClass).generate(), null),
                                                 literal(serviceClass.getSimpleName()),

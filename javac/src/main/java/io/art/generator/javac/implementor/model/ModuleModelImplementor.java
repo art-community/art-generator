@@ -15,7 +15,6 @@ public class ModuleModelImplementor {
     public void implementModuleModel() {
         ModuleModel model = loadModel();
         implementServerModel(model.getServerModel());
-        ;
     }
 
     private ModuleModel loadModel() {

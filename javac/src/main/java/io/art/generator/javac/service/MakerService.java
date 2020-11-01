@@ -80,7 +80,12 @@ public class MakerService {
 
 
     public JCNewClass newObject(TypeModel classType) {
-        return maker().NewClass(null, List.nil(), classType.generate(), List.nil(), null);
+        return newObject(classType, List.nil());
+    }
+
+
+    public JCNewClass newObject(TypeModel classType, List<JCExpression> arguments) {
+        return maker().NewClass(null, List.nil(), classType.generate(), arguments, null);
     }
 
 
