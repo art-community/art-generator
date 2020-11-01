@@ -16,7 +16,7 @@ import java.lang.reflect.*;
 public class ModuleModelImplementor {
     public void implementModuleModel() {
         ModuleModel model = loadModel();
-        generateByServerModel(model.getServerModel());
+        implementServerModel(model.getServerModel());
         replaceMethod(mainClass(), configureMethod(model));
     }
 

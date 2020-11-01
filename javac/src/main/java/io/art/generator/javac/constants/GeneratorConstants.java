@@ -6,7 +6,7 @@ public interface GeneratorConstants {
     String JAVA_PACKAGE_PREFIX = "java.";
     String ARRAY_MARKER = "[";
     int ARRAY_ELEMENTS_CLASS_NAME_INDEX = 2;
-    String CONFIGURATION_CLASS_NAME = "Configuration";
+    String CONFIGURATOR_CLASS_NAME_SUFFIX = "Configurator";
     String BUILDER_METHOD_NAME = "builder";
     String BUILD_METHOD_NAME = "build";
 
@@ -33,6 +33,7 @@ public interface GeneratorConstants {
         String CREATE_MAPPERS = "createMappers";
         String MAPPERS = "mappers";
         String PUT_TO_MODEL = "putToModel";
+        String REGISTER = "register";
         String PUT_FROM_MODEL = "putFromModel";
         String VALUE = "value";
         String MODEL = "model";

@@ -2,11 +2,13 @@ package io.art.generator.javac.implementor.mapping;
 
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
-import io.art.entity.immutable.*;
-import io.art.entity.mapper.*;
-import io.art.entity.mapping.*;
-import io.art.entity.registry.*;
 import io.art.generator.javac.model.*;
+import io.art.launcher.*;
+import io.art.model.module.*;
+import io.art.value.immutable.*;
+import io.art.value.mapper.*;
+import io.art.value.mapping.*;
+import io.art.value.registry.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.javac.constants.GeneratorConstants.*;
@@ -29,21 +31,21 @@ public class MappingImplementor {
     public void implementMethodMapping(Class<?> returnClass, Class<?>[] parameterClasses) {
         TypeModel registryType = type(MappersRegistry.class);
 
+        NewField model = newField()
+                .name("model")
+                .modifiers(PRIVATE | FINAL | STATIC)
+                .type(type(ModuleModel.class))
+                .initializer(() -> applyClassMethod(type(mainClass().getName()), "configure"));
+
         NewField mappersField = newField()
                 .name(MAPPERS)
                 .modifiers(PRIVATE | FINAL | STATIC)
                 .type(registryType)
                 .initializer(() -> applyMethod(CREATE_MAPPERS));
 
-        NewMethod mappersMethod = newMethod()
-                .returnType(registryType)
-                .name(MAPPERS)
-                .modifiers(PUBLIC | STATIC)
-                .statement(() -> returnVariable(MAPPERS));
-
         NewClass configurationClass = newClass()
-                .modifiers(PUBLIC | STATIC)
-                .name(CONFIGURATION_CLASS_NAME)
+                .modifiers(PRIVATE | STATIC)
+                .name(mainClass().getName() + CONFIGURATOR_CLASS_NAME_SUFFIX)
                 .addImport(importClass(returnClass.getName()))
                 .addImport(importClass(PrimitiveMapping.class.getName()))
                 .addImport(importClass(ArrayMapping.class.getName()))
@@ -56,11 +58,19 @@ public class MappingImplementor {
                 .addImport(importClass(ValueToModelMapper.class.getName()))
                 .addImport(importClass(ValueFromModelMapper.class.getName()))
                 .addImport(importClass(MappersRegistry.class.getName()))
+                .field("model", model)
                 .field(MAPPERS, mappersField)
-                .method(CREATE_MAPPERS, generateCreateMappersMethod(returnClass, registryType, parameterClasses))
-                .method(MAPPERS, mappersMethod);
+                .method(CREATE_MAPPERS, generateCreateMappersMethod(returnClass, registryType, parameterClasses));
         stream(parameterClasses).forEach(parameter -> configurationClass.addImport(importClass(parameter.getName())));
         replaceInnerClass(mainClass(), configurationClass);
+        NewMethod mainMethod = newMethod()
+                .modifiers(PUBLIC | STATIC)
+                .name("main")
+                .returnType(type(void.class))
+                .parameter(NewParameter.newParameter(type(String[].class), "args"))
+                .addClassImport(importClass(ModuleLauncher.class.getName()))
+                .statement(() -> maker().Exec(applyClassMethod(type(ModuleLauncher.class), "launch", List.of(applyClassMethod(type(mainClass().getName()), "configure")))));
+        replaceMethod(mainClass(), mainMethod);
     }
 
     private NewMethod generateCreateMappersMethod(Class<?> returnClass, TypeModel registryType, Class<?>[] parameterClasses) {
@@ -84,11 +94,11 @@ public class MappingImplementor {
     }
 
     private JCTree.JCExpressionStatement implementToModel(Class<?> modelClass) {
-        return execMethodCall(MAPPERS, PUT_TO_MODEL, List.of(classReference(modelClass), implementToModelMapper(modelClass)));
+        return execMethodCall(MAPPERS, REGISTER, List.of(classReference(modelClass), implementToModelMapper(modelClass)));
     }
 
     private JCTree.JCExpressionStatement implementFromModel(Class<?> modelClass) {
-        return execMethodCall(MAPPERS, PUT_FROM_MODEL, List.of(classReference(modelClass), implementFromModelMapper(modelClass)));
+        return execMethodCall(MAPPERS, REGISTER, List.of(classReference(modelClass), implementFromModelMapper(modelClass)));
     }
 
     private JCTree.JCVariableDecl generateMappersVariable(TypeModel registryType) {

@@ -6,6 +6,7 @@ dependencies {
     }
     annotationProcessor("com.google.auto.service", "auto-service", "1+")
     implementation("com.google.auto.service", "auto-service", "1+")
+    implementation(project(":launcher"))
     implementation(project(":core"))
     implementation(project(":server"))
     implementation(project(":value"))

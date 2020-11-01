@@ -2,8 +2,8 @@ package io.art.generator.javac.implementor.mapping;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
-import io.art.entity.immutable.*;
-import io.art.entity.mapping.*;
+import io.art.value.immutable.*;
+import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.javac.constants.GeneratorConstants.*;

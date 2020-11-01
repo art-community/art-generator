@@ -8,15 +8,13 @@ import static io.art.generator.javac.implementor.mapping.MappingImplementor.*;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
-import java.util.*;
 
 @UtilityClass
 public class ServerModelImplementor {
-    public void generateByServerModel(ServerModel serverModel) {
+    public void implementServerModel(ServerModel serverModel) {
         GeneratorClassLoader loader = classLoader();
-        Set<ServiceMethodModel> identifiers = serverModel.getModels();
-        for (ServiceMethodModel identifier : identifiers) {
-            Class<?> serviceClass = identifier.getServiceClass();
+        for (ServiceModel<?> service : serverModel.getServices()) {
+            Class<?> serviceClass = service.getServiceClass();
             if (isNull(serviceClass)) {
                 continue;
             }
