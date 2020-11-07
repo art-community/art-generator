@@ -6,9 +6,8 @@ import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
-import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
-import static io.art.generator.constants.GeneratorConstants.Names.BUILD_METHOD_NAME;
+import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
@@ -19,13 +18,13 @@ import java.lang.reflect.*;
 public class FromModelMapperCreator {
     public static JCLambda createFromModelMapper(Class<?> modelClass) {
         return newLambda()
-                .parameter(newParameter(type(modelClass), MODEL))
+                .parameter(newParameter(type(modelClass), MODEL_NAME))
                 .expression(() -> createMapperContent(modelClass))
                 .generate();
     }
 
     private static JCMethodInvocation createMapperContent(Class<?> modelClass) {
-        JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER);
+        JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER_NAME);
         for (Method method : modelClass.getDeclaredMethods()) {
             String getterName = method.getName();
             if (getterName.startsWith(GET_PREFIX)) {
@@ -40,7 +39,7 @@ public class FromModelMapperCreator {
     private static JCMethodInvocation createFieldMapping(JCMethodInvocation builderInvocation, String fieldName, Class<?> fieldType) {
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(literal(fieldName));
-        mapping.add(newLambda().expression(() -> applyMethod(MODEL, GET_PREFIX + capitalize(fieldName))).generate());
+        mapping.add(newLambda().expression(() -> applyMethod(MODEL_NAME, GET_PREFIX + capitalize(fieldName))).generate());
 
         if (String.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), fromString));
@@ -70,6 +69,6 @@ public class FromModelMapperCreator {
             mapping.add(select(type(PrimitiveMapping.class), fromFloat));
         }
 
-        return applyMethod(builderInvocation, LAZY_PUT, mapping.toList());
+        return applyMethod(builderInvocation, LAZY_PUT_NAME, mapping.toList());
     }
 }

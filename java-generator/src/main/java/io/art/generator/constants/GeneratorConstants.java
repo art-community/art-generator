@@ -20,6 +20,16 @@ public interface GeneratorConstants {
         String MAPPERS_NAME = "mappers";
         String SERVICES_NAME = "services";
         String REGISTRY_NAME = "registry";
+        String PUT_TO_MODEL_NAME = "putToModel";
+        String PUT_FROM_MODEL_NAME = "putFromModel";
+        String GET_TO_MODEL_NAME = "getToModel";
+        String GET_FROM_MODEL_NAME = "getFromModel";
+        String REGISTER = "register";
+        String VALUE_NAME = "value";
+        String ENTITY_BUILDER_NAME = "entityBuilder";
+        String LAZY_PUT_NAME = "lazyPut";
+        String MAP_NAME = "map";
+        String GET_PREFIX = "get";
     }
 
     interface Annotations {
@@ -37,19 +47,6 @@ public interface GeneratorConstants {
     }
 
     interface MappersConstants {
-        String CREATE_MAPPERS = "createMappers";
-        String PUT_TO_MODEL = "putToModel";
-        String PUT_FROM_MODEL = "putFromModel";
-        String GET_TO_MODEL = "getToModel";
-        String GET_FROM_MODEL = "getFromModel";
-        String REGISTER = "register";
-        String VALUE = "value";
-        String MODEL = "model";
-        String ENTITY_BUILDER = "entityBuilder";
-        String LAZY_PUT = "lazyPut";
-        String MAP = "map";
-        String GET_PREFIX = "get";
-
         interface PrimitiveMappingMethods {
             String toString = "toString";
             String toInt = "toInt";
