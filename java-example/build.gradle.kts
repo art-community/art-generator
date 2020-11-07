@@ -13,4 +13,4 @@ dependencies {
     implementation(project(":message-pack"))
     annotationProcessor(project(":java-generator"))
 }
-tasks["compileJava"].dependsOn("clean").dependsOn(project(":javac").tasks["build"])
+tasks["compileJava"].dependsOn("clean").dependsOn(project(":java-generator").tasks["build"])
