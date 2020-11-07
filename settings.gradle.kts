@@ -21,8 +21,8 @@ plugins {
 }
 
 rootProject.name = "art-generator"
-include("javac")
-include("example")
+include("java-generator")
+include("java-example")
 
 include("core")
 project(":core").projectDir = file("/Users/anton/Development/Projects/art/art-java/core")
