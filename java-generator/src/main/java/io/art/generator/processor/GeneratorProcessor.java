@@ -10,8 +10,10 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.context.*;
 import io.art.generator.context.GeneratorContextConfiguration.*;
-import io.art.generator.scanner.GeneratorScanner;
+import io.art.generator.scanner.*;
+import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.generator.constants.GeneratorConstants.Annotations.*;
+import static io.art.generator.constants.GeneratorConstants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.GenerationService.*;
 import static javax.lang.model.SourceVersion.*;
@@ -32,6 +34,11 @@ public class GeneratorProcessor extends AbstractProcessor {
         super.init(processingEnvironment);
         this.processingEnvironment = (JavacProcessingEnvironment) processingEnvironment;
         trees = (JavacTrees) Trees.instance(processingEnvironment);
+    }
+
+    @Override
+    public Set<String> getSupportedOptions() {
+        return addToSet(DISABLE_OPTION, super.getSupportedOptions());
     }
 
     @Override
