@@ -11,5 +11,5 @@ public class Request {
     Set<List<String>> stringSetValue;
     Collection<Collection<Collection<String>>> stringCollectionValue;
     Map<String, List<String>> mapValue;
-    String[] stringArray;
+    Model model;
 }

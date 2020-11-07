@@ -8,6 +8,7 @@ import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.generator.constants.GeneratorConstants.CLASS_KEYWORD;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
@@ -47,30 +48,25 @@ public class ToModelMapperCreator {
             if (String.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), toString);
             }
-
             if (Integer.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), toInt);
             }
-
             if (Long.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), toLong);
             }
-
             if (Boolean.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), toBool);
             }
-
             if (Double.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), toDouble);
             }
-
             if (Byte.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), toByte);
             }
-
             if (Float.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), toFloat);
             }
+            return applyMethod(REGISTRY_NAME, GET_TO_MODEL_NAME, List.of(select(type(typeAssClass), CLASS_KEYWORD)));
         }
 
         if (type instanceof ParameterizedType) {
