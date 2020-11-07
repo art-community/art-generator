@@ -48,9 +48,10 @@ public class MappingFieldsDeterminer {
     public ImmutableSet<Field> collectUnknownTypeFieldsRecursive(Class<?> modelClass) {
         ImmutableSet.Builder<Field> allFields = ImmutableSet.builder();
         for (Field field : getMappingFields(modelClass)) {
-            if (typeIsUnknown(field.getType())) {
+            Class<?> fieldType = field.getType();
+            if (typeIsUnknown(fieldType) && !fieldType.equals(modelClass)) {
                 allFields.add(field);
-                allFields.addAll(collectUnknownTypeFieldsRecursive(field.getType()));
+                allFields.addAll(collectUnknownTypeFieldsRecursive(fieldType));
             }
         }
         return allFields.build();
