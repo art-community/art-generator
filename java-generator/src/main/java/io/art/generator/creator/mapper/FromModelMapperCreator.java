@@ -20,24 +20,24 @@ public class FromModelMapperCreator {
     public static JCLambda createFromModelMapper(Class<?> modelClass) {
         return newLambda()
                 .parameter(newParameter(type(modelClass), MODEL))
-                .expression(() -> generateMapperContent(modelClass))
+                .expression(() -> createMapperContent(modelClass))
                 .generate();
     }
 
-    private static JCMethodInvocation generateMapperContent(Class<?> modelClass) {
+    private static JCMethodInvocation createMapperContent(Class<?> modelClass) {
         JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER);
         for (Method method : modelClass.getDeclaredMethods()) {
             String getterName = method.getName();
             if (getterName.startsWith(GET_PREFIX)) {
                 String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
                 Class<?> fieldType = method.getReturnType();
-                builderInvocation = generateFieldMapping(builderInvocation, fieldName, fieldType);
+                builderInvocation = createFieldMapping(builderInvocation, fieldName, fieldType);
             }
         }
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
-    private static JCMethodInvocation generateFieldMapping(JCMethodInvocation builderInvocation, String fieldName, Class<?> fieldType) {
+    private static JCMethodInvocation createFieldMapping(JCMethodInvocation builderInvocation, String fieldName, Class<?> fieldType) {
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(literal(fieldName));
         mapping.add(newLambda().expression(() -> applyMethod(MODEL, GET_PREFIX + capitalize(fieldName))).generate());
