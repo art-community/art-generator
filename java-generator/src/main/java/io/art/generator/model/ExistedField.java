@@ -1,11 +1,11 @@
 package io.art.generator.model;
 
-import com.sun.tools.javac.tree.*;
+import com.sun.tools.javac.tree.JCTree.*;
 import lombok.*;
 
 @Getter
 @Builder
 public class ExistedField {
     private final String name;
-    private final JCTree.JCVariableDecl declaration;
+    private final JCVariableDecl declaration;
 }

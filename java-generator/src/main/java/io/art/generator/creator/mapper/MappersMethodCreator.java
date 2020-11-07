@@ -22,25 +22,25 @@ public class MappersMethodCreator {
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
 
-        method.statement(() -> implementToModel(returnClass));
+        method.statement(() -> createToModel(returnClass));
         for (Class<?> parameterClass : parameterClasses) {
-            method.statement(() -> implementToModel(parameterClass));
+            method.statement(() -> createToModel(parameterClass));
         }
 
-        method.statement(() -> implementFromModel(returnClass));
+        method.statement(() -> createFromModel(returnClass));
         for (Class<?> parameterClass : parameterClasses) {
-            method.statement(() -> implementFromModel(parameterClass));
+            method.statement(() -> createFromModel(parameterClass));
         }
 
         return method.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
-    private JCExpressionStatement implementToModel(Class<?> modelClass) {
+    private JCExpressionStatement createToModel(Class<?> modelClass) {
         List<JCExpression> arguments = List.of(classReference(modelClass), createToModelMapper(modelClass));
         return execMethodCall(REGISTRY_NAME, REGISTER, arguments);
     }
 
-    private JCExpressionStatement implementFromModel(Class<?> modelClass) {
+    private JCExpressionStatement createFromModel(Class<?> modelClass) {
         List<JCExpression> arguments = List.of(classReference(modelClass), createFromModelMapper(modelClass));
         return execMethodCall(REGISTRY_NAME, REGISTER, arguments);
     }

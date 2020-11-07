@@ -1,14 +1,14 @@
 package io.art.generator.model;
 
-import com.sun.tools.javac.tree.*;
+import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.generator.service.*;
 import lombok.*;
 import lombok.experimental.*;
-import io.art.generator.service.*;
 import static com.sun.tools.javac.util.List.*;
-import static java.util.stream.Collectors.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static java.util.stream.Collectors.*;
 import java.util.*;
 import java.util.function.*;
 
@@ -19,7 +19,7 @@ public class NewVariable {
     private String name;
     private long modifiers;
     private TypeModel type;
-    private Supplier<JCTree.JCExpression> initializer;
+    private Supplier<JCExpression> initializer;
 
     public NewVariable asNull() {
         initializer = JavacService::nullValue;
@@ -33,17 +33,17 @@ public class NewVariable {
 
     public NewVariable arrayOf(TypeModel type, Set<String> otherVariables) {
         initializer = () -> {
-            List<JCTree.JCIdent> elements = from(otherVariables.stream().map(field -> maker().Ident(elements().getName(field))).collect(toList()));
+            List<JCIdent> elements = from(otherVariables.stream().map(field -> maker().Ident(elements().getName(field))).collect(toList()));
             return maker().NewArray(maker().Ident(elements().getName(type.getName())), nil(), from(elements));
         };
         return this;
     }
 
-    public JCTree.JCVariableDecl generate() {
-        JCTree.JCModifiers modifiers = maker().Modifiers(this.modifiers);
+    public JCVariableDecl generate() {
+        JCModifiers modifiers = maker().Modifiers(this.modifiers);
         Name name = elements().getName(this.name);
-        JCTree.JCExpression type = this.type.generate();
-        JCTree.JCExpression initializationExpression = initializer.get();
+        JCExpression type = this.type.generate();
+        JCExpression initializationExpression = initializer.get();
         return maker().VarDef(modifiers, name, type, initializationExpression);
     }
 

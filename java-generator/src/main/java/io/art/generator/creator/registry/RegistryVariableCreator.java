@@ -1,12 +1,11 @@
 package io.art.generator.creator.registry;
 
-import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
-import static io.art.generator.constants.GeneratorConstants.Names.REGISTRY_NAME;
-import static io.art.generator.model.NewVariable.newVariable;
-import static io.art.generator.service.JavacService.newObject;
+import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.model.NewVariable.*;
+import static io.art.generator.service.JavacService.*;
 
 @UtilityClass
 public class RegistryVariableCreator {
