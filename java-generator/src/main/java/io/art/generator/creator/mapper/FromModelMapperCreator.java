@@ -65,6 +65,14 @@ public class FromModelMapperCreator {
             return select(type(BinaryMapping.class), fromBinary);
         }
 
+        if (type instanceof Class) {
+            Class<?> typeAssClass = (Class<?>) type;
+            if (typeAssClass.isArray()) {
+                JCExpression parameterMapper = selectFromModelMapper(typeAssClass.getComponentType());
+                return applyClassMethod(type(ArrayMapping.class), fromArray, List.of(parameterMapper));
+            }
+        }
+
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type rawType = parameterizedType.getRawType();

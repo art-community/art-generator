@@ -68,12 +68,14 @@ public interface GeneratorConstants {
 
         interface ArrayMappingMethods {
             String fromCollection = "fromCollection";
+            String fromArray = "fromArray";
             String fromList = "fromList";
             String fromSet = "fromSet";
             String fromQueue = "fromQueue";
             String fromDeque = "fromDeque";
 
             String toCollection = "toCollection";
+            String toArray = "toArray";
             String toList = "toList";
             String toSet = "toSet";
             String toQueue = "toQueue";

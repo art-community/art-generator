@@ -5,7 +5,7 @@ import java.util.*;
 
 @Value
 @Builder
-public class Request {
+public class Model {
     String stringValue;
     List<Set<String>> stringListValue;
     Set<List<String>> stringSetValue;

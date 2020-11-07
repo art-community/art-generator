@@ -8,6 +8,7 @@ import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.generator.constants.GeneratorConstants.ARRAY_MARKER;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.toBinary;
@@ -65,6 +66,14 @@ public class ToModelMapperCreator {
 
         if (byte[].class.equals(type)) {
             return select(type(BinaryMapping.class), toBinary);
+        }
+
+        if (type instanceof Class) {
+            Class<?> typeAssClass = (Class<?>) type;
+            if (typeAssClass.isArray()) {
+                JCExpression parameterMapper = selectToModelMapper(typeAssClass.getComponentType());
+                return applyClassMethod(type(ArrayMapping.class), toArray, List.of(parameterMapper));
+            }
         }
 
         if (type instanceof ParameterizedType) {
