@@ -6,12 +6,9 @@ import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
-import static io.art.generator.javac.constants.GeneratorConstants.*;
 import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.*;
-import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.toString;
 import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
-import static io.art.generator.javac.constants.GeneratorConstants.Names.BUILDER_METHOD_NAME;
-import static io.art.generator.javac.constants.GeneratorConstants.Names.BUILD_METHOD_NAME;
+import static io.art.generator.javac.constants.GeneratorConstants.Names.*;
 import static io.art.generator.javac.context.GenerationContext.*;
 import static io.art.generator.javac.model.NewLambda.*;
 import static io.art.generator.javac.model.NewParameter.*;
@@ -51,6 +48,22 @@ public class ToModelMapperImplementor {
 
         if (Integer.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), toInt));
+        }
+
+        if (Boolean.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), toBool));
+        }
+
+        if (Double.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), toDouble));
+        }
+
+        if (Byte.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), toByte));
+        }
+
+        if (Float.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), toFloat));
         }
 
         return applyMethod(VALUE, MAP, mapping.toList());

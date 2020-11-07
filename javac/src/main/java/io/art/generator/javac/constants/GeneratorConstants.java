@@ -51,8 +51,19 @@ public interface GeneratorConstants {
         interface PrimitiveMappingMethods {
             String toString = "toString";
             String toInt = "toInt";
+            String toBool = "toBool";
+            String toLong = "toLong";
+            String toDouble = "toDouble";
+            String toByte = "toByte";
+            String toFloat = "toFloat";
+
             String fromString = "fromString";
             String fromInt = "fromInt";
+            String fromBool = "fromBool";
+            String fromLong = "fromLong";
+            String fromDouble = "fromDouble";
+            String fromByte = "fromByte";
+            String fromFloat = "fromFloat";
         }
     }
 }

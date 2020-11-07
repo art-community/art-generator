@@ -51,6 +51,22 @@ public class FromModelMapperImplementor {
             mapping.add(select(type(PrimitiveMapping.class), fromInt));
         }
 
+        if (Boolean.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), fromBool));
+        }
+
+        if (Double.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), fromDouble));
+        }
+
+        if (Byte.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), fromByte));
+        }
+
+        if (Float.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), fromFloat));
+        }
+
         return applyMethod(builderInvocation, LAZY_PUT, mapping.toList());
     }
 }
