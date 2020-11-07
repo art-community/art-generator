@@ -8,14 +8,15 @@ import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
-import static io.art.generator.extractor.TypeParameterExtractor.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
+import static java.text.MessageFormat.format;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -110,6 +111,6 @@ public class FromModelMapperCreator {
             }
         }
 
-        return null;
+        throw new GenerationException(format(UNKNOWN_FIELD_TYPE, type.getTypeName()));
     }
 }

@@ -43,7 +43,8 @@ public interface GeneratorConstants {
     }
 
     interface ExceptionMessages {
-        String MODULE_CONFIGURATOR_NOT_FOUND_EXCEPTION = "Module configurator method not found";
+        String MODULE_CONFIGURATOR_NOT_FOUND = "Module configurator method not found";
+        String UNKNOWN_FIELD_TYPE = "Field type unknown: {0}";
     }
 
     interface MappersConstants {

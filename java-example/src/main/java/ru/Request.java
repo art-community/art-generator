@@ -10,8 +10,8 @@ import java.util.*;
 @Builder
 public class Request {
     String stringValue;
-    List<String> stringListValue;
-    Set<String> stringSetValue;
+    List<Set<String>> stringListValue;
+    Set<List<String>> stringSetValue;
     Collection<Collection<Collection<String>>> stringCollectionValue;
 
     public io.art.value.immutable.Value toValue() {

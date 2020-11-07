@@ -77,7 +77,7 @@ public class ModelImplementor {
             Method configuratorMethod = stream(mainClass.getMethods())
                     .filter(ModelImplementor::hasConfiguratorAnnotation)
                     .findFirst()
-                    .orElseThrow(() -> new GenerationException(MODULE_CONFIGURATOR_NOT_FOUND_EXCEPTION));
+                    .orElseThrow(() -> new GenerationException(MODULE_CONFIGURATOR_NOT_FOUND));
             return (ModuleModel) configuratorMethod.invoke(null);
         } catch (Throwable throwable) {
             throw new GenerationException(throwable);
