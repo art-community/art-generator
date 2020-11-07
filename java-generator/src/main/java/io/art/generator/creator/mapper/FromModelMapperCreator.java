@@ -85,22 +85,26 @@ public class FromModelMapperCreator {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type rawType = parameterizedType.getRawType();
+            Class<?> rawTypeAsClass = (Class<?>) parameterizedType.getRawType();
             if (rawType instanceof Class) {
-                Class<?> rawTypeAsClass = (Class<?>) rawType;
-                JCExpression parameterMapper = selectMapper(extractFirstTypeParameter(parameterizedType));
-                if (rawTypeAsClass.isAssignableFrom(List.class)) {
+                if (java.util.List.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression parameterMapper = selectMapper(parameterizedType.getActualTypeArguments()[0]);
                     return applyClassMethod(type(ArrayMapping.class), fromList, List.of(parameterMapper));
                 }
-                if (rawTypeAsClass.isAssignableFrom(Queue.class)) {
+                if (Queue.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression parameterMapper = selectMapper(parameterizedType.getActualTypeArguments()[0]);
                     return applyClassMethod(type(ArrayMapping.class), fromQueue, List.of(parameterMapper));
                 }
-                if (rawTypeAsClass.isAssignableFrom(Deque.class)) {
+                if (Deque.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression parameterMapper = selectMapper(parameterizedType.getActualTypeArguments()[0]);
                     return applyClassMethod(type(ArrayMapping.class), fromDeque, List.of(parameterMapper));
                 }
-                if (rawTypeAsClass.isAssignableFrom(Set.class)) {
+                if (Set.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression parameterMapper = selectMapper(parameterizedType.getActualTypeArguments()[0]);
                     return applyClassMethod(type(ArrayMapping.class), fromSet, List.of(parameterMapper));
                 }
-                if (rawTypeAsClass.isAssignableFrom(Collection.class)) {
+                if (Collection.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression parameterMapper = selectMapper(parameterizedType.getActualTypeArguments()[0]);
                     return applyClassMethod(type(ArrayMapping.class), fromCollection, List.of(parameterMapper));
                 }
             }
