@@ -16,16 +16,13 @@ import static io.art.generator.javac.model.TypeModel.*;
 import static io.art.generator.javac.service.MakerService.*;
 
 @UtilityClass
-public class NewConfigureMethod {
+public class NewDecorateMethod {
     public static NewMethod generateDecorateMethod() {
         return newMethod()
                 .modifiers(PUBLIC | STATIC)
                 .name("decorate")
                 .parameter(newParameter(type(ModuleModel.class), "model"))
                 .returnType(type(ModuleModel.class.getName()))
-                .addClassImport(classImport(ConfiguratorModel.class.getName()))
-                .addClassImport(classImport(ValueConfiguratorModel.class.getName()))
-                .addClassImport(classImport(ServerConfiguratorModel.class.getName()))
                 .statement(() -> maker().Return(
                         applyMethod("model", "configure", List.of(
                                 newLambda()

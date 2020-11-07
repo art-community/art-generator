@@ -40,7 +40,7 @@ public class ModuleModelImplementor {
         ModuleModel model = loadModel();
         String providerClassName = mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX;
         NewClass providerClass = newClass()
-                .modifiers(PRIVATE | STATIC)
+                .modifiers(PUBLIC | STATIC)
                 .name(providerClassName)
                 .addImport(classImport(PrimitiveMapping.class.getName()))
                 .addImport(classImport(ArrayMapping.class.getName()))
@@ -57,13 +57,14 @@ public class ModuleModelImplementor {
                 .addImport(classImport(ServiceSpecification.class.getName()))
                 .addImport(classImport(ServiceMethodSpecification.class.getName()))
                 .addImport(classImport(ServiceMethodImplementation.class.getName()))
-                .addImport(classImport(ConfiguratorModel.class.getName()))
                 .addImport(classImport(ModuleModel.class.getName()))
-                .addImport(classImport(ServerConfiguratorModel.class.getName()))
                 .addImport(classImport(ServiceLoggingDecorator.class.getName()))
                 .addImport(classImport(ServiceMethodIdentifier.class.getName()))
                 .addImport(classImport(MethodProcessingMode.class.getName()))
                 .addImport(classImport(MethodDecoratorScope.class.getName()))
+                .addImport(classImport(ConfiguratorModel.class.getName()))
+                .addImport(classImport(ValueConfiguratorModel.class.getName()))
+                .addImport(classImport(ServerConfiguratorModel.class.getName()))
                 .addImport(classImport(ModuleLauncher.class.getName()));
         implementServerModel(providerClass, model.getServerModel());
         replaceInnerClass(mainClass(), providerClass);

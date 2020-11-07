@@ -6,6 +6,7 @@ import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.generator.javac.constants.GeneratorConstants.*;
 import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.toString;
 import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
@@ -40,35 +41,43 @@ public class ToModelMapperImplementor {
     }
 
     private static JCMethodInvocation generateFieldMapping(String fieldName, Class<?> fieldType) {
+        String providerClassName = mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX;
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(maker().Literal(fieldName));
 
         if (String.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), toString));
+            return applyMethod(VALUE, MAP, mapping.toList());
         }
 
         if (Integer.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), toInt));
+            return applyMethod(VALUE, MAP, mapping.toList());
         }
 
         if (Long.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), toLong));
+            return applyMethod(VALUE, MAP, mapping.toList());
         }
 
         if (Boolean.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), toBool));
+            return applyMethod(VALUE, MAP, mapping.toList());
         }
 
         if (Double.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), toDouble));
+            return applyMethod(VALUE, MAP, mapping.toList());
         }
 
         if (Byte.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), toByte));
+            return applyMethod(VALUE, MAP, mapping.toList());
         }
 
         if (Float.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), toFloat));
+            return applyMethod(VALUE, MAP, mapping.toList());
         }
 
         return applyMethod(VALUE, MAP, mapping.toList());

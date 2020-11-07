@@ -39,8 +39,10 @@ public interface GeneratorConstants {
     interface MappersConstants {
         String CREATE_MAPPERS = "createMappers";
         String PUT_TO_MODEL = "putToModel";
-        String REGISTER = "register";
         String PUT_FROM_MODEL = "putFromModel";
+        String GET_TO_MODEL = "getToModel";
+        String GET_FROM_MODEL = "getFromModel";
+        String REGISTER = "register";
         String VALUE = "value";
         String MODEL = "model";
         String ENTITY_BUILDER = "entityBuilder";

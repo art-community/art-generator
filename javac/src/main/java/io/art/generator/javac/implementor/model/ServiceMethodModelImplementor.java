@@ -23,7 +23,7 @@ import static io.art.generator.javac.implementor.mapping.FromModelMapperImplemen
 import static io.art.generator.javac.implementor.mapping.ToModelMapperImplementor.*;
 import static io.art.generator.javac.model.ImportModel.*;
 import static io.art.generator.javac.model.NewBuilder.*;
-import static io.art.generator.javac.model.NewConfigureMethod.*;
+import static io.art.generator.javac.model.NewDecorateMethod.*;
 import static io.art.generator.javac.model.NewField.*;
 import static io.art.generator.javac.model.NewMethod.*;
 import static io.art.generator.javac.model.NewVariable.*;
