@@ -1,6 +1,5 @@
 package io.art.generator.creator.service;
 
-import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.core.constants.*;
 import io.art.generator.model.*;
@@ -13,11 +12,10 @@ import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.constants.MethodDecoratorScope.*;
 import static io.art.core.constants.MethodProcessingMode.*;
-import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.creator.registry.RegistryVariableCreator.*;
 import static io.art.generator.model.NewBuilder.*;
 import static io.art.generator.model.NewMethod.*;
-import static io.art.generator.model.NewVariable.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 
@@ -28,7 +26,7 @@ public class ServicesMethodCreator {
                 .name("services")
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
-                .statement(() -> generateRegistryVariable(registryType))
+                .statement(() -> createRegistryVariable(registryType))
                 .statement(() -> maker().Exec(applyMethod("registry", "register", List.of(
                         literal(serviceClass.getSimpleName()),
                         newBuilder(type(ServiceSpecification.class))
@@ -61,13 +59,5 @@ public class ServicesMethodCreator {
                                 .generate()
                 ))))
                 .statement(() -> returnVariable("registry"));
-    }
-
-    private JCVariableDecl generateRegistryVariable(TypeModel registryType) {
-        return newVariable()
-                .name(REGISTRY_NAME)
-                .initializer(() -> newObject(registryType))
-                .type(registryType)
-                .generate();
     }
 }

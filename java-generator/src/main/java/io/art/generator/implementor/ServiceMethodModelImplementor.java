@@ -23,7 +23,6 @@ public class ServiceMethodModelImplementor {
     public void implementServiceMethodModel(NewClass providerClass, Class<?> serviceClass, Method serviceMethod) {
         Class<?> returnType = serviceMethod.getReturnType();
         Class<?>[] parameterTypes = serviceMethod.getParameterTypes();
-        TypeModel registryType = type(MappersRegistry.class);
 
         NewField model = newField()
                 .name(MODEL_NAME)
@@ -34,7 +33,7 @@ public class ServiceMethodModelImplementor {
         providerClass
                 .addImport(classImport(serviceClass.getName()))
                 .field(MODEL_NAME, model)
-                .method(MAPPERS_NAME, createMappersMethod(returnType, registryType, parameterTypes))
+                .method(MAPPERS_NAME, createMappersMethod(returnType, type(MappersRegistry.class), parameterTypes))
                 .method(SERVICES_NAME, createServicesMethod(serviceClass, type(ServiceSpecificationRegistry.class)))
                 .method(DECORATE_NAME, createDecorateMethod());
 
