@@ -64,5 +64,19 @@ public interface GeneratorConstants {
             String fromByte = "fromByte";
             String fromFloat = "fromFloat";
         }
+
+        interface ArrayMappingMethods {
+            String fromCollection = "fromCollection";
+            String fromList = "fromList";
+            String fromSet = "fromSet";
+            String fromQueue = "fromQueue";
+            String fromDeque = "fromDeque";
+
+            String toCollection = "toCollection";
+            String toList = "toList";
+            String toSet = "toSet";
+            String toQueue = "toQueue";
+            String toDeque = "toDeque";
+        }
     }
 }

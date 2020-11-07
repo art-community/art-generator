@@ -39,7 +39,6 @@ public class ToModelMapperCreator {
     }
 
     private JCMethodInvocation createFieldMapping(String fieldName, Class<?> fieldType) {
-        String providerClassName = mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX;
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(maker().Literal(fieldName));
 
