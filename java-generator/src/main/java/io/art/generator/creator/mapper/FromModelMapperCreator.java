@@ -10,13 +10,15 @@ import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
-import static java.text.MessageFormat.format;
+import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -29,32 +31,7 @@ public class FromModelMapperCreator {
                 .generate();
     }
 
-    private JCMethodInvocation createMapperContent(Class<?> modelClass) {
-        try {
-            JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER_NAME);
-            for (Method method : modelClass.getDeclaredMethods()) {
-                String getterName = method.getName();
-                if (getterName.startsWith(GET_PREFIX)) {
-                    String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
-                    Type fieldType = modelClass.getDeclaredField(fieldName).getGenericType();
-                    builderInvocation = createFieldMapping(builderInvocation, fieldName, fieldType);
-                }
-            }
-            return applyMethod(builderInvocation, BUILD_METHOD_NAME);
-        } catch (Throwable throwable) {
-            throw new GenerationException(throwable);
-        }
-    }
-
-    private JCMethodInvocation createFieldMapping(JCMethodInvocation builderInvocation, String fieldName, Type fieldType) {
-        ListBuffer<JCExpression> mapping = new ListBuffer<>();
-        mapping.add(literal(fieldName));
-        mapping.add(newLambda().expression(() -> applyMethod(MODEL_NAME, GET_PREFIX + capitalize(fieldName))).generate());
-        mapping.add(selectMapper(fieldType));
-        return applyMethod(builderInvocation, LAZY_PUT_NAME, mapping.toList());
-    }
-
-    private JCExpression selectMapper(Type type) {
+    public JCExpression selectFromModelMapper(Type type) {
         if (String.class.equals(type)) {
             return select(type(PrimitiveMapping.class), fromString);
         }
@@ -88,29 +65,61 @@ public class FromModelMapperCreator {
             Type rawType = parameterizedType.getRawType();
             Class<?> rawTypeAsClass = (Class<?>) parameterizedType.getRawType();
             if (rawType instanceof Class) {
+                Type[] typeArguments = parameterizedType.getActualTypeArguments();
                 if (java.util.List.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectMapper(parameterizedType.getActualTypeArguments()[0]);
+                    JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
                     return applyClassMethod(type(ArrayMapping.class), fromList, List.of(parameterMapper));
                 }
                 if (Queue.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectMapper(parameterizedType.getActualTypeArguments()[0]);
+                    JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
                     return applyClassMethod(type(ArrayMapping.class), fromQueue, List.of(parameterMapper));
                 }
                 if (Deque.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectMapper(parameterizedType.getActualTypeArguments()[0]);
+                    JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
                     return applyClassMethod(type(ArrayMapping.class), fromDeque, List.of(parameterMapper));
                 }
                 if (Set.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectMapper(parameterizedType.getActualTypeArguments()[0]);
+                    JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
                     return applyClassMethod(type(ArrayMapping.class), fromSet, List.of(parameterMapper));
                 }
                 if (Collection.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectMapper(parameterizedType.getActualTypeArguments()[0]);
+                    JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
                     return applyClassMethod(type(ArrayMapping.class), fromCollection, List.of(parameterMapper));
+                }
+                if (Map.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression keyToModelMapper = selectToModelMapper(typeArguments[0]);
+                    JCExpression keyFromModelMapper = selectFromModelMapper(typeArguments[0]);
+                    JCExpression valueMapper = selectFromModelMapper(typeArguments[1]);
+                    return applyClassMethod(type(EntityMapping.class), fromMap, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
                 }
             }
         }
 
         throw new GenerationException(format(UNKNOWN_FIELD_TYPE, type.getTypeName()));
+    }
+
+    private JCMethodInvocation createMapperContent(Class<?> modelClass) {
+        try {
+            JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER_NAME);
+            for (Method method : modelClass.getDeclaredMethods()) {
+                String getterName = method.getName();
+                if (getterName.startsWith(GET_PREFIX)) {
+                    String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
+                    Type fieldType = modelClass.getDeclaredField(fieldName).getGenericType();
+                    builderInvocation = createFieldMapping(builderInvocation, fieldName, fieldType);
+                }
+            }
+            return applyMethod(builderInvocation, BUILD_METHOD_NAME);
+        } catch (Throwable throwable) {
+            throw new GenerationException(throwable);
+        }
+    }
+
+    private JCMethodInvocation createFieldMapping(JCMethodInvocation builderInvocation, String fieldName, Type fieldType) {
+        ListBuffer<JCExpression> mapping = new ListBuffer<>();
+        mapping.add(literal(fieldName));
+        mapping.add(newLambda().expression(() -> applyMethod(MODEL_NAME, GET_PREFIX + capitalize(fieldName))).generate());
+        mapping.add(selectFromModelMapper(fieldType));
+        return applyMethod(builderInvocation, LAZY_PUT_NAME, mapping.toList());
     }
 }

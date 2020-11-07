@@ -49,6 +49,7 @@ public class ModelImplementor {
                 .addImport(classImport(ArrayValue.class.getName()))
                 .addImport(classImport(BinaryValue.class.getName()))
                 .addImport(classImport(Entity.class.getName()))
+                .addImport(classImport(Primitive.class.getName()))
                 .addImport(classImport(Value.class.getName()))
                 .addImport(classImport(ValueToModelMapper.class.getName()))
                 .addImport(classImport(ValueFromModelMapper.class.getName()))

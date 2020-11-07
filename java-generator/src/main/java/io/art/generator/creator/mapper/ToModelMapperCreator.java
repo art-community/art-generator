@@ -1,20 +1,28 @@
 package io.art.generator.creator.mapper;
 
 import com.sun.tools.javac.tree.JCTree.*;
+import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.generator.exception.*;
 import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.toString;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
+import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
+import java.util.*;
 
 @UtilityClass
 public class ToModelMapperCreator {
@@ -78,5 +86,73 @@ public class ToModelMapperCreator {
         }
 
         return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
+    }
+
+
+    public JCExpression selectToModelMapper(Type type) {
+        if (String.class.equals(type)) {
+            return select(type(PrimitiveMapping.class), toString);
+        }
+
+        if (Integer.class.equals(type)) {
+            return select(type(PrimitiveMapping.class), toInt);
+        }
+
+        if (Long.class.equals(type)) {
+            return select(type(PrimitiveMapping.class), toLong);
+        }
+
+        if (Boolean.class.equals(type)) {
+            return select(type(PrimitiveMapping.class), toBool);
+        }
+
+        if (Double.class.equals(type)) {
+            return select(type(PrimitiveMapping.class), toDouble);
+        }
+
+        if (Byte.class.equals(type)) {
+            return select(type(PrimitiveMapping.class), toByte);
+        }
+
+        if (Float.class.equals(type)) {
+            return select(type(PrimitiveMapping.class), toFloat);
+        }
+
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type rawType = parameterizedType.getRawType();
+            Class<?> rawTypeAsClass = (Class<?>) parameterizedType.getRawType();
+            if (rawType instanceof Class) {
+                Type[] typeArguments = parameterizedType.getActualTypeArguments();
+                if (java.util.List.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
+                    return applyClassMethod(type(ArrayMapping.class), toList, List.of(parameterMapper));
+                }
+                if (Queue.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
+                    return applyClassMethod(type(ArrayMapping.class), toQueue, List.of(parameterMapper));
+                }
+                if (Deque.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
+                    return applyClassMethod(type(ArrayMapping.class), toDeque, List.of(parameterMapper));
+                }
+                if (Set.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
+                    return applyClassMethod(type(ArrayMapping.class), toSet, List.of(parameterMapper));
+                }
+                if (Collection.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
+                    return applyClassMethod(type(ArrayMapping.class), toCollection, List.of(parameterMapper));
+                }
+                if (Map.class.isAssignableFrom(rawTypeAsClass)) {
+                    JCExpression keyToModelMapper = selectToModelMapper(typeArguments[0]);
+                    JCExpression keyFromModelMapper = selectFromModelMapper(typeArguments[0]);
+                    JCExpression valueMapper = selectFromModelMapper(typeArguments[1]);
+                    return applyClassMethod(type(EntityMapping.class), toMap, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
+                }
+            }
+        }
+
+        throw new GenerationException(format(UNKNOWN_FIELD_TYPE, type.getTypeName()));
     }
 }

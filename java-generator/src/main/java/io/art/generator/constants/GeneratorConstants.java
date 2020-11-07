@@ -79,5 +79,11 @@ public interface GeneratorConstants {
             String toQueue = "toQueue";
             String toDeque = "toDeque";
         }
+
+        interface EntityMappingMethods {
+            String toMap = "toMap";
+            String toMutableMap = "toMutableMap";
+            String fromMap = "fromMap";
+        }
     }
 }
