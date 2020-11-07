@@ -4,8 +4,8 @@ import lombok.*;
 import lombok.experimental.*;
 import static io.art.generator.constants.GeneratorConstants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
-import static io.art.generator.service.CompilationService.recompile;
 import static io.art.generator.implementor.ModelImplementor.*;
+import static io.art.generator.service.CompilationService.*;
 
 @UtilityClass
 public class GenerationService {

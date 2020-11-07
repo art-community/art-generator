@@ -36,7 +36,7 @@ import java.lang.reflect.*;
 
 @UtilityClass
 public class ModelImplementor {
-    public static void implementModel() {
+    public void implementModel() {
         ModuleModel model = loadModel();
         String providerClassName = mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX;
         NewClass providerClass = newClass()
@@ -71,7 +71,7 @@ public class ModelImplementor {
         replaceMethod(mainClass(), generateMainMethod(providerClassName));
     }
 
-    private ModuleModel loadModel() {
+    private static ModuleModel loadModel() {
         try {
             Class<?> mainClass = classLoader().loadClass(mainClass().getFullName());
             Method configuratorMethod = stream(mainClass.getMethods())
@@ -84,7 +84,7 @@ public class ModelImplementor {
         }
     }
 
-    private boolean hasConfiguratorAnnotation(Method method) {
+    private static boolean hasConfiguratorAnnotation(Method method) {
         return stream(method.getAnnotations()).anyMatch(annotation -> annotation.annotationType().getName().equals(CONFIGURATOR_ANNOTATION_NAME));
     }
 

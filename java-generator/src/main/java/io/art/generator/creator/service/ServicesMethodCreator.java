@@ -9,23 +9,21 @@ import io.art.server.implementation.*;
 import io.art.server.model.*;
 import io.art.server.specification.*;
 import lombok.experimental.*;
-import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.INVOKE;
-import static com.sun.tools.javac.code.Flags.PRIVATE;
-import static com.sun.tools.javac.code.Flags.STATIC;
-import static io.art.core.constants.MethodDecoratorScope.INPUT;
-import static io.art.core.constants.MethodDecoratorScope.OUTPUT;
-import static io.art.core.constants.MethodProcessingMode.BLOCKING;
-import static io.art.generator.constants.GeneratorConstants.Names.REGISTRY_NAME;
-import static io.art.generator.context.GeneratorContext.maker;
-import static io.art.generator.model.NewBuilder.newBuilder;
-import static io.art.generator.model.NewMethod.newMethod;
-import static io.art.generator.model.NewVariable.newVariable;
-import static io.art.generator.model.TypeModel.type;
+import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
+import static com.sun.tools.javac.code.Flags.*;
+import static io.art.core.constants.MethodDecoratorScope.*;
+import static io.art.core.constants.MethodProcessingMode.*;
+import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.model.NewBuilder.*;
+import static io.art.generator.model.NewMethod.*;
+import static io.art.generator.model.NewVariable.*;
+import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 
 @UtilityClass
 public class ServicesMethodCreator {
-    public static NewMethod createServicesMethod(Class<?> serviceClass, TypeModel registryType) {
+    public NewMethod createServicesMethod(Class<?> serviceClass, TypeModel registryType) {
         return newMethod()
                 .name("services")
                 .returnType(registryType)

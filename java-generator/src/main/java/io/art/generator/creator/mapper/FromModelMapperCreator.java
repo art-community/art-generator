@@ -16,7 +16,7 @@ import java.lang.reflect.*;
 
 @UtilityClass
 public class FromModelMapperCreator {
-    public static JCLambda createFromModelMapper(Class<?> modelClass) {
+    public JCLambda createFromModelMapper(Class<?> modelClass) {
         return newLambda()
                 .parameter(newParameter(type(modelClass), MODEL_NAME))
                 .expression(() -> createMapperContent(modelClass))

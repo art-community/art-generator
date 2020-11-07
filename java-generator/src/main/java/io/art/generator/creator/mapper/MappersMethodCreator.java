@@ -5,7 +5,6 @@ import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
-import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
@@ -15,7 +14,7 @@ import static io.art.generator.service.JavacService.*;
 
 @UtilityClass
 public class MappersMethodCreator {
-    public static NewMethod createMappersMethod(Class<?> returnClass, TypeModel registryType, Class<?>[] parameterClasses) {
+    public NewMethod createMappersMethod(Class<?> returnClass, TypeModel registryType, Class<?>[] parameterClasses) {
         NewMethod method = newMethod()
                 .name(MAPPERS_NAME)
                 .returnType(registryType)

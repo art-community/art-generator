@@ -6,7 +6,7 @@ import io.art.model.configurator.*;
 import io.art.model.module.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
-import static io.art.generator.constants.GeneratorConstants.Names.PROVIDER_CLASS_NAME_SUFFIX;
+import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewMethod.*;
@@ -16,7 +16,7 @@ import static io.art.generator.service.JavacService.*;
 
 @UtilityClass
 public class DecorateMethodCreator {
-    public static NewMethod createDecorateMethod() {
+    public NewMethod createDecorateMethod() {
         return newMethod()
                 .modifiers(PUBLIC | STATIC)
                 .name("decorate")

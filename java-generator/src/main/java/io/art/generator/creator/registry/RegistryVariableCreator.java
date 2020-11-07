@@ -9,7 +9,7 @@ import static io.art.generator.service.JavacService.*;
 
 @UtilityClass
 public class RegistryVariableCreator {
-    public static JCVariableDecl createRegistryVariable(TypeModel registryType) {
+    public JCVariableDecl createRegistryVariable(TypeModel registryType) {
         return newVariable()
                 .name(REGISTRY_NAME)
                 .initializer(() -> newObject(registryType))

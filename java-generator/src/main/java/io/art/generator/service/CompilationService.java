@@ -9,6 +9,7 @@ import static java.util.stream.Collectors.*;
 import static io.art.generator.constants.GeneratorConstants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import java.io.*;
+import java.util.*;
 
 @UtilityClass
 public class CompilationService {
@@ -22,7 +23,12 @@ public class CompilationService {
         arguments.add(D.getText());
         arguments.add(options().get(D));
         arguments.add(DISABLE_OPTION_ENABLED);
-        arguments.addAll(getExistedClasses().values().stream().map(existed -> existed.getPackageUnit().getSourceFile().getName()).collect(toList()));
+        List<String> classes = getExistedClasses()
+                .values()
+                .stream()
+                .map(existed -> existed.getPackageUnit().getSourceFile().getName())
+                .collect(toList());
+        arguments.addAll(classes);
         javacTool.run(inputStream, outputStream, System.err, arguments.build().toArray(new String[0]));
     }
 }
