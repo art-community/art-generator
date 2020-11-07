@@ -7,6 +7,7 @@ import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.*;
+import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.toString;
 import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
 import static io.art.generator.javac.constants.GeneratorConstants.Names.*;
 import static io.art.generator.javac.context.GenerationContext.*;
@@ -48,6 +49,10 @@ public class ToModelMapperImplementor {
 
         if (Integer.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), toInt));
+        }
+
+        if (Long.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), toLong));
         }
 
         if (Boolean.class.equals(fieldType)) {

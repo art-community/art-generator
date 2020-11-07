@@ -51,6 +51,10 @@ public class FromModelMapperImplementor {
             mapping.add(select(type(PrimitiveMapping.class), fromInt));
         }
 
+        if (Long.class.equals(fieldType)) {
+            mapping.add(select(type(PrimitiveMapping.class), fromLong));
+        }
+
         if (Boolean.class.equals(fieldType)) {
             mapping.add(select(type(PrimitiveMapping.class), fromBool));
         }
