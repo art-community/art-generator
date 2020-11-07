@@ -1,6 +1,6 @@
 package io.art.generator.creator.service;
 
-import com.sun.tools.javac.tree.*;
+import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.core.constants.*;
 import io.art.generator.model.*;
@@ -63,7 +63,7 @@ public class ServicesMethodCreator {
                 .statement(() -> returnVariable("registry"));
     }
 
-    private JCTree.JCVariableDecl generateRegistryVariable(TypeModel registryType) {
+    private JCVariableDecl generateRegistryVariable(TypeModel registryType) {
         return newVariable()
                 .name(REGISTRY_NAME)
                 .initializer(() -> newObject(registryType))

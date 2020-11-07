@@ -13,7 +13,7 @@ import java.util.*;
 
 @UtilityClass
 public class CompilationService {
-    public static void recompile() {
+    public void recompile() {
         JavacTool javacTool = JavacTool.create();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(EMPTY_BYTES);

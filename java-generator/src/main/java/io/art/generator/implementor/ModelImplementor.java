@@ -71,7 +71,7 @@ public class ModelImplementor {
         replaceMethod(mainClass(), generateMainMethod(providerClassName));
     }
 
-    private static ModuleModel loadModel() {
+    private ModuleModel loadModel() {
         try {
             Class<?> mainClass = classLoader().loadClass(mainClass().getFullName());
             Method configuratorMethod = stream(mainClass.getMethods())
@@ -84,11 +84,11 @@ public class ModelImplementor {
         }
     }
 
-    private static boolean hasConfiguratorAnnotation(Method method) {
+    private boolean hasConfiguratorAnnotation(Method method) {
         return stream(method.getAnnotations()).anyMatch(annotation -> annotation.annotationType().getName().equals(CONFIGURATOR_ANNOTATION_NAME));
     }
 
-    private static NewMethod generateMainMethod(String providerClassName) {
+    private NewMethod generateMainMethod(String providerClassName) {
         JCMethodInvocation launchMethod = applyClassMethod(type(ModuleLauncher.class), LAUNCH_NAME, List.of(select(providerClassName, MODEL_NAME)));
         return newMethod()
                 .modifiers(PUBLIC | STATIC)

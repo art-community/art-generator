@@ -25,7 +25,7 @@ public class ToModelMapperCreator {
                 .generate();
     }
 
-    private static JCMethodInvocation createMapperContent(Class<?> modelClass) {
+    private JCMethodInvocation createMapperContent(Class<?> modelClass) {
         JCMethodInvocation builderInvocation = applyClassMethod(type(modelClass.getName()), BUILDER_METHOD_NAME);
         for (Method method : modelClass.getDeclaredMethods()) {
             String getterName = method.getName();
@@ -38,7 +38,7 @@ public class ToModelMapperCreator {
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
-    private static JCMethodInvocation createFieldMapping(String fieldName, Class<?> fieldType) {
+    private JCMethodInvocation createFieldMapping(String fieldName, Class<?> fieldType) {
         String providerClassName = mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX;
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(maker().Literal(fieldName));
