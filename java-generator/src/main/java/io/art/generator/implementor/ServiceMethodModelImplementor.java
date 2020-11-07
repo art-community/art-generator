@@ -35,7 +35,7 @@ public class ServiceMethodModelImplementor {
                 .addImport(classImport(serviceClass.getName()))
                 .field(MODEL_NAME, model)
                 .method(MAPPERS_NAME, createMappersMethod(returnType, registryType, parameterTypes))
-                .method(SERVICES_NAME, createServicesMethod(returnType, type(ServiceSpecificationRegistry.class)))
+                .method(SERVICES_NAME, createServicesMethod(serviceClass, type(ServiceSpecificationRegistry.class)))
                 .method(DECORATE_NAME, createDecorateMethod());
 
         for (Class<?> parameterType : parameterTypes) {
