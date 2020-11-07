@@ -8,10 +8,9 @@ import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
-import static io.art.generator.constants.GeneratorConstants.ARRAY_MARKER;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
-import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.toBinary;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.toString;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
@@ -36,43 +35,41 @@ public class ToModelMapperCreator {
     }
 
     public JCExpression selectToModelMapper(Type type) {
-        if (String.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), toString);
-        }
-
-        if (Integer.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), toInt);
-        }
-
-        if (Long.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), toLong);
-        }
-
-        if (Boolean.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), toBool);
-        }
-
-        if (Double.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), toDouble);
-        }
-
-        if (Byte.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), toByte);
-        }
-
-        if (Float.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), toFloat);
-        }
-
-        if (byte[].class.equals(type)) {
-            return select(type(BinaryMapping.class), toBinary);
-        }
-
         if (type instanceof Class) {
             Class<?> typeAssClass = (Class<?>) type;
+            if (byte[].class.equals(typeAssClass)) {
+                return select(type(BinaryMapping.class), toBinary);
+            }
             if (typeAssClass.isArray()) {
                 JCExpression parameterMapper = selectToModelMapper(typeAssClass.getComponentType());
                 return applyClassMethod(type(ArrayMapping.class), toArray, List.of(parameterMapper));
+            }
+            if (String.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), toString);
+            }
+
+            if (Integer.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), toInt);
+            }
+
+            if (Long.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), toLong);
+            }
+
+            if (Boolean.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), toBool);
+            }
+
+            if (Double.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), toDouble);
+            }
+
+            if (Byte.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), toByte);
+            }
+
+            if (Float.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), toFloat);
             }
         }
 

@@ -33,43 +33,41 @@ public class FromModelMapperCreator {
     }
 
     public JCExpression selectFromModelMapper(Type type) {
-        if (String.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), fromString);
-        }
-
-        if (Integer.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), fromInt);
-        }
-
-        if (Long.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), fromLong);
-        }
-
-        if (Boolean.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), fromBool);
-        }
-
-        if (Double.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), fromDouble);
-        }
-
-        if (Byte.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), fromByte);
-        }
-
-        if (Float.class.equals(type)) {
-            return select(type(PrimitiveMapping.class), fromFloat);
-        }
-
-        if (byte[].class.equals(type)) {
-            return select(type(BinaryMapping.class), fromBinary);
-        }
-
         if (type instanceof Class) {
             Class<?> typeAssClass = (Class<?>) type;
+            if (byte[].class.equals(typeAssClass)) {
+                return select(type(BinaryMapping.class), fromBinary);
+            }
             if (typeAssClass.isArray()) {
                 JCExpression parameterMapper = selectFromModelMapper(typeAssClass.getComponentType());
                 return applyClassMethod(type(ArrayMapping.class), fromArray, List.of(parameterMapper));
+            }
+            if (String.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), fromString);
+            }
+
+            if (Integer.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), fromInt);
+            }
+
+            if (Long.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), fromLong);
+            }
+
+            if (Boolean.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), fromBool);
+            }
+
+            if (Double.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), fromDouble);
+            }
+
+            if (Byte.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), fromByte);
+            }
+
+            if (Float.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), fromFloat);
             }
         }
 
