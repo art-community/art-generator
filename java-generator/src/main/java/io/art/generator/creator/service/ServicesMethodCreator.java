@@ -1,4 +1,4 @@
-package io.art.generator.implementor.service;
+package io.art.generator.creator.service;
 
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
@@ -24,8 +24,8 @@ import static io.art.generator.model.TypeModel.type;
 import static io.art.generator.service.JavacService.*;
 
 @UtilityClass
-public class ServicesMethodImplementor {
-    public static NewMethod implementServicesMethod(Class<?> serviceClass, TypeModel registryType) {
+public class ServicesMethodCreator {
+    public static NewMethod createServicesMethod(Class<?> serviceClass, TypeModel registryType) {
         return newMethod()
                 .name("services")
                 .returnType(registryType)

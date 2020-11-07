@@ -1,4 +1,4 @@
-package io.art.generator.implementor.decorator;
+package io.art.generator.creator.decorate;
 
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
@@ -15,8 +15,8 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 
 @UtilityClass
-public class DecorateMethodImplementor {
-    public static NewMethod implementDecorateMethod() {
+public class DecorateMethodCreator {
+    public static NewMethod createDecorateMethod() {
         return newMethod()
                 .modifiers(PUBLIC | STATIC)
                 .name("decorate")

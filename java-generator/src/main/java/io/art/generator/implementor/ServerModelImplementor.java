@@ -1,11 +1,11 @@
-package io.art.generator.implementor.model;
+package io.art.generator.implementor;
 
 import io.art.generator.loader.*;
 import io.art.generator.model.*;
 import io.art.model.server.*;
 import lombok.experimental.*;
 import static io.art.generator.context.GeneratorContext.*;
-import static io.art.generator.implementor.model.ServiceMethodModelImplementor.*;
+import static io.art.generator.implementor.ServiceMethodModelImplementor.*;
 import static java.lang.reflect.Modifier.*;
 import java.lang.reflect.*;
 

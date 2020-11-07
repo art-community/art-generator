@@ -5,7 +5,7 @@ import lombok.experimental.*;
 import static io.art.generator.constants.GeneratorConstants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.CompilationService.recompile;
-import static io.art.generator.implementor.model.ModuleModelImplementor.*;
+import static io.art.generator.implementor.ModelImplementor.*;
 
 @UtilityClass
 public class GenerationService {
@@ -15,7 +15,7 @@ public class GenerationService {
             return;
         }
         recompile();
-        implementModuleModel();
+        implementModel();
         classLoader().close();
     }
 

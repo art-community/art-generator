@@ -1,4 +1,4 @@
-package io.art.generator.implementor.model;
+package io.art.generator.implementor;
 
 import com.sun.tools.javac.util.*;
 import io.art.core.constants.*;
@@ -23,7 +23,7 @@ import static io.art.generator.constants.GeneratorConstants.Annotations.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
-import static io.art.generator.implementor.model.ServerModelImplementor.*;
+import static io.art.generator.implementor.ServerModelImplementor.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewClass.*;
 import static io.art.generator.model.NewMethod.*;
@@ -35,8 +35,8 @@ import static java.util.Arrays.*;
 import java.lang.reflect.*;
 
 @UtilityClass
-public class ModuleModelImplementor {
-    public static void implementModuleModel() {
+public class ModelImplementor {
+    public static void implementModel() {
         ModuleModel model = loadModel();
         String providerClassName = mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX;
         NewClass providerClass = newClass()
@@ -69,14 +69,13 @@ public class ModuleModelImplementor {
         implementServerModel(providerClass, model.getServerModel());
         replaceInnerClass(mainClass(), providerClass);
         replaceMethod(mainClass(), generateMainMethod(providerClassName));
-
     }
 
     private ModuleModel loadModel() {
         try {
             Class<?> mainClass = classLoader().loadClass(mainClass().getFullName());
             Method configuratorMethod = stream(mainClass.getMethods())
-                    .filter(ModuleModelImplementor::hasConfiguratorAnnotation)
+                    .filter(ModelImplementor::hasConfiguratorAnnotation)
                     .findFirst()
                     .orElseThrow(() -> new GenerationException(MODULE_CONFIGURATOR_NOT_FOUND_EXCEPTION));
             return (ModuleModel) configuratorMethod.invoke(null);

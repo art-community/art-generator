@@ -1,4 +1,4 @@
-package io.art.generator.implementor.mapping;
+package io.art.generator.creator.mapper;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
@@ -16,8 +16,8 @@ import static io.art.generator.service.JavacService.*;
 import java.lang.reflect.*;
 
 @UtilityClass
-public class FromModelMapperImplementor {
-    public static JCLambda implementFromModelMapper(Class<?> modelClass) {
+public class FromModelMapperCreator {
+    public static JCLambda createFromModelMapper(Class<?> modelClass) {
         return newLambda()
                 .parameter(newParameter(type(modelClass), MODEL))
                 .expression(() -> generateMapperContent(modelClass))
