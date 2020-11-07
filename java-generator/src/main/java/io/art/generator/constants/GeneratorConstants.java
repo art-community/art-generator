@@ -1,5 +1,8 @@
 package io.art.generator.constants;
 
+import static io.art.core.factory.CollectionsFactory.*;
+import java.util.*;
+
 public interface GeneratorConstants {
     String CLASS_KEYWORD = "class";
     String JAVA_PACKAGE_PREFIX = "java.";
@@ -91,5 +94,22 @@ public interface GeneratorConstants {
             String fromBinary = "fromBinary";
             String toBinary = "toBinary";
         }
+
+        Set<Class<?>> KNOWN_TYPES = setOf(
+                String.class,
+                Integer.class,
+                Long.class,
+                Byte.class,
+                Float.class,
+                Double.class,
+                List.class,
+                Collection.class,
+                Set.class,
+                Map.class
+        );
+
+        Set<Class<?>> KNOWN_STRICT_TYPES = setOf(
+                Object.class
+        );
     }
 }

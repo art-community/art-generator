@@ -5,5 +5,6 @@ import lombok.*;
 @Value
 @Builder
 public class Response {
-    String value;
+    String stringValue;
+    Model model;
 }

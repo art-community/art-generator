@@ -8,7 +8,7 @@ import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
-import static io.art.generator.constants.GeneratorConstants.CLASS_KEYWORD;
+import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
@@ -16,11 +16,13 @@ import static io.art.generator.constants.GeneratorConstants.MappersConstants.Ent
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
+import static io.art.generator.determiner.MappingFieldsDeterminer.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static java.text.MessageFormat.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -108,13 +110,10 @@ public class FromModelMapperCreator {
     private JCMethodInvocation createMapperContent(Class<?> modelClass) {
         try {
             JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER_NAME);
-            for (Method method : modelClass.getDeclaredMethods()) {
-                String getterName = method.getName();
-                if (getterName.startsWith(GET_PREFIX)) {
-                    String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
-                    Type fieldType = modelClass.getDeclaredField(fieldName).getGenericType();
-                    builderInvocation = createFieldMapping(builderInvocation, fieldName, fieldType);
-                }
+            for (Field field : getMappingFields(modelClass)) {
+                String fieldName = field.getName();
+                Type fieldType = field.getGenericType();
+                builderInvocation = createFieldMapping(builderInvocation, fieldName, fieldType);
             }
             return applyMethod(builderInvocation, BUILD_METHOD_NAME);
         } catch (Throwable throwable) {
