@@ -10,6 +10,8 @@ import static io.art.generator.javac.constants.GeneratorConstants.*;
 import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.toString;
 import static io.art.generator.javac.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
+import static io.art.generator.javac.constants.GeneratorConstants.Names.BUILDER_METHOD_NAME;
+import static io.art.generator.javac.constants.GeneratorConstants.Names.BUILD_METHOD_NAME;
 import static io.art.generator.javac.context.GenerationContext.*;
 import static io.art.generator.javac.model.NewLambda.*;
 import static io.art.generator.javac.model.NewParameter.*;

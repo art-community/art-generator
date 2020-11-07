@@ -28,7 +28,7 @@ public class NewClass {
     public NewClass field(String name, NewField field) {
         fields.put(name, field);
         if (!field.type().isJdk() && !field.type().getPackageName().isEmpty()) {
-            imports.add(importClass(field.type().getFullName()));
+            imports.add(classImport(field.type().getFullName()));
         }
         return this;
     }

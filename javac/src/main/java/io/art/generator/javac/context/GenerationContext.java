@@ -32,14 +32,10 @@ public class GenerationContext {
 
     private static final AtomicReference<GeneratorClassLoader> classLoader = new AtomicReference<>();
 
-    private static final ConcurrentHashMap<String, ExistedClass> existedClasses = new ConcurrentHashMap<>();
-
-    public static void putExistedClass(String name, ExistedClass existedClass) {
-        existedClasses.put(name, existedClass);
-    }
+    private static ImmutableMap<String, ExistedClass> existedClasses;
 
     public static ImmutableMap<String, ExistedClass> getExistedClasses() {
-        return ImmutableMap.copyOf(existedClasses);
+        return existedClasses;
     }
 
     public static ExistedClass getExistedClass(String name) {
@@ -82,17 +78,18 @@ public class GenerationContext {
         return classLoader.get();
     }
 
-    public static void initialize(GenerationContextConfiguration initializer) {
+    public static void initialize(GenerationContextConfiguration configuration) {
         if (initialized.compareAndSet(false, true)) {
-            GenerationContext.processingEnvironment.set(initializer.getProcessingEnvironment());
-            GenerationContext.options.set(initializer.getOptions());
-            GenerationContext.compiler.set(initializer.getCompiler());
-            GenerationContext.maker.set(initializer.getMaker());
-            GenerationContext.elements.set(initializer.getElements());
-            GenerationContext.mainClass.set(initializer.getMainClass());
-            GenerationContext.mainMethod.set(initializer.getMainMethod());
-            GenerationContext.configureMethod.set(initializer.getConfigureMethod());
-            GenerationContext.classLoader.set(new GeneratorClassLoader());;
+            GenerationContext.existedClasses = configuration.getExistedClasses();
+            GenerationContext.processingEnvironment.set(configuration.getProcessingEnvironment());
+            GenerationContext.options.set(configuration.getOptions());
+            GenerationContext.compiler.set(configuration.getCompiler());
+            GenerationContext.maker.set(configuration.getMaker());
+            GenerationContext.elements.set(configuration.getElements());
+            GenerationContext.mainClass.set(configuration.getMainClass());
+            GenerationContext.mainMethod.set(configuration.getMainMethod());
+            GenerationContext.configureMethod.set(configuration.getConfigureMethod());
+            GenerationContext.classLoader.set(new GeneratorClassLoader());
         }
     }
 }

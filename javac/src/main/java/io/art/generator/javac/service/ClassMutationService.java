@@ -30,7 +30,7 @@ public class ClassMutationService {
         Set<ImportModel> importModels = fields.stream()
                 .map(NewField::type)
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
-                .map(type -> importClass(type.getFullName()))
+                .map(type -> classImport(type.getFullName()))
                 .collect(toSet());
         ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, importModels);
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
@@ -45,7 +45,7 @@ public class ClassMutationService {
         Set<ImportModel> importModels = Stream.of(method)
                 .map(NewMethod::returnType)
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
-                .map(type -> importClass(type.getFullName()))
+                .map(type -> classImport(type.getFullName()))
                 .collect(toSet());
         ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, combine(importModels, method.classImports()));
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();

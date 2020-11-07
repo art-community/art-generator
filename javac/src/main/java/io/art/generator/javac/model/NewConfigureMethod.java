@@ -6,6 +6,7 @@ import io.art.model.module.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.javac.constants.GeneratorConstants.*;
+import static io.art.generator.javac.constants.GeneratorConstants.Names.PROVIDER_CLASS_NAME_SUFFIX;
 import static io.art.generator.javac.context.GenerationContext.*;
 import static io.art.generator.javac.model.ImportModel.*;
 import static io.art.generator.javac.model.NewLambda.*;
@@ -16,15 +17,15 @@ import static io.art.generator.javac.service.MakerService.*;
 
 @UtilityClass
 public class NewConfigureMethod {
-    public static NewMethod decorateMethod() {
+    public static NewMethod generateDecorateMethod() {
         return newMethod()
                 .modifiers(PUBLIC | STATIC)
                 .name("decorate")
                 .parameter(newParameter(type(ModuleModel.class), "model"))
                 .returnType(type(ModuleModel.class.getName()))
-                .addClassImport(importClass(ConfiguratorModel.class.getName()))
-                .addClassImport(importClass(ValueConfiguratorModel.class.getName()))
-                .addClassImport(importClass(ServerConfiguratorModel.class.getName()))
+                .addClassImport(classImport(ConfiguratorModel.class.getName()))
+                .addClassImport(classImport(ValueConfiguratorModel.class.getName()))
+                .addClassImport(classImport(ServerConfiguratorModel.class.getName()))
                 .statement(() -> maker().Return(
                         applyMethod("model", "configure", List.of(
                                 newLambda()
@@ -35,7 +36,7 @@ public class NewConfigureMethod {
                                                                 newLambda()
                                                                         .parameter(newParameter(type(ValueConfiguratorModel.class), "value"))
                                                                         .expression(() -> applyMethod("value", "registry", List.of(applyMethod(
-                                                                                mainClass().getName() + CONFIGURATOR_CLASS_NAME_SUFFIX,
+                                                                                mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX,
                                                                                 "mappers")))
                                                                         )
                                                                         .generate()
@@ -44,7 +45,7 @@ public class NewConfigureMethod {
                                                                 newLambda()
                                                                         .parameter(newParameter(type(ServerConfiguratorModel.class), "server"))
                                                                         .expression(() -> applyMethod("server", "registry", List.of(applyMethod(
-                                                                                mainClass().getName() + CONFIGURATOR_CLASS_NAME_SUFFIX,
+                                                                                mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX,
                                                                                 "services")))
                                                                         )
                                                                         .generate()

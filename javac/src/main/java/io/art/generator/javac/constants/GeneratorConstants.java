@@ -1,14 +1,26 @@
 package io.art.generator.javac.constants;
 
 public interface GeneratorConstants {
-    String MAIN_METHOD_NAME = "main";
     String CLASS_KEYWORD = "class";
     String JAVA_PACKAGE_PREFIX = "java.";
     String ARRAY_MARKER = "[";
     int ARRAY_ELEMENTS_CLASS_NAME_INDEX = 2;
-    String CONFIGURATOR_CLASS_NAME_SUFFIX = "Configurator";
-    String BUILDER_METHOD_NAME = "builder";
-    String BUILD_METHOD_NAME = "build";
+
+    interface Names {
+        String PROVIDER_CLASS_NAME_SUFFIX = "Provider";
+        String BUILDER_METHOD_NAME = "builder";
+        String BUILD_METHOD_NAME = "build";
+        String MAIN_NAME = "main";
+        String LAUNCH_NAME = "launch";
+        String DECORATE_NAME = "decorate";
+        String CONFIGURE_NAME = "configure";
+        String MODULE_NAME = "module";
+        String MODEL_NAME = "model";
+        String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
+        String MAPPERS_NAME = "mappers";
+        String SERVICES_NAME = "services";
+        String REGISTRY_NAME = "registry";
+    }
 
     interface Annotations {
         String MODULE_ANNOTATION_NAME = "io.art.model.annotation.Module";
@@ -24,14 +36,8 @@ public interface GeneratorConstants {
         String MODULE_CONFIGURATOR_NOT_FOUND_EXCEPTION = "Module configurator method not found";
     }
 
-    interface MethodNames {
-        String CONFIGURE_METHOD_NAME = "configure";
-        String MODULE_METHOD_NAME = "module";
-    }
-
     interface MappersConstants {
         String CREATE_MAPPERS = "createMappers";
-        String MAPPERS = "mappers";
         String PUT_TO_MODEL = "putToModel";
         String REGISTER = "register";
         String PUT_FROM_MODEL = "putFromModel";

@@ -9,10 +9,12 @@ import com.sun.tools.javac.processing.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.javac.context.*;
+import io.art.generator.javac.context.GenerationContextConfiguration.*;
 import io.art.generator.javac.scanner.Scanner;
-import static javax.lang.model.SourceVersion.*;
 import static io.art.generator.javac.constants.GeneratorConstants.Annotations.*;
+import static io.art.generator.javac.context.GenerationContext.*;
 import static io.art.generator.javac.service.GenerationService.*;
+import static javax.lang.model.SourceVersion.*;
 import javax.annotation.processing.*;
 import javax.lang.model.element.*;
 import java.util.*;
@@ -23,6 +25,7 @@ import java.util.*;
 public class JavacProcessor extends AbstractProcessor {
     private JavacTrees trees;
     private JavacProcessingEnvironment processingEnvironment;
+    private final GenerationContextConfigurationBuilder configurationBuilder = GenerationContextConfiguration.builder();
 
     @Override
     public void init(ProcessingEnvironment processingEnvironment) {
@@ -34,19 +37,18 @@ public class JavacProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
         if (roundEnvironment.processingOver()) {
+            initialize(configurationBuilder.build());
             generate();
             return false;
         }
-        JavaCompiler compiler = JavaCompiler.instance(processingEnvironment.getContext());
-        TreeMaker maker = TreeMaker.instance(processingEnvironment.getContext());
         JavacElements elements = JavacElements.instance(processingEnvironment.getContext());
-        GenerationContextConfiguration.GenerationContextConfigurationBuilder configuration = GenerationContextConfiguration.builder()
+        configurationBuilder
                 .options(Options.instance(processingEnvironment.getContext()))
                 .processingEnvironment(processingEnvironment)
-                .compiler(compiler)
+                .compiler(JavaCompiler.instance(processingEnvironment.getContext()))
                 .elements(elements)
-                .maker(maker);
-        Scanner scanner = new Scanner(elements, configuration);
+                .maker(TreeMaker.instance(processingEnvironment.getContext()));
+        Scanner scanner = new Scanner(elements, configurationBuilder);
         for (Element rootElement : roundEnvironment.getRootElements()) {
             scanner.scan(trees.getPath(rootElement), trees);
         }

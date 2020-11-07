@@ -1,5 +1,6 @@
 package io.art.generator.javac.context;
 
+import com.google.common.collect.*;
 import com.sun.tools.javac.main.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.processing.*;
@@ -19,4 +20,6 @@ public class GenerationContextConfiguration {
     private final ExistedClass mainClass;
     private final ExistedMethod mainMethod;
     private final ExistedMethod configureMethod;
+    @Singular("exitedClass")
+    private final ImmutableMap<String, ExistedClass> existedClasses;
 }

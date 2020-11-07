@@ -25,15 +25,15 @@ public class ImportModel {
         importPart = importText.substring(importText.lastIndexOf(DOT) + 1);
     }
 
-    public static ImportModel importClass(String importText) {
+    public static ImportModel classImport(String importText) {
         return new ImportModel(importText, false, false);
     }
 
-    public static ImportModel importStaticClass(String importText) {
+    public static ImportModel staticClassImport(String importText) {
         return new ImportModel(importText, false, true);
     }
 
-    public static ImportModel importPackage(String importText) {
+    public static ImportModel packageImport(String importText) {
         return new ImportModel(importText, true, false);
     }
 }

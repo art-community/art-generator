@@ -12,6 +12,6 @@ public class Example {
 
     @Configurator
     public static ModuleModel configure() {
-        return module().serve(server -> server.rsocket(rsocket -> rsocket.toClass(MyService.class)));
+        return module().serve(server -> server.rsocket(rsocket -> rsocket.to(MyService.class)));
     }
 }

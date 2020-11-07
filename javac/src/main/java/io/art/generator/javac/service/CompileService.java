@@ -23,6 +23,6 @@ public class CompileService {
         arguments.add(options().get(D));
         arguments.add(DISABLE_OPTION_ENABLED);
         arguments.addAll(getExistedClasses().values().stream().map(existed -> existed.getPackageUnit().getSourceFile().getName()).collect(toList()));
-        javacTool.run(inputStream, outputStream, outputStream, arguments.build().toArray(new String[0]));
+        javacTool.run(inputStream, outputStream, System.err, arguments.build().toArray(new String[0]));
     }
 }
