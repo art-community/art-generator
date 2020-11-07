@@ -33,62 +33,6 @@ public class ToModelMapperCreator {
                 .generate();
     }
 
-    private JCMethodInvocation createMapperContent(Class<?> modelClass) {
-        JCMethodInvocation builderInvocation = applyClassMethod(type(modelClass.getName()), BUILDER_METHOD_NAME);
-        for (Method method : modelClass.getDeclaredMethods()) {
-            String getterName = method.getName();
-            if (getterName.startsWith(GET_PREFIX)) {
-                String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
-                Class<?> fieldType = method.getReturnType();
-                builderInvocation = applyMethod(builderInvocation, fieldName, List.of(createFieldMapping(fieldName, fieldType)));
-            }
-        }
-        return applyMethod(builderInvocation, BUILD_METHOD_NAME);
-    }
-
-    private JCMethodInvocation createFieldMapping(String fieldName, Class<?> fieldType) {
-        ListBuffer<JCExpression> mapping = new ListBuffer<>();
-        mapping.add(maker().Literal(fieldName));
-
-        if (String.class.equals(fieldType)) {
-            mapping.add(select(type(PrimitiveMapping.class), toString));
-            return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
-        }
-
-        if (Integer.class.equals(fieldType)) {
-            mapping.add(select(type(PrimitiveMapping.class), toInt));
-            return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
-        }
-
-        if (Long.class.equals(fieldType)) {
-            mapping.add(select(type(PrimitiveMapping.class), toLong));
-            return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
-        }
-
-        if (Boolean.class.equals(fieldType)) {
-            mapping.add(select(type(PrimitiveMapping.class), toBool));
-            return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
-        }
-
-        if (Double.class.equals(fieldType)) {
-            mapping.add(select(type(PrimitiveMapping.class), toDouble));
-            return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
-        }
-
-        if (Byte.class.equals(fieldType)) {
-            mapping.add(select(type(PrimitiveMapping.class), toByte));
-            return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
-        }
-
-        if (Float.class.equals(fieldType)) {
-            mapping.add(select(type(PrimitiveMapping.class), toFloat));
-            return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
-        }
-
-        return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
-    }
-
-
     public JCExpression selectToModelMapper(Type type) {
         if (String.class.equals(type)) {
             return select(type(PrimitiveMapping.class), toString);
@@ -147,12 +91,36 @@ public class ToModelMapperCreator {
                 if (Map.class.isAssignableFrom(rawTypeAsClass)) {
                     JCExpression keyToModelMapper = selectToModelMapper(typeArguments[0]);
                     JCExpression keyFromModelMapper = selectFromModelMapper(typeArguments[0]);
-                    JCExpression valueMapper = selectFromModelMapper(typeArguments[1]);
+                    JCExpression valueMapper = selectToModelMapper(typeArguments[1]);
                     return applyClassMethod(type(EntityMapping.class), toMap, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
                 }
             }
         }
 
         throw new GenerationException(format(UNKNOWN_FIELD_TYPE, type.getTypeName()));
+    }
+
+    private JCMethodInvocation createMapperContent(Class<?> modelClass) {
+        try {
+            JCMethodInvocation builderInvocation = applyClassMethod(type(modelClass.getName()), BUILDER_METHOD_NAME);
+            for (Method method : modelClass.getDeclaredMethods()) {
+                String getterName = method.getName();
+                if (getterName.startsWith(GET_PREFIX)) {
+                    String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
+                    Type fieldType = modelClass.getDeclaredField(fieldName).getGenericType();
+                    builderInvocation = applyMethod(builderInvocation, fieldName, List.of(createFieldMapping(fieldName, fieldType)));
+                }
+            }
+            return applyMethod(builderInvocation, BUILD_METHOD_NAME);
+        } catch (Throwable throwable) {
+            throw new GenerationException(throwable);
+        }
+    }
+
+    private JCMethodInvocation createFieldMapping(String fieldName, Type fieldType) {
+        ListBuffer<JCExpression> mapping = new ListBuffer<>();
+        mapping.add(maker().Literal(fieldName));
+        mapping.add(selectToModelMapper(fieldType));
+        return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
     }
 }
