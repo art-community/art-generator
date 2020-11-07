@@ -10,6 +10,7 @@ import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.toBinary;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.toString;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
@@ -60,6 +61,10 @@ public class ToModelMapperCreator {
 
         if (Float.class.equals(type)) {
             return select(type(PrimitiveMapping.class), toFloat);
+        }
+
+        if (byte[].class.equals(type)) {
+            return select(type(BinaryMapping.class), toBinary);
         }
 
         if (type instanceof ParameterizedType) {

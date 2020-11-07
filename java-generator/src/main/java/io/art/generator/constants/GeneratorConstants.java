@@ -82,8 +82,12 @@ public interface GeneratorConstants {
 
         interface EntityMappingMethods {
             String toMap = "toMap";
-            String toMutableMap = "toMutableMap";
             String fromMap = "fromMap";
+        }
+
+        interface BinaryMappingMethods {
+            String fromBinary = "fromBinary";
+            String toBinary = "toBinary";
         }
     }
 }
