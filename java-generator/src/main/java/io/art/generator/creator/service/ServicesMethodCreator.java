@@ -13,6 +13,7 @@ import reactor.core.publisher.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;
+import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.constants.MethodDecoratorScope.*;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.generator.constants.GeneratorConstants.*;
@@ -21,7 +22,7 @@ import static io.art.generator.constants.GeneratorConstants.ServiceSpecification
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.registry.RegistryVariableCreator.*;
 import static io.art.generator.determiner.ServiceMethodsDeterminer.*;
-import static io.art.generator.model.ImportModel.classImport;
+import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewBuilder.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.TypeModel.*;
@@ -59,11 +60,11 @@ public class ServicesMethodCreator {
         Type[] parameterTypes = serviceMethod.getGenericParameterTypes();
         MethodProcessingMode inputMode = BLOCKING;
         for (Type parameterType : parameterTypes) {
-            if (parameterType instanceof Flux) {
+            if (parameterType instanceof ParameterizedType && ((ParameterizedType) parameterType).getRawType().equals(Flux.class)) {
                 inputMode = FLUX;
                 break;
             }
-            if (parameterType instanceof Mono) {
+            if (parameterType instanceof ParameterizedType && ((ParameterizedType) parameterType).getRawType().equals(Mono.class)) {
                 inputMode = MONO;
                 break;
             }
@@ -89,12 +90,12 @@ public class ServicesMethodCreator {
                         List.of(literal(serviceClass.getSimpleName()), literal(serviceMethod.getName()))),
                 select(type(MethodDecoratorScope.class), OUTPUT.name())
         ));
-        return newBuilder(type(ServiceMethodSpecification.class))
+        NewBuilder method = newBuilder(type(ServiceMethodSpecification.class))
                 .method(SERVICE_ID, literal(serviceClass.getSimpleName()))
-                .method(METHOD_ID, literal(serviceMethod.getName()))
-                .method(INPUT_MAPPER, createInputMapper(newMethod, parameterTypes))
-                .method(OUTPUT_MAPPER, createOutputMapper(newMethod, returnType))
-                .method(INPUT_MODE, select(type(MethodProcessingMode.class), inputMode.name()))
+                .method(METHOD_ID, literal(serviceMethod.getName()));
+        let(createInputMapper(newMethod, parameterTypes), mapper -> method.method(INPUT_MAPPER, mapper));
+        let(createOutputMapper(newMethod, returnType), mapper -> method.method(OUTPUT_MAPPER, mapper));
+        return method.method(INPUT_MODE, select(type(MethodProcessingMode.class), inputMode.name()))
                 .method(OUTPUT_MODE, select(type(MethodProcessingMode.class), outputMode.name()))
                 .method(INPUT_DECORATOR, inputDecorator)
                 .method(OUTPUT_DECORATOR, outputDecorator)
@@ -143,6 +144,9 @@ public class ServicesMethodCreator {
             }
             parameters.add(select(type((Class<?>) parameterType), CLASS_KEYWORD));
             newMethod.addClassImport(classImport(((Class<?>) parameterType).getName()));
+        }
+        if (parameters.isEmpty()) {
+            return null;
         }
         return applyMethod(MAPPERS_REGISTRY_NAME, GET_TO_MODEL_NAME, parameters.toList());
     }

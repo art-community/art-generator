@@ -27,4 +27,8 @@ public class MyService {
         request.subscribe(System.out::println);
         return "Test";
     }
+
+    public String myMethod3() {
+        return "Test";
+    }
 }
