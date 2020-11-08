@@ -1,5 +1,7 @@
 package io.art.generator.creator.decorate;
 
+import com.sun.tools.javac.tree.*;
+import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
 import io.art.model.configurator.*;
@@ -19,36 +21,37 @@ public class DecorateMethodCreator {
     public NewMethod createDecorateMethod() {
         return newMethod()
                 .modifiers(PUBLIC | STATIC)
-                .name("decorate")
-                .parameter(newParameter(type(ModuleModel.class), "model"))
+                .name(DECORATE_NAME)
+                .parameter(newParameter(type(ModuleModel.class), MODEL_NAME))
                 .returnType(type(ModuleModel.class.getName()))
-                .statement(() -> maker().Return(
-                        applyMethod("model", "configure", List.of(
-                                newLambda()
-                                        .parameter(newParameter(type(ConfiguratorModel.class), "configurator"))
-                                        .expression(() ->
-                                                applyMethod(applyMethod("configurator",
-                                                        "value", List.of(
-                                                                newLambda()
-                                                                        .parameter(newParameter(type(ValueConfiguratorModel.class), "value"))
-                                                                        .expression(() -> applyMethod("value", "registry", List.of(applyMethod(
-                                                                                mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX,
-                                                                                "mappers")))
-                                                                        )
-                                                                        .generate()
-                                                        )),
-                                                        "server", List.of(
-                                                                newLambda()
-                                                                        .parameter(newParameter(type(ServerConfiguratorModel.class), "server"))
-                                                                        .expression(() -> applyMethod("server", "registry", List.of(applyMethod(
-                                                                                mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX,
-                                                                                "services")))
-                                                                        )
-                                                                        .generate()
-                                                        )))
-                                        .generate()
-                                )
-                        ))
-                );
+                .statement(() -> maker().Return(createModelConfigureMethod(mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX)));
+    }
+
+    private JCMethodInvocation createModelConfigureMethod(String providerClassName) {
+        return applyMethod(MODEL_NAME, CONFIGURE_NAME, List.of(createConfiguratorLambda(providerClassName)));
+    }
+
+    private JCTree.JCLambda createConfiguratorLambda(String providerClassName) {
+        return newLambda()
+                .parameter(newParameter(type(ConfiguratorModel.class), CONFIGURATOR_NAME))
+                .expression(() -> applyMethod(
+                        applyMethod(CONFIGURATOR_NAME, VALUE_NAME, List.of(createValueLambda(providerClassName))),
+                        SERVER_NAME, List.of(createServerLambda(providerClassName)))
+                )
+                .generate();
+    }
+
+    private JCTree.JCLambda createValueLambda(String providerClassName) {
+        return newLambda()
+                .parameter(newParameter(type(ValueConfiguratorModel.class), VALUE_NAME))
+                .expression(() -> applyMethod(VALUE_NAME, REGISTRY_NAME, List.of(applyMethod(providerClassName, MAPPERS_NAME))))
+                .generate();
+    }
+
+    private JCTree.JCLambda createServerLambda(String providerClassName) {
+        return newLambda()
+                .parameter(newParameter(type(ServerConfiguratorModel.class), SERVER_NAME))
+                .expression(() -> applyMethod(SERVER_NAME, REGISTRY_NAME, List.of(applyMethod(providerClassName, SERVICES_NAME))))
+                .generate();
     }
 }

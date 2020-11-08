@@ -40,11 +40,11 @@ public class MappersMethodCreator {
 
     private JCExpressionStatement createToModel(Class<?> modelClass) {
         List<JCExpression> arguments = List.of(classReference(modelClass), createToModelMapper(modelClass));
-        return execMethodCall(REGISTRY_NAME, REGISTER, arguments);
+        return execMethodCall(REGISTRY_NAME, REGISTER_NAME, arguments);
     }
 
     private JCExpressionStatement createFromModel(Class<?> modelClass) {
         List<JCExpression> arguments = List.of(classReference(modelClass), createFromModelMapper(modelClass));
-        return execMethodCall(REGISTRY_NAME, REGISTER, arguments);
+        return execMethodCall(REGISTRY_NAME, REGISTER_NAME, arguments);
     }
 }

@@ -12,11 +12,13 @@ public interface GeneratorConstants {
     interface Names {
         String PROVIDER_CLASS_NAME_SUFFIX = "Provider";
         String BUILDER_METHOD_NAME = "builder";
+        String CONFIGURATOR_NAME = "configurator";
         String BUILD_METHOD_NAME = "build";
         String MAIN_NAME = "main";
         String LAUNCH_NAME = "launch";
         String DECORATE_NAME = "decorate";
         String CONFIGURE_NAME = "configure";
+        String SERVER_NAME = "server";
         String MODULE_NAME = "module";
         String MODEL_NAME = "model";
         String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
@@ -27,7 +29,7 @@ public interface GeneratorConstants {
         String PUT_FROM_MODEL_NAME = "putFromModel";
         String GET_TO_MODEL_NAME = "getToModel";
         String GET_FROM_MODEL_NAME = "getFromModel";
-        String REGISTER = "register";
+        String REGISTER_NAME = "register";
         String VALUE_NAME = "value";
         String ENTITY_BUILDER_NAME = "entityBuilder";
         String LAZY_PUT_NAME = "lazyPut";
@@ -52,47 +54,47 @@ public interface GeneratorConstants {
 
     interface MappersConstants {
         interface PrimitiveMappingMethods {
-            String toString = "toString";
-            String toInt = "toInt";
-            String toBool = "toBool";
-            String toLong = "toLong";
-            String toDouble = "toDouble";
-            String toByte = "toByte";
-            String toFloat = "toFloat";
+            String TO_STRING = "toString";
+            String TO_INT = "toInt";
+            String TO_BOOL = "toBool";
+            String TO_LONG = "toLong";
+            String TO_DOUBLE = "toDouble";
+            String TO_BYTE = "toByte";
+            String TO_FLOAT = "toFloat";
 
-            String fromString = "fromString";
-            String fromInt = "fromInt";
-            String fromBool = "fromBool";
-            String fromLong = "fromLong";
-            String fromDouble = "fromDouble";
-            String fromByte = "fromByte";
-            String fromFloat = "fromFloat";
+            String FROM_STRING = "fromString";
+            String FROM_INT = "fromInt";
+            String FROM_BOOL = "fromBool";
+            String FROM_LONG = "fromLong";
+            String FROM_DOUBLE = "fromDouble";
+            String FROM_BYTE = "fromByte";
+            String FROM_FLOAT = "fromFloat";
         }
 
         interface ArrayMappingMethods {
-            String fromCollection = "fromCollection";
-            String fromArray = "fromArray";
-            String fromList = "fromList";
-            String fromSet = "fromSet";
-            String fromQueue = "fromQueue";
-            String fromDeque = "fromDeque";
+            String FROM_COLLECTION = "fromCollection";
+            String FROM_ARRAY = "fromArray";
+            String FROM_LIST = "fromList";
+            String FROM_SET = "fromSet";
+            String FROM_QUEUE = "fromQueue";
+            String FROM_DEQUE = "fromDeque";
 
-            String toCollection = "toCollection";
-            String toArray = "toArray";
-            String toList = "toList";
-            String toSet = "toSet";
-            String toQueue = "toQueue";
-            String toDeque = "toDeque";
+            String TO_COLLECTION = "toCollection";
+            String TO_ARRAY = "toArray";
+            String TO_LIST = "toList";
+            String TO_SET = "toSet";
+            String TO_QUEUE = "toQueue";
+            String TO_DEQUE = "toDeque";
         }
 
         interface EntityMappingMethods {
-            String toMap = "toMap";
-            String fromMap = "fromMap";
+            String TO_MAP = "toMap";
+            String FROM_MAP = "fromMap";
         }
 
         interface BinaryMappingMethods {
-            String fromBinary = "fromBinary";
-            String toBinary = "toBinary";
+            String FROM_BINARY = "fromBinary";
+            String TO_BINARY = "toBinary";
         }
 
         Set<Class<?>> KNOWN_TYPES = setOf(
@@ -118,5 +120,22 @@ public interface GeneratorConstants {
         Set<Class<?>> KNOWN_STRICT_TYPES = setOf(
                 Object.class
         );
+    }
+
+    interface ServiceSpecificationMethods {
+        String SERVICE_ID = "serviceId";
+        String METHOD_ID = "methodId";
+        String METHOD = "method";
+        String INPUT_MODE = "inputMode";
+        String OUTPUT_MODE = "outputMode";
+        String INPUT_MAPPER = "inputMapper";
+        String OUTPUT_MAPPER = "outputMapper";
+        String INPUT_DECORATOR = "inputDecorator";
+        String OUTPUT_DECORATOR = "outputDecorator";
+        String IMPLEMENTATION = "implementation";
+        String SERVICE_METHOD = "serviceMethod";
+        String HANDLER_METHOD = "handler";
+        String PRODUCER_METHOD = "producer";
+        String CONSUMER_METHOD = "consumer";
     }
 }
