@@ -74,36 +74,33 @@ public class FromModelMapperCreator {
 
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            Type rawType = parameterizedType.getRawType();
-            Class<?> rawTypeAsClass = (Class<?>) parameterizedType.getRawType();
-            if (rawType instanceof Class) {
-                Type[] typeArguments = parameterizedType.getActualTypeArguments();
-                if (java.util.List.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
-                    return applyClassMethod(type(ArrayMapping.class), FROM_LIST, List.of(parameterMapper));
-                }
-                if (Queue.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
-                    return applyClassMethod(type(ArrayMapping.class), FROM_QUEUE, List.of(parameterMapper));
-                }
-                if (Deque.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
-                    return applyClassMethod(type(ArrayMapping.class), FROM_DEQUE, List.of(parameterMapper));
-                }
-                if (Set.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
-                    return applyClassMethod(type(ArrayMapping.class), FROM_SET, List.of(parameterMapper));
-                }
-                if (Collection.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
-                    return applyClassMethod(type(ArrayMapping.class), FROM_COLLECTION, List.of(parameterMapper));
-                }
-                if (Map.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression keyToModelMapper = selectToModelMapper(typeArguments[0]);
-                    JCExpression keyFromModelMapper = selectFromModelMapper(typeArguments[0]);
-                    JCExpression valueMapper = selectFromModelMapper(typeArguments[1]);
-                    return applyClassMethod(type(EntityMapping.class), FROM_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
-                }
+            Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+            Type[] typeArguments = parameterizedType.getActualTypeArguments();
+            if (java.util.List.class.isAssignableFrom(rawType)) {
+                JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
+                return applyClassMethod(type(ArrayMapping.class), FROM_LIST, List.of(parameterMapper));
+            }
+            if (Queue.class.isAssignableFrom(rawType)) {
+                JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
+                return applyClassMethod(type(ArrayMapping.class), FROM_QUEUE, List.of(parameterMapper));
+            }
+            if (Deque.class.isAssignableFrom(rawType)) {
+                JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
+                return applyClassMethod(type(ArrayMapping.class), FROM_DEQUE, List.of(parameterMapper));
+            }
+            if (Set.class.isAssignableFrom(rawType)) {
+                JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
+                return applyClassMethod(type(ArrayMapping.class), FROM_SET, List.of(parameterMapper));
+            }
+            if (Collection.class.isAssignableFrom(rawType)) {
+                JCExpression parameterMapper = selectFromModelMapper(typeArguments[0]);
+                return applyClassMethod(type(ArrayMapping.class), FROM_COLLECTION, List.of(parameterMapper));
+            }
+            if (Map.class.isAssignableFrom(rawType)) {
+                JCExpression keyToModelMapper = selectToModelMapper(typeArguments[0]);
+                JCExpression keyFromModelMapper = selectFromModelMapper(typeArguments[0]);
+                JCExpression valueMapper = selectFromModelMapper(typeArguments[1]);
+                return applyClassMethod(type(EntityMapping.class), FROM_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
             }
         }
 

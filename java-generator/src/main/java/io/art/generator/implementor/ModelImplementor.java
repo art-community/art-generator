@@ -2,6 +2,7 @@ package io.art.generator.implementor;
 
 import com.sun.tools.javac.util.*;
 import io.art.core.constants.*;
+import io.art.generator.collector.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.launcher.*;
@@ -12,6 +13,7 @@ import io.art.server.implementation.*;
 import io.art.server.model.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
+import io.art.value.immutable.Value;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import io.art.value.mapping.*;
@@ -20,13 +22,16 @@ import lombok.experimental.*;
 import reactor.core.publisher.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.tree.JCTree.*;
+import static io.art.generator.collector.ServerMetaDataCollector.*;
 import static io.art.generator.constants.GeneratorConstants.Annotations.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.creator.decorate.DecorateMethodCreator.*;
 import static io.art.generator.implementor.ServerModelImplementor.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewClass.*;
+import static io.art.generator.model.NewField.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
@@ -70,7 +75,33 @@ public class ModelImplementor {
                 .addImport(classImport(Flux.class.getName()))
                 .addImport(classImport(Mono.class.getName()))
                 .addImport(classImport(ModuleLauncher.class.getName()));
+
+        NewField modelField = newField()
+                .name(MODEL_NAME)
+                .modifiers(PRIVATE | FINAL | STATIC)
+                .type(type(ModuleModel.class))
+                .initializer(() -> applyMethod(DECORATE_NAME, List.of(applyClassMethod(type(mainClass().getName()), CONFIGURE_NAME))));
+
+        NewField mappersRegistryField = newField()
+                .name(MAPPERS_REGISTRY_NAME)
+                .modifiers(PRIVATE | FINAL | STATIC)
+                .type(type(MappersRegistry.class))
+                .initializer(() -> applyMethod(MAPPERS_NAME));
+
+        NewField servicesRegistryField = newField()
+                .name(SERVICES_REGISTRY_NAME)
+                .modifiers(PRIVATE | FINAL | STATIC)
+                .type(type(ServiceSpecificationRegistry.class))
+                .initializer(() -> applyMethod(SERVICES_NAME));
+
+        providerClass
+                .field(MODEL_NAME, modelField)
+                .field(MAPPERS_REGISTRY_NAME, mappersRegistryField)
+                .field(SERVICES_REGISTRY_NAME, servicesRegistryField);
+
+        ServerModelMetaData serverModelMetaData = collectServerModelMetaData(model.getServerModel());
         implementServerModel(providerClass, model.getServerModel());
+        providerClass.method(DECORATE_NAME, createDecorateMethod());
         replaceInnerClass(mainClass(), providerClass);
         replaceMethod(mainClass(), generateMainMethod(providerClassName));
     }

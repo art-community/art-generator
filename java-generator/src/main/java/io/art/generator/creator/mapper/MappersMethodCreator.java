@@ -1,80 +1,71 @@
 package io.art.generator.creator.mapper;
 
-import com.google.common.reflect.*;
-import com.sun.beans.*;
+import com.google.common.collect.*;
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
 import io.art.generator.model.*;
 import io.art.value.registry.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
+import static io.art.core.factory.CollectionsFactory.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.creator.registry.RegistryVariableCreator.*;
-import static io.art.generator.determiner.MappingFieldsDeterminer.*;
 import static io.art.generator.model.NewMethod.*;
+import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import java.lang.reflect.*;
 import java.util.*;
 
 @UtilityClass
 public class MappersMethodCreator {
-    public NewMethod createMappersMethod(Type returnType, TypeModel registryType, Type[] parameterClasses) {
+    public NewMethod createMappersMethod(ImmutableSet<Type> types) {
+        TypeModel registryType = type(MappersRegistry.class);
         NewMethod method = newMethod()
                 .name(MAPPERS_NAME)
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
 
-        for (Type parameterType : parameterClasses) {
-            if (parameterType instanceof ParameterizedType) {
-                Class<?> parameterClass = (Class<?>) ((ParameterizedType) parameterType).getActualTypeArguments()[0];
-                collectUnknownClassesRecursive(parameterClass)
-                        .stream()
-                        .peek(type -> method.statement(() -> createToModel(type)))
-                        .forEach(type -> method.statement(() -> createFromModel(type)));
-                if (typeIsUnknown(parameterClass)) {
-                    method.statement(() -> createToModel(parameterClass)).statement(() -> createFromModel(parameterClass));
-                }
-            }
-            if (parameterType instanceof Class) {
-                if (typeIsUnknown(parameterType)) {
-                    Class<?> parameterClass = (Class<?>) parameterType;
-                    method.statement(() -> createToModel(parameterClass)).statement(() -> createFromModel(parameterClass));
-                }
-            }
-        }
-
-        if (returnType instanceof ParameterizedType) {
-            Class<?> returnClass = (Class<?>) ((ParameterizedType) returnType).getActualTypeArguments()[0];
-            collectUnknownClassesRecursive(returnClass)
-                    .stream()
-                    .peek(type -> method.statement(() -> createToModel(type)))
-                    .forEach(type -> method.statement(() -> createFromModel(type)));
-            if (typeIsUnknown(returnClass)) {
-                method.statement(() -> createToModel(returnClass)).statement(() -> createFromModel(returnClass));
-            }
-        }
-
-        if (returnType instanceof Class) {
-            if (typeIsUnknown(returnType)) {
-                Class<?> returnClass = (Class<?>) returnType;
-                method.statement(() -> createToModel(returnClass)).statement(() -> createFromModel(returnClass));
-            }
+        Set<Type> createdMappers = setOf();
+        for (Type type : types) {
+            createMapperForType(method, type, createdMappers);
+            createdMappers.add(type);
         }
 
         return method.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
-    private JCExpressionStatement createToModel(Class<?> modelClass) {
-        List<JCExpression> arguments = List.of(classReference(modelClass), createToModelMapper(modelClass));
+    private void createMapperForType(NewMethod method, Type type, Set<Type> createdMappers) {
+        if (createdMappers.contains(type)) {
+            return;
+        }
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+            createdMappers.add(rawType);
+            method.statement(() -> createToModel(rawType)).statement(() -> createFromModel(rawType));
+            for (Type actualTypeArgument : parameterizedType.getActualTypeArguments()) {
+                createdMappers.add(actualTypeArgument);
+                createMapperForType(method, actualTypeArgument, createdMappers);
+            }
+            return;
+        }
+        if (type instanceof Class<?>) {
+            createdMappers.add(type);
+            Class<?> typeAsClass = (Class<?>) type;
+            method.statement(() -> createToModel(typeAsClass)).statement(() -> createFromModel(typeAsClass));
+        }
+    }
+
+    private JCExpressionStatement createToModel(Class<?> type) {
+        List<JCExpression> arguments = List.of(classReference(type), createToModelMapper(type));
         return execMethodCall(REGISTRY_NAME, REGISTER_NAME, arguments);
     }
 
-    private JCExpressionStatement createFromModel(Class<?> modelClass) {
-        List<JCExpression> arguments = List.of(classReference(modelClass), createFromModelMapper(modelClass));
+    private JCExpressionStatement createFromModel(Class<?> type) {
+        List<JCExpression> arguments = List.of(classReference(type), createFromModelMapper(type));
         return execMethodCall(REGISTRY_NAME, REGISTER_NAME, arguments);
     }
 }

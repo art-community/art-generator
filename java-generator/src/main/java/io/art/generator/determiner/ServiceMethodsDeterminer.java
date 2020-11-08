@@ -10,6 +10,8 @@ import java.lang.reflect.*;
 @UtilityClass
 public class ServiceMethodsDeterminer {
     public ImmutableList<Method> getServiceMethods(Class<?> serviceClass) {
-        return stream(serviceClass.getDeclaredMethods()).filter(method -> isPublic(method.getModifiers())).collect(toImmutableList());
+        return stream(serviceClass.getDeclaredMethods())
+                .filter(method -> isPublic(method.getModifiers()))
+                .collect(toImmutableList());
     }
 }

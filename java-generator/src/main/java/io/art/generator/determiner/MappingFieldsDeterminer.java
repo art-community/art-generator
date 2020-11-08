@@ -13,6 +13,23 @@ import java.util.*;
 
 @UtilityClass
 public class MappingFieldsDeterminer {
+    public ImmutableList<Field> getMappingFields(Class<?> modelClass) {
+        ImmutableList.Builder<Field> fields = ImmutableList.builder();
+        try {
+            for (Method method : modelClass.getDeclaredMethods()) {
+                String getterName = method.getName();
+                if (getterName.startsWith(GET_PREFIX)) {
+                    String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
+                    Field[] declaredFields = modelClass.getDeclaredFields();
+                    stream(declaredFields).filter(field -> field.getName().equals(fieldName)).forEach(fields::add);
+                }
+            }
+            return fields.build();
+        } catch (Throwable throwable) {
+            throw new GenerationException(throwable);
+        }
+    }
+
     public boolean typeIsKnown(Type type) {
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
@@ -29,23 +46,6 @@ public class MappingFieldsDeterminer {
 
     public boolean typeIsUnknown(Type type) {
         return !typeIsKnown(type);
-    }
-
-    public ImmutableList<Field> getMappingFields(Class<?> modelClass) {
-        ImmutableList.Builder<Field> types = ImmutableList.builder();
-        try {
-            for (Method method : modelClass.getDeclaredMethods()) {
-                String getterName = method.getName();
-                if (getterName.startsWith(GET_PREFIX)) {
-                    String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
-                    Field[] declaredFields = modelClass.getDeclaredFields();
-                    stream(declaredFields).filter(field -> field.getName().equals(fieldName)).forEach(types::add);
-                }
-            }
-            return types.build();
-        } catch (Throwable throwable) {
-            throw new GenerationException(throwable);
-        }
     }
 
     public ImmutableSet<Class<?>> collectUnknownClassesRecursive(Class<?> modelClass) {

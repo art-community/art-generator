@@ -37,76 +37,72 @@ public class ToModelMapperCreator {
 
     public JCExpression selectToModelMapper(Type type) {
         if (type instanceof Class) {
-            Class<?> typeAssClass = (Class<?>) type;
-            if (byte[].class.equals(typeAssClass)) {
+            Class<?> typeAsClass = (Class<?>) type;
+            if (byte[].class.equals(typeAsClass)) {
                 return select(type(BinaryMapping.class), TO_BINARY);
             }
-            if (typeAssClass.isArray()) {
-                JCExpression parameterMapper = selectToModelMapper(typeAssClass.getComponentType());
+            if (typeAsClass.isArray()) {
+                JCExpression parameterMapper = selectToModelMapper(typeAsClass.getComponentType());
                 return applyClassMethod(type(ArrayMapping.class), TO_ARRAY, List.of(parameterMapper));
             }
-            if (String.class.equals(typeAssClass)) {
+            if (String.class.equals(typeAsClass)) {
                 return select(type(PrimitiveMapping.class), TO_STRING);
             }
-            if (short.class.equals(typeAssClass) || Short.class.equals(typeAssClass)) {
+            if (short.class.equals(typeAsClass) || Short.class.equals(typeAsClass)) {
                 return select(type(PrimitiveMapping.class), TO_INT);
             }
-            if (int.class.equals(typeAssClass) || Integer.class.equals(typeAssClass)) {
+            if (int.class.equals(typeAsClass) || Integer.class.equals(typeAsClass)) {
                 return select(type(PrimitiveMapping.class), TO_INT);
             }
-            if (long.class.equals(typeAssClass) ||Long.class.equals(typeAssClass)) {
+            if (long.class.equals(typeAsClass) || Long.class.equals(typeAsClass)) {
                 return select(type(PrimitiveMapping.class), TO_LONG);
             }
-            if (boolean.class.equals(typeAssClass) ||Boolean.class.equals(typeAssClass)) {
+            if (boolean.class.equals(typeAsClass) || Boolean.class.equals(typeAsClass)) {
                 return select(type(PrimitiveMapping.class), TO_BOOL);
             }
-            if (double.class.equals(typeAssClass) ||Double.class.equals(typeAssClass)) {
+            if (double.class.equals(typeAsClass) || Double.class.equals(typeAsClass)) {
                 return select(type(PrimitiveMapping.class), TO_DOUBLE);
             }
-            if (byte.class.equals(typeAssClass) ||Byte.class.equals(typeAssClass)) {
+            if (byte.class.equals(typeAsClass) || Byte.class.equals(typeAsClass)) {
                 return select(type(PrimitiveMapping.class), TO_BYTE);
             }
-            if (float.class.equals(typeAssClass) ||Float.class.equals(typeAssClass)) {
+            if (float.class.equals(typeAsClass) || Float.class.equals(typeAsClass)) {
                 return select(type(PrimitiveMapping.class), TO_FLOAT);
             }
-            return applyMethod(REGISTRY_NAME, GET_TO_MODEL_NAME, List.of(select(type(typeAssClass), CLASS_KEYWORD)));
+            return applyMethod(REGISTRY_NAME, GET_TO_MODEL_NAME, List.of(select(type(typeAsClass), CLASS_KEYWORD)));
         }
 
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            Type rawType = parameterizedType.getRawType();
-            Class<?> rawTypeAsClass = (Class<?>) parameterizedType.getRawType();
-            if (rawType instanceof Class) {
-                Type[] typeArguments = parameterizedType.getActualTypeArguments();
-                if (java.util.List.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
-                    return applyClassMethod(type(ArrayMapping.class), TO_LIST, List.of(parameterMapper));
-                }
-                if (Queue.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
-                    return applyClassMethod(type(ArrayMapping.class), TO_QUEUE, List.of(parameterMapper));
-                }
-                if (Deque.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
-                    return applyClassMethod(type(ArrayMapping.class), TO_DEQUE, List.of(parameterMapper));
-                }
-                if (Set.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
-                    return applyClassMethod(type(ArrayMapping.class), TO_SET, List.of(parameterMapper));
-                }
-                if (Collection.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
-                    return applyClassMethod(type(ArrayMapping.class), TO_COLLECTION, List.of(parameterMapper));
-                }
-                if (Map.class.isAssignableFrom(rawTypeAsClass)) {
-                    JCExpression keyToModelMapper = selectToModelMapper(typeArguments[0]);
-                    JCExpression keyFromModelMapper = selectFromModelMapper(typeArguments[0]);
-                    JCExpression valueMapper = selectToModelMapper(typeArguments[1]);
-                    return applyClassMethod(type(EntityMapping.class), TO_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
-                }
+            Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+            Type[] typeArguments = parameterizedType.getActualTypeArguments();
+            if (java.util.List.class.isAssignableFrom(rawType)) {
+                JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
+                return applyClassMethod(type(ArrayMapping.class), TO_LIST, List.of(parameterMapper));
+            }
+            if (Queue.class.isAssignableFrom(rawType)) {
+                JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
+                return applyClassMethod(type(ArrayMapping.class), TO_QUEUE, List.of(parameterMapper));
+            }
+            if (Deque.class.isAssignableFrom(rawType)) {
+                JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
+                return applyClassMethod(type(ArrayMapping.class), TO_DEQUE, List.of(parameterMapper));
+            }
+            if (Set.class.isAssignableFrom(rawType)) {
+                JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
+                return applyClassMethod(type(ArrayMapping.class), TO_SET, List.of(parameterMapper));
+            }
+            if (Collection.class.isAssignableFrom(rawType)) {
+                JCExpression parameterMapper = selectToModelMapper(typeArguments[0]);
+                return applyClassMethod(type(ArrayMapping.class), TO_COLLECTION, List.of(parameterMapper));
+            }
+            if (Map.class.isAssignableFrom(rawType)) {
+                JCExpression keyToModelMapper = selectToModelMapper(typeArguments[0]);
+                JCExpression keyFromModelMapper = selectFromModelMapper(typeArguments[0]);
+                JCExpression valueMapper = selectToModelMapper(typeArguments[1]);
+                return applyClassMethod(type(EntityMapping.class), TO_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
             }
         }
-
         throw new GenerationException(format(UNKNOWN_FIELD_TYPE, type.getTypeName()));
     }
 
