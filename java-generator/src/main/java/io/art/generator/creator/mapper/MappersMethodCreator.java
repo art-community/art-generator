@@ -12,28 +12,53 @@ import static io.art.generator.creator.registry.RegistryVariableCreator.*;
 import static io.art.generator.determiner.MappingFieldsDeterminer.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.service.JavacService.*;
+import java.lang.reflect.*;
 
 @UtilityClass
 public class MappersMethodCreator {
-    public NewMethod createMappersMethod(Class<?> returnClass, TypeModel registryType, Class<?>[] parameterClasses) {
+    public NewMethod createMappersMethod(Type returnType, TypeModel registryType, Type[] parameterClasses) {
         NewMethod method = newMethod()
                 .name(MAPPERS_NAME)
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
 
-        for (Class<?> parameterClass : parameterClasses) {
-            collectUnknownClassesRecursive(parameterClass)
+        for (Type parameterType : parameterClasses) {
+            if (parameterType instanceof ParameterizedType) {
+                Class<?> parameterClass = (Class<?>) ((ParameterizedType) parameterType).getActualTypeArguments()[0];
+                collectUnknownClassesRecursive(parameterClass)
+                        .stream()
+                        .peek(type -> method.statement(() -> createToModel(type)))
+                        .forEach(type -> method.statement(() -> createFromModel(type)));
+                if (typeIsUnknown(parameterClass)) {
+                    method.statement(() -> createToModel(parameterClass)).statement(() -> createFromModel(parameterClass));
+                }
+            }
+            if (parameterType instanceof Class) {
+                if (typeIsUnknown(parameterType)) {
+                    Class<?> parameterClass = (Class<?>) parameterType;
+                    method.statement(() -> createToModel(parameterClass)).statement(() -> createFromModel(parameterClass));
+                }
+            }
+        }
+
+        if (returnType instanceof ParameterizedType) {
+            Class<?> returnClass = (Class<?>) ((ParameterizedType) returnType).getActualTypeArguments()[0];
+            collectUnknownClassesRecursive(returnClass)
                     .stream()
                     .peek(type -> method.statement(() -> createToModel(type)))
                     .forEach(type -> method.statement(() -> createFromModel(type)));
-            method.statement(() -> createToModel(parameterClass)).statement(() -> createFromModel(parameterClass));
+            if (typeIsUnknown(returnClass)) {
+                method.statement(() -> createToModel(returnClass)).statement(() -> createFromModel(returnClass));
+            }
         }
 
-        collectUnknownClassesRecursive(returnClass).stream()
-                .peek(type -> method.statement(() -> createToModel(type)))
-                .forEach(type -> method.statement(() -> createFromModel(type)));
-        method.statement(() -> createToModel(returnClass)).statement(() -> createFromModel(returnClass));
+        if (returnType instanceof Class) {
+            if (typeIsUnknown(returnType)) {
+                Class<?> returnClass = (Class<?>) returnType;
+                method.statement(() -> createToModel(returnClass)).statement(() -> createFromModel(returnClass));
+            }
+        }
 
         return method.statement(() -> returnVariable(REGISTRY_NAME));
     }

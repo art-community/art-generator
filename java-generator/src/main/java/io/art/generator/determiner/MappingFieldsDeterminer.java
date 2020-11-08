@@ -7,6 +7,7 @@ import static io.art.core.extensions.StringExtensions.*;
 import static io.art.core.factory.CollectionsFactory.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static java.util.Arrays.*;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -37,7 +38,8 @@ public class MappingFieldsDeterminer {
                 String getterName = method.getName();
                 if (getterName.startsWith(GET_PREFIX)) {
                     String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
-                    types.add(modelClass.getDeclaredField(fieldName));
+                    Field[] declaredFields = modelClass.getDeclaredFields();
+                    stream(declaredFields).filter(field -> field.getName().equals(fieldName)).forEach(types::add);
                 }
             }
             return types.build();

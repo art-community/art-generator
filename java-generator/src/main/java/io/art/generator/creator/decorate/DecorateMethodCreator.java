@@ -44,7 +44,7 @@ public class DecorateMethodCreator {
     private JCTree.JCLambda createValueLambda(String providerClassName) {
         return newLambda()
                 .parameter(newParameter(type(ValueConfiguratorModel.class), VALUE_NAME))
-                .expression(() -> applyMethod(VALUE_NAME, REGISTRY_NAME, List.of(applyMethod(providerClassName, MAPPERS_NAME))))
+                .expression(() -> applyMethod(VALUE_NAME, REGISTRY_NAME, List.of(ident(MAPPERS_REGISTRY_NAME))))
                 .generate();
     }
 

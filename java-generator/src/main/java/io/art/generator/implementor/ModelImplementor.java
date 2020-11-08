@@ -17,6 +17,7 @@ import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import io.art.value.registry.*;
 import lombok.experimental.*;
+import reactor.core.publisher.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.generator.constants.GeneratorConstants.Annotations.*;
@@ -66,6 +67,8 @@ public class ModelImplementor {
                 .addImport(classImport(ConfiguratorModel.class.getName()))
                 .addImport(classImport(ValueConfiguratorModel.class.getName()))
                 .addImport(classImport(ServerConfiguratorModel.class.getName()))
+                .addImport(classImport(Flux.class.getName()))
+                .addImport(classImport(Mono.class.getName()))
                 .addImport(classImport(ModuleLauncher.class.getName()));
         implementServerModel(providerClass, model.getServerModel());
         replaceInnerClass(mainClass(), providerClass);

@@ -1,5 +1,6 @@
 package io.art.generator.constants;
 
+import reactor.core.publisher.*;
 import static io.art.core.factory.CollectionsFactory.*;
 import java.util.*;
 
@@ -21,6 +22,7 @@ public interface GeneratorConstants {
         String SERVER_NAME = "server";
         String MODULE_NAME = "module";
         String MODEL_NAME = "model";
+        String MAPPERS_REGISTRY_NAME = "mappersRegistry";
         String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
         String MAPPERS_NAME = "mappers";
         String SERVICES_NAME = "services";
@@ -114,7 +116,9 @@ public interface GeneratorConstants {
                 List.class,
                 Collection.class,
                 Set.class,
-                Map.class
+                Map.class,
+                Flux.class,
+                Mono.class
         );
 
         Set<Class<?>> KNOWN_STRICT_TYPES = setOf(

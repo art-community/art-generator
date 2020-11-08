@@ -21,8 +21,8 @@ import java.lang.reflect.*;
 @UtilityClass
 public class ServiceMethodModelImplementor {
     public void implementServiceMethodModel(NewClass providerClass, Class<?> serviceClass, Method serviceMethod) {
-        Class<?> returnType = serviceMethod.getReturnType();
-        Class<?>[] parameterTypes = serviceMethod.getParameterTypes();
+        Type returnType = serviceMethod.getGenericReturnType();
+        Type[] parameterTypes = serviceMethod.getGenericParameterTypes();
 
         NewField model = newField()
                 .name(MODEL_NAME)
@@ -30,15 +30,22 @@ public class ServiceMethodModelImplementor {
                 .type(type(ModuleModel.class))
                 .initializer(() -> applyMethod(DECORATE_NAME, List.of(applyClassMethod(type(mainClass().getName()), CONFIGURE_NAME))));
 
+        NewField mappersRegistry = newField()
+                .name(MAPPERS_REGISTRY_NAME)
+                .modifiers(PRIVATE | FINAL | STATIC)
+                .type(type(MappersRegistry.class))
+                .initializer(() -> applyMethod(MAPPERS_NAME));
+
         providerClass
                 .addImport(classImport(serviceClass.getName()))
                 .field(MODEL_NAME, model)
+                .field(MAPPERS_REGISTRY_NAME, mappersRegistry)
                 .method(MAPPERS_NAME, createMappersMethod(returnType, type(MappersRegistry.class), parameterTypes))
                 .method(SERVICES_NAME, createServicesMethod(serviceClass, type(ServiceSpecificationRegistry.class)))
                 .method(DECORATE_NAME, createDecorateMethod());
 
-        for (Class<?> parameterType : parameterTypes) {
-            providerClass.addImport(classImport(parameterType.getName()));
+        for (Type parameterType : parameterTypes) {
+            providerClass.addImport(classImport(parameterType.getTypeName()));
         }
     }
 }
