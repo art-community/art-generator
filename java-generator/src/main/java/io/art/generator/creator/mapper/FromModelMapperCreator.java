@@ -48,22 +48,25 @@ public class FromModelMapperCreator {
             if (String.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), fromString);
             }
-            if (Integer.class.equals(typeAssClass)) {
+            if (int.class.equals(typeAssClass) || Integer.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), fromInt);
             }
-            if (Long.class.equals(typeAssClass)) {
+            if (short.class.equals(typeAssClass) || Short.class.equals(typeAssClass)) {
+                return select(type(PrimitiveMapping.class), fromInt);
+            }
+            if (long.class.equals(typeAssClass) || Long.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), fromLong);
             }
-            if (Boolean.class.equals(typeAssClass)) {
+            if (boolean.class.equals(typeAssClass) || Boolean.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), fromBool);
             }
-            if (Double.class.equals(typeAssClass)) {
+            if (double.class.equals(typeAssClass) || Double.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), fromDouble);
             }
-            if (Byte.class.equals(typeAssClass)) {
+            if (byte.class.equals(typeAssClass) || Byte.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), fromByte);
             }
-            if (Float.class.equals(typeAssClass)) {
+            if (float.class.equals(typeAssClass) || Float.class.equals(typeAssClass)) {
                 return select(type(PrimitiveMapping.class), fromFloat);
             }
             return applyMethod(REGISTRY_NAME, GET_FROM_MODEL_NAME, List.of(select(type(typeAssClass), CLASS_KEYWORD)));

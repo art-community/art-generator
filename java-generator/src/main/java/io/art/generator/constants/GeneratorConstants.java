@@ -97,10 +97,17 @@ public interface GeneratorConstants {
 
         Set<Class<?>> KNOWN_TYPES = setOf(
                 String.class,
+                short.class,
+                Short.class,
+                int.class,
                 Integer.class,
+                long.class,
                 Long.class,
+                byte.class,
                 Byte.class,
+                float.class,
                 Float.class,
+                double.class,
                 Double.class,
                 List.class,
                 Collection.class,

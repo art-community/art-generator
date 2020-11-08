@@ -4,9 +4,11 @@ import com.google.common.collect.*;
 import io.art.generator.exception.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.core.factory.CollectionsFactory.setOf;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import java.lang.reflect.*;
+import java.util.*;
 
 @UtilityClass
 public class MappingFieldsDeterminer {
@@ -45,33 +47,46 @@ public class MappingFieldsDeterminer {
     }
 
     public ImmutableSet<Class<?>> collectUnknownClassesRecursive(Class<?> modelClass) {
-        ImmutableSet.Builder<Class<?>> classes = ImmutableSet.builder();
+        Set<Class<?>> classes = setOf();
         for (Field field : getMappingFields(modelClass)) {
             Type type = field.getGenericType();
             if (typeIsUnknown(type) && !type.equals(modelClass)) {
-                addUnknownClass(classes, type);
+                addUnknownType(classes, type);
             }
         }
-        return classes.build();
+        return ImmutableSet.copyOf(classes);
     }
 
-    private void addUnknownClass(ImmutableSet.Builder<Class<?>> classes, Type type) {
+    public ImmutableSet<Class<?>> collectUnknownClasses(Set<Class<?>> classes, Class<?> modelClass) {
+        for (Field field : getMappingFields(modelClass)) {
+            Type type = field.getGenericType();
+            if (typeIsUnknown(type) && !type.equals(modelClass)) {
+                addUnknownType(classes, type);
+            }
+        }
+        return ImmutableSet.copyOf(classes);
+    }
+
+    private void addUnknownType(Set<Class<?>> classes, Type type) {
         if (type instanceof ParameterizedType) {
             Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
             for (Type typeArgument : typeArguments) {
-                if (typeIsUnknown(typeArgument) && !typeArgument.equals(type)) {
-                    if (typeArgument instanceof Class) {
-                        classes.addAll(collectUnknownClassesRecursive((Class<?>) typeArgument));
-                        continue;
-                    }
-                    addUnknownClass(classes, typeArgument);
+                if (typeIsKnown(typeArgument) || typeArgument.equals(type)) {
+                    continue;
                 }
+                if (typeArgument instanceof Class && !classes.contains(typeArgument)) {
+                    Class<?> typeArgumentAsClass = (Class<?>) typeArgument;
+                    classes.add(typeArgumentAsClass);
+                    classes.addAll(collectUnknownClasses(classes, typeArgumentAsClass));
+                    continue;
+                }
+                addUnknownType(classes, typeArgument);
             }
         }
-        if (type instanceof Class) {
+        if (type instanceof Class && !classes.contains(type)) {
             Class<?> typeAsClass = (Class<?>) type;
             classes.add(typeAsClass);
-            classes.addAll(collectUnknownClassesRecursive(typeAsClass));
+            classes.addAll(collectUnknownClasses(classes, typeAsClass));
         }
     }
 }
