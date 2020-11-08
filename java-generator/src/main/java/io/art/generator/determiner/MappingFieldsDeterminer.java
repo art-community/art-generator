@@ -59,11 +59,13 @@ public class MappingFieldsDeterminer {
         if (type instanceof ParameterizedType) {
             Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
             for (Type typeArgument : typeArguments) {
-                if (typeArgument instanceof Class) {
-                    classes.addAll(collectUnknownClassesRecursive((Class<?>) typeArgument));
-                    continue;
+                if (typeIsUnknown(typeArgument) && !typeArgument.equals(type)) {
+                    if (typeArgument instanceof Class) {
+                        classes.addAll(collectUnknownClassesRecursive((Class<?>) typeArgument));
+                        continue;
+                    }
+                    addUnknownClass(classes, typeArgument);
                 }
-                addUnknownClass(classes, typeArgument);
             }
         }
         if (type instanceof Class) {
