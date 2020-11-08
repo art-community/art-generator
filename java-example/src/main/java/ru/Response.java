@@ -7,8 +7,9 @@ import java.util.*;
 @Builder
 public class Response {
     String stringValue;
-    @Singular("listModel")
-    List<Model> listModels;
+    Model[] arrayModels;
+    Collection<Collection<Model>> collectionModels;
+    Collection<Model[]> collectionArrayModels;
     @Singular("stringModel")
     Map<String, Model> stringModels;
     @Singular("intModel")

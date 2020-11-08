@@ -66,6 +66,15 @@ public class MappingFieldsDeterminer {
                 }
                 if (typeArgument instanceof Class && !classes.contains(typeArgument)) {
                     Class<?> typeArgumentAsClass = (Class<?>) typeArgument;
+                    Class<?> arrayClass;
+                    if (typeArgumentAsClass.isArray()) {
+                        if (classes.contains(arrayClass = typeArgumentAsClass.getComponentType())) {
+                            continue;
+                        }
+                        classes.add(arrayClass);
+                        classes.addAll(collectUnknownClasses(classes, arrayClass));
+                        continue;
+                    }
                     classes.add(typeArgumentAsClass);
                     classes.addAll(collectUnknownClasses(classes, typeArgumentAsClass));
                     continue;
@@ -75,6 +84,15 @@ public class MappingFieldsDeterminer {
         }
         if (type instanceof Class && !classes.contains(type)) {
             Class<?> typeAsClass = (Class<?>) type;
+            Class<?> arrayClass;
+            if (typeAsClass.isArray()) {
+                if (classes.contains(arrayClass = typeAsClass.getComponentType())) {
+                    return;
+                }
+                classes.add(arrayClass);
+                classes.addAll(collectUnknownClasses(classes, arrayClass));
+                return;
+            }
             classes.add(typeAsClass);
             classes.addAll(collectUnknownClasses(classes, typeAsClass));
         }
