@@ -54,7 +54,7 @@ public class TypeModel {
             jdk = true;
             packageName = outerTypeName.substring(0, outerTypeName.lastIndexOf(DOT));
             name = outerTypeName.substring(outerTypeName.lastIndexOf(packageName) + packageName.length() + 1);
-            fullName = outerTypeName;
+            fullName = name;
             return;
         }
         if (outerTypeName.contains(DOT)) {

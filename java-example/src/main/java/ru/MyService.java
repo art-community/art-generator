@@ -22,4 +22,9 @@ public class MyService {
                 .stringValue("request was:" + request.getStringValue())
                 .build());
     }
+
+    public String myMethod2(Mono<Request> request) {
+        request.subscribe(System.out::println);
+        return "Test";
+    }
 }

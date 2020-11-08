@@ -105,21 +105,22 @@ public class ServicesMethodCreator {
     private JCMethodInvocation createOutputMapper(NewMethod newMethod, Type returnType) {
         if (returnType instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) returnType;
-            if (((Class<?>) parameterizedType.getRawType()).isAssignableFrom(Flux.class)) {
+            if (parameterizedType.getRawType().equals(Flux.class)) {
                 Class<?> typeArgument = (Class<?>) parameterizedType.getActualTypeArguments()[0];
                 List<JCExpression> arguments = List.of(select(type(typeArgument), CLASS_KEYWORD));
-                newMethod.addClassImport(classImport(typeArgument.getName()));
+                newMethod.addClassImport(classImport(type(typeArgument).getName()));
                 return applyMethod(MAPPERS_REGISTRY_NAME, GET_FROM_MODEL_NAME, arguments);
             }
-            if (((Class<?>) parameterizedType.getRawType()).isAssignableFrom(Mono.class)) {
+            if (parameterizedType.getRawType().equals(Mono.class)) {
                 Class<?> typeArgument = (Class<?>) parameterizedType.getActualTypeArguments()[0];
                 List<JCExpression> arguments = List.of(select(type(typeArgument), CLASS_KEYWORD));
-                newMethod.addClassImport(classImport(typeArgument.getName()));
+                newMethod.addClassImport(classImport(type(typeArgument).getName()));
                 return applyMethod(MAPPERS_REGISTRY_NAME, GET_FROM_MODEL_NAME, arguments);
             }
         }
-        List<JCExpression> arguments = List.of(select(returnType.getTypeName(), CLASS_KEYWORD));
-        newMethod.addClassImport(classImport(returnType.getTypeName()));
+        Class<?> returnClass = (Class<?>) returnType;
+        List<JCExpression> arguments = List.of(select(type(returnClass), CLASS_KEYWORD));
+        newMethod.addClassImport(classImport(type(returnClass).getName()));
         return applyMethod(MAPPERS_REGISTRY_NAME, GET_FROM_MODEL_NAME, arguments);
     }
 
@@ -128,15 +129,15 @@ public class ServicesMethodCreator {
         for (Type parameterType : parameterTypes) {
             if (parameterType instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) parameterType;
-                if (parameterizedType instanceof Flux) {
+                if (parameterizedType.getRawType().equals(Flux.class)) {
                     Class<?> typeArgument = (Class<?>) parameterizedType.getActualTypeArguments()[0];
                     parameters.add(select(type(typeArgument), CLASS_KEYWORD));
-                    newMethod.addClassImport(classImport(typeArgument.getName()));
+                    newMethod.addClassImport(classImport(type(typeArgument).getName()));
                 }
-                if (parameterizedType instanceof Mono) {
+                if (parameterizedType.getRawType().equals(Mono.class)) {
                     Class<?> typeArgument = (Class<?>) parameterizedType.getActualTypeArguments()[0];
                     parameters.add(select(type(typeArgument), CLASS_KEYWORD));
-                    newMethod.addClassImport(classImport(typeArgument.getName()));
+                    newMethod.addClassImport(classImport(type(typeArgument).getName()));
                 }
                 continue;
             }

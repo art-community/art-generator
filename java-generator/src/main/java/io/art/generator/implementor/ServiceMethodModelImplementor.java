@@ -45,7 +45,14 @@ public class ServiceMethodModelImplementor {
                 .method(DECORATE_NAME, createDecorateMethod());
 
         for (Type parameterType : parameterTypes) {
-            providerClass.addImport(classImport(parameterType.getTypeName()));
+            if (parameterType instanceof ParameterizedType) {
+                for (Type actualTypeArgument : ((ParameterizedType) parameterType).getActualTypeArguments()) {
+                    providerClass.addImport(classImport(type((Class<?>) actualTypeArgument).getFullName()));
+                }
+            }
+            if (parameterType instanceof Class) {
+                providerClass.addImport(classImport(type((Class<?>) parameterType).getFullName()));
+            }
         }
     }
 }
