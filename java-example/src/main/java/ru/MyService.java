@@ -5,6 +5,12 @@ import lombok.experimental.*;
 @UtilityClass
 public class MyService {
     public Response myMethod(Request request) {
-        return Response.builder().stringValue("request was:" + request.getStringValue()).model(request.getModel()).build();
+        Model model = Model.builder()
+                .stringValue(request.getModel() + ": from service")
+                .build();
+        return Response.builder()
+                .model(model)
+                .stringValue("request was:" + request.getStringValue())
+                .build();
     }
 }
