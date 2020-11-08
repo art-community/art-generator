@@ -4,7 +4,7 @@ import com.google.common.collect.*;
 import io.art.generator.exception.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
-import static io.art.core.factory.CollectionsFactory.setOf;
+import static io.art.core.factory.CollectionsFactory.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import java.lang.reflect.*;
@@ -50,17 +50,7 @@ public class MappingFieldsDeterminer {
         Set<Class<?>> classes = setOf();
         for (Field field : getMappingFields(modelClass)) {
             Type type = field.getGenericType();
-            if (typeIsUnknown(type) && !type.equals(modelClass)) {
-                addUnknownType(classes, type);
-            }
-        }
-        return ImmutableSet.copyOf(classes);
-    }
-
-    public ImmutableSet<Class<?>> collectUnknownClasses(Set<Class<?>> classes, Class<?> modelClass) {
-        for (Field field : getMappingFields(modelClass)) {
-            Type type = field.getGenericType();
-            if (typeIsUnknown(type) && !type.equals(modelClass)) {
+            if (typeIsUnknown(type) && !classes.contains(modelClass)) {
                 addUnknownType(classes, type);
             }
         }
@@ -71,7 +61,7 @@ public class MappingFieldsDeterminer {
         if (type instanceof ParameterizedType) {
             Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
             for (Type typeArgument : typeArguments) {
-                if (typeIsKnown(typeArgument) || typeArgument.equals(type)) {
+                if (typeIsKnown(typeArgument)) {
                     continue;
                 }
                 if (typeArgument instanceof Class && !classes.contains(typeArgument)) {
@@ -89,4 +79,15 @@ public class MappingFieldsDeterminer {
             classes.addAll(collectUnknownClasses(classes, typeAsClass));
         }
     }
+
+    public ImmutableSet<Class<?>> collectUnknownClasses(Set<Class<?>> classes, Class<?> modelClass) {
+        for (Field field : getMappingFields(modelClass)) {
+            Type type = field.getGenericType();
+            if (typeIsUnknown(type) && !classes.contains(modelClass)) {
+                addUnknownType(classes, type);
+            }
+        }
+        return ImmutableSet.copyOf(classes);
+    }
+
 }
