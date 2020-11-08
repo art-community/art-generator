@@ -22,7 +22,8 @@ public interface GeneratorConstants {
         String SERVER_NAME = "server";
         String MODULE_NAME = "module";
         String MODEL_NAME = "model";
-        String MAPPERS_REGISTRY_NAME = "mappersRegistry";
+        String MAPPERS_REGISTRY_NAME = "MAPPERS_REGISTRY";
+        String SERVICES_REGISTRY_NAME = "SERVICES_REGISTRY";
         String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
         String MAPPERS_NAME = "mappers";
         String SERVICES_NAME = "services";

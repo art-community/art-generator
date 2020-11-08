@@ -1,8 +1,12 @@
 package io.art.generator.creator.mapper;
 
+import com.google.common.reflect.*;
+import com.sun.beans.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
+import com.sun.tools.javac.util.List;
 import io.art.generator.model.*;
+import io.art.value.registry.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
@@ -13,6 +17,7 @@ import static io.art.generator.determiner.MappingFieldsDeterminer.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.service.JavacService.*;
 import java.lang.reflect.*;
+import java.util.*;
 
 @UtilityClass
 public class MappersMethodCreator {

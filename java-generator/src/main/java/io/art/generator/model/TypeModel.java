@@ -4,12 +4,14 @@ import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import lombok.*;
 import static io.art.core.constants.StringConstants.*;
+import static io.art.generator.constants.GeneratorConstants.*;
+import static io.art.generator.context.GeneratorContext.*;
 import static java.util.Arrays.*;
 import static java.util.Collections.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
-import static io.art.generator.constants.GeneratorConstants.*;
-import static io.art.generator.context.GeneratorContext.*;
+import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 
 @Getter
@@ -97,6 +99,21 @@ public class TypeModel {
 
     public static TypeModel type(Class<?> typeClass) {
         return type(typeClass, emptyList());
+    }
+
+    public static TypeModel type(Type type) {
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type rawType = parameterizedType.getRawType();
+            List<TypeModel> arguments = stream(parameterizedType.getActualTypeArguments())
+                    .map(TypeModel::type)
+                    .collect(toList());
+            if (rawType instanceof ParameterizedType) {
+                return type(rawType);
+            }
+            return type((Class<?>) rawType, arguments);
+        }
+        return type((Class<?>) type, emptyList());
     }
 
     public static TypeModel type(Class<?> typeClass, List<TypeModel> parameters) {

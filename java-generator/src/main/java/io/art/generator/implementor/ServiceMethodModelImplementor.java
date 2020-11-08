@@ -36,10 +36,17 @@ public class ServiceMethodModelImplementor {
                 .type(type(MappersRegistry.class))
                 .initializer(() -> applyMethod(MAPPERS_NAME));
 
+        NewField servicesRegistry = newField()
+                .name(SERVICES_REGISTRY_NAME)
+                .modifiers(PRIVATE | FINAL | STATIC)
+                .type(type(ServiceSpecificationRegistry.class))
+                .initializer(() -> applyMethod(SERVICES_NAME));
+
         providerClass
                 .addImport(classImport(serviceClass.getName()))
                 .field(MODEL_NAME, model)
                 .field(MAPPERS_REGISTRY_NAME, mappersRegistry)
+                .field(SERVICES_REGISTRY_NAME, servicesRegistry)
                 .method(MAPPERS_NAME, createMappersMethod(returnType, type(MappersRegistry.class), parameterTypes))
                 .method(SERVICES_NAME, createServicesMethod(serviceClass, type(ServiceSpecificationRegistry.class)))
                 .method(DECORATE_NAME, createDecorateMethod());
