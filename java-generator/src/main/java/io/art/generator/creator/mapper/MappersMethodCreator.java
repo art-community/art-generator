@@ -23,16 +23,16 @@ public class MappersMethodCreator {
                 .statement(() -> createRegistryVariable(registryType));
 
         for (Class<?> parameterClass : parameterClasses) {
-            collectUnknownTypeFieldsRecursive(parameterClass)
+            collectUnknownClassesRecursive(parameterClass)
                     .stream()
-                    .peek(field -> method.statement(() -> createToModel(field.getType())))
-                    .forEach(field -> method.statement(() -> createFromModel(field.getType())));
+                    .peek(type -> method.statement(() -> createToModel(type)))
+                    .forEach(type -> method.statement(() -> createFromModel(type)));
             method.statement(() -> createToModel(parameterClass)).statement(() -> createFromModel(parameterClass));
         }
 
-        collectUnknownTypeFieldsRecursive(returnClass).stream()
-                .peek(field -> method.statement(() -> createToModel(field.getType())))
-                .forEach(field -> method.statement(() -> createFromModel(field.getType())));
+        collectUnknownClassesRecursive(returnClass).stream()
+                .peek(type -> method.statement(() -> createToModel(type)))
+                .forEach(type -> method.statement(() -> createFromModel(type)));
         method.statement(() -> createToModel(returnClass)).statement(() -> createFromModel(returnClass));
 
         return method.statement(() -> returnVariable(REGISTRY_NAME));

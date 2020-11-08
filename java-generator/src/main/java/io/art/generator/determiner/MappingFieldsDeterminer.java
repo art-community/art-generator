@@ -13,7 +13,6 @@ public class MappingFieldsDeterminer {
     public boolean typeIsKnown(Type type) {
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
-
             boolean foundByKnownTypes = KNOWN_TYPES
                     .stream()
                     .anyMatch(knownType -> typeAsClass.isArray() ? knownType.isAssignableFrom(typeAsClass.getComponentType()) : knownType.isAssignableFrom(typeAsClass));
@@ -45,15 +44,32 @@ public class MappingFieldsDeterminer {
         }
     }
 
-    public ImmutableSet<Field> collectUnknownTypeFieldsRecursive(Class<?> modelClass) {
-        ImmutableSet.Builder<Field> allFields = ImmutableSet.builder();
+    public ImmutableSet<Class<?>> collectUnknownClassesRecursive(Class<?> modelClass) {
+        ImmutableSet.Builder<Class<?>> classes = ImmutableSet.builder();
         for (Field field : getMappingFields(modelClass)) {
-            Class<?> fieldType = field.getType();
-            if (typeIsUnknown(fieldType) && !fieldType.equals(modelClass)) {
-                allFields.add(field);
-                allFields.addAll(collectUnknownTypeFieldsRecursive(fieldType));
+            Type type = field.getGenericType();
+            if (typeIsUnknown(type) && !type.equals(modelClass)) {
+                addUnknownClass(classes, type);
             }
         }
-        return allFields.build();
+        return classes.build();
+    }
+
+    private void addUnknownClass(ImmutableSet.Builder<Class<?>> classes, Type type) {
+        if (type instanceof ParameterizedType) {
+            Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
+            for (Type typeArgument : typeArguments) {
+                if (typeArgument instanceof Class) {
+                    classes.addAll(collectUnknownClassesRecursive((Class<?>) typeArgument));
+                    continue;
+                }
+                addUnknownClass(classes, typeArgument);
+            }
+        }
+        if (type instanceof Class) {
+            Class<?> typeAsClass = (Class<?>) type;
+            classes.add(typeAsClass);
+            classes.addAll(collectUnknownClassesRecursive(typeAsClass));
+        }
     }
 }
