@@ -32,23 +32,10 @@ public class FromModelMapperCreator {
         if (typeIsKnown(type)) {
             return createFromModelMapperBody(type);
         }
-        if (type instanceof ParameterizedType) {
-            Type rawType = ((ParameterizedType) type).getRawType();
-            if (rawType.equals(Flux.class) || rawType.equals(Mono.class)) {
-                return newLambda()
-                        .parameter(newParameter(type(((ParameterizedType) type).getActualTypeArguments()[0]), MODEL_NAME))
-                        .expression(() -> createFromModelMapperBody(type))
-                        .generate();
-            }
-            throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
-        }
-        if (type instanceof Class) {
-            return newLambda()
-                    .parameter(newParameter(type(type), MODEL_NAME))
-                    .expression(() -> createFromModelMapperBody(type))
-                    .generate();
-        }
-        throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
+        return newLambda()
+                .parameter(newParameter(type(type), MODEL_NAME))
+                .expression(() -> createFromModelMapperBody(type))
+                .generate();
     }
 
     public JCExpression createFromModelMapperBody(Type type) {

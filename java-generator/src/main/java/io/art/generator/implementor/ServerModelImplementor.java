@@ -75,11 +75,27 @@ public class ServerModelImplementor {
                 .method(METHOD_ID, literal(serviceMethod.getName()));
         if (!isEmpty(parameterTypes)) {
             servicesMethod.addClassImport(classImport(type(parameterTypes[0]).getName()));
-            methodBuilder.method(INPUT_MAPPER, createToModelMapper(parameterTypes[0]));
+            switch (inputMode) {
+                case BLOCKING:
+                    methodBuilder.method(INPUT_MAPPER, createToModelMapper(parameterTypes[0]));
+                    break;
+                case MONO:
+                case FLUX:
+                    methodBuilder.method(INPUT_MAPPER, createToModelMapper(((ParameterizedType) parameterTypes[0]).getActualTypeArguments()[0]));
+                    break;
+            }
         }
         if (!void.class.equals(returnType)) {
             servicesMethod.addClassImport(classImport(type(returnType).getName()));
-            methodBuilder.method(OUTPUT_MAPPER, createFromModelMapper(returnType));
+            switch (outputMode) {
+                case BLOCKING:
+                    methodBuilder.method(OUTPUT_MAPPER, createFromModelMapper(returnType));
+                    break;
+                case MONO:
+                case FLUX:
+                    methodBuilder.method(OUTPUT_MAPPER, createFromModelMapper(((ParameterizedType) returnType).getActualTypeArguments()[0]));
+                    break;
+            }
         }
         return methodBuilder
                 .method(INPUT_MODE, select(methodProcessingModeType, inputMode.name()))
