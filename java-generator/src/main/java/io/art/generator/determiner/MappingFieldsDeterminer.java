@@ -38,12 +38,21 @@ public class MappingFieldsDeterminer {
         }
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
+            if (typeAsClass.isArray()) {
+                boolean foundByKnownTypes = KNOWN_TYPES
+                        .stream()
+                        .anyMatch(knownType -> knownType.isAssignableFrom(typeAsClass.getComponentType()));
+                boolean foundByKnownStrictTypes = KNOWN_STRICT_TYPES
+                        .stream()
+                        .anyMatch(knownType -> knownType.equals(typeAsClass.getComponentType()));
+                return foundByKnownStrictTypes || foundByKnownTypes;
+            }
             boolean foundByKnownTypes = KNOWN_TYPES
                     .stream()
-                    .anyMatch(knownType -> typeAsClass.isArray() ? knownType.isAssignableFrom(typeAsClass.getComponentType()) : knownType.isAssignableFrom(typeAsClass));
+                    .anyMatch(knownType -> knownType.isAssignableFrom(typeAsClass));
             boolean foundByKnownStrictTypes = KNOWN_STRICT_TYPES
                     .stream()
-                    .anyMatch(knownType -> typeAsClass.isArray() ? knownType.equals(typeAsClass.getComponentType()) : knownType.equals(typeAsClass));
+                    .anyMatch(knownType -> knownType.equals(typeAsClass));
             return foundByKnownStrictTypes || foundByKnownTypes;
         }
         return false;
