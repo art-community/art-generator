@@ -1,9 +1,7 @@
 package ru;
 
-import com.google.common.collect.*;
 import lombok.experimental.*;
 import reactor.core.publisher.*;
-import static io.art.core.factory.CollectionsFactory.*;
 
 @UtilityClass
 public class MyService {
@@ -23,5 +21,9 @@ public class MyService {
 
     public String myMethod3() {
         return "Test";
+    }
+
+    public String myMethod4(String req) {
+        return req;
     }
 }
