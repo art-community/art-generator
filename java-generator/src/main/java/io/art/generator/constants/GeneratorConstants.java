@@ -69,10 +69,6 @@ public interface GeneratorConstants {
         String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
         String SERVICES_NAME = "services";
         String REGISTRY_NAME = "registry";
-        String PUT_TO_MODEL_NAME = "putToModel";
-        String PUT_FROM_MODEL_NAME = "putFromModel";
-        String GET_TO_MODEL_NAME = "getToModel";
-        String GET_FROM_MODEL_NAME = "getFromModel";
         String REGISTER_NAME = "register";
         String VALUE_NAME = "value";
         String ENTITY_BUILDER_NAME = "entityBuilder";

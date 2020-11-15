@@ -67,16 +67,15 @@ public class ServerModelImplementor {
         if (parameterTypes.length > 1) {
             throw new GenerationException(MORE_THAN_ONE_PARAMETER);
         }
-        Type parameterType = parameterTypes[0];
         Type returnType = serviceMethod.getGenericReturnType();
-        MethodProcessingMode inputMode = isEmpty(parameterTypes) ? BLOCKING : calculateProcessingMode(parameterType);
+        MethodProcessingMode inputMode = isEmpty(parameterTypes) ? BLOCKING : calculateProcessingMode(parameterTypes[0]);
         MethodProcessingMode outputMode = calculateProcessingMode(returnType);
         NewBuilder methodBuilder = newBuilder(type(ServiceMethodSpecification.class))
                 .method(SERVICE_ID, literal(serviceClass.getSimpleName()))
                 .method(METHOD_ID, literal(serviceMethod.getName()));
-        if (isNotEmpty(parameterTypes)) {
-            servicesMethod.addClassImport(classImport(type(parameterType).getName()));
-            methodBuilder.method(INPUT_MAPPER, createToModelMapper(parameterType));
+        if (!isEmpty(parameterTypes)) {
+            servicesMethod.addClassImport(classImport(type(parameterTypes[0]).getName()));
+            methodBuilder.method(INPUT_MAPPER, createToModelMapper(parameterTypes[0]));
         }
         if (!void.class.equals(returnType)) {
             servicesMethod.addClassImport(classImport(type(returnType).getName()));

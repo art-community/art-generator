@@ -6,6 +6,4 @@ import lombok.*;
 @Builder
 public class Request {
     String stringValue;
-    int intValue;
-    Model model;
 }

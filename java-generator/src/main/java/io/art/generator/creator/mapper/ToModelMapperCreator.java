@@ -3,8 +3,9 @@ package io.art.generator.creator.mapper;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.generator.determiner.*;
 import io.art.generator.exception.*;
-import io.art.value.immutable.Value;
+import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import reactor.core.publisher.*;
@@ -28,26 +29,29 @@ import java.util.*;
 
 @UtilityClass
 public class ToModelMapperCreator {
-    public JCLambda createToModelMapper(Type type) {
+    public JCExpression createToModelMapper(Type type) {
+        if (typeIsUnknown(type)) {
+            return createToModelMapperBody(type);
+        }
         return newLambda()
-                .parameter(newParameter(type(Value.class), VALUE_NAME))
+                .parameter(newParameter(type(Entity.class), VALUE_NAME))
                 .expression(() -> createToModelMapperBody(type))
                 .generate();
     }
 
     public JCExpression createToModelMapperBody(Type type) {
         if (type instanceof Class) {
-            return createClassMapper((Class<?>) type);
+            return createClassMapperBody((Class<?>) type);
         }
 
         if (type instanceof ParameterizedType) {
-            return createParametrizedTypeMapper((ParameterizedType) type);
+            return createParametrizedTypeMapperBody((ParameterizedType) type);
         }
 
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }
 
-    private JCExpression createClassMapper(Class<?> mappingClass) {
+    private JCExpression createClassMapperBody(Class<?> mappingClass) {
         if (byte[].class.equals(mappingClass)) {
             return select(type(BinaryMapping.class), TO_BINARY);
         }
@@ -88,7 +92,7 @@ public class ToModelMapperCreator {
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
-    private JCExpression createParametrizedTypeMapper(ParameterizedType parameterizedType) {
+    private JCExpression createParametrizedTypeMapperBody(ParameterizedType parameterizedType) {
         Type rawType = parameterizedType.getRawType();
         if (!(rawType instanceof Class)) {
             throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));

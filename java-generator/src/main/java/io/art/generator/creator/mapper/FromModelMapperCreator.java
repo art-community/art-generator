@@ -28,7 +28,10 @@ import java.util.*;
 
 @UtilityClass
 public class FromModelMapperCreator {
-    public JCLambda createFromModelMapper(Type type) {
+    public JCExpression createFromModelMapper(Type type) {
+        if (typeIsKnown(type)) {
+            return createFromModelMapperBody(type);
+        }
         return newLambda()
                 .parameter(newParameter(type(type), MODEL_NAME))
                 .expression(() -> createFromModelMapperBody(type))
