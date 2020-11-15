@@ -33,11 +33,11 @@ public class GeneratorContext {
 
     private static ImmutableMap<String, ExistedClass> existedClasses;
 
-    public static ImmutableMap<String, ExistedClass> getExistedClasses() {
+    public static ImmutableMap<String, ExistedClass> existedClasses() {
         return existedClasses;
     }
 
-    public static ExistedClass getExistedClass(String name) {
+    public static ExistedClass existedClass(String name) {
         return existedClasses.get(name);
     }
 

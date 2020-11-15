@@ -13,14 +13,14 @@ import java.util.*;
 
 @UtilityClass
 public class MappingFieldsDeterminer {
-    public ImmutableList<Field> getMappingFields(Class<?> modelClass) {
+    public ImmutableList<Field> getMappingFields(Class<?> mappingClass) {
         ImmutableList.Builder<Field> fields = ImmutableList.builder();
         try {
-            for (Method method : modelClass.getDeclaredMethods()) {
+            for (Method method : mappingClass.getDeclaredMethods()) {
                 String getterName = method.getName();
                 if (getterName.startsWith(GET_PREFIX)) {
                     String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
-                    Field[] declaredFields = modelClass.getDeclaredFields();
+                    Field[] declaredFields = mappingClass.getDeclaredFields();
                     stream(declaredFields).filter(field -> field.getName().equals(fieldName)).forEach(fields::add);
                 }
             }
@@ -46,17 +46,6 @@ public class MappingFieldsDeterminer {
 
     public boolean typeIsUnknown(Type type) {
         return !typeIsKnown(type);
-    }
-
-    public ImmutableSet<Class<?>> collectUnknownClassesRecursive(Class<?> modelClass) {
-        Set<Class<?>> classes = setOf();
-        for (Field field : getMappingFields(modelClass)) {
-            Type type = field.getGenericType();
-            if (typeIsUnknown(type) && !classes.contains(modelClass)) {
-                addUnknownType(classes, type);
-            }
-        }
-        return ImmutableSet.copyOf(classes);
     }
 
     private void addUnknownType(Set<Class<?>> classes, Type type) {

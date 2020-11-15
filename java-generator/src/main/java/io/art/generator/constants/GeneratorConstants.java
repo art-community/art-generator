@@ -1,5 +1,18 @@
 package io.art.generator.constants;
 
+import io.art.core.constants.*;
+import io.art.launcher.*;
+import io.art.model.configurator.*;
+import io.art.model.module.*;
+import io.art.server.decorator.*;
+import io.art.server.implementation.*;
+import io.art.server.model.*;
+import io.art.server.registry.*;
+import io.art.server.specification.*;
+import io.art.value.immutable.Value;
+import io.art.value.immutable.*;
+import io.art.value.mapper.*;
+import io.art.value.mapping.*;
 import reactor.core.publisher.*;
 import static io.art.core.factory.CollectionsFactory.*;
 import java.util.*;
@@ -9,6 +22,35 @@ public interface GeneratorConstants {
     String JAVA_PACKAGE_PREFIX = "java.";
     String ARRAY_MARKER = "[";
     int ARRAY_ELEMENTS_CLASS_NAME_INDEX = 2;
+
+    String[] IMPORTING_CLASSES = new String[]{
+            PrimitiveMapping.class.getName(),
+            ArrayMapping.class.getName(),
+            EntityMapping.class.getName(),
+            BinaryMapping.class.getName(),
+            ArrayValue.class.getName(),
+            BinaryValue.class.getName(),
+            Entity.class.getName(),
+            Primitive.class.getName(),
+            Value.class.getName(),
+            ValueToModelMapper.class.getName(),
+            ValueFromModelMapper.class.getName(),
+            ServiceSpecificationRegistry.class.getName(),
+            ServiceSpecification.class.getName(),
+            ServiceMethodSpecification.class.getName(),
+            ServiceMethodImplementation.class.getName(),
+            ModuleModel.class.getName(),
+            ServiceLoggingDecorator.class.getName(),
+            ServiceMethodIdentifier.class.getName(),
+            MethodProcessingMode.class.getName(),
+            MethodDecoratorScope.class.getName(),
+            ConfiguratorModel.class.getName(),
+            ValueConfiguratorModel.class.getName(),
+            ServerConfiguratorModel.class.getName(),
+            Flux.class.getName(),
+            Mono.class.getName(),
+            ModuleLauncher.class.getName()
+    };
 
     interface Names {
         String PROVIDER_CLASS_NAME_SUFFIX = "Provider";
@@ -25,7 +67,6 @@ public interface GeneratorConstants {
         String MAPPERS_REGISTRY_NAME = "MAPPERS_REGISTRY";
         String SERVICES_REGISTRY_NAME = "SERVICES_REGISTRY";
         String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
-        String MAPPERS_NAME = "mappers";
         String SERVICES_NAME = "services";
         String REGISTRY_NAME = "registry";
         String PUT_TO_MODEL_NAME = "putToModel";
@@ -52,7 +93,8 @@ public interface GeneratorConstants {
 
     interface ExceptionMessages {
         String MODULE_CONFIGURATOR_NOT_FOUND = "Module configurator method not found";
-        String UNKNOWN_FIELD_TYPE = "Field type unknown: {0}";
+        String MORE_THAN_ONE_PARAMETER = "More than one parameter not supported";
+        String UNSUPPORTED_TYPE = "Unsupported type: {0}";
     }
 
     interface MappersConstants {

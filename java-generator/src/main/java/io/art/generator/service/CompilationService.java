@@ -23,7 +23,7 @@ public class CompilationService {
         arguments.add(D.getText());
         arguments.add(options().get(D));
         arguments.add(DISABLE_OPTION_ENABLED);
-        List<String> classes = getExistedClasses()
+        List<String> classes = existedClasses()
                 .values()
                 .stream()
                 .map(existed -> existed.getPackageUnit().getSourceFile().getName())

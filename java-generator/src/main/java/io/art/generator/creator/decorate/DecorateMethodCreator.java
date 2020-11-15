@@ -1,6 +1,5 @@
 package io.art.generator.creator.decorate;
 
-import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
@@ -31,7 +30,7 @@ public class DecorateMethodCreator {
         return applyMethod(MODEL_NAME, CONFIGURE_NAME, List.of(createConfiguratorLambda()));
     }
 
-    private JCTree.JCLambda createConfiguratorLambda() {
+    private JCLambda createConfiguratorLambda() {
         return newLambda()
                 .parameter(newParameter(type(ConfiguratorModel.class), CONFIGURATOR_NAME))
                 .expression(DecorateMethodCreator::createConfiguratorLambdaBody)
@@ -39,25 +38,18 @@ public class DecorateMethodCreator {
     }
 
     private JCMethodInvocation createConfiguratorLambdaBody() {
-        return applyMethod(
-                applyMethod(
-                        CONFIGURATOR_NAME,
-                        VALUE_NAME,
-                        List.of(createValueLambda())
-                ),
-                SERVER_NAME,
-                List.of(createServerLambda())
-        );
+        return applyMethod(createValueMethod(), SERVER_NAME, List.of(createServerLambda()));
     }
 
-    private JCTree.JCLambda createValueLambda() {
-        return newLambda()
+    private JCMethodInvocation createValueMethod() {
+        List<JCExpression> arguments = List.of(newLambda()
                 .parameter(newParameter(type(ValueConfiguratorModel.class), VALUE_NAME))
                 .expression(() -> applyMethod(VALUE_NAME, REGISTRY_NAME, List.of(ident(MAPPERS_REGISTRY_NAME))))
-                .generate();
+                .generate());
+        return applyMethod(CONFIGURATOR_NAME, VALUE_NAME, arguments);
     }
 
-    private JCTree.JCLambda createServerLambda() {
+    private JCLambda createServerLambda() {
         return newLambda()
                 .parameter(newParameter(type(ServerConfiguratorModel.class), SERVER_NAME))
                 .expression(() -> applyMethod(SERVER_NAME, REGISTRY_NAME, List.of(ident(SERVICES_REGISTRY_NAME))))
