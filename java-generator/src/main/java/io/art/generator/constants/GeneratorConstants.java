@@ -155,9 +155,7 @@ public interface GeneratorConstants {
                 List.class,
                 Collection.class,
                 Set.class,
-                Map.class,
-                Flux.class,
-                Mono.class
+                Map.class
         );
 
         Set<Class<?>> KNOWN_STRICT_TYPES = setOf(

@@ -30,7 +30,7 @@ import java.util.*;
 @UtilityClass
 public class ToModelMapperCreator {
     public JCExpression createToModelMapper(Type type) {
-        if (typeIsUnknown(type)) {
+        if (typeIsKnown(type)) {
             return createToModelMapperBody(type);
         }
         return newLambda()

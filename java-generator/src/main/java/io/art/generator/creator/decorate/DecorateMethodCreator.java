@@ -38,15 +38,7 @@ public class DecorateMethodCreator {
     }
 
     private JCMethodInvocation createConfiguratorLambdaBody() {
-        return applyMethod(createValueMethod(), SERVER_NAME, List.of(createServerLambda()));
-    }
-
-    private JCMethodInvocation createValueMethod() {
-        List<JCExpression> arguments = List.of(newLambda()
-                .parameter(newParameter(type(ValueConfiguratorModel.class), VALUE_NAME))
-                .expression(() -> applyMethod(VALUE_NAME, REGISTRY_NAME, List.of(ident(MAPPERS_REGISTRY_NAME))))
-                .generate());
-        return applyMethod(CONFIGURATOR_NAME, VALUE_NAME, arguments);
+        return applyMethod(CONFIGURATOR_NAME, SERVER_NAME, List.of(createServerLambda()));
     }
 
     private JCLambda createServerLambda() {
