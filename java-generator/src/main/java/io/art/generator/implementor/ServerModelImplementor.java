@@ -1,5 +1,6 @@
 package io.art.generator.implementor;
 
+import com.google.common.collect.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.core.constants.*;
@@ -39,9 +40,8 @@ public class ServerModelImplementor {
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
-        serverModel
-                .getServices()
-                .forEach(serviceModel -> servicesMethod.statement(() -> maker().Exec(executeRegisterMethod(servicesMethod, serviceModel))));
+        ImmutableSet<ServiceModel<?>> services = serverModel.getServices();
+        services.forEach(serviceModel -> servicesMethod.statement(() -> maker().Exec(executeRegisterMethod(servicesMethod, serviceModel))));
         return servicesMethod.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
