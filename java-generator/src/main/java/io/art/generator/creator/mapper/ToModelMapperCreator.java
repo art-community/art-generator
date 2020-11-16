@@ -58,25 +58,25 @@ public class ToModelMapperCreator {
         }
         if (mappingClass.isArray()) {
             if (short.class.equals(mappingClass.getComponentType())) {
-                return select(type(ArrayFactory.class), SHORT_ARRAY);
+                return invokeReference(type(ArrayValue.class), SHORT_ARRAY);
             }
             if (int.class.equals(mappingClass.getComponentType())) {
-                return select(type(ArrayFactory.class), INT_ARRAY);
+                return invokeReference(type(ArrayValue.class), INT_ARRAY);
             }
             if (long.class.equals(mappingClass.getComponentType())) {
-                return select(type(ArrayFactory.class), LONG_ARRAY);
+                return invokeReference(type(ArrayValue.class), LONG_ARRAY);
             }
             if (boolean.class.equals(mappingClass.getComponentType())) {
-                return select(type(ArrayFactory.class), BOOL_ARRAY);
+                return invokeReference(type(ArrayValue.class), BOOL_ARRAY);
             }
             if (double.class.equals(mappingClass.getComponentType())) {
-                return select(type(ArrayFactory.class), DOUBLE_ARRAY);
+                return invokeReference(type(ArrayValue.class), DOUBLE_ARRAY);
             }
             if (byte.class.equals(mappingClass.getComponentType())) {
-                return select(type(ArrayFactory.class), BYTE_ARRAY);
+                return invokeReference(type(ArrayValue.class), BYTE_ARRAY);
             }
             if (float.class.equals(mappingClass.getComponentType())) {
-                return select(type(ArrayFactory.class), FLOAT_ARRAY);
+                return invokeReference(type(ArrayValue.class), FLOAT_ARRAY);
             }
             JCExpression parameterMapper = createToModelMapperBody(mappingClass.getComponentType());
             return applyClassMethod(type(ArrayMapping.class), TO_ARRAY, List.of(parameterMapper));
@@ -85,7 +85,7 @@ public class ToModelMapperCreator {
             return select(type(PrimitiveMapping.class), TO_STRING);
         }
         if (short.class.equals(mappingClass) || Short.class.equals(mappingClass)) {
-            return select(type(PrimitiveMapping.class), TO_INT);
+            return select(type(PrimitiveMapping.class), TO_SHORT);
         }
         if (int.class.equals(mappingClass) || Integer.class.equals(mappingClass)) {
             return select(type(PrimitiveMapping.class), TO_INT);

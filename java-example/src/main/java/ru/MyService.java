@@ -6,9 +6,7 @@ import reactor.core.publisher.*;
 @UtilityClass
 public class MyService {
     public Flux<Response> myMethod(Request request) {
-        Model model = Model.builder()
-                .stringValue(request.getStringValue() + ": from service")
-                .build();
+        Model model = Model.builder().build();
         return Flux.just(Response.builder().build());
     }
 

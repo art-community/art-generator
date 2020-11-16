@@ -51,7 +51,8 @@ public interface GeneratorConstants {
             Flux.class.getName(),
             Mono.class.getName(),
             ModuleLauncher.class.getName(),
-            ArrayFactory.class.getName()
+            ArrayFactory.class.getName(),
+            ArrayValue.class.getName()
     };
 
     interface Names {
@@ -66,7 +67,6 @@ public interface GeneratorConstants {
         String SERVER_NAME = "server";
         String MODULE_NAME = "module";
         String MODEL_NAME = "model";
-        String MAPPERS_REGISTRY_NAME = "MAPPERS_REGISTRY";
         String SERVICES_REGISTRY_NAME = "SERVICES_REGISTRY";
         String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
         String SERVICES_NAME = "services";
@@ -117,7 +117,6 @@ public interface GeneratorConstants {
         }
 
         interface ArrayFactoryMethods {
-            String STRING_ARRAY = "stringArray";
             String LONG_ARRAY = "longArray";
             String SHORT_ARRAY = "shortArray";
             String INT_ARRAY = "intArray";
