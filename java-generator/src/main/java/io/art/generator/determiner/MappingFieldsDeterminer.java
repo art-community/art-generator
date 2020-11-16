@@ -6,6 +6,7 @@ import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static java.lang.Character.isUpperCase;
 import static java.util.Arrays.*;
 import java.lang.reflect.*;
 
@@ -17,9 +18,10 @@ public class MappingFieldsDeterminer {
             for (Method method : mappingClass.getDeclaredMethods()) {
                 String getterName = method.getName();
                 if (getterName.startsWith(GET_PREFIX)) {
-                    String fieldName = decapitalize(getterName.substring(GET_PREFIX.length()));
+                    String fieldName = getterName.substring(GET_PREFIX.length());
+                    String decapitalizedFieldName = isUpperCase(fieldName.charAt(0)) ? fieldName : decapitalize(fieldName);
                     Field[] declaredFields = mappingClass.getDeclaredFields();
-                    stream(declaredFields).filter(field -> field.getName().equals(fieldName)).forEach(fields::add);
+                    stream(declaredFields).filter(field -> field.getName().equals(decapitalizedFieldName)).forEach(fields::add);
                 }
             }
             return fields.build();
