@@ -72,4 +72,14 @@ public class Request {
     Set<String> FSString;
     Set<Double> FSDouble;
     Set<Float> FSFloat;
+
+    Map<Integer, Integer> FMInteger;
+    Map<Character, Character> FMCharacter;
+    Map<Short, Short> FMShort;
+    Map<Byte, Byte> FMByte;
+    Map<Boolean, Boolean> FMBoolean;
+    Map<Long, Long> FMLong;
+    Map<String, String> FMString;
+    Map<Double, Double> FMDouble;
+    Map<Float, Float> FMFloat;
 }
