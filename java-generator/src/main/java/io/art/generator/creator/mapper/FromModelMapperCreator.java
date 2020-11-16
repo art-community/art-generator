@@ -55,6 +55,9 @@ public class FromModelMapperCreator {
             return select(type(BinaryMapping.class), FROM_BINARY);
         }
         if (mappingClass.isArray()) {
+            if (char.class.equals(mappingClass.getComponentType())) {
+                return select(type(ArrayMapping.class), FROM_CHAR_ARRAY);
+            }
             if (short.class.equals(mappingClass.getComponentType())) {
                 return select(type(ArrayMapping.class), FROM_SHORT_ARRAY);
             }
@@ -81,6 +84,9 @@ public class FromModelMapperCreator {
         }
         if (String.class.equals(mappingClass)) {
             return select(type(PrimitiveMapping.class), FROM_STRING);
+        }
+        if (char.class.equals(mappingClass) || Character.class.equals(mappingClass)) {
+            return select(type(PrimitiveMapping.class), FROM_CHAR);
         }
         if (int.class.equals(mappingClass) || Integer.class.equals(mappingClass)) {
             return select(type(PrimitiveMapping.class), FROM_INT);

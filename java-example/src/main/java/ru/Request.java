@@ -6,6 +6,7 @@ import java.util.*;
 @Value
 @Builder
 public class Request {
+    char f0;
     int f1;
     short f2;
     byte f3;

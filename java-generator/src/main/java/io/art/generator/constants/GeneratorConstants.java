@@ -98,6 +98,7 @@ public interface GeneratorConstants {
     interface MappersConstants {
         interface PrimitiveMappingMethods {
             String TO_STRING = "toString";
+            String TO_CHAR = "toChar";
             String TO_INT = "toInt";
             String TO_SHORT = "toShort";
             String TO_BOOL = "toBool";
@@ -107,6 +108,7 @@ public interface GeneratorConstants {
             String TO_FLOAT = "toFloat";
 
             String FROM_STRING = "fromString";
+            String FROM_CHAR = "fromChar";
             String FROM_INT = "fromInt";
             String FROM_SHORT = "fromShort";
             String FROM_BOOL = "fromBool";
