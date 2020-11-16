@@ -116,16 +116,6 @@ public interface GeneratorConstants {
             String FROM_FLOAT = "fromFloat";
         }
 
-        interface ArrayFactoryMethods {
-            String LONG_ARRAY = "longArray";
-            String SHORT_ARRAY = "shortArray";
-            String INT_ARRAY = "intArray";
-            String BOOL_ARRAY = "boolArray";
-            String DOUBLE_ARRAY = "doubleArray";
-            String FLOAT_ARRAY = "floatArray";
-            String BYTE_ARRAY = "byteArray";
-        }
-
         interface ArrayMappingMethods {
             String FROM_COLLECTION = "fromCollection";
             String FROM_ARRAY = "fromArray";
@@ -140,6 +130,25 @@ public interface GeneratorConstants {
             String TO_SET = "toSet";
             String TO_QUEUE = "toQueue";
             String TO_DEQUE = "toDeque";
+
+            String TO_INT_ARRAY = "toIntArray";
+            String TO_LONG_ARRAY = "toLongArray";
+            String TO_SHORT_ARRAY = "toShortArray";
+            String TO_DOUBLE_ARRAY = "toDoubleArray";
+            String TO_FLOAT_ARRAY = "toFloatArray";
+            String TO_BYTE_ARRAY = "toByteArray";
+            String TO_CHAR_ARRAY = "toCharArray";
+            String TO_BOOL_ARRAY = "toBoolArray";
+
+
+            String FROM_INT_ARRAY = "fromIntArray";
+            String FROM_LONG_ARRAY = "fromLongArray";
+            String FROM_SHORT_ARRAY = "fromShortArray";
+            String FROM_DOUBLE_ARRAY = "fromDoubleArray";
+            String FROM_FLOAT_ARRAY = "fromFloatArray";
+            String FROM_BYTE_ARRAY = "fromByteArray";
+            String FROM_CHAR_ARRAY = "fromCharArray";
+            String FROM_BOOL_ARRAY = "fromBoolArray";
         }
 
         interface EntityMappingMethods {
