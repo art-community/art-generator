@@ -152,6 +152,9 @@ public class FromModelMapperCreator {
             return applyClassMethod(type(ArrayMapping.class), FROM_COLLECTION, List.of(parameterMapper));
         }
         if (Map.class.isAssignableFrom(mappingClass)) {
+            if (!typeIsPrimitive(typeArguments[0])) {
+                throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
+            }
             JCExpression keyToModelMapper = createToModelMapperBody(typeArguments[0]);
             JCExpression keyFromModelMapper = createFromModelMapperBody(typeArguments[0]);
             JCExpression valueMapper = createFromModelMapperBody(typeArguments[1]);
