@@ -9,9 +9,7 @@ public class MyService {
         Model model = Model.builder()
                 .stringValue(request.getStringValue() + ": from service")
                 .build();
-        return Flux.just(Response.builder()
-                .stringValue("myModel2")
-                .build());
+        return Flux.just(Response.builder().build());
     }
 
     public String myMethod2(Mono<Request> request) {

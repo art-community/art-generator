@@ -112,7 +112,7 @@ public class ServerModelImplementor {
         if (void.class.equals(serviceMethod.getReturnType())) {
             name = CONSUMER_METHOD;
         }
-        JCMemberReference reference = maker().Reference(INVOKE, name(serviceMethod.getName()), type(serviceClass).generate(), null);
+        JCMemberReference reference = invokeReference(type(serviceClass), (serviceMethod.getName()));
         JCLiteral serviceName = literal(serviceClass.getSimpleName());
         JCLiteral methodName = literal(serviceMethod.getName());
         List<JCExpression> arguments = List.of(reference, serviceName, methodName);

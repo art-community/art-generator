@@ -3,13 +3,14 @@ package io.art.generator.creator.mapper;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
-import io.art.generator.determiner.*;
 import io.art.generator.exception.*;
+import io.art.value.factory.*;
 import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import reactor.core.publisher.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayFactoryMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
@@ -56,6 +57,27 @@ public class ToModelMapperCreator {
             return select(type(BinaryMapping.class), TO_BINARY);
         }
         if (mappingClass.isArray()) {
+            if (short.class.equals(mappingClass.getComponentType())) {
+                return select(type(ArrayFactory.class), SHORT_ARRAY);
+            }
+            if (int.class.equals(mappingClass.getComponentType())) {
+                return select(type(ArrayFactory.class), INT_ARRAY);
+            }
+            if (long.class.equals(mappingClass.getComponentType())) {
+                return select(type(ArrayFactory.class), LONG_ARRAY);
+            }
+            if (boolean.class.equals(mappingClass.getComponentType())) {
+                return select(type(ArrayFactory.class), BOOL_ARRAY);
+            }
+            if (double.class.equals(mappingClass.getComponentType())) {
+                return select(type(ArrayFactory.class), DOUBLE_ARRAY);
+            }
+            if (byte.class.equals(mappingClass.getComponentType())) {
+                return select(type(ArrayFactory.class), BYTE_ARRAY);
+            }
+            if (float.class.equals(mappingClass.getComponentType())) {
+                return select(type(ArrayFactory.class), FLOAT_ARRAY);
+            }
             JCExpression parameterMapper = createToModelMapperBody(mappingClass.getComponentType());
             return applyClassMethod(type(ArrayMapping.class), TO_ARRAY, List.of(parameterMapper));
         }

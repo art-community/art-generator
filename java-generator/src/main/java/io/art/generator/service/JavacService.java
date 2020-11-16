@@ -4,6 +4,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
+import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.INVOKE;
 import static com.sun.tools.javac.code.TypeTag.*;
 import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.context.GeneratorContext.*;
@@ -109,5 +110,9 @@ public class JavacService {
 
     public JCReturn returnVariable(String reference) {
         return maker().Return(ident(reference));
+    }
+
+    public JCMemberReference invokeReference(TypeModel type, String name) {
+        return maker().Reference(INVOKE, name(name), type.generate(), null);
     }
 }

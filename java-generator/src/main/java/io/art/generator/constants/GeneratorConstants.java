@@ -9,6 +9,7 @@ import io.art.server.implementation.*;
 import io.art.server.model.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
+import io.art.value.factory.*;
 import io.art.value.immutable.Value;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
@@ -49,7 +50,8 @@ public interface GeneratorConstants {
             ServerConfiguratorModel.class.getName(),
             Flux.class.getName(),
             Mono.class.getName(),
-            ModuleLauncher.class.getName()
+            ModuleLauncher.class.getName(),
+            ArrayFactory.class.getName()
     };
 
     interface Names {
@@ -97,6 +99,7 @@ public interface GeneratorConstants {
         interface PrimitiveMappingMethods {
             String TO_STRING = "toString";
             String TO_INT = "toInt";
+            String TO_SHORT = "toShort";
             String TO_BOOL = "toBool";
             String TO_LONG = "toLong";
             String TO_DOUBLE = "toDouble";
@@ -105,11 +108,23 @@ public interface GeneratorConstants {
 
             String FROM_STRING = "fromString";
             String FROM_INT = "fromInt";
+            String FROM_SHORT = "fromShort";
             String FROM_BOOL = "fromBool";
             String FROM_LONG = "fromLong";
             String FROM_DOUBLE = "fromDouble";
             String FROM_BYTE = "fromByte";
             String FROM_FLOAT = "fromFloat";
+        }
+
+        interface ArrayFactoryMethods {
+            String STRING_ARRAY = "stringArray";
+            String LONG_ARRAY = "longArray";
+            String SHORT_ARRAY = "shortArray";
+            String INT_ARRAY = "intArray";
+            String BOOL_ARRAY = "boolArray";
+            String DOUBLE_ARRAY = "doubleArray";
+            String FLOAT_ARRAY = "floatArray";
+            String BYTE_ARRAY = "byteArray";
         }
 
         interface ArrayMappingMethods {

@@ -31,10 +31,7 @@ public class MappingFieldsDeterminer {
     public boolean typeIsKnown(Type type) {
         if (type instanceof ParameterizedType) {
             Type rawType = ((ParameterizedType) type).getRawType();
-            if (rawType instanceof Class) {
-                return typeIsKnown(rawType);
-            }
-            return false;
+            return typeIsKnown(rawType);
         }
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
