@@ -82,4 +82,6 @@ public class Request {
     Map<String, String> FMString;
     Map<Double, Double> FMDouble;
     Map<Float, Float> FMFloat;
+
+    Model fModel;
 }
