@@ -2,7 +2,6 @@ package io.art.generator.model;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.tree.JCTree.*;
-import io.art.core.extensions.*;
 import io.art.generator.exception.*;
 import lombok.*;
 import static io.art.core.checker.NullityChecker.*;
@@ -47,6 +46,11 @@ public class TypeModel {
             return;
         }
 
+        if (type instanceof GenericArrayType) {
+            ofGenericArrayType((GenericArrayType) type);
+            return;
+        }
+
         throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
@@ -76,6 +80,17 @@ public class TypeModel {
         this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
         this.fullName = ownerClass.getName();
         this.parameters = stream(parameterizedType.getActualTypeArguments()).map(TypeModel::new).collect(toList());
+    }
+
+    private void ofGenericArrayType(GenericArrayType genericArrayType) {
+        this.type = genericArrayType;
+        Class<?> ownerClass = extractClass(genericArrayType);
+        this.ownerName = let(ownerClass.getDeclaringClass(), Class::getSimpleName);
+        this.name = ownerClass.getSimpleName();
+        this.packageName = emptyIfNull(let(ownerClass.getPackage(), Package::getName));
+        this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
+        this.fullName = ownerClass.getName();
+        this.parameters = emptyList();
     }
 
     public JCExpression generate() {

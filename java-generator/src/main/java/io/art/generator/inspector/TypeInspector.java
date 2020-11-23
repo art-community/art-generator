@@ -90,12 +90,19 @@ public class TypeInspector {
         return (Class<?>) rawType;
     }
 
+    public Class<?> extractClass(GenericArrayType genericArrayType) {
+        return extractClass(genericArrayType.getGenericComponentType());
+    }
+
     public Class<?> extractClass(Type type) {
         if (type instanceof Class) {
             return (Class<?>) type;
         }
         if (type instanceof ParameterizedType) {
             return extractClass((ParameterizedType) type);
+        }
+        if (type instanceof GenericArrayType) {
+            return extractClass((GenericArrayType) type);
         }
         throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
@@ -124,7 +131,7 @@ public class TypeInspector {
             return collectCustomTypes(root.getComponentType());
         }
         types.add(root);
-        for (Field property :getProperties(root)) {
+        for (Field property : getProperties(root)) {
             Type type = property.getGenericType();
 
             if (type.equals(root)) {

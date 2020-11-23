@@ -43,12 +43,18 @@ public class ToModelMapperCreator {
         if (isLibraryType(type)) {
             return createToModelMapperBody(type, valueName);
         }
+
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {
                 return createToModelMapperBody(type, valueName);
             }
         }
+
+        if (type instanceof ParameterizedType || type instanceof GenericArrayType) {
+            return createToModelMapperBody(type, valueName);
+        }
+
         return newLambda()
                 .parameter(newParameter(type(Entity.class), valueName))
                 .expression(() -> createToModelMapperBody(type, valueName))
@@ -63,6 +69,10 @@ public class ToModelMapperCreator {
 
         if (type instanceof ParameterizedType) {
             return createParametrizedTypeMapperBody((ParameterizedType) type);
+        }
+
+        if (type instanceof GenericArrayType) {
+            return createGenericArrayTypeMapperBody((GenericArrayType) type);
         }
 
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
@@ -173,6 +183,11 @@ public class ToModelMapperCreator {
             return applyClassMethod(type(EntityMapping.class), TO_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
         }
         throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
+    }
+
+    private JCExpression createGenericArrayTypeMapperBody(GenericArrayType genericArrayType) {
+        JCExpression parameterMapper = toModelMapper(genericArrayType.getGenericComponentType());
+        return applyClassMethod(type(ArrayMapping.class), TO_ARRAY, List.of(parameterMapper));
     }
 
     private JCMethodInvocation createFieldMapping(String fieldName, Type fieldType, String valueName) {
