@@ -137,6 +137,9 @@ public class ToModelMapperCreator {
         if (float.class.equals(mappingClass) || Float.class.equals(mappingClass)) {
             return select(type(PrimitiveMapping.class), TO_FLOAT);
         }
+        if (UUID.class.equals(mappingClass)) {
+            return select(type(PrimitiveMapping.class), TO_UUID);
+        }
         JCMethodInvocation builderInvocation = applyClassMethod(type(mappingClass), BUILDER_METHOD_NAME);
         for (Field field : getProperties(mappingClass)) {
             String fieldName = field.getName();

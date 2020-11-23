@@ -21,8 +21,6 @@ import java.util.*;
 public interface GeneratorConstants {
     String CLASS_KEYWORD = "class";
     String JAVA_PACKAGE_PREFIX = "java.";
-    String ARRAY_MARKER = "[";
-    int ARRAY_ELEMENTS_CLASS_NAME_INDEX = 2;
 
     String[] IMPORTING_CLASSES = new String[]{
             PrimitiveMapping.class.getName(),
@@ -100,6 +98,7 @@ public interface GeneratorConstants {
 
     interface MappersConstants {
         interface PrimitiveMappingMethods {
+            String TO_UUID = "toUuid";
             String TO_STRING = "toString";
             String TO_CHAR = "toChar";
             String TO_INT = "toInt";
@@ -110,6 +109,7 @@ public interface GeneratorConstants {
             String TO_BYTE = "toByte";
             String TO_FLOAT = "toFloat";
 
+            String FROM_UUID = "fromUuid";
             String FROM_STRING = "fromString";
             String FROM_CHAR = "fromChar";
             String FROM_INT = "fromInt";
@@ -191,7 +191,8 @@ public interface GeneratorConstants {
                 Deque.class,
                 Map.class,
                 Flux.class,
-                Mono.class
+                Mono.class,
+                UUID.class
         );
 
         Set<Class<?>> LIBRARY_TYPES = setOf(

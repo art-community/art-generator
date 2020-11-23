@@ -24,6 +24,8 @@ public class Model {
     Double FBDouble;
     Float FBFloat;
 
+    UUID FUUID;
+
     int[] FAint;
     char[] FAchar;
     short[] FAshort;
