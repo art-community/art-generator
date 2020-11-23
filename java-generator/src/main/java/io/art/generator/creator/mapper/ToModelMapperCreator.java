@@ -20,7 +20,7 @@ import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
-import static io.art.generator.service.RandomService.*;
+import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GenerationState.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
@@ -39,7 +39,7 @@ public class ToModelMapperCreator {
     }
 
     public JCExpression createToModelMapper(Type type) {
-        String valueName = randomName(VALUE_NAME);
+        String valueName = sequenceName(VALUE_NAME);
         if (isLibraryType(type)) {
             return createToModelMapperBody(type, valueName);
         }
