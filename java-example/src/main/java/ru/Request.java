@@ -84,23 +84,48 @@ public class Request {
     Map<Float, Float> FMFloat;
 
     Model FModel;
+
     Model[] FAModel;
+    List<Model>[] FALModel;
+    Set<Model>[] FASModel;
+    Collection<Model>[] FACModel;
+    Map<String, Model>[] FAMModel;
 
     List<Model> FLModel;
+    List<List<Model>> FLLModel;
+    List<Set<Model>> FLSModel;
+    List<Collection<Model>> FLCModel;
+    List<Map<String, Model>> FLMModel;
+    List<Model[]> FLAModel;
+
     Set<Model> FSModel;
+    Set<List<Model>> FSLModel;
+    Set<Set<Model>> FSSModel;
+    Set<Collection<Model>> FSCModel;
+    Set<Map<String, Model>> FSMModel;
+    Set<Model[]> FSAModel;
+
+    Collection<Model> FCModel;
+    Collection<List<Model>> FCLModel;
+    Collection<Set<Model>> FCSModel;
     Collection<Collection<Model>> FCCModel;
+    Collection<Map<String, Model>> FCMModel;
     Collection<Model[]> FCAModel;
 
     Map<String, Model> FMModel;
     Map<String, Model[]> FMAModel;
     Map<String, List<Model>> FMLModel;
     Map<String, Set<Model>> FMSModel;
+    Map<String, Collection<Model>> FMCModel;
+    Map<String, Map<String, Model>> FMMModel;
 
-    Map<String, Model>[] FAMModel;
+    Collection<List<Map<String, Model>>> FCCMModel;
+    Collection<Set<Map<String, Model>>> FCLMModel;
+    Collection<Collection<Map<String, Model>>> FCSMModel;
+    Collection<Map<String, Model>> FCMMModel;
 
-    List<Map<String, Model>> FLMModel;
-    Set<Map<String, Model>> FSMModel;
-    Collection<Collection<Map<String, Model>>> FCCMModel;
-
-    Collection<Map<String, Model>[]> FCAMModel;
+    Collection<List<Map<String, Model>>[]> FCLMAModel;
+    Collection<Set<Map<String, Model>>[]> FCSMAModel;
+    Collection<Collection<Map<String, Model>>[]> FCCMAModel;
+    Collection<Map<String, Model>[]> FCMAModel;
 }
