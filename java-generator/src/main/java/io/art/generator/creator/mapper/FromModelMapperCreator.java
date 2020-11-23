@@ -15,6 +15,7 @@ import static io.art.generator.constants.GeneratorConstants.MappersConstants.Bin
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.context.GeneratorContext.mainClass;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.model.NewLambda.*;
@@ -22,6 +23,8 @@ import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.RandomService.*;
+import static io.art.generator.state.GenerationState.getGeneratedMapping;
+import static io.art.generator.state.GenerationState.hasGeneratedMapping;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
@@ -33,6 +36,9 @@ public class FromModelMapperCreator {
         String modelName = randomName(MODEL_NAME);
         if (isJdkType(type)) {
             return createFromModelMapperBody(type, modelName);
+        }
+        if (hasGeneratedMapping(type)) {
+            return select(select(mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX, getGeneratedMapping(type)), FROM_MODEL_NAME);
         }
         return newLambda()
                 .parameter(newParameter(type(type), modelName))

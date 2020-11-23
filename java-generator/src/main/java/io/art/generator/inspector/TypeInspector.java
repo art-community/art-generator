@@ -89,4 +89,37 @@ public class TypeInspector {
         }
         return (Class<?>) rawType;
     }
+
+    public Class<?> extractClass(Type type) {
+        if (type instanceof Class) {
+            return (Class<?>) type;
+        }
+        if (type instanceof ParameterizedType) {
+            return extractClass((ParameterizedType) type);
+        }
+        throw new GenerationException(format(UNSUPPORTED_TYPE, type));
+    }
+
+    public ImmutableSet<Type> collectCustomTypes(Type root) {
+        ImmutableSet.Builder<Type> types = ImmutableSet.builder();
+        if (isJdkType(root)) {
+            return types.build();
+        }
+        types.add(root);
+        if (root instanceof Class) {
+            getProperties((Class<?>) root)
+                    .stream()
+                    .flatMap(type -> collectCustomTypes(type.getGenericType()).stream())
+                    .forEach(types::add);
+            return types.build();
+        }
+        if (root instanceof ParameterizedType) {
+            getProperties(extractClass((ParameterizedType) root))
+                    .stream()
+                    .flatMap(type -> collectCustomTypes(type.getGenericType()).stream())
+                    .forEach(types::add);
+            return types.build();
+        }
+        return types.build();
+    }
 }

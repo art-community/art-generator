@@ -66,6 +66,7 @@ public interface GeneratorConstants {
         String CONFIGURE_NAME = "configure";
         String SERVER_NAME = "server";
         String MODULE_NAME = "module";
+        String MAPPING_INTERFACE_NAME = "Mapping";
         String MODEL_NAME = "model";
         String SERVICES_REGISTRY_NAME = "SERVICES_REGISTRY";
         String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
@@ -77,6 +78,8 @@ public interface GeneratorConstants {
         String LAZY_PUT_NAME = "lazyPut";
         String MAP_NAME = "map";
         String GET_PREFIX = "get";
+        String TO_MODEL_NAME = "toModel";
+        String FROM_MODEL_NAME = "fromModel";
     }
 
     interface Annotations {

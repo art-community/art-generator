@@ -5,6 +5,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.core.constants.*;
 import io.art.generator.exception.*;
+import io.art.generator.inspector.*;
 import io.art.generator.model.*;
 import io.art.model.server.*;
 import io.art.server.implementation.*;
@@ -42,6 +43,24 @@ public class ServerModelImplementor {
         ImmutableSet<ServiceModel<?>> services = serverModel.getServices();
         services.forEach(serviceModel -> servicesMethod.statement(() -> maker().Exec(executeRegisterMethod(servicesMethod, serviceModel))));
         return servicesMethod.statement(() -> returnVariable(REGISTRY_NAME));
+    }
+
+    public ImmutableSet<Type> collectCustomTypes(ServerModel serverModel) {
+        ImmutableSet.Builder<Type> types = ImmutableSet.builder();
+        ImmutableSet<ServiceModel<?>> services = serverModel.getServices();
+        for (ServiceModel<?> service : services) {
+            for (Method method : service.getServiceClass().getMethods()) {
+                Type[] parameterTypes = method.getGenericParameterTypes();
+                if (parameterTypes.length > 1) {
+                    throw new GenerationException(MORE_THAN_ONE_PARAMETER);
+                }
+                types.addAll(TypeInspector.collectCustomTypes(method.getGenericReturnType()));
+                if (isNotEmpty(parameterTypes)) {
+                    types.addAll(TypeInspector.collectCustomTypes(parameterTypes[0]));
+                }
+            }
+        }
+        return types.build();
     }
 
     private JCMethodInvocation executeRegisterMethod(NewMethod servicesMethod, ServiceModel<?> serviceModel) {
