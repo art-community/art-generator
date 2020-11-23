@@ -5,6 +5,7 @@ import io.art.generator.model.*;
 import io.art.launcher.*;
 import io.art.model.module.*;
 import io.art.server.registry.*;
+import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.constants.GeneratorConstants.*;
@@ -37,7 +38,7 @@ public class ModuleModelImplementor {
                 .name(MODEL_NAME)
                 .modifiers(PRIVATE | FINAL | STATIC)
                 .type(type(ModuleModel.class))
-                .initializer(() -> applyMethod(DECORATE_NAME, List.of(applyClassMethod(type(mainClass().getName()), CONFIGURE_NAME))));
+                .initializer(() -> applyMethod(DECORATE_NAME, List.of(applyClassMethod(type(mainClass().asClass()), CONFIGURE_NAME))));
 
         NewField servicesRegistryField = newField()
                 .name(SERVICES_REGISTRY_NAME)

@@ -1,31 +1,27 @@
-package io.art.generator.determiner;
+package io.art.generator.inspector;
 
 import com.google.common.collect.*;
 import io.art.generator.exception.*;
-import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
-import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
-import static io.art.generator.model.TypeModel.type;
-import static io.art.generator.service.JavacService.select;
-import static java.lang.Character.isUpperCase;
+import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.*;
 
 @UtilityClass
-public class MappingFieldsDeterminer {
-    public ImmutableList<Field> getMappingFields(Class<?> type) {
+public class TypeInspector {
+    public ImmutableList<Field> getProperties(Class<?> type) {
         ImmutableList.Builder<Field> fields = ImmutableList.builder();
         try {
-            for (Method method : type.getDeclaredMethods()) {
-                String getterName = method.getName();
-                if (getterName.startsWith(GET_PREFIX)) {
-                    String fieldName = getterName.substring(GET_PREFIX.length());
-                    String decapitalizedFieldName = isUpperCase(fieldName.charAt(0)) ? fieldName : decapitalize(fieldName);
-                    Field[] declaredFields = type.getDeclaredFields();
-                    stream(declaredFields).filter(field -> field.getName().equals(decapitalizedFieldName)).forEach(fields::add);
+            for (Field field : type.getDeclaredFields()) {
+                String getterName = GET_PREFIX + capitalize(field.getName());
+                boolean hasGetter = stream(type.getMethods()).anyMatch(method -> method.getName().equals(getterName));
+                if (hasGetter) {
+                    fields.add(field);
                 }
             }
             return fields.build();
@@ -34,34 +30,34 @@ public class MappingFieldsDeterminer {
         }
     }
 
-    public boolean typeIsKnown(Type type) {
+    public boolean isJdkType(Type type) {
         if (type instanceof ParameterizedType) {
             Type rawType = ((ParameterizedType) type).getRawType();
-            return typeIsKnown(rawType);
+            return isJdkType(rawType);
         }
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {
-                boolean foundByKnownTypes = KNOWN_TYPES
+                boolean jdkBaseType = JDK_BASE_TYPES
                         .stream()
                         .anyMatch(knownType -> knownType.isAssignableFrom(typeAsClass.getComponentType()));
-                boolean foundByKnownStrictTypes = KNOWN_STRICT_TYPES
+                boolean jdkType = JDK_TYPES
                         .stream()
                         .anyMatch(knownType -> knownType.equals(typeAsClass.getComponentType()));
-                return foundByKnownStrictTypes || foundByKnownTypes;
+                return jdkType || jdkBaseType;
             }
-            boolean foundByKnownTypes = KNOWN_TYPES
+            boolean jdkBaseType = JDK_BASE_TYPES
                     .stream()
                     .anyMatch(knownType -> knownType.isAssignableFrom(typeAsClass));
-            boolean foundByKnownStrictTypes = KNOWN_STRICT_TYPES
+            boolean jdkType = JDK_TYPES
                     .stream()
                     .anyMatch(knownType -> knownType.equals(typeAsClass));
-            return foundByKnownStrictTypes || foundByKnownTypes;
+            return jdkType || jdkBaseType;
         }
         return false;
     }
-    
-    public boolean typeIsPrimitive(Type type) {
+
+    public boolean isPrimitiveType(Type type) {
         if (String.class.equals(type)) {
             return true;
         }
@@ -87,5 +83,17 @@ public class MappingFieldsDeterminer {
             return true;
         }
         return float.class.equals(type) || Float.class.equals(type);
+    }
+
+    public boolean isCustomType(Type type) {
+        return !isPrimitiveType(type);
+    }
+
+    public Class<?> extractClass(ParameterizedType parameterizedType) {
+        Type rawType = parameterizedType.getRawType();
+        if (!(rawType instanceof Class)) {
+            throw new GenerationException(format(UNSUPPORTED_TYPE, rawType));
+        }
+        return (Class<?>) rawType;
     }
 }

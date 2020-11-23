@@ -163,7 +163,7 @@ public interface GeneratorConstants {
             String TO_BINARY = "toBinary";
         }
 
-        Set<Class<?>> KNOWN_TYPES = setOf(
+        Set<Class<?>> JDK_BASE_TYPES = setOf(
                 String.class,
                 short.class,
                 Short.class,
@@ -183,7 +183,7 @@ public interface GeneratorConstants {
                 Map.class
         );
 
-        Set<Class<?>> KNOWN_STRICT_TYPES = setOf(
+        Set<Class<?>> JDK_TYPES = setOf(
                 Object.class
         );
     }

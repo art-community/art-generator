@@ -1,4 +1,4 @@
-package io.art.generator.determiner;
+package io.art.generator.inspector;
 
 import com.google.common.collect.*;
 import lombok.experimental.*;
@@ -8,7 +8,7 @@ import static java.util.Arrays.*;
 import java.lang.reflect.*;
 
 @UtilityClass
-public class ServiceMethodsDeterminer {
+public class ServiceMethodsInspector {
     public ImmutableList<Method> getServiceMethods(Class<?> serviceClass) {
         return stream(serviceClass.getDeclaredMethods())
                 .filter(method -> isPublic(method.getModifiers()))

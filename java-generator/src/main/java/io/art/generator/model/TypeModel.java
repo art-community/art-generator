@@ -2,10 +2,17 @@ package io.art.generator.model;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.tree.JCTree.*;
+import io.art.core.extensions.*;
+import io.art.generator.exception.*;
 import lombok.*;
+import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.constants.StringConstants.*;
+import static io.art.core.extensions.StringExtensions.*;
+import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.inspector.TypeInspector.*;
+import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
 import static java.util.Collections.*;
 import static java.util.Objects.*;
@@ -17,70 +24,63 @@ import java.util.*;
 @Getter
 @EqualsAndHashCode
 public class TypeModel {
-    private final String outerTypeName;
-    private final String innerTypeName;
-    private final List<TypeModel> parameters;
+    private Type type;
+    private List<TypeModel> parameters;
 
     private String packageName = EMPTY_STRING;
+    private String ownerName;
     private String fullName;
     private String name;
 
-    private TypeTag primitiveType;
-
+    private TypeTag primitive;
     private boolean jdk;
     private boolean array;
 
-    private TypeModel(String outerTypeName, String innerTypeName, List<TypeModel> parameters) {
-        this.outerTypeName = outerTypeName;
-        this.innerTypeName = innerTypeName;
-        this.parameters = parameters;
-        Optional<TypeTag> existedType = stream(TypeTag.values())
-                .filter(tag -> tag.name().toLowerCase().equals(outerTypeName.toLowerCase()))
-                .findFirst();
-        if (existedType.isPresent()) {
-            primitiveType = existedType.get();
-            name = outerTypeName;
+    private TypeModel(Type type) {
+        if (type instanceof Class) {
+            ofClass((Class<?>) type);
             return;
         }
-        if (outerTypeName.startsWith(ARRAY_MARKER)) {
-            array = true;
-            String elementsType = outerTypeName.substring(ARRAY_ELEMENTS_CLASS_NAME_INDEX);
-            parseTypeName(elementsType.substring(0, elementsType.length() - 1));
+
+        if (type instanceof ParameterizedType) {
+            ofParametrizedType((ParameterizedType) type);
             return;
         }
-        parseTypeName(outerTypeName);
+
+        throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
-    private void parseTypeName(String outerTypeName) {
-        if (outerTypeName.startsWith(JAVA_PACKAGE_PREFIX)) {
-            jdk = true;
-            packageName = outerTypeName.substring(0, outerTypeName.lastIndexOf(DOT));
-            name = outerTypeName.substring(outerTypeName.lastIndexOf(packageName) + packageName.length() + 1);
-            fullName = name;
-            return;
-        }
-        if (outerTypeName.contains(DOT)) {
-            packageName = outerTypeName.substring(0, outerTypeName.lastIndexOf(DOT));
-            String nameWithoutPackage = outerTypeName.substring(outerTypeName.lastIndexOf(packageName) + packageName.length() + 1);
-            if (!innerTypeName.isEmpty()) {
-                name = nameWithoutPackage + DOT + innerTypeName;
-                fullName = outerTypeName + DOT + innerTypeName;
-                return;
-            }
-            name = nameWithoutPackage;
-            fullName = outerTypeName;
-            return;
-        }
-        if (!innerTypeName.isEmpty()) {
-            name = fullName = outerTypeName + DOT + innerTypeName;
-            return;
-        }
-        this.name = fullName = outerTypeName;
+
+    private void ofClass(Class<?> typeClass) {
+        this.type = typeClass;
+        this.array = typeClass.isArray();
+        this.ownerName = let(typeClass.getDeclaringClass(), Class::getSimpleName);
+        this.name = typeClass.getSimpleName();
+        this.packageName = emptyIfNull(let(typeClass.getPackage(), Package::getName));
+        this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
+        this.fullName = typeClass.getName();
+        this.parameters = emptyList();
+        stream(TypeTag.values())
+                .filter(tag -> tag.name().toLowerCase().equals(typeClass.getSimpleName().toLowerCase()))
+                .findFirst()
+                .ifPresent(typeTag -> this.primitive = typeTag);
+    }
+
+
+    private void ofParametrizedType(ParameterizedType parameterizedType) {
+        this.type = parameterizedType;
+        Class<?> ownerClass = extractClass(parameterizedType);
+        this.ownerName = let(ownerClass.getDeclaringClass(), Class::getSimpleName);
+        this.name = ownerClass.getSimpleName();
+        this.packageName = emptyIfNull(let(ownerClass.getPackage(), Package::getName));
+        this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
+        this.fullName = ownerClass.getName();
+        this.parameters = stream(parameterizedType.getActualTypeArguments()).map(TypeModel::new).collect(toList());
     }
 
     public JCExpression generate() {
-        if (nonNull(primitiveType)) {
-            return maker().TypeIdent(primitiveType);
+        if (nonNull(primitive)) {
+            return maker().TypeIdent(primitive);
         }
         if (!parameters.isEmpty()) {
             com.sun.tools.javac.util.List<JCExpression> arguments = com.sun.tools.javac.util.List.from(parameters
@@ -96,43 +96,7 @@ public class TypeModel {
                 : maker().Ident(elements().getName(name));
     }
 
-
-    public static TypeModel type(Class<?> typeClass) {
-        return type(typeClass, emptyList());
-    }
-
     public static TypeModel type(Type type) {
-        if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
-            Type rawType = parameterizedType.getRawType();
-            List<TypeModel> arguments = stream(parameterizedType.getActualTypeArguments())
-                    .map(TypeModel::type)
-                    .collect(toList());
-            if (rawType instanceof ParameterizedType) {
-                return type(rawType);
-            }
-            return type((Class<?>) rawType, arguments);
-        }
-        return type((Class<?>) type, emptyList());
-    }
-
-    public static TypeModel type(Class<?> typeClass, List<TypeModel> parameters) {
-        return type(typeClass.getName(), parameters);
-    }
-
-    public static TypeModel type(String name) {
-        return type(name, emptyList());
-    }
-
-    public static TypeModel type(String name, List<TypeModel> parameters) {
-        return new TypeModel(name, EMPTY_STRING, parameters);
-    }
-
-    public static TypeModel type(String outerName, String innerName) {
-        return new TypeModel(outerName, innerName, emptyList());
-    }
-
-    public static TypeModel type(String outerName, String innerName, List<TypeModel> parameters) {
-        return new TypeModel(outerName, innerName, parameters);
+        return new TypeModel(type);
     }
 }

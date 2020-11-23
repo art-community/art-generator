@@ -16,7 +16,7 @@ import static io.art.generator.constants.GeneratorConstants.MappersConstants.Pri
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
-import static io.art.generator.determiner.MappingFieldsDeterminer.*;
+import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
@@ -29,7 +29,7 @@ import java.util.*;
 @UtilityClass
 public class ToModelMapperCreator {
     public JCExpression createToModelMapper(Type type) {
-        if (typeIsKnown(type)) {
+        if (isJdkType(type)) {
             return createToModelMapperBody(type);
         }
         return newLambda()
@@ -110,7 +110,7 @@ public class ToModelMapperCreator {
             return select(type(PrimitiveMapping.class), TO_FLOAT);
         }
         JCMethodInvocation builderInvocation = applyClassMethod(type(mappingClass), BUILDER_METHOD_NAME);
-        for (Field field : getMappingFields(mappingClass)) {
+        for (Field field : getProperties(mappingClass)) {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
             builderInvocation = applyMethod(builderInvocation, fieldName, List.of(createFieldMapping(fieldName, fieldType)));
@@ -152,7 +152,7 @@ public class ToModelMapperCreator {
             return applyClassMethod(type(ArrayMapping.class), TO_COLLECTION, List.of(parameterMapper));
         }
         if (Map.class.isAssignableFrom(mappingClass)) {
-            if (!typeIsPrimitive(typeArguments[0])) {
+            if (isCustomType(typeArguments[0])) {
                 throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
             }
             JCExpression keyToModelMapper = createToModelMapperBody(typeArguments[0]);
@@ -166,7 +166,7 @@ public class ToModelMapperCreator {
     private JCMethodInvocation createFieldMapping(String fieldName, Type fieldType) {
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(maker().Literal(fieldName));
-        mapping.add(createToModelMapperBody(fieldType));
+        mapping.add(createToModelMapper(fieldType));
         return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
     }
 }

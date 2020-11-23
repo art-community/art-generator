@@ -22,7 +22,7 @@ public class DecorateMethodCreator {
                 .modifiers(PUBLIC | STATIC)
                 .name(DECORATE_NAME)
                 .parameter(newParameter(type(ModuleModel.class), MODEL_NAME))
-                .returnType(type(ModuleModel.class.getName()))
+                .returnType(type(ModuleModel.class))
                 .statement(() -> maker().Return(createModelConfigureMethod()));
     }
 

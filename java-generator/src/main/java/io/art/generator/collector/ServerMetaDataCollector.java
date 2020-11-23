@@ -7,7 +7,7 @@ import io.art.model.server.*;
 import lombok.experimental.*;
 import static io.art.generator.collector.MappingTypesCollector.*;
 import static io.art.generator.context.GeneratorContext.*;
-import static io.art.generator.determiner.ServiceMethodsDeterminer.*;
+import static io.art.generator.inspector.ServiceMethodsInspector.*;
 import java.lang.reflect.*;
 
 @UtilityClass

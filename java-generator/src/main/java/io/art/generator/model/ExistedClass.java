@@ -4,6 +4,8 @@ import com.sun.tools.javac.code.*;
 import lombok.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.constants.StringConstants.*;
+import static io.art.generator.context.GeneratorContext.classLoader;
+import static java.lang.Class.*;
 import java.util.*;
 
 @Getter
@@ -29,5 +31,9 @@ public class ExistedClass {
 
     public Type getType() {
         return declaration.sym.type;
+    }
+
+    public Class<?> asClass() {
+        return classLoader().loadClass(getFullName());
     }
 }

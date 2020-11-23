@@ -16,7 +16,7 @@ import static io.art.generator.constants.GeneratorConstants.MappersConstants.Ent
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
-import static io.art.generator.determiner.MappingFieldsDeterminer.*;
+import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
@@ -29,7 +29,7 @@ import java.util.*;
 @UtilityClass
 public class FromModelMapperCreator {
     public JCExpression createFromModelMapper(Type type) {
-        if (typeIsKnown(type)) {
+        if (isJdkType(type)) {
             return createFromModelMapperBody(type);
         }
         return newLambda()
@@ -110,7 +110,7 @@ public class FromModelMapperCreator {
             return select(type(PrimitiveMapping.class), FROM_FLOAT);
         }
         JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER_NAME);
-        for (Field field : getMappingFields(mappingClass)) {
+        for (Field field : getProperties(mappingClass)) {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
             builderInvocation = createFieldMapping(builderInvocation, fieldName, fieldType);
@@ -152,7 +152,7 @@ public class FromModelMapperCreator {
             return applyClassMethod(type(ArrayMapping.class), FROM_COLLECTION, List.of(parameterMapper));
         }
         if (Map.class.isAssignableFrom(mappingClass)) {
-            if (!typeIsPrimitive(typeArguments[0])) {
+            if (isCustomType(typeArguments[0])) {
                 throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
             }
             JCExpression keyToModelMapper = createToModelMapperBody(typeArguments[0]);
@@ -167,7 +167,7 @@ public class FromModelMapperCreator {
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(literal(fieldName));
         mapping.add(newLambda().expression(() -> applyMethod(MODEL_NAME, GET_PREFIX + capitalize(fieldName))).generate());
-        mapping.add(createFromModelMapperBody(fieldType));
+        mapping.add(createFromModelMapper(fieldType));
         return applyMethod(builderInvocation, LAZY_PUT_NAME, mapping.toList());
     }
 }
