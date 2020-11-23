@@ -84,6 +84,7 @@ public class TypeModel {
 
     private void ofGenericArrayType(GenericArrayType genericArrayType) {
         this.type = genericArrayType;
+        this.array = true;
         Class<?> ownerClass = extractClass(genericArrayType);
         this.ownerName = let(ownerClass.getDeclaringClass(), Class::getSimpleName);
         this.name = ownerClass.getSimpleName();

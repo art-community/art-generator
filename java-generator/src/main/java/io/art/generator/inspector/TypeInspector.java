@@ -86,11 +86,7 @@ public class TypeInspector {
     }
 
     public Class<?> extractClass(ParameterizedType parameterizedType) {
-        Type rawType = parameterizedType.getRawType();
-        if (!(rawType instanceof Class)) {
-            throw new GenerationException(format(UNSUPPORTED_TYPE, rawType));
-        }
-        return (Class<?>) rawType;
+        return extractClass(parameterizedType.getRawType());
     }
 
     public Class<?> extractClass(GenericArrayType genericArrayType) {
