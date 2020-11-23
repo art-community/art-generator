@@ -49,7 +49,7 @@ public class ServerModelImplementor {
         ImmutableSet.Builder<Type> types = ImmutableSet.builder();
         ImmutableSet<ServiceModel<?>> services = serverModel.getServices();
         for (ServiceModel<?> service : services) {
-            for (Method method : service.getServiceClass().getMethods()) {
+            for (Method method : service.getServiceClass().getDeclaredMethods()) {
                 Type[] parameterTypes = method.getGenericParameterTypes();
                 if (parameterTypes.length > 1) {
                     throw new GenerationException(MORE_THAN_ONE_PARAMETER);
@@ -95,11 +95,11 @@ public class ServerModelImplementor {
             servicesMethod.addClassImport(classImport(type(parameterTypes[0]).getName()));
             switch (inputMode) {
                 case BLOCKING:
-                    methodBuilder.method(INPUT_MAPPER, createToModelMapper(parameterTypes[0]));
+                    methodBuilder.method(INPUT_MAPPER, toModelMapper(parameterTypes[0]));
                     break;
                 case MONO:
                 case FLUX:
-                    methodBuilder.method(INPUT_MAPPER, createToModelMapper(((ParameterizedType) parameterTypes[0]).getActualTypeArguments()[0]));
+                    methodBuilder.method(INPUT_MAPPER, toModelMapper(((ParameterizedType) parameterTypes[0]).getActualTypeArguments()[0]));
                     break;
             }
         }
@@ -107,11 +107,11 @@ public class ServerModelImplementor {
             servicesMethod.addClassImport(classImport(type(returnType).getName()));
             switch (outputMode) {
                 case BLOCKING:
-                    methodBuilder.method(OUTPUT_MAPPER, createFromModelMapper(returnType));
+                    methodBuilder.method(OUTPUT_MAPPER, fromModelMapper(returnType));
                     break;
                 case MONO:
                 case FLUX:
-                    methodBuilder.method(OUTPUT_MAPPER, createFromModelMapper(((ParameterizedType) returnType).getActualTypeArguments()[0]));
+                    methodBuilder.method(OUTPUT_MAPPER, fromModelMapper(((ParameterizedType) returnType).getActualTypeArguments()[0]));
                     break;
             }
         }

@@ -166,7 +166,7 @@ public interface GeneratorConstants {
             String TO_BINARY = "toBinary";
         }
 
-        Set<Class<?>> JDK_BASE_TYPES = setOf(
+        Set<Class<?>> LIBRARY_BASE_TYPES = setOf(
                 String.class,
                 boolean.class,
                 Boolean.class,
@@ -189,10 +189,12 @@ public interface GeneratorConstants {
                 Set.class,
                 Queue.class,
                 Deque.class,
-                Map.class
+                Map.class,
+                Flux.class,
+                Mono.class
         );
 
-        Set<Class<?>> JDK_TYPES = setOf(
+        Set<Class<?>> LIBRARY_TYPES = setOf(
                 Object.class
         );
     }

@@ -24,21 +24,26 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.RandomService.*;
 import static io.art.generator.state.GenerationState.getGeneratedMapping;
-import static io.art.generator.state.GenerationState.hasGeneratedMapping;
 import static java.text.MessageFormat.*;
+import static java.util.Objects.nonNull;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
 import java.util.*;
 
 @UtilityClass
 public class FromModelMapperCreator {
+    public JCExpression fromModelMapper(Type type) {
+        String generatedMapping = getGeneratedMapping(type);
+        if (nonNull(generatedMapping)) {
+            return select(select(mainClass().getName(), generatedMapping), FROM_MODEL_NAME);
+        }
+        return createFromModelMapper(type);
+    }
+
     public JCExpression createFromModelMapper(Type type) {
         String modelName = randomName(MODEL_NAME);
-        if (isJdkType(type)) {
+        if (isLibraryType(type)) {
             return createFromModelMapperBody(type, modelName);
-        }
-        if (hasGeneratedMapping(type)) {
-            return select(select(mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX, getGeneratedMapping(type)), FROM_MODEL_NAME);
         }
         return newLambda()
                 .parameter(newParameter(type(type), modelName))
@@ -175,7 +180,7 @@ public class FromModelMapperCreator {
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(literal(fieldName));
         mapping.add(newLambda().expression(() -> applyMethod(modelName, GET_PREFIX + capitalize(fieldName))).generate());
-        mapping.add(createFromModelMapper(fieldType));
+        mapping.add(fromModelMapper(fieldType));
         return applyMethod(builderInvocation, LAZY_PUT_NAME, mapping.toList());
     }
 }

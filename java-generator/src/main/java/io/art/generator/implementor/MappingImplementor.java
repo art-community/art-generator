@@ -36,8 +36,8 @@ public class MappingImplementor {
         }
         for (Map.Entry<Type, String> entry : typeMappings.entrySet()) {
             Type[] arguments = {
-                    Entity.class,
-                    entry.getKey()
+                    entry.getKey(),
+                    Entity.class
             };
             ParameterizedTypeImpl toType = ParameterizedTypeImpl.make(ValueToModelMapper.class, arguments, null);
             ParameterizedTypeImpl fromType = ParameterizedTypeImpl.make(ValueFromModelMapper.class, arguments, null);

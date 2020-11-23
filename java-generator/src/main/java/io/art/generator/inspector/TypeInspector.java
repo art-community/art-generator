@@ -30,19 +30,19 @@ public class TypeInspector {
         }
     }
 
-    public boolean isJdkType(Type type) {
+    public boolean isLibraryType(Type type) {
         if (type instanceof ParameterizedType) {
-            return isJdkType(extractClass((ParameterizedType) type));
+            return isLibraryType(extractClass((ParameterizedType) type));
         }
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {
-                return isJdkType(typeAsClass.getComponentType());
+                return isLibraryType(typeAsClass.getComponentType());
             }
-            boolean jdkBaseType = JDK_BASE_TYPES
+            boolean jdkBaseType = LIBRARY_BASE_TYPES
                     .stream()
                     .anyMatch(matching -> matching.isAssignableFrom(typeAsClass));
-            boolean jdkType = JDK_TYPES
+            boolean jdkType = LIBRARY_TYPES
                     .stream()
                     .anyMatch(matching -> matching.equals(typeAsClass));
             return jdkType || jdkBaseType;
@@ -102,19 +102,26 @@ public class TypeInspector {
 
     public ImmutableSet<Type> collectCustomTypes(Type root) {
         ImmutableSet.Builder<Type> types = ImmutableSet.builder();
-        if (isJdkType(root)) {
-            return types.build();
-        }
-        types.add(root);
         if (root instanceof Class) {
+            if (isLibraryType(root)) {
+                return types.build();
+            }
+            types.add(root);
             getProperties((Class<?>) root)
                     .stream()
                     .flatMap(type -> collectCustomTypes(type.getGenericType()).stream())
                     .forEach(types::add);
             return types.build();
         }
+
         if (root instanceof ParameterizedType) {
-            getProperties(extractClass((ParameterizedType) root))
+            ParameterizedType parameterizedType = (ParameterizedType) root;
+            stream(parameterizedType.getActualTypeArguments()).flatMap(type -> collectCustomTypes(type).stream()).forEach(types::add);
+            Class<?> rawClass = extractClass(parameterizedType.getRawType());
+            if (isLibraryType(rawClass)) {
+                return types.build();
+            }
+            getProperties(rawClass)
                     .stream()
                     .flatMap(type -> collectCustomTypes(type.getGenericType()).stream())
                     .forEach(types::add);
