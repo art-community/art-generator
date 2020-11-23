@@ -165,8 +165,12 @@ public interface GeneratorConstants {
 
         Set<Class<?>> JDK_BASE_TYPES = setOf(
                 String.class,
+                boolean.class,
+                Boolean.class,
                 short.class,
                 Short.class,
+                char.class,
+                Character.class,
                 int.class,
                 Integer.class,
                 long.class,
@@ -180,6 +184,8 @@ public interface GeneratorConstants {
                 List.class,
                 Collection.class,
                 Set.class,
+                Queue.class,
+                Deque.class,
                 Map.class
         );
 

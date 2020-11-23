@@ -21,6 +21,7 @@ import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
+import static io.art.generator.service.RandomService.randomName;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
@@ -29,28 +30,29 @@ import java.util.*;
 @UtilityClass
 public class ToModelMapperCreator {
     public JCExpression createToModelMapper(Type type) {
+        String valueName = randomName(VALUE_NAME);
         if (isJdkType(type)) {
-            return createToModelMapperBody(type);
+            return createToModelMapperBody(type, valueName);
         }
         return newLambda()
-                .parameter(newParameter(type(Entity.class), VALUE_NAME))
-                .expression(() -> createToModelMapperBody(type))
+                .parameter(newParameter(type(Entity.class), valueName))
+                .expression(() -> createToModelMapperBody(type, valueName))
                 .generate();
     }
 
-    public JCExpression createToModelMapperBody(Type type) {
+    public JCExpression createToModelMapperBody(Type type, String valueName) {
         if (type instanceof Class) {
-            return createClassMapperBody((Class<?>) type);
+            return createClassMapperBody((Class<?>) type, valueName);
         }
 
         if (type instanceof ParameterizedType) {
-            return createParametrizedTypeMapperBody((ParameterizedType) type);
+            return createParametrizedTypeMapperBody((ParameterizedType) type, valueName);
         }
 
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }
 
-    private JCExpression createClassMapperBody(Class<?> mappingClass) {
+    private JCExpression createClassMapperBody(Class<?> mappingClass, String valueName) {
         if (byte[].class.equals(mappingClass)) {
             return select(type(BinaryMapping.class), TO_BINARY);
         }
@@ -79,7 +81,7 @@ public class ToModelMapperCreator {
             if (float.class.equals(mappingClass.getComponentType())) {
                 return select(type(ArrayMapping.class), TO_FLOAT_ARRAY);
             }
-            JCExpression parameterMapper = createToModelMapperBody(mappingClass.getComponentType());
+            JCExpression parameterMapper = createToModelMapperBody(mappingClass.getComponentType(), valueName);
             return applyClassMethod(type(ArrayMapping.class), TO_ARRAY, List.of(parameterMapper));
         }
         if (String.class.equals(mappingClass)) {
@@ -113,12 +115,12 @@ public class ToModelMapperCreator {
         for (Field field : getProperties(mappingClass)) {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
-            builderInvocation = applyMethod(builderInvocation, fieldName, List.of(createFieldMapping(fieldName, fieldType)));
+            builderInvocation = applyMethod(builderInvocation, fieldName, List.of(createFieldMapping(fieldName, fieldType, valueName)));
         }
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
-    private JCExpression createParametrizedTypeMapperBody(ParameterizedType parameterizedType) {
+    private JCExpression createParametrizedTypeMapperBody(ParameterizedType parameterizedType, String valueName) {
         Type rawType = parameterizedType.getRawType();
         if (!(rawType instanceof Class)) {
             throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
@@ -126,47 +128,47 @@ public class ToModelMapperCreator {
         Class<?> mappingClass = (Class<?>) rawType;
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
         if (Flux.class.isAssignableFrom(mappingClass)) {
-            return createToModelMapperBody(typeArguments[0]);
+            return createToModelMapperBody(typeArguments[0], valueName);
         }
         if (Mono.class.isAssignableFrom(mappingClass)) {
-            return createToModelMapperBody(typeArguments[0]);
+            return createToModelMapperBody(typeArguments[0], valueName);
         }
         if (java.util.List.class.isAssignableFrom(mappingClass)) {
-            JCExpression parameterMapper = createToModelMapperBody(typeArguments[0]);
+            JCExpression parameterMapper = createToModelMapperBody(typeArguments[0], valueName);
             return applyClassMethod(type(ArrayMapping.class), TO_LIST, List.of(parameterMapper));
         }
         if (Queue.class.isAssignableFrom(mappingClass)) {
-            JCExpression parameterMapper = createToModelMapperBody(typeArguments[0]);
+            JCExpression parameterMapper = createToModelMapperBody(typeArguments[0], valueName);
             return applyClassMethod(type(ArrayMapping.class), TO_QUEUE, List.of(parameterMapper));
         }
         if (Deque.class.isAssignableFrom(mappingClass)) {
-            JCExpression parameterMapper = createToModelMapperBody(typeArguments[0]);
+            JCExpression parameterMapper = createToModelMapperBody(typeArguments[0], valueName);
             return applyClassMethod(type(ArrayMapping.class), TO_DEQUE, List.of(parameterMapper));
         }
         if (Set.class.isAssignableFrom(mappingClass)) {
-            JCExpression parameterMapper = createToModelMapperBody(typeArguments[0]);
+            JCExpression parameterMapper = createToModelMapperBody(typeArguments[0], valueName);
             return applyClassMethod(type(ArrayMapping.class), TO_SET, List.of(parameterMapper));
         }
         if (Collection.class.isAssignableFrom(mappingClass)) {
-            JCExpression parameterMapper = createToModelMapperBody(typeArguments[0]);
+            JCExpression parameterMapper = createToModelMapperBody(typeArguments[0], valueName);
             return applyClassMethod(type(ArrayMapping.class), TO_COLLECTION, List.of(parameterMapper));
         }
         if (Map.class.isAssignableFrom(mappingClass)) {
             if (isCustomType(typeArguments[0])) {
                 throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
             }
-            JCExpression keyToModelMapper = createToModelMapperBody(typeArguments[0]);
-            JCExpression keyFromModelMapper = createFromModelMapperBody(typeArguments[0]);
-            JCExpression valueMapper = createToModelMapperBody(typeArguments[1]);
+            JCExpression keyToModelMapper = createToModelMapperBody(typeArguments[0], valueName);
+            JCExpression keyFromModelMapper = createFromModelMapperBody(typeArguments[0], randomName(MODEL_NAME));
+            JCExpression valueMapper = createToModelMapperBody(typeArguments[1], valueName);
             return applyClassMethod(type(EntityMapping.class), TO_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
         }
         throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
     }
 
-    private JCMethodInvocation createFieldMapping(String fieldName, Type fieldType) {
+    private JCMethodInvocation createFieldMapping(String fieldName, Type fieldType, String valueName) {
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(maker().Literal(fieldName));
         mapping.add(createToModelMapper(fieldType));
-        return applyMethod(VALUE_NAME, MAP_NAME, mapping.toList());
+        return applyMethod(valueName, MAP_NAME, mapping.toList());
     }
 }

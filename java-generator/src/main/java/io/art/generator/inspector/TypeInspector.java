@@ -32,26 +32,19 @@ public class TypeInspector {
 
     public boolean isJdkType(Type type) {
         if (type instanceof ParameterizedType) {
-            Type rawType = ((ParameterizedType) type).getRawType();
-            return isJdkType(rawType);
+            return isJdkType(extractClass((ParameterizedType) type));
         }
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {
-                boolean jdkBaseType = JDK_BASE_TYPES
-                        .stream()
-                        .anyMatch(knownType -> knownType.isAssignableFrom(typeAsClass.getComponentType()));
-                boolean jdkType = JDK_TYPES
-                        .stream()
-                        .anyMatch(knownType -> knownType.equals(typeAsClass.getComponentType()));
-                return jdkType || jdkBaseType;
+                return isJdkType(typeAsClass.getComponentType());
             }
             boolean jdkBaseType = JDK_BASE_TYPES
                     .stream()
-                    .anyMatch(knownType -> knownType.isAssignableFrom(typeAsClass));
+                    .anyMatch(matching -> matching.isAssignableFrom(typeAsClass));
             boolean jdkType = JDK_TYPES
                     .stream()
-                    .anyMatch(knownType -> knownType.equals(typeAsClass));
+                    .anyMatch(matching -> matching.equals(typeAsClass));
             return jdkType || jdkBaseType;
         }
         return false;
