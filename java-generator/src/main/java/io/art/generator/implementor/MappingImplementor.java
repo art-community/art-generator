@@ -33,6 +33,7 @@ public class MappingImplementor {
                     .filter(key -> extractClass(key).getSimpleName().equals(typeAsClass.getSimpleName()))
                     .count();
             typeMappings.put(type, typeAsClass.getSimpleName() + MAPPING_INTERFACE_NAME + id);
+            putGeneratedMapping(type, typeAsClass.getSimpleName() + MAPPING_INTERFACE_NAME + id);
         }
         for (Map.Entry<Type, String> entry : typeMappings.entrySet()) {
             Type[] arguments = {
@@ -52,7 +53,6 @@ public class MappingImplementor {
                             .name(FROM_MODEL_NAME)
                             .type(TypeModel.type(fromType))
                             .initializer(() -> createFromModelMapper(entry.getKey())));
-            putGeneratedMapping(entry.getKey(), entry.getValue());
             mappingClasses.add(mapping);
         }
         return mappingClasses.build();

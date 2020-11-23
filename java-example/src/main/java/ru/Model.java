@@ -83,4 +83,10 @@ public class Model {
     Map<Double, Double> FMDouble;
     Map<Float, Float> FMFloat;
 
+    Model FModel;
+    Model[] FAModel;
+    List<Model> FLModel;
+    Set<Model> FSModel;
+    //Collection<Collection<Model>> collectionModels;
+//    Collection<Model[]> collectionArrayModels;
 }

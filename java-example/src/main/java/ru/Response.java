@@ -83,10 +83,10 @@ public class Response {
     Map<Double, Double> FMDouble;
     Map<Float, Float> FMFloat;
 
-    Model fModel;
-    //Model[] fAModel;
-    //List<Model> f45;
-//    Set<Model> f46;
-//    Collection<Collection<Model>> collectionModels;
+    Model FModel;
+    Model[] FAModel;
+    List<Model> FLModel;
+    Set<Model> FSModel;
+    Collection<Collection<Model>> collectionModels;
 //    Collection<Model[]> collectionArrayModels;
 }

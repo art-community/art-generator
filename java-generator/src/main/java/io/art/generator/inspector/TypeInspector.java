@@ -102,31 +102,42 @@ public class TypeInspector {
 
     public ImmutableSet<Type> collectCustomTypes(Type root) {
         ImmutableSet.Builder<Type> types = ImmutableSet.builder();
+
         if (root instanceof Class) {
-            if (isLibraryType(root)) {
-                return types.build();
-            }
-            types.add(root);
-            getProperties((Class<?>) root)
-                    .stream()
-                    .flatMap(type -> collectCustomTypes(type.getGenericType()).stream())
-                    .forEach(types::add);
-            return types.build();
+            return collectCustomTypes((Class<?>) root);
         }
 
         if (root instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) root;
-            stream(parameterizedType.getActualTypeArguments()).flatMap(type -> collectCustomTypes(type).stream()).forEach(types::add);
-            Class<?> rawClass = extractClass(parameterizedType.getRawType());
-            if (isLibraryType(rawClass)) {
-                return types.build();
-            }
-            getProperties(rawClass)
-                    .stream()
-                    .flatMap(type -> collectCustomTypes(type.getGenericType()).stream())
+            stream(parameterizedType.getActualTypeArguments())
+                    .filter(type -> !type.equals(root) && (!extractClass(type).isArray() || !root.equals(extractClass(type).getComponentType())))
+                    .flatMap(type -> collectCustomTypes(type).stream())
                     .forEach(types::add);
+            Class<?> rawClass = extractClass(parameterizedType.getRawType());
+            if (!root.equals(rawClass)) {
+                types.addAll(collectCustomTypes(rawClass));
+            }
             return types.build();
         }
+
+        return types.build();
+    }
+
+    public ImmutableSet<Type> collectCustomTypes(Class<?> root) {
+        ImmutableSet.Builder<Type> types = ImmutableSet.builder();
+        if (isLibraryType(root)) {
+            return types.build();
+        }
+        if (root.isArray()) {
+            return collectCustomTypes(root.getComponentType());
+        }
+        types.add(root);
+        getProperties(root)
+                .stream()
+                .map(Field::getGenericType)
+                .filter(type -> !type.equals(root) && (!extractClass(type).isArray() || !root.equals(extractClass(type).getComponentType())))
+                .flatMap(type -> collectCustomTypes(type).stream())
+                .forEach(types::add);
         return types.build();
     }
 }
