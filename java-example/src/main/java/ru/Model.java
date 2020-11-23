@@ -85,10 +85,16 @@ public class Model {
 
     Model FModel;
     Model[] FAModel;
+
     List<Model> FLModel;
     Set<Model> FSModel;
     Collection<Collection<Model>> FCCModel;
     Collection<Model[]> FCAModel;
+
+    Map<String, Model> FMModel;
+    Map<String, Model[]> FMAModel;
+    Map<String, List<Model>> FMLModel;
+    Map<String, Set<Model>> FMSModel;
 
     Map<String, Model>[] FAMModel;
 
@@ -97,9 +103,4 @@ public class Model {
     Collection<Collection<Map<String, Model>>> FCCMModel;
 
     Collection<Map<String, Model>[]> FCAMModel;
-
-    Map<String, Model> FMModel;
-    Map<String, Model[]> FMAModel;
-    Map<String, List<Model>> FMLModel;
-    Map<String, Set<Model>> FMSModel;
 }
