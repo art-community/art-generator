@@ -7,14 +7,14 @@ import java.util.*;
 @Value
 @Builder
 public class Model {
-    char Fchar;
-    int Fint;
-    short Fshort;
-    byte Fbyte;
-    boolean Fboolean;
-    long Flong;
-    double Fdouble;
-    float Ffloat;
+    //char Fchar;
+    //int Fint;
+    //short Fshort;
+    //byte Fbyte;
+    //boolean Fboolean;
+    //long Flong;
+    //double Fdouble;
+    //float Ffloat;
 
     Integer FBInteger;
     Short FBShort;
@@ -30,14 +30,14 @@ public class Model {
     ZonedDateTime zonedDateTime;
     Date date;
 
-    int[] FAint;
-    char[] FAchar;
-    short[] FAshort;
-    byte[] FAbyte;
-    boolean[] FAboolean;
-    long[] FAlong;
-    double[] FAdouble;
-    float[] FAfloat;
+    //int[] FAint;
+    //char[] FAchar;
+    //short[] FAshort;
+    //byte[] FAbyte;
+    //boolean[] FAboolean;
+    //long[] FAlong;
+    //double[] FAdouble;
+    //float[] FAfloat;
 
     Integer[] FABInteger;
     Character[] FABCharacter;
@@ -87,7 +87,7 @@ public class Model {
     Map<Long, Long> FMLong;
     Map<String, String> FMString;
     Map<Double, Double> FMDouble;
-    Map<Float, Float> FMFloat;
+    Map<Float, Float> pArgFMFloat;
 
     Model FModel;
 
