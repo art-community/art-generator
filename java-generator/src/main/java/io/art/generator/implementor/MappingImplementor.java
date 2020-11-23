@@ -20,6 +20,7 @@ import java.util.*;
 
 @UtilityClass
 public class MappingImplementor {
+    @SuppressWarnings("all")
     public ImmutableList<NewClass> implementCustomTypeMappings(ImmutableSet<Type> types) {
         types = types.stream().filter(type -> isNull(getGeneratedMapping(type))).collect(toImmutableSet());
         ImmutableList.Builder<NewClass> mappingClasses = ImmutableList.builder();

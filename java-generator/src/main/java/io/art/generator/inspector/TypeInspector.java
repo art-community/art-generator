@@ -108,16 +108,7 @@ public class TypeInspector {
         }
 
         if (root instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) root;
-            stream(parameterizedType.getActualTypeArguments())
-                    .filter(type -> !type.equals(root))
-                    .filter(type -> !extractClass(type).isArray() || !root.equals(extractClass(type).getComponentType()))
-                    .flatMap(type -> collectCustomTypes(type).stream())
-                    .forEach(types::add);
-            Class<?> rawClass = extractClass(parameterizedType.getRawType());
-            if (!root.equals(rawClass)) {
-                types.addAll(collectCustomTypes(rawClass));
-            }
+            collectCustomTypes(root, types, (ParameterizedType) root);
             return types.build();
         }
 
@@ -135,6 +126,7 @@ public class TypeInspector {
         types.add(root);
         for (Field property :getProperties(root)) {
             Type type = property.getGenericType();
+
             if (type.equals(root)) {
                 continue;
             }
@@ -149,19 +141,34 @@ public class TypeInspector {
             }
 
             if (type instanceof ParameterizedType) {
-                Class<?> typeAsClass = extractClass(type);
-                if (root.equals(typeAsClass) || (typeAsClass.isArray() && root.equals(typeAsClass.getComponentType()))) {
-                    continue;
-                }
-                ParameterizedType parameterizedType = (ParameterizedType) type;
-                stream(parameterizedType.getActualTypeArguments())
-                        .filter(argument -> !argument.equals(root))
-                        .filter(argument -> !extractClass(argument).isArray() || !root.equals(extractClass(argument).getComponentType()))
-                        .flatMap(argument -> collectCustomTypes(argument).stream())
-                        .forEach(types::add);
-                types.addAll(collectCustomTypes(typeAsClass));
+                collectCustomTypes(root, types, (ParameterizedType) type);
             }
         }
         return types.build();
     }
+
+    private static void collectCustomTypes(Type root, ImmutableSet.Builder<Type> types, ParameterizedType parameterizedType) {
+        Class<?> rawClass = extractClass(parameterizedType.getRawType());
+        if (!root.equals(rawClass)) {
+            types.addAll(collectCustomTypes(rawClass));
+        }
+        Type[] arguments = parameterizedType.getActualTypeArguments();
+        for (Type argument : arguments) {
+            if (root.equals(argument)) {
+                continue;
+            }
+            if (argument instanceof Class) {
+                Class<?> argumentAsClass = (Class<?>) argument;
+                if (argumentAsClass.isArray() && root.equals(argumentAsClass.getComponentType())) {
+                    continue;
+                }
+                types.addAll(collectCustomTypes(argumentAsClass));
+                continue;
+            }
+            if (argument instanceof ParameterizedType) {
+                collectCustomTypes(root, types, (ParameterizedType) argument);
+            }
+        }
+    }
+
 }
