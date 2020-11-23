@@ -54,7 +54,6 @@ public class TypeModel {
         throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
-
     private void ofClass(Class<?> typeClass) {
         this.type = typeClass;
         this.array = typeClass.isArray();
