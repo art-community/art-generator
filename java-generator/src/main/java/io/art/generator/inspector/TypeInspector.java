@@ -34,6 +34,9 @@ public class TypeInspector {
         if (type instanceof ParameterizedType) {
             return isLibraryType(extractClass((ParameterizedType) type));
         }
+        if (type instanceof GenericArrayType) {
+            return isLibraryType(extractClass((GenericArrayType) type));
+        }
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {

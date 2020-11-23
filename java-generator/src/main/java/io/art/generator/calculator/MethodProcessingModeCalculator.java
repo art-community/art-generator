@@ -22,6 +22,9 @@ public class MethodProcessingModeCalculator {
             }
             return BLOCKING;
         }
+        if (parameterType instanceof GenericArrayType) {
+            return BLOCKING;
+        }
         if (parameterType instanceof Class<?>) {
             if (parameterType.equals(Flux.class)) {
                 return FLUX;
