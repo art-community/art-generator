@@ -84,8 +84,8 @@ public class Response {
     Map<Float, Float> FMFloat;
 
     Model fModel;
-//    Model[] f44;
-//    List<Model> f45;
+    //Model[] fAModel;
+    //List<Model> f45;
 //    Set<Model> f46;
 //    Collection<Collection<Model>> collectionModels;
 //    Collection<Model[]> collectionArrayModels;

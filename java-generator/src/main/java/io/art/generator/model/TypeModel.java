@@ -54,18 +54,18 @@ public class TypeModel {
     private void ofClass(Class<?> typeClass) {
         this.type = typeClass;
         this.array = typeClass.isArray();
-        this.ownerName = let(typeClass.getDeclaringClass(), Class::getSimpleName);
-        this.name = typeClass.getSimpleName();
-        this.packageName = emptyIfNull(let(typeClass.getPackage(), Package::getName));
+        final Class<?> adoptedTypeClass = array ? typeClass.getComponentType() : typeClass;
+        this.ownerName = let(adoptedTypeClass.getDeclaringClass(), Class::getSimpleName);
+        this.name = adoptedTypeClass.getSimpleName();
+        this.packageName = emptyIfNull(let(adoptedTypeClass.getPackage(), Package::getName));
         this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
-        this.fullName = typeClass.getName();
-        this.parameters = emptyList();
+        this.fullName = adoptedTypeClass.getName();
+        this.parameters = stream(adoptedTypeClass.getTypeParameters()).map(TypeModel::type).collect(toList());
         stream(TypeTag.values())
-                .filter(tag -> tag.name().toLowerCase().equals(typeClass.getSimpleName().toLowerCase()))
+                .filter(tag -> tag.name().toLowerCase().equals(adoptedTypeClass.getSimpleName().toLowerCase()))
                 .findFirst()
                 .ifPresent(typeTag -> this.primitive = typeTag);
     }
-
 
     private void ofParametrizedType(ParameterizedType parameterizedType) {
         this.type = parameterizedType;
