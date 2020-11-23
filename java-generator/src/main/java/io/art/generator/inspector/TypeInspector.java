@@ -108,7 +108,7 @@ public class TypeInspector {
         }
 
         if (root instanceof ParameterizedType) {
-            collectCustomTypes(root, types, (ParameterizedType) root);
+            types.addAll(collectCustomTypes(root, (ParameterizedType) root));
             return types.build();
         }
 
@@ -141,13 +141,14 @@ public class TypeInspector {
             }
 
             if (type instanceof ParameterizedType) {
-                collectCustomTypes(root, types, (ParameterizedType) type);
+                types.addAll(collectCustomTypes(root, (ParameterizedType) type));
             }
         }
         return types.build();
     }
 
-    private static void collectCustomTypes(Type root, ImmutableSet.Builder<Type> types, ParameterizedType parameterizedType) {
+    private static ImmutableSet<Type> collectCustomTypes(Type root, ParameterizedType parameterizedType) {
+        ImmutableSet.Builder<Type> types = ImmutableSet.builder();
         Class<?> rawClass = extractClass(parameterizedType.getRawType());
         if (!root.equals(rawClass)) {
             types.addAll(collectCustomTypes(rawClass));
@@ -166,9 +167,10 @@ public class TypeInspector {
                 continue;
             }
             if (argument instanceof ParameterizedType) {
-                collectCustomTypes(root, types, (ParameterizedType) argument);
+                types.addAll(collectCustomTypes(root, (ParameterizedType) argument));
             }
         }
+        return types.build();
     }
 
 }
