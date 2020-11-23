@@ -86,7 +86,7 @@ public class Model {
     Model FModel;
     Model[] FAModel;
     List<Model> FLModel;
-    Set<Model> FSModel;
+//    Set<Model> FSModel;
     //Collection<Collection<Model>> collectionModels;
 //    Collection<Model[]> collectionArrayModels;
 }

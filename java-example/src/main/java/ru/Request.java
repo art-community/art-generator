@@ -87,6 +87,6 @@ public class Request {
     Model[] FAModel;
     List<Model> FLModel;
     Set<Model> FSModel;
-    Collection<Collection<Model>> collectionModels;
-//    Collection<Model[]> collectionArrayModels;
+    Collection<Collection<Model>> FCCModel;
+    Collection<Model[]> FCAModel;
 }
