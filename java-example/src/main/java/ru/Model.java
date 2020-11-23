@@ -1,6 +1,7 @@
 package ru;
 
 import lombok.*;
+import java.time.*;
 import java.util.*;
 
 @Value
@@ -25,6 +26,9 @@ public class Model {
     Float FBFloat;
 
     UUID FUUID;
+    LocalDateTime localDateTime;
+    ZonedDateTime zonedDateTime;
+    Date date;
 
     int[] FAint;
     char[] FAchar;

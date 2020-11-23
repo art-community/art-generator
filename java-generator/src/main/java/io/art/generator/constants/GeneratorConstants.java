@@ -16,6 +16,7 @@ import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import reactor.core.publisher.*;
 import static io.art.core.factory.CollectionsFactory.*;
+import java.time.*;
 import java.util.*;
 
 public interface GeneratorConstants {
@@ -108,6 +109,9 @@ public interface GeneratorConstants {
             String TO_DOUBLE = "toDouble";
             String TO_BYTE = "toByte";
             String TO_FLOAT = "toFloat";
+            String TO_LOCAL_DATE_TIME = "toLocalDateTime";
+            String TO_ZONED_DATE_TIME = "toZonedDateTime";
+            String TO_DATE = "toDate";
 
             String FROM_UUID = "fromUuid";
             String FROM_STRING = "fromString";
@@ -119,6 +123,9 @@ public interface GeneratorConstants {
             String FROM_DOUBLE = "fromDouble";
             String FROM_BYTE = "fromByte";
             String FROM_FLOAT = "fromFloat";
+            String FROM_LOCAL_DATE_TIME = "fromLocalDateTime";
+            String FROM_ZONED_DATE_TIME = "fromZonedDateTime";
+            String FROM_DATE = "fromDate";
         }
 
         interface ArrayMappingMethods {
@@ -192,7 +199,10 @@ public interface GeneratorConstants {
                 Map.class,
                 Flux.class,
                 Mono.class,
-                UUID.class
+                UUID.class,
+                LocalDateTime.class,
+                ZonedDateTime.class,
+                Date.class
         );
 
         Set<Class<?>> LIBRARY_TYPES = setOf(

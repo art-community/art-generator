@@ -26,6 +26,7 @@ import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
+import java.time.*;
 import java.util.*;
 
 @UtilityClass
@@ -139,6 +140,15 @@ public class ToModelMapperCreator {
         }
         if (UUID.class.equals(mappingClass)) {
             return select(type(PrimitiveMapping.class), TO_UUID);
+        }
+        if (LocalDateTime.class.equals(mappingClass)) {
+            return select(type(PrimitiveMapping.class), TO_LOCAL_DATE_TIME);
+        }
+        if (ZonedDateTime.class.equals(mappingClass)) {
+            return select(type(PrimitiveMapping.class), TO_ZONED_DATE_TIME);
+        }
+        if (Date.class.equals(mappingClass)) {
+            return select(type(PrimitiveMapping.class), TO_DATE);
         }
         JCMethodInvocation builderInvocation = applyClassMethod(type(mappingClass), BUILDER_METHOD_NAME);
         for (Field field : getProperties(mappingClass)) {
