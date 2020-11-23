@@ -24,14 +24,14 @@ public class Request {
     Double FBDouble;
     Float FBFloat;
 
-    //int[] FAint;
-    //char[] FAchar;
-    //short[] FAshort;
-    //byte[] FAbyte;
-    //boolean[] FAboolean;
-    //long[] FAlong;
-    //double[] FAdouble;
-    //float[] FAfloat;
+    int[] FAint;
+    char[] FAchar;
+    short[] FAshort;
+    byte[] FAbyte;
+    boolean[] FAboolean;
+    long[] FAlong;
+    double[] FAdouble;
+    float[] FAfloat;
 
     Integer[] FABInteger;
     Character[] FABCharacter;
