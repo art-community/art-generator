@@ -130,6 +130,9 @@ public class ServerModelImplementor {
         if (void.class.equals(serviceMethod.getReturnType())) {
             name = CONSUMER_METHOD;
         }
+        if (void.class.equals(serviceMethod.getReturnType()) && isEmpty(serviceMethod.getParameterTypes())) {
+            name = RUNNER_METHOD;
+        }
         JCMemberReference reference = invokeReference(type(serviceClass), (serviceMethod.getName()));
         JCLiteral serviceName = literal(serviceClass.getSimpleName());
         JCLiteral methodName = literal(serviceMethod.getName());

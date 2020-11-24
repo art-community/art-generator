@@ -174,6 +174,8 @@ public interface GeneratorConstants {
         }
 
         Set<Class<?>> LIBRARY_BASE_TYPES = setOf(
+                void.class,
+                Void.class,
                 String.class,
                 boolean.class,
                 Boolean.class,
@@ -222,6 +224,7 @@ public interface GeneratorConstants {
         String OUTPUT_DECORATOR = "outputDecorator";
         String IMPLEMENTATION = "implementation";
         String SERVICE_METHOD = "serviceMethod";
+        String RUNNER_METHOD = "runner";
         String HANDLER_METHOD = "handler";
         String PRODUCER_METHOD = "producer";
         String CONSUMER_METHOD = "consumer";

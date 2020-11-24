@@ -107,18 +107,19 @@ public class TypeInspector {
     }
 
     public ImmutableSet<Type> collectCustomTypes(Type root) {
-        ImmutableSet.Builder<Type> types = ImmutableSet.builder();
-
         if (root instanceof Class) {
             return collectCustomTypes((Class<?>) root);
         }
 
         if (root instanceof ParameterizedType) {
-            types.addAll(collectCustomTypes(root, (ParameterizedType) root));
-            return types.build();
+            return collectCustomTypes(root, (ParameterizedType) root);
         }
 
-        return types.build();
+        if (root instanceof GenericArrayType) {
+            return ImmutableSet.of(((GenericArrayType) root).getGenericComponentType());
+        }
+
+        throw new GenerationException(format(UNSUPPORTED_TYPE, root));
     }
 
     public ImmutableSet<Type> collectCustomTypes(Class<?> root) {
