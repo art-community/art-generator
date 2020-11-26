@@ -2,6 +2,7 @@ package io.art.generator.implementor;
 
 import com.google.common.collect.*;
 import io.art.generator.model.*;
+import io.art.generator.reflection.*;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import lombok.experimental.*;
@@ -12,6 +13,7 @@ import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.reflection.ParameterizedTypeImplementation.parameterizedType;
 import static io.art.generator.state.GenerationState.*;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Objects.*;
@@ -40,8 +42,8 @@ public class MappingImplementor {
                     entry.getKey(),
                     Entity.class
             };
-            ParameterizedTypeImpl toType = ParameterizedTypeImpl.make(ValueToModelMapper.class, arguments, null);
-            ParameterizedTypeImpl fromType = ParameterizedTypeImpl.make(ValueFromModelMapper.class, arguments, null);
+            ParameterizedType toType = parameterizedType(ValueToModelMapper.class, arguments, null);
+            ParameterizedType fromType = parameterizedType(ValueFromModelMapper.class, arguments, null);
             NewClass mapping = NewClass.newClass()
                     .name(entry.getValue())
                     .modifiers(INTERFACE)
