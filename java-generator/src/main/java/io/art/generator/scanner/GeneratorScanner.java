@@ -1,16 +1,18 @@
 package io.art.generator.scanner;
 
-import com.google.common.collect.*;
 import com.sun.source.tree.*;
 import com.sun.source.util.*;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.tree.JCTree.*;
+import io.art.core.factory.*;
 import io.art.generator.context.GeneratorContextConfiguration.*;
 import io.art.generator.model.*;
 import lombok.*;
 import static com.sun.source.tree.Tree.Kind.*;
 import static io.art.core.constants.StringConstants.*;
+import static io.art.core.factory.SetFactory.immutableSetOf;
+import static io.art.core.factory.SetFactory.setOf;
 import static io.art.generator.constants.GeneratorConstants.Annotations.*;
 import static io.art.generator.constants.GeneratorConstants.Names.MAIN_NAME;
 import static java.lang.reflect.Modifier.*;
@@ -68,7 +70,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                     .filter(member -> member.getKind() == METHOD)
                     .map(member -> (JCMethodDecl) member)
                     .filter(method -> method.getName().toString().equals(MAIN_NAME))
-                    .filter(method -> method.getModifiers().getFlags().containsAll(ImmutableSet.of(STATIC, PUBLIC)))
+                    .filter(method -> method.getModifiers().getFlags().containsAll(setOf(STATIC, PUBLIC)))
                     .filter(method -> nonNull(method.getReturnType()))
                     .filter(method -> nonNull(method.getReturnType().type))
                     .filter(method -> nonNull(method.getReturnType().type.getTag()))
@@ -80,7 +82,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                     .filter(member -> member.getKind() == METHOD)
                     .map(member -> (JCMethodDecl) member)
                     .filter(method -> hasAnnotation(method.getModifiers().getAnnotations(), CONFIGURATOR_ANNOTATION_NAME))
-                    .filter(method -> method.getModifiers().getFlags().containsAll(ImmutableSet.of(STATIC, PUBLIC)))
+                    .filter(method -> method.getModifiers().getFlags().containsAll(setOf(STATIC, PUBLIC)))
                     .findFirst();
 
             ExistedClass.ExistedClassBuilder mainClassBuilder = ExistedClass.builder()

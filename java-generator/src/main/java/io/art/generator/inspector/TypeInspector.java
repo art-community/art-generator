@@ -1,9 +1,12 @@
 package io.art.generator.inspector;
 
-import com.google.common.collect.*;
+import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import lombok.experimental.*;
+import static io.art.core.collection.ImmutableArray.*;
+import static io.art.core.collection.ImmutableSet.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
@@ -14,8 +17,8 @@ import java.lang.reflect.*;
 
 @UtilityClass
 public class TypeInspector {
-    public ImmutableList<Field> getProperties(Class<?> type) {
-        ImmutableList.Builder<Field> fields = ImmutableList.builder();
+    public ImmutableArray<Field> getProperties(Class<?> type) {
+        ImmutableArray.Builder<Field> fields = immutableArrayBuilder();
         try {
             for (Field field : type.getDeclaredFields()) {
                 String getterName = GET_PREFIX + capitalize(field.getName());
@@ -116,14 +119,14 @@ public class TypeInspector {
         }
 
         if (root instanceof GenericArrayType) {
-            return ImmutableSet.of(((GenericArrayType) root).getGenericComponentType());
+            return immutableSetOf(((GenericArrayType) root).getGenericComponentType());
         }
 
         throw new GenerationException(format(UNSUPPORTED_TYPE, root));
     }
 
     public ImmutableSet<Type> collectCustomTypes(Class<?> root) {
-        ImmutableSet.Builder<Type> types = ImmutableSet.builder();
+        ImmutableSet.Builder<Type> types = immutableSetBuilder();
         if (isLibraryType(root)) {
             return types.build();
         }
@@ -155,7 +158,7 @@ public class TypeInspector {
     }
 
     private static ImmutableSet<Type> collectCustomTypes(Type root, ParameterizedType parameterizedType) {
-        ImmutableSet.Builder<Type> types = ImmutableSet.builder();
+        ImmutableSet.Builder<Type> types = immutableSetBuilder();
         Class<?> rawClass = extractClass(parameterizedType.getRawType());
         if (!root.equals(rawClass)) {
             types.addAll(collectCustomTypes(rawClass));

@@ -1,13 +1,15 @@
 package io.art.generator.context;
 
-import com.google.common.collect.*;
 import com.sun.tools.javac.main.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.processing.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
+import io.art.core.collection.*;
+import io.art.core.factory.*;
 import io.art.generator.loader.*;
 import io.art.generator.model.*;
+import static io.art.core.factory.MapFactory.*;
 import java.util.concurrent.atomic.*;
 
 public class GeneratorContext {
@@ -79,7 +81,7 @@ public class GeneratorContext {
 
     public static void initialize(GeneratorContextConfiguration configuration) {
         if (initialized.compareAndSet(false, true)) {
-            GeneratorContext.existedClasses = configuration.getExistedClasses();
+            GeneratorContext.existedClasses = immutableMapOf(configuration.getExistedClasses());
             GeneratorContext.processingEnvironment.set(configuration.getProcessingEnvironment());
             GeneratorContext.options.set(configuration.getOptions());
             GeneratorContext.compiler.set(configuration.getCompiler());

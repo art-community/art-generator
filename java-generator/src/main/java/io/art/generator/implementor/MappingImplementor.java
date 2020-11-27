@@ -1,14 +1,13 @@
 package io.art.generator.implementor;
 
-import com.google.common.collect.*;
-import io.art.core.collection.ImmutableSet;
+import io.art.core.collection.*;
 import io.art.generator.model.*;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import lombok.experimental.*;
-import static com.google.common.collect.ImmutableSet.*;
+import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.collection.ImmutableSet.*;
-import static io.art.core.factory.MapFactory.map;
+import static io.art.core.factory.MapFactory.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
@@ -22,9 +21,9 @@ import java.util.*;
 
 @UtilityClass
 public class MappingImplementor {
-    public ImmutableList<NewClass> implementCustomTypeMappings(ImmutableSet<Type> types) {
+    public ImmutableArray<NewClass> implementCustomTypeMappings(ImmutableSet<Type> types) {
         types = types.stream().filter(type -> isNull(getGeneratedMapping(type))).collect(immutableSetCollector());
-        ImmutableList.Builder<NewClass> mappingClasses = ImmutableList.builder();
+        ImmutableArray.Builder<NewClass> mappingClasses = immutableArrayBuilder();
         Map<Type, String> typeMappings = map();
         Type[] typesArray = types.toArray(new Type[0]);
         for (Type type : typesArray) {

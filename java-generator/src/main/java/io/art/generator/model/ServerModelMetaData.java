@@ -1,6 +1,6 @@
 package io.art.generator.model;
 
-import com.google.common.collect.*;
+import io.art.core.collection.*;
 import lombok.*;
 import java.lang.reflect.*;
 

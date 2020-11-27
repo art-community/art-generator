@@ -1,6 +1,5 @@
 package io.art.generator.context;
 
-import com.google.common.collect.*;
 import com.sun.tools.javac.main.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.processing.*;
@@ -8,6 +7,7 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
 import lombok.*;
+import java.util.*;
 
 @Getter
 @Builder
@@ -21,5 +21,5 @@ public class GeneratorContextConfiguration {
     private final ExistedMethod mainMethod;
     private final ExistedMethod configureMethod;
     @Singular("exitedClass")
-    private final ImmutableMap<String, ExistedClass> existedClasses;
+    private final Map<String, ExistedClass> existedClasses;
 }
