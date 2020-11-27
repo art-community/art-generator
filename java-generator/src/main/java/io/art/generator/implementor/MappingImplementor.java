@@ -1,19 +1,19 @@
 package io.art.generator.implementor;
 
 import com.google.common.collect.*;
+import io.art.core.collection.ImmutableSet;
 import io.art.generator.model.*;
-import io.art.generator.reflection.*;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import lombok.experimental.*;
-import sun.reflect.generics.reflectiveObjects.*;
 import static com.google.common.collect.ImmutableSet.*;
-import static io.art.core.factory.CollectionsFactory.*;
+import static io.art.core.collection.ImmutableSet.*;
+import static io.art.core.factory.MapFactory.map;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.inspector.TypeInspector.*;
-import static io.art.generator.reflection.ParameterizedTypeImplementation.parameterizedType;
+import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.state.GenerationState.*;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Objects.*;
@@ -23,9 +23,9 @@ import java.util.*;
 @UtilityClass
 public class MappingImplementor {
     public ImmutableList<NewClass> implementCustomTypeMappings(ImmutableSet<Type> types) {
-        types = types.stream().filter(type -> isNull(getGeneratedMapping(type))).collect(toImmutableSet());
+        types = types.stream().filter(type -> isNull(getGeneratedMapping(type))).collect(immutableSetCollector());
         ImmutableList.Builder<NewClass> mappingClasses = ImmutableList.builder();
-        Map<Type, String> typeMappings = mapOf();
+        Map<Type, String> typeMappings = map();
         Type[] typesArray = types.toArray(new Type[0]);
         for (Type type : typesArray) {
             Class<?> typeAsClass = extractClass(type);

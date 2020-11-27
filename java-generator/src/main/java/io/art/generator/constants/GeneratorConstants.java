@@ -1,5 +1,6 @@
 package io.art.generator.constants;
 
+import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.launcher.*;
 import io.art.model.configurator.*;
@@ -9,13 +10,12 @@ import io.art.server.implementation.*;
 import io.art.server.model.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
-import io.art.value.factory.*;
 import io.art.value.immutable.Value;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import reactor.core.publisher.*;
-import static io.art.core.factory.CollectionsFactory.*;
+import static io.art.core.factory.SetFactory.*;
 import java.time.*;
 import java.util.*;
 
@@ -50,7 +50,6 @@ public interface GeneratorConstants {
             Flux.class.getName(),
             Mono.class.getName(),
             ModuleLauncher.class.getName(),
-            ArrayFactory.class.getName(),
             ArrayValue.class.getName()
     };
 
@@ -173,7 +172,7 @@ public interface GeneratorConstants {
             String TO_BINARY = "toBinary";
         }
 
-        Set<Class<?>> LIBRARY_BASE_TYPES = setOf(
+        ImmutableSet<Class<?>> LIBRARY_BASE_TYPES = immutableSetOf(
                 void.class,
                 Void.class,
                 String.class,
@@ -207,7 +206,7 @@ public interface GeneratorConstants {
                 Date.class
         );
 
-        Set<Class<?>> LIBRARY_TYPES = setOf(
+        ImmutableSet<Class<?>> LIBRARY_TYPES = immutableSetOf(
                 Object.class
         );
     }

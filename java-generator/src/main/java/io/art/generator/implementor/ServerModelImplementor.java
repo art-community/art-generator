@@ -1,8 +1,8 @@
 package io.art.generator.implementor;
 
-import com.google.common.collect.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
+import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.generator.exception.*;
 import io.art.generator.inspector.*;
@@ -14,6 +14,7 @@ import io.art.server.specification.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;
+import static io.art.core.collection.ImmutableSet.immutableSetBuilder;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
@@ -46,7 +47,7 @@ public class ServerModelImplementor {
     }
 
     public ImmutableSet<Type> collectCustomTypes(ServerModel serverModel) {
-        ImmutableSet.Builder<Type> types = ImmutableSet.builder();
+        ImmutableSet.Builder<Type> types = immutableSetBuilder();
         ImmutableSet<ServiceModel<?>> services = serverModel.getServices();
         for (ServiceModel<?> service : services) {
             for (Method method : service.getServiceClass().getDeclaredMethods()) {

@@ -1,6 +1,6 @@
 package io.art.generator.state;
 
-import static io.art.core.factory.CollectionsFactory.*;
+import static io.art.core.factory.MapFactory.concurrentHashMap;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
 import java.util.*;
