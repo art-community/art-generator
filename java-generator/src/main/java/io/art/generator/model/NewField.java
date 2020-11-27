@@ -3,6 +3,7 @@ package io.art.generator.model;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.core.factory.*;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.util.List.*;
@@ -27,7 +28,7 @@ public class NewField {
 
     public NewField arrayOf(TypeModel type, Set<String> otherFields) {
         initializer = () -> {
-            List<JCIdent> elements = from(otherFields.stream().map(field -> maker().Ident(elements().getName(field))).collect(toList()));
+            List<JCIdent> elements = from(otherFields.stream().map(field -> maker().Ident(elements().getName(field))).collect(toCollection(ArrayFactory::dynamicArray)));
             return maker().NewArray(maker().Ident(elements().getName(type.getName())), nil(), from(elements));
         };
         return this;

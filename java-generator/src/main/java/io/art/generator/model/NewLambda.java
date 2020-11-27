@@ -3,6 +3,7 @@ package io.art.generator.model;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
+import io.art.core.factory.*;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.util.List.*;
@@ -37,7 +38,7 @@ public class NewLambda {
     }
 
     public JCLambda generate() {
-        JCBlock body = maker().Block(0L, from(statements.stream().map(Supplier::get).collect(toList())));
+        JCBlock body = maker().Block(0L, from(statements.stream().map(Supplier::get).collect(toCollection(ArrayFactory::dynamicArray))));
         ListBuffer<JCVariableDecl> parameters = this.parameters.stream().map(NewParameter::generate).collect(toCollection(ListBuffer::new));
         JCTree lambdaBody = nonNull(expression) ? expression.get() : body;
         return maker().Lambda(parameters.toList(), lambdaBody);

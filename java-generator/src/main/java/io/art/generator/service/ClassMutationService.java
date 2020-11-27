@@ -3,6 +3,7 @@ package io.art.generator.service;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.core.factory.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.Tree.Kind.*;
@@ -25,13 +26,13 @@ public class ClassMutationService {
                 definition -> fields.stream().noneMatch(field -> field.name().equals(((JCVariableDecl) definition).name.toString()))
         );
         classDefinitions.addAll(definitions);
-        classDefinitions.addAll(fields.stream().map(NewField::generate).collect(toList()));
+        classDefinitions.addAll(fields.stream().map(NewField::generate).collect(toCollection(ArrayFactory::dynamicArray)));
         existedClass.getDeclaration().defs = classDefinitions.toList();
         Set<ImportModel> importModels = fields.stream()
                 .map(NewField::type)
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
                 .map(type -> classImport(type.getFullName()))
-                .collect(toSet());
+                .collect(toCollection(SetFactory::set));
         ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, importModels);
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
@@ -46,7 +47,7 @@ public class ClassMutationService {
                 .map(NewMethod::returnType)
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
                 .map(type -> classImport(type.getFullName()))
-                .collect(toSet());
+                .collect(toCollection(SetFactory::set));
         ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, combine(importModels, method.classImports()));
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
@@ -75,7 +76,7 @@ public class ClassMutationService {
     private ListBuffer<JCTree> addImports(ExistedClass existedClass, Set<ImportModel> newImports) {
         ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
         List<JCTree> currentPackageDefinitions = existedClass.getPackageUnit().defs;
-        newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toList()));
+        newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toCollection(ArrayFactory::dynamicArray)));
         java.util.List<JCImport> imports = newImports
                 .stream()
                 .distinct()
@@ -86,7 +87,7 @@ public class ClassMutationService {
                         ),
                         newImport.isAsStatic())
                 )
-                .collect(toList());
+                .collect(toCollection(ArrayFactory::dynamicArray));
         newPackageDefinitions.addAll(imports);
         newPackageDefinitions.add(currentPackageDefinitions.last());
         return newPackageDefinitions;

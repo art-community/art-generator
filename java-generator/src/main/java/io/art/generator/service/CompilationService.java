@@ -2,6 +2,7 @@ package io.art.generator.service;
 
 import com.sun.tools.javac.api.*;
 import io.art.core.collection.*;
+import io.art.core.factory.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.main.Option.*;
 import static io.art.core.collection.ImmutableArray.immutableArrayBuilder;
@@ -28,7 +29,7 @@ public class CompilationService {
                 .values()
                 .stream()
                 .map(existed -> existed.getPackageUnit().getSourceFile().getName())
-                .collect(toList());
+                .collect(toCollection(ArrayFactory::dynamicArray));
         arguments.addAll(classes);
         javacTool.run(inputStream, outputStream, System.err, arguments.build().toArray(new String[0]));
     }

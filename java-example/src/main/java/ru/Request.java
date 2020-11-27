@@ -6,14 +6,14 @@ import java.util.*;
 @Value
 @Builder
 public class Request {
-    //char Fchar;
-    //int Fint;
-    //short Fshort;
-    //byte Fbyte;
-    //boolean Fboolean;
-    //long Flong;
-    //double Fdouble;
-    //float Ffloat;
+    char Fchar;
+    int Fint;
+    short Fshort;
+    byte Fbyte;
+    boolean Fboolean;
+    long Flong;
+    double Fdouble;
+    float Ffloat;
 
     Integer FBInteger;
     Short FBShort;

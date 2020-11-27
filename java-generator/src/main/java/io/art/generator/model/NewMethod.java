@@ -2,6 +2,7 @@ package io.art.generator.model;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
+import io.art.core.factory.*;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.util.List.*;
@@ -44,8 +45,8 @@ public class NewMethod {
         JCModifiers modifiers = maker().Modifiers(this.modifiers);
         Name name = elements().getName(this.name);
         JCExpression type = returnType.generate();
-        JCBlock body = maker().Block(0L, from(statements.stream().map(Supplier::get).collect(toList())));
-        List<JCVariableDecl> parameters = this.parameters.stream().map(NewParameter::generate).collect(toList());
+        JCBlock body = maker().Block(0L, from(statements.stream().map(Supplier::get).collect(toCollection(ArrayFactory::dynamicArray))));
+        List<JCVariableDecl> parameters = this.parameters.stream().map(NewParameter::generate).collect(toCollection(ArrayFactory::dynamicArray));
         return maker().MethodDef(modifiers, name, type, nil(), from(parameters), nil(), body, null);
     }
 

@@ -2,6 +2,7 @@ package io.art.generator.model;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.tree.JCTree.*;
+import io.art.core.factory.*;
 import io.art.generator.exception.*;
 import lombok.*;
 import static io.art.core.checker.NullityChecker.*;
@@ -63,7 +64,7 @@ public class TypeModel {
         this.packageName = emptyIfNull(let(adoptedTypeClass.getPackage(), Package::getName));
         this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
         this.fullName = adoptedTypeClass.getName();
-        this.parameters = stream(adoptedTypeClass.getTypeParameters()).map(TypeModel::type).collect(toList());
+        this.parameters = stream(adoptedTypeClass.getTypeParameters()).map(TypeModel::type).collect(toCollection(ArrayFactory::dynamicArray));
         stream(TypeTag.values())
                 .filter(tag -> tag.name().toLowerCase().equals(adoptedTypeClass.getSimpleName().toLowerCase()))
                 .findFirst()
@@ -78,7 +79,7 @@ public class TypeModel {
         this.packageName = emptyIfNull(let(ownerClass.getPackage(), Package::getName));
         this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
         this.fullName = ownerClass.getName();
-        this.parameters = stream(parameterizedType.getActualTypeArguments()).map(TypeModel::new).collect(toList());
+        this.parameters = stream(parameterizedType.getActualTypeArguments()).map(TypeModel::new).collect(toCollection(ArrayFactory::dynamicArray));
     }
 
     private void ofGenericArrayType(GenericArrayType genericArrayType) {
@@ -101,7 +102,7 @@ public class TypeModel {
             com.sun.tools.javac.util.List<JCExpression> arguments = com.sun.tools.javac.util.List.from(parameters
                     .stream()
                     .map(TypeModel::generate)
-                    .collect(toList()));
+                    .collect(toCollection(ArrayFactory::dynamicArray)));
             return maker().TypeApply(isArray()
                     ? maker().TypeArray(maker().Ident(elements().getName(name)))
                     : maker().Ident(elements().getName(name)), arguments);

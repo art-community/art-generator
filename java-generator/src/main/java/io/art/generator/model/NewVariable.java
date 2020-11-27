@@ -3,6 +3,7 @@ package io.art.generator.model;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.core.factory.*;
 import io.art.generator.service.*;
 import lombok.*;
 import lombok.experimental.*;
@@ -33,7 +34,7 @@ public class NewVariable {
 
     public NewVariable arrayOf(TypeModel type, Set<String> otherVariables) {
         initializer = () -> {
-            List<JCIdent> elements = from(otherVariables.stream().map(field -> maker().Ident(elements().getName(field))).collect(toList()));
+            List<JCIdent> elements = from(otherVariables.stream().map(field -> maker().Ident(elements().getName(field))).collect(toCollection(ArrayFactory::dynamicArray)));
             return maker().NewArray(maker().Ident(elements().getName(type.getName())), nil(), from(elements));
         };
         return this;
