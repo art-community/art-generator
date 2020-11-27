@@ -86,8 +86,8 @@ public interface GeneratorConstants {
     }
 
     interface ProcessorOptions {
-        String DISABLE_OPTION_ENABLED = "-Adisable=true";
-        String DISABLE_OPTION = "disable";
+        String DISABLE_OPTION_ENABLED = "-Aart.generator.disable=true";
+        String DISABLE_OPTION = "art.generator.disable";
     }
 
     interface ExceptionMessages {
