@@ -5,7 +5,6 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.generator.exception.*;
 import io.art.value.immutable.*;
-import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
@@ -208,9 +207,7 @@ public class ToModelMapperCreator {
     private JCMethodInvocation createFieldMapping(String fieldName, Type fieldType, String valueName) {
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(maker().Literal(fieldName));
-        JCExpression expression = isJavaPrimitiveType(fieldType)
-                ? applyClassMethod(type(ValueToModelMapper.class), VALIDATE_PRIMITIVE_MAPPING, List.of(literal(fieldName), toModelMapper(fieldType)))
-                : toModelMapper(fieldType);
+        JCExpression expression = toModelMapper(fieldType);
         mapping.add(expression);
         return applyMethod(valueName, MAP_NAME, mapping.toList());
     }
