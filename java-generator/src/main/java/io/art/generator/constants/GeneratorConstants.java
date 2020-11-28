@@ -79,6 +79,7 @@ public interface GeneratorConstants {
         String GET_PREFIX = "get";
         String TO_MODEL_NAME = "toModel";
         String FROM_MODEL_NAME = "fromModel";
+        String VALIDATED_MAP_NAME = "validatedMap";
     }
 
     interface Annotations {

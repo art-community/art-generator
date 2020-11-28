@@ -6,7 +6,7 @@ import java.util.*;
 @Value
 @Builder
 public class Request {
-    //char Fchar;
+    char Fchar;
     //int Fint;
     //short Fshort;
     //byte Fbyte;

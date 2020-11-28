@@ -207,8 +207,8 @@ public class ToModelMapperCreator {
     private JCMethodInvocation createFieldMapping(String fieldName, Type fieldType, String valueName) {
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(maker().Literal(fieldName));
-        JCExpression expression = toModelMapper(fieldType);
-        mapping.add(expression);
-        return applyMethod(valueName, MAP_NAME, mapping.toList());
+        String methodName = isJavaPrimitiveType(fieldType) ? VALIDATED_MAP_NAME : MAP_NAME;
+        mapping.add(toModelMapper(fieldType));
+        return applyMethod(valueName, methodName, mapping.toList());
     }
 }
