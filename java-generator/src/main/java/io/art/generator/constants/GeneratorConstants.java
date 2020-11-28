@@ -111,6 +111,7 @@ public interface GeneratorConstants {
             String TO_LOCAL_DATE_TIME = "toLocalDateTime";
             String TO_ZONED_DATE_TIME = "toZonedDateTime";
             String TO_DATE = "toDate";
+            String VALIDATE_PRIMITIVE_MAPPING = "validatePrimitiveMapping";
 
             String FROM_UUID = "fromUuid";
             String FROM_STRING = "fromString";

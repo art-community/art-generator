@@ -5,6 +5,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import io.art.core.factory.*;
 import io.art.generator.exception.*;
 import lombok.*;
+import sun.reflect.generics.reflectiveObjects.*;
 import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.extensions.StringExtensions.*;
@@ -55,6 +56,7 @@ public class TypeModel {
         throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
+    @SuppressWarnings("all")
     private void ofClass(Class<?> typeClass) {
         this.type = typeClass;
         this.array = typeClass.isArray();
@@ -64,7 +66,10 @@ public class TypeModel {
         this.packageName = emptyIfNull(let(adoptedTypeClass.getPackage(), Package::getName));
         this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
         this.fullName = adoptedTypeClass.getName();
-        this.parameters = stream(adoptedTypeClass.getTypeParameters()).map(TypeModel::type).collect(toCollection(ArrayFactory::dynamicArray));
+        this.parameters = stream(adoptedTypeClass.getTypeParameters())
+                .filter(type -> !(type instanceof TypeVariable))
+                .map(TypeModel::type)
+                .collect(toCollection(ArrayFactory::dynamicArray));
         stream(TypeTag.values())
                 .filter(tag -> tag.name().toLowerCase().equals(adoptedTypeClass.getSimpleName().toLowerCase()))
                 .findFirst()

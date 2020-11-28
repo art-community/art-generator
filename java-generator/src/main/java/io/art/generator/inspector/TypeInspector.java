@@ -84,6 +84,31 @@ public class TypeInspector {
         return float.class.equals(type) || Float.class.equals(type);
     }
 
+    public boolean isJavaPrimitiveType(Type type) {
+        if (char.class.equals(type)) {
+            return true;
+        }
+        if (int.class.equals(type)) {
+            return true;
+        }
+        if (short.class.equals(type)) {
+            return true;
+        }
+        if (long.class.equals(type)) {
+            return true;
+        }
+        if (boolean.class.equals(type)) {
+            return true;
+        }
+        if (double.class.equals(type)) {
+            return true;
+        }
+        if (byte.class.equals(type)) {
+            return true;
+        }
+        return float.class.equals(type);
+    }
+
     public boolean isCustomType(Type type) {
         return !isPrimitiveType(type);
     }
