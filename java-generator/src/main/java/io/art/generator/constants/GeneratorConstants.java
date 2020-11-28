@@ -75,6 +75,7 @@ public interface GeneratorConstants {
         String ENTITY_BUILDER_NAME = "entityBuilder";
         String LAZY_PUT_NAME = "lazyPut";
         String MAP_NAME = "map";
+        String IS_PREFIX = "is";
         String GET_PREFIX = "get";
         String TO_MODEL_NAME = "toModel";
         String FROM_MODEL_NAME = "fromModel";

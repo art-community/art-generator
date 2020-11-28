@@ -21,7 +21,8 @@ public class TypeInspector {
         ImmutableArray.Builder<Field> fields = immutableArrayBuilder();
         try {
             for (Field field : type.getDeclaredFields()) {
-                String getterName = GET_PREFIX + capitalize(field.getName());
+                Type fieldType = field.getGenericType();
+                String getterName = isBoolean(fieldType) ? IS_PREFIX + capitalize(field.getName()) : GET_PREFIX + capitalize(field.getName());
                 boolean hasGetter = stream(type.getMethods()).anyMatch(method -> method.getName().equals(getterName));
                 if (hasGetter) {
                     fields.add(field);
@@ -31,6 +32,10 @@ public class TypeInspector {
         } catch (Throwable throwable) {
             throw new GenerationException(throwable);
         }
+    }
+
+    public boolean isBoolean(Type fieldType) {
+        return fieldType == boolean.class || fieldType == Boolean.class;
     }
 
     public boolean isLibraryType(Type type) {

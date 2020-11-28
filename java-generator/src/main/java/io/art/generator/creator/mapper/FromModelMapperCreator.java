@@ -208,7 +208,7 @@ public class FromModelMapperCreator {
     private JCMethodInvocation createFieldMapping(JCMethodInvocation builderInvocation, String fieldName, Type fieldType, String modelName) {
         ListBuffer<JCExpression> mapping = new ListBuffer<>();
         mapping.add(literal(fieldName));
-        mapping.add(newLambda().expression(() -> applyMethod(modelName, GET_PREFIX + capitalize(fieldName))).generate());
+        mapping.add(newLambda().expression(() -> applyMethod(modelName, (isBoolean(fieldType) ? IS_PREFIX : GET_PREFIX) + capitalize(fieldName))).generate());
         mapping.add(fromModelMapper(fieldType));
         return applyMethod(builderInvocation, LAZY_PUT_NAME, mapping.toList());
     }
