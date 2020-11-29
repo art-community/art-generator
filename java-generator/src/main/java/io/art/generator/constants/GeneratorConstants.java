@@ -2,6 +2,7 @@ package io.art.generator.constants;
 
 import io.art.core.collection.*;
 import io.art.core.constants.*;
+import io.art.generator.model.*;
 import io.art.launcher.*;
 import io.art.model.configurator.*;
 import io.art.model.module.*;
@@ -16,6 +17,7 @@ import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import reactor.core.publisher.*;
 import static io.art.core.factory.SetFactory.*;
+import static io.art.generator.model.TypeModel.*;
 import java.time.*;
 import java.util.*;
 
@@ -229,5 +231,25 @@ public interface GeneratorConstants {
         String HANDLER_METHOD = "handler";
         String PRODUCER_METHOD = "producer";
         String CONSUMER_METHOD = "consumer";
+    }
+
+    interface TypeModels {
+        TypeModel ENTITY_TYPE = type(Entity.class);
+        TypeModel BINARY_MAPPING_TYPE = type(BinaryMapping.class);
+        TypeModel ARRAY_MAPPING_TYPE = type(ArrayMapping.class);
+        TypeModel PRIMITIVE_MAPPING_TYPE = type(PrimitiveMapping.class);
+        TypeModel ENTITY_MAPPING_TYPE = type(EntityMapping.class);
+        TypeModel MODULE_MODEL_TYPE = type(ModuleModel.class);
+        TypeModel CONFIGURATOR_MODEL_TYPE = type(ConfiguratorModel.class);
+        TypeModel SERVER_CONFIGURATOR_MODEL_TYPE = type(ServerConfiguratorModel.class);
+        TypeModel SERVICE_SPECIFICATION_REGISTRY_TYPE = type(ServiceSpecificationRegistry.class);
+        TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
+        TypeModel METHOD_PROCESSING_MODE_TYPE = type(MethodProcessingMode.class);
+        TypeModel SERVICE_METHOD_SPECIFICATION_TYPE = type(ServiceMethodSpecification.class);
+        TypeModel SERVICE_METHOD_IMPLEMENTATION_TYPE = type(ServiceMethodImplementation.class);
+        TypeModel MODULE_LAUNCHER_TYPE = type(ModuleLauncher.class);
+        TypeModel STRING_ARRAY_TYPE = type(String[].class);
+        TypeModel VOID_TYPE = type(void.class);
+
     }
 }

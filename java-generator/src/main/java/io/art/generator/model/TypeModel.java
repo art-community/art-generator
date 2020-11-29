@@ -5,10 +5,10 @@ import com.sun.tools.javac.tree.JCTree.*;
 import io.art.core.factory.*;
 import io.art.generator.exception.*;
 import lombok.*;
-import sun.reflect.generics.reflectiveObjects.*;
 import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.core.factory.MapFactory.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.context.GeneratorContext.*;
@@ -25,6 +25,8 @@ import java.util.*;
 @Getter
 @EqualsAndHashCode
 public class TypeModel {
+    private static final Map<Type, TypeModel> CACHE = concurrentHashMap();
+
     private Type type;
     private List<TypeModel> parameters;
 
@@ -118,6 +120,6 @@ public class TypeModel {
     }
 
     public static TypeModel type(Type type) {
-        return new TypeModel(type);
+        return orElse(CACHE.get(type), () -> new TypeModel(type));
     }
 }

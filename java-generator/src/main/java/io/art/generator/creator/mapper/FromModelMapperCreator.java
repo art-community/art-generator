@@ -3,6 +3,7 @@ package io.art.generator.creator.mapper;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.generator.constants.*;
 import io.art.generator.exception.*;
 import io.art.value.immutable.*;
 import io.art.value.mapping.*;
@@ -13,6 +14,7 @@ import static io.art.generator.constants.GeneratorConstants.MappersConstants.Arr
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.inspector.TypeInspector.*;
@@ -82,19 +84,19 @@ public class FromModelMapperCreator {
 
     private JCExpression createClassMapperBody(Class<?> modelClass, String modelName) {
         if (byte[].class.equals(modelClass)) {
-            return select(type(BinaryMapping.class), FROM_BINARY);
+            return select(BINARY_MAPPING_TYPE, FROM_BINARY);
         }
         if (modelClass.isArray()) {
             if (isJavaPrimitiveType(modelClass.getComponentType())) {
-                return select(type(ArrayMapping.class), selectFromArrayJavaPrimitiveMethod(modelClass));
+                return select(ARRAY_MAPPING_TYPE, selectFromArrayJavaPrimitiveMethod(modelClass));
             }
             JCExpression parameterMapper = fromModelMapper(modelClass.getComponentType());
-            return applyClassMethod(type(ArrayMapping.class), FROM_ARRAY, List.of(parameterMapper));
+            return applyClassMethod(ARRAY_MAPPING_TYPE, FROM_ARRAY, List.of(parameterMapper));
         }
         if (isPrimitiveType(modelClass)) {
-            return select(type(PrimitiveMapping.class), selectFromPrimitiveMethod(modelClass));
+            return select(PRIMITIVE_MAPPING_TYPE, selectFromPrimitiveMethod(modelClass));
         }
-        JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER_NAME);
+        JCMethodInvocation builderInvocation = applyClassMethod(ENTITY_TYPE, ENTITY_BUILDER_NAME);
         for (Field field : getProperties(modelClass)) {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
@@ -112,7 +114,7 @@ public class FromModelMapperCreator {
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
         if (isCollectionType(rawClass)) {
             JCExpression parameterMapper = fromModelMapper(typeArguments[0]);
-            return applyClassMethod(type(ArrayMapping.class), selectFromCollectionMethod(rawClass), List.of(parameterMapper));
+            return applyClassMethod(ARRAY_MAPPING_TYPE, selectFromCollectionMethod(rawClass), List.of(parameterMapper));
         }
         if (Map.class.isAssignableFrom(rawClass)) {
             if (isCustomType(typeArguments[0])) {
@@ -121,9 +123,9 @@ public class FromModelMapperCreator {
             JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
             JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
             JCExpression valueMapper = fromModelMapper(typeArguments[1]);
-            return applyClassMethod(type(EntityMapping.class), FROM_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
+            return applyClassMethod(ENTITY_MAPPING_TYPE, FROM_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
         }
-        JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER_NAME);
+        JCMethodInvocation builderInvocation = applyClassMethod(ENTITY_TYPE, ENTITY_BUILDER_NAME);
         for (Field field : getProperties(rawClass)) {
             String fieldName = field.getName();
             Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
@@ -134,7 +136,7 @@ public class FromModelMapperCreator {
 
     private JCExpression createGenericArrayTypeMapperBody(GenericArrayType genericArrayType) {
         JCExpression parameterMapper = fromModelMapper(genericArrayType.getGenericComponentType());
-        return applyClassMethod(type(ArrayMapping.class), FROM_ARRAY, List.of(parameterMapper));
+        return applyClassMethod(ARRAY_MAPPING_TYPE, FROM_ARRAY, List.of(parameterMapper));
     }
 
     private JCMethodInvocation createFieldMappers(JCMethodInvocation builderInvocation, String fieldName, Type fieldType, String modelName) {

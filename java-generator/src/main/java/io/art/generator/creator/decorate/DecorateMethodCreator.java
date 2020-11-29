@@ -3,16 +3,14 @@ package io.art.generator.creator.decorate;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
-import io.art.model.configurator.*;
-import io.art.model.module.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
-import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 
 @UtilityClass
@@ -21,8 +19,8 @@ public class DecorateMethodCreator {
         return newMethod()
                 .modifiers(PUBLIC | STATIC)
                 .name(DECORATE_NAME)
-                .parameter(newParameter(type(ModuleModel.class), MODEL_NAME))
-                .returnType(type(ModuleModel.class))
+                .parameter(newParameter(MODULE_MODEL_TYPE, MODEL_NAME))
+                .returnType(MODULE_MODEL_TYPE)
                 .statement(() -> maker().Return(createModelConfigureMethod()));
     }
 
@@ -32,7 +30,7 @@ public class DecorateMethodCreator {
 
     private JCLambda createConfiguratorLambda() {
         return newLambda()
-                .parameter(newParameter(type(ConfiguratorModel.class), CONFIGURATOR_NAME))
+                .parameter(newParameter(CONFIGURATOR_MODEL_TYPE, CONFIGURATOR_NAME))
                 .expression(DecorateMethodCreator::createConfiguratorLambdaBody)
                 .generate();
     }
@@ -43,7 +41,7 @@ public class DecorateMethodCreator {
 
     private JCLambda createServerLambda() {
         return newLambda()
-                .parameter(newParameter(type(ServerConfiguratorModel.class), SERVER_NAME))
+                .parameter(newParameter(SERVER_CONFIGURATOR_MODEL_TYPE, SERVER_NAME))
                 .expression(() -> applyMethod(SERVER_NAME, REGISTRY_NAME, List.of(ident(SERVICES_REGISTRY_NAME))))
                 .generate();
     }

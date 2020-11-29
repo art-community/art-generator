@@ -4,6 +4,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.generator.exception.*;
+import io.art.generator.model.*;
 import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import lombok.experimental.*;
@@ -12,6 +13,7 @@ import static io.art.generator.constants.GeneratorConstants.MappersConstants.Arr
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.inspector.TypeInspector.*;
@@ -31,7 +33,6 @@ import java.util.*;
 @UtilityClass
 public class ToModelMapperCreator {
     public JCExpression toModelMapper(Type type) {
-        System.out.println(type);
         String generatedMapper = getGeneratedMapper(type);
         if (nonNull(generatedMapper)) {
             return select(select(mainClass().getName(), generatedMapper), TO_MODEL_NAME);
@@ -58,7 +59,7 @@ public class ToModelMapperCreator {
         }
 
         return newLambda()
-                .parameter(newParameter(type(Entity.class), valueName))
+                .parameter(newParameter(ENTITY_TYPE, valueName))
                 .expression(() -> createToModelMapperBody(type, valueName))
                 .generate();
     }
@@ -82,17 +83,17 @@ public class ToModelMapperCreator {
 
     private JCExpression createClassMapperBody(Class<?> modelClass, String valueName) {
         if (byte[].class.equals(modelClass)) {
-            return select(type(BinaryMapping.class), TO_BINARY);
+            return select(BINARY_MAPPING_TYPE, TO_BINARY);
         }
         if (modelClass.isArray()) {
             if (isJavaPrimitiveType(modelClass.getComponentType())) {
-                return select(type(ArrayMapping.class), selectToArrayJavaPrimitiveMethod(modelClass));
+                return select(ARRAY_MAPPING_TYPE, selectToArrayJavaPrimitiveMethod(modelClass));
             }
             JCExpression parameterMapper = toModelMapper(modelClass.getComponentType());
-            return applyClassMethod(type(ArrayMapping.class), TO_ARRAY, List.of(parameterMapper));
+            return applyClassMethod(ARRAY_MAPPING_TYPE, TO_ARRAY, List.of(parameterMapper));
         }
         if (isPrimitiveType(modelClass)) {
-            return select(type(PrimitiveMapping.class), selectToPrimitiveMethod(modelClass));
+            return select(PRIMITIVE_MAPPING_TYPE, selectToPrimitiveMethod(modelClass));
         }
         JCMethodInvocation builderInvocation = applyClassMethod(type(modelClass), BUILDER_METHOD_NAME);
         for (Field field : getProperties(modelClass)) {
@@ -113,7 +114,7 @@ public class ToModelMapperCreator {
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
         if (isCollectionType(rawClass)) {
             JCExpression parameterMapper = toModelMapper(typeArguments[0]);
-            return applyClassMethod(type(ArrayMapping.class), selectToCollectionMethod(rawClass), List.of(parameterMapper));
+            return applyClassMethod(ARRAY_MAPPING_TYPE, selectToCollectionMethod(rawClass), List.of(parameterMapper));
         }
         if (Map.class.isAssignableFrom(rawClass)) {
             if (isCustomType(typeArguments[0])) {
@@ -122,7 +123,7 @@ public class ToModelMapperCreator {
             JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
             JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
             JCExpression valueMapper = toModelMapper(typeArguments[1]);
-            return applyClassMethod(type(EntityMapping.class), TO_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
+            return applyClassMethod(ENTITY_MAPPING_TYPE, TO_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
         }
         JCMethodInvocation builderInvocation = applyClassMethod(type(parameterizedType), BUILDER_METHOD_NAME);
         for (Field field : getProperties(rawClass)) {
@@ -136,7 +137,7 @@ public class ToModelMapperCreator {
 
     private JCExpression createGenericArrayTypeMapperBody(GenericArrayType genericArrayType) {
         JCExpression parameterMapper = toModelMapper(genericArrayType.getGenericComponentType());
-        return applyClassMethod(type(ArrayMapping.class), TO_ARRAY, List.of(parameterMapper));
+        return applyClassMethod(ARRAY_MAPPING_TYPE, TO_ARRAY, List.of(parameterMapper));
     }
 
     private JCMethodInvocation createFieldMappers(String fieldName, Type fieldType, String valueName) {

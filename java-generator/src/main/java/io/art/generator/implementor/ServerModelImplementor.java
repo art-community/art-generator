@@ -20,6 +20,7 @@ import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.constants.GeneratorConstants.ServiceSpecificationMethods.*;
+import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
@@ -35,7 +36,7 @@ import java.lang.reflect.*;
 @UtilityClass
 public class ServerModelImplementor {
     public NewMethod implementServerModel(ServerModel serverModel) {
-        TypeModel registryType = type(ServiceSpecificationRegistry.class);
+        TypeModel registryType = SERVICE_SPECIFICATION_REGISTRY_TYPE;
         NewMethod servicesMethod = newMethod()
                 .name(SERVICES_NAME)
                 .returnType(registryType)
@@ -71,7 +72,7 @@ public class ServerModelImplementor {
     }
 
     private JCMethodInvocation executeServiceSpecificationBuilder(NewMethod servicesMethod, Class<?> serviceClass) {
-        NewBuilder builder = newBuilder(type(ServiceSpecification.class)).method(SERVICE_ID, literal(serviceClass.getSimpleName()));
+        NewBuilder builder = newBuilder(SERVICE_SPECIFICATION_TYPE).method(SERVICE_ID, literal(serviceClass.getSimpleName()));
         for (Method method : getServiceMethods(serviceClass)) {
             JCMethodInvocation methodSpecificationBuilder = executeMethodSpecificationBuilder(servicesMethod, serviceClass, method);
             List<JCExpression> arguments = List.of(literal(method.getName()), methodSpecificationBuilder);
@@ -81,7 +82,7 @@ public class ServerModelImplementor {
     }
 
     private JCMethodInvocation executeMethodSpecificationBuilder(NewMethod servicesMethod, Class<?> serviceClass, Method serviceMethod) {
-        TypeModel methodProcessingModeType = type(MethodProcessingMode.class);
+        TypeModel methodProcessingModeType = METHOD_PROCESSING_MODE_TYPE;
         Type[] parameterTypes = serviceMethod.getGenericParameterTypes();
         if (parameterTypes.length > 1) {
             throw new GenerationException(MORE_THAN_ONE_PARAMETER);
@@ -89,7 +90,7 @@ public class ServerModelImplementor {
         Type returnType = serviceMethod.getGenericReturnType();
         MethodProcessingMode inputMode = isEmpty(parameterTypes) ? BLOCKING : calculateProcessingMode(parameterTypes[0]);
         MethodProcessingMode outputMode = calculateProcessingMode(returnType);
-        NewBuilder methodBuilder = newBuilder(type(ServiceMethodSpecification.class))
+        NewBuilder methodBuilder = newBuilder(SERVICE_METHOD_SPECIFICATION_TYPE)
                 .method(SERVICE_ID, literal(serviceClass.getSimpleName()))
                 .method(METHOD_ID, literal(serviceMethod.getName()));
         if (!isEmpty(parameterTypes)) {
@@ -138,6 +139,6 @@ public class ServerModelImplementor {
         JCLiteral serviceName = literal(serviceClass.getSimpleName());
         JCLiteral methodName = literal(serviceMethod.getName());
         List<JCExpression> arguments = List.of(reference, serviceName, methodName);
-        return applyClassMethod(type(ServiceMethodImplementation.class), name, arguments);
+        return applyClassMethod(SERVICE_METHOD_IMPLEMENTATION_TYPE, name, arguments);
     }
 }

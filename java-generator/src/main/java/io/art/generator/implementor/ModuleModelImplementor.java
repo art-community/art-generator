@@ -2,13 +2,12 @@ package io.art.generator.implementor;
 
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
-import io.art.launcher.*;
 import io.art.model.module.*;
-import io.art.server.registry.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.decorate.DecorateMethodCreator.*;
 import static io.art.generator.implementor.MappersImplementor.*;
@@ -37,13 +36,13 @@ public class ModuleModelImplementor {
         NewField modelField = newField()
                 .name(MODEL_NAME)
                 .modifiers(PRIVATE | FINAL | STATIC)
-                .type(type(ModuleModel.class))
+                .type(MODULE_MODEL_TYPE)
                 .initializer(() -> applyMethod(DECORATE_NAME, List.of(applyClassMethod(type(mainClass().asClass()), CONFIGURE_NAME))));
 
         NewField servicesRegistryField = newField()
                 .name(SERVICES_REGISTRY_NAME)
                 .modifiers(PRIVATE | FINAL | STATIC)
-                .type(type(ServiceSpecificationRegistry.class))
+                .type(SERVICE_SPECIFICATION_REGISTRY_TYPE)
                 .initializer(() -> applyMethod(SERVICES_NAME));
 
         implementCustomTypeMappers(collectCustomTypes(model.getServerModel())).forEach(mapping -> replaceInnerClass(mainClass(), mapping));
@@ -51,9 +50,9 @@ public class ModuleModelImplementor {
         NewMethod mainMethod = newMethod()
                 .modifiers(PUBLIC | STATIC)
                 .name(MAIN_NAME)
-                .returnType(type(void.class))
-                .parameter(newParameter(type(String[].class), MAIN_METHOD_ARGUMENTS_NAME))
-                .statement(() -> maker().Exec(applyClassMethod(type(ModuleLauncher.class), LAUNCH_NAME, List.of(select(providerClassName, MODEL_NAME)))));
+                .returnType(VOID_TYPE)
+                .parameter(newParameter(STRING_ARRAY_TYPE, MAIN_METHOD_ARGUMENTS_NAME))
+                .statement(() -> maker().Exec(applyClassMethod(MODULE_LAUNCHER_TYPE, LAUNCH_NAME, List.of(select(providerClassName, MODEL_NAME)))));
 
         providerClass
                 .field(MODEL_NAME, modelField)
