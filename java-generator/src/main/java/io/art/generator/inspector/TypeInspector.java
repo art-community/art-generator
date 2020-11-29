@@ -142,17 +142,29 @@ public class TypeInspector {
         throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
-    public Type extractVariableType(ParameterizedType parameterizedType, TypeVariable<?> typeVariable) {
-        return parameterizedType.getActualTypeArguments()[typeVariableIndex(typeVariable)];
+    public Type extractGenericType(ParameterizedType parameterizedType, Type type) {
+        if (type instanceof TypeVariable<?>) {
+            return parameterizedType.getActualTypeArguments()[typeVariableIndex((TypeVariable<?>) type)];
+        }
+        if (type instanceof GenericArrayType) {
+            Type componentType = ((GenericArrayType) type).getGenericComponentType();
+            return extractGenericType(parameterizedType, componentType);
+        }
+        if (type instanceof ParameterizedType) {
+            Type rawType = ((ParameterizedType) type).getRawType();
+            return extractGenericType(parameterizedType, rawType);
+        }
+        return type;
     }
 
     public int typeVariableIndex(TypeVariable<?> typeVariable) {
         TypeVariable<?>[] typeParameters = typeVariable.getGenericDeclaration().getTypeParameters();
         int index = -1;
-        for (TypeVariable<?> v : typeParameters) {
+        for (TypeVariable<?> parameter : typeParameters) {
             index++;
-            if (typeVariable.equals(v))
+            if (typeVariable.equals(parameter)) {
                 return index;
+            }
         }
         throw new GenerationException("");
     }
