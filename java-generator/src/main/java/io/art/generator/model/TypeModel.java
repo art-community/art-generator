@@ -119,6 +119,10 @@ public class TypeModel {
                 : maker().Ident(elements().getName(name));
     }
 
+    public com.sun.tools.javac.util.List<JCExpression> generateParameters() {
+        return com.sun.tools.javac.util.List.from(getParameters().stream().map(TypeModel::generate).collect(toList()));
+    }
+
     public static TypeModel type(Type type) {
         TypeModel cached = CACHE.get(type);
         if (nonNull(cached)) {

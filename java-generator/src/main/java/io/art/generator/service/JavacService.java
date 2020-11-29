@@ -53,7 +53,7 @@ public class JavacService {
 
     public JCMethodInvocation applyClassMethod(TypeModel classType, String method, List<JCExpression> arguments) {
         if (isNotEmpty(classType.getParameters())) {
-            return maker().Apply(List.from(classType.getParameters().stream().map(TypeModel::generate).collect(toList())), select(classType, method), arguments);
+            return maker().Apply(classType.generateParameters(), select(classType, method), arguments);
         }
         return maker().Apply(List.nil(), select(classType, method), arguments);
     }
@@ -92,7 +92,7 @@ public class JavacService {
 
 
     public JCNewClass newObject(TypeModel classType, List<JCExpression> arguments) {
-        return maker().NewClass(null, List.nil(), classType.generate(), arguments, null);
+        return maker().NewClass(null, classType.generateParameters(), classType.generate(), arguments, null);
     }
 
 

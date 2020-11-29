@@ -6,6 +6,14 @@ import java.util.*;
 @Value
 @Builder
 public class Response {
+    int FInteger;
+    short FShort;
+    byte FByte;
+    boolean FBoolean;
+    long FLong;
+    double FDouble;
+    float FFloat;
+
     Integer FBInteger;
     Short FBShort;
     Byte FBByte;
