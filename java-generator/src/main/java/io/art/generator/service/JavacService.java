@@ -6,9 +6,12 @@ import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.INVOKE;
 import static com.sun.tools.javac.code.TypeTag.*;
+import static io.art.core.checker.EmptinessChecker.isNotEmpty;
 import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.TypeModel.*;
+import static java.util.stream.Collectors.*;
+import java.util.stream.*;
 
 @UtilityClass
 public class JavacService {
@@ -49,6 +52,9 @@ public class JavacService {
     }
 
     public JCMethodInvocation applyClassMethod(TypeModel classType, String method, List<JCExpression> arguments) {
+        if (isNotEmpty(classType.getParameters())) {
+            return maker().Apply(List.from(classType.getParameters().stream().map(TypeModel::generate).collect(toList())), select(classType, method), arguments);
+        }
         return maker().Apply(List.nil(), select(classType, method), arguments);
     }
 

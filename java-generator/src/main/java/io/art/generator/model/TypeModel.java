@@ -120,6 +120,11 @@ public class TypeModel {
     }
 
     public static TypeModel type(Type type) {
-        return orElse(CACHE.get(type), () -> new TypeModel(type));
+        TypeModel cached = CACHE.get(type);
+        if (nonNull(cached)) {
+            return cached;
+        }
+        CACHE.put(type, cached = new TypeModel(type));
+        return cached;
     }
 }
