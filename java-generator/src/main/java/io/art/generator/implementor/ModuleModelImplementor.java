@@ -2,65 +2,34 @@ package io.art.generator.implementor;
 
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
-import io.art.model.module.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
-import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
-import static io.art.generator.creator.decorate.DecorateMethodCreator.*;
-import static io.art.generator.implementor.MappersImplementor.*;
-import static io.art.generator.implementor.ServerModelImplementor.*;
+import static io.art.generator.creator.provider.ProviderClassCreator.*;
 import static io.art.generator.loader.ModelLoader.*;
-import static io.art.generator.model.NewClass.*;
-import static io.art.generator.model.NewField.*;
+import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
-import static io.art.generator.model.TypeModel.*;
+import static io.art.generator.service.ClassGenerationService.*;
 import static io.art.generator.service.ClassMutationService.*;
 import static io.art.generator.service.JavacService.*;
-import static java.util.Arrays.*;
 
 @UtilityClass
 public class ModuleModelImplementor {
     public void implementModuleModel() {
-        ModuleModel model = loadModel();
-        String providerClassName = mainClass().getName() + PROVIDER_CLASS_NAME_SUFFIX;
-        NewClass providerClass = newClass().modifiers(PUBLIC | STATIC).name(providerClassName);
-
-        stream(IMPORTING_CLASSES)
-                .map(ImportModel::classImport)
-                .forEach(providerClass::addImport);
-
-        NewField modelField = newField()
-                .name(MODEL_NAME)
-                .modifiers(PRIVATE | FINAL | STATIC)
-                .type(MODULE_MODEL_TYPE)
-                .initializer(() -> applyMethod(DECORATE_NAME, List.of(applyClassMethod(type(mainClass().asClass()), CONFIGURE_NAME))));
-
-        NewField servicesRegistryField = newField()
-                .name(SERVICES_REGISTRY_NAME)
-                .modifiers(PRIVATE | FINAL | STATIC)
-                .type(SERVICE_SPECIFICATION_REGISTRY_TYPE)
-                .initializer(() -> applyMethod(SERVICES_NAME));
-
-        implementCustomTypeMappers(collectCustomTypes(model.getServerModel())).forEach(mapping -> replaceInnerClass(mainClass(), mapping));
+        generateClass(createProviderClass(loadModel()), mainClass().getPackageName());
 
         NewMethod mainMethod = newMethod()
                 .modifiers(PUBLIC | STATIC)
                 .name(MAIN_NAME)
                 .returnType(VOID_TYPE)
                 .parameter(newParameter(STRING_ARRAY_TYPE, MAIN_METHOD_ARGUMENTS_NAME))
-                .statement(() -> maker().Exec(applyClassMethod(MODULE_LAUNCHER_TYPE, LAUNCH_NAME, List.of(select(providerClassName, MODEL_NAME)))));
-
-        providerClass
-                .field(MODEL_NAME, modelField)
-                .field(SERVICES_REGISTRY_NAME, servicesRegistryField)
-                .method(SERVICES_NAME, implementServerModel(model.getServerModel()))
-                .method(DECORATE_NAME, createDecorateMethod());
+                .addImport(classImport(MODULE_LAUNCHER_TYPE.getFullName()))
+                .addImport(classImport(providerClassFullName()))
+                .statement(() -> maker().Exec(applyClassMethod(MODULE_LAUNCHER_TYPE, LAUNCH_NAME, List.of(applyMethod(providerClassName(), PROVIDE_NAME)))));
 
         replaceMethod(mainClass(), mainMethod);
-        replaceInnerClass(mainClass(), providerClass);
     }
 }

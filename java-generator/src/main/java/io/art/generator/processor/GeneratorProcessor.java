@@ -16,6 +16,7 @@ import static io.art.generator.constants.GeneratorConstants.Annotations.*;
 import static io.art.generator.constants.GeneratorConstants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.GenerationService.*;
+import static io.art.generator.state.GenerationState.*;
 import static javax.lang.model.SourceVersion.*;
 import javax.annotation.processing.*;
 import javax.lang.model.element.*;
@@ -43,9 +44,15 @@ public class GeneratorProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        if (roundEnvironment.processingOver()) {
-            initialize(configurationBuilder.build());
+        if (this.processingEnvironment.getOptions().get(DISABLE_OPTION) != null) {
+            return false;
+        }
+        if (GeneratorContext.isInitialized()) {
+            if (isCompleted()) {
+                return false;
+            }
             generate();
+            complete();
             return false;
         }
         JavacElements elements = JavacElements.instance(processingEnvironment.getContext());
@@ -59,6 +66,7 @@ public class GeneratorProcessor extends AbstractProcessor {
         for (Element rootElement : roundEnvironment.getRootElements()) {
             scanner.scan(trees.getPath(rootElement), trees);
         }
+        initialize(configurationBuilder.build());
         return false;
     }
 }

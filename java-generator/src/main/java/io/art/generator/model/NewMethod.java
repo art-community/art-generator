@@ -26,7 +26,7 @@ public class NewMethod {
     private java.util.List<NewParameter> parameters = new LinkedList<>();
     private java.util.List<Supplier<JCStatement>> statements = new LinkedList<>();
 
-    public NewMethod addClassImport(ImportModel importModel) {
+    public NewMethod addImport(ImportModel importModel) {
         classImports.add(importModel);
         return this;
     }

@@ -1,5 +1,6 @@
 package io.art.generator.context;
 
+import com.sun.tools.javac.file.*;
 import com.sun.tools.javac.main.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.processing.*;

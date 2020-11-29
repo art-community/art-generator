@@ -23,6 +23,7 @@ import java.util.*;
 
 public interface GeneratorConstants {
     String CLASS_KEYWORD = "class";
+    String JAVA_FILE = ".java";
     String JAVA_PACKAGE_PREFIX = "java.";
 
     String[] IMPORTING_CLASSES = new String[]{
@@ -68,6 +69,7 @@ public interface GeneratorConstants {
         String MODULE_NAME = "module";
         String MAPPING_INTERFACE_NAME = "Mapping";
         String MODEL_NAME = "model";
+        String PROVIDE_NAME = "provide";
         String SERVICES_REGISTRY_NAME = "SERVICES_REGISTRY";
         String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
         String SERVICES_NAME = "services";

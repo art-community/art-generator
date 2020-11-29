@@ -33,7 +33,7 @@ public class FromModelMapperCreator {
     public JCExpression fromModelMapper(Type type) {
         String generatedMapping = getGeneratedMapper(type);
         if (nonNull(generatedMapping)) {
-            return select(select(mainClass().getName(), generatedMapping), FROM_MODEL_NAME);
+            return select(select(providerClassName(), generatedMapping), FROM_MODEL_NAME);
         }
         return createFromModelMapper(type);
     }

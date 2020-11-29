@@ -8,9 +8,6 @@ import io.art.generator.collector.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.model.server.*;
-import io.art.server.implementation.*;
-import io.art.server.registry.*;
-import io.art.server.specification.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;
@@ -94,7 +91,7 @@ public class ServerModelImplementor {
                 .method(SERVICE_ID, literal(serviceClass.getSimpleName()))
                 .method(METHOD_ID, literal(serviceMethod.getName()));
         if (!isEmpty(parameterTypes)) {
-            servicesMethod.addClassImport(classImport(type(parameterTypes[0]).getName()));
+            servicesMethod.addImport(classImport(type(parameterTypes[0]).getName()));
             switch (inputMode) {
                 case BLOCKING:
                     methodBuilder.method(INPUT_MAPPER, toModelMapper(parameterTypes[0]));
@@ -106,7 +103,7 @@ public class ServerModelImplementor {
             }
         }
         if (!void.class.equals(returnType)) {
-            servicesMethod.addClassImport(classImport(type(returnType).getName()));
+            servicesMethod.addImport(classImport(type(returnType).getName()));
             switch (outputMode) {
                 case BLOCKING:
                     methodBuilder.method(OUTPUT_MAPPER, fromModelMapper(returnType));

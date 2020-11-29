@@ -5,11 +5,11 @@ import io.art.core.collection.*;
 import io.art.core.factory.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.main.Option.*;
-import static io.art.core.collection.ImmutableArray.immutableArrayBuilder;
+import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.constants.ArrayConstants.*;
-import static java.util.stream.Collectors.*;
 import static io.art.generator.constants.GeneratorConstants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static java.util.stream.Collectors.*;
 import java.io.*;
 import java.util.*;
 

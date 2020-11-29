@@ -1,15 +1,16 @@
 package io.art.generator.context;
 
+import com.sun.tools.javac.file.*;
 import com.sun.tools.javac.main.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.processing.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
-import io.art.core.factory.*;
 import io.art.generator.loader.*;
 import io.art.generator.model.*;
 import static io.art.core.factory.MapFactory.*;
+import static io.art.generator.constants.GeneratorConstants.Names.*;
 import java.util.concurrent.atomic.*;
 
 public class GeneratorContext {
@@ -67,6 +68,14 @@ public class GeneratorContext {
         return mainClass.get();
     }
 
+    public static String providerClassName() {
+        return mainClass.get().getName() + PROVIDER_CLASS_NAME_SUFFIX;
+    }
+
+    public static String providerClassFullName() {
+        return mainClass.get().getFullName() + PROVIDER_CLASS_NAME_SUFFIX;
+    }
+
     public static ExistedMethod mainMethod() {
         return mainMethod.get();
     }
@@ -77,6 +86,10 @@ public class GeneratorContext {
 
     public static GeneratorClassLoader classLoader() {
         return classLoader.get();
+    }
+
+    public static boolean isInitialized() {
+        return initialized.get();
     }
 
     public static void initialize(GeneratorContextConfiguration configuration) {

@@ -12,6 +12,7 @@ import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.state.GenerationState.*;
 import static java.lang.reflect.Modifier.*;
@@ -44,6 +45,7 @@ public class MappersImplementor {
             ParameterizedType toType = parameterizedType(ValueToModelMapper.class, arguments);
             ParameterizedType fromType = parameterizedType(ValueFromModelMapper.class, arguments);
             NewClass mapping = NewClass.newClass()
+                    .addImport(classImport(TypeModel.type(entry.getKey()).getFullName()))
                     .name(entry.getValue())
                     .modifiers(INTERFACE)
                     .field(TO_MODEL_NAME, NewField.newField()
