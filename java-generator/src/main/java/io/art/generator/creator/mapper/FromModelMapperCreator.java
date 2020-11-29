@@ -46,22 +46,21 @@ public class FromModelMapperCreator {
             return createFromModelMapperBody(type, modelName);
         }
 
+        if (type instanceof GenericArrayType) {
+            return createFromModelMapperBody(type, modelName);
+        }
+
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {
                 return createFromModelMapperBody(type, modelName);
             }
-            return newLambda()
-                    .parameter(newParameter(type(type), modelName))
-                    .expression(() -> createFromModelMapperBody(type, modelName))
-                    .generate();
         }
 
-        if (type instanceof ParameterizedType || type instanceof GenericArrayType) {
-            return createFromModelMapperBody(type, modelName);
-        }
-
-        throw new GenerationException(format(UNSUPPORTED_TYPE, type));
+        return newLambda()
+                .parameter(newParameter(type(type), modelName))
+                .expression(() -> createFromModelMapperBody(type, modelName))
+                .generate();
     }
 
 

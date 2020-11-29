@@ -2,13 +2,13 @@ package io.art.generator.inspector;
 
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
-import io.art.generator.reflection.*;
 import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.reflection.GenericArrayTypeImplementation.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
@@ -180,7 +180,7 @@ public class TypeInspector {
         }
         if (type instanceof GenericArrayType) {
             Type componentType = ((GenericArrayType) type).getGenericComponentType();
-            return extractGenericPropertyType(owner, componentType);
+            return genericArrayType(extractGenericPropertyType(owner, componentType));
         }
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;

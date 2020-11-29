@@ -41,8 +41,4 @@ public class ParameterizedTypeImplementation implements ParameterizedType {
     public static ParameterizedTypeImplementation parameterizedType(Class<?> rawType, Type[] actualTypeArguments) {
         return new ParameterizedTypeImplementation(rawType, actualTypeArguments, null);
     }
-
-    public static ParameterizedTypeImplementation parameterizedType(Class<?> rawType, Type[] actualTypeArguments, Type ownerType) {
-        return new ParameterizedTypeImplementation(rawType, actualTypeArguments, ownerType);
-    }
 }

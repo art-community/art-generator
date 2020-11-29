@@ -46,22 +46,21 @@ public class ToModelMapperCreator {
             return createToModelMapperBody(type, valueName);
         }
 
+        if (type instanceof GenericArrayType) {
+            return createToModelMapperBody(type, valueName);
+        }
+
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {
                 return createToModelMapperBody(type, valueName);
             }
-            return newLambda()
-                    .parameter(newParameter(type(Entity.class), valueName))
-                    .expression(() -> createToModelMapperBody(type, valueName))
-                    .generate();
         }
 
-        if (type instanceof ParameterizedType || type instanceof GenericArrayType) {
-            return createToModelMapperBody(type, valueName);
-        }
-
-        throw new GenerationException(format(UNSUPPORTED_TYPE, type));
+        return newLambda()
+                .parameter(newParameter(type(Entity.class), valueName))
+                .expression(() -> createToModelMapperBody(type, valueName))
+                .generate();
     }
 
 
@@ -125,7 +124,7 @@ public class ToModelMapperCreator {
             JCExpression valueMapper = toModelMapper(typeArguments[1]);
             return applyClassMethod(type(EntityMapping.class), TO_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
         }
-        JCMethodInvocation builderInvocation = applyClassMethod(type(rawClass), BUILDER_METHOD_NAME);
+        JCMethodInvocation builderInvocation = applyClassMethod(type(parameterizedType), BUILDER_METHOD_NAME);
         for (Field field : getProperties(rawClass)) {
             String fieldName = field.getName();
             Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
@@ -143,7 +142,7 @@ public class ToModelMapperCreator {
     private JCMethodInvocation createFieldMappers(String fieldName, Type fieldType, String valueName) {
         ListBuffer<JCExpression> arguments = new ListBuffer<>();
         arguments.add(maker().Literal(fieldName));
-        String methodName = isJavaPrimitiveType(fieldType) ? VALIDATED_MAP_NAME : MAP_NAME;
+        String methodName = isJavaPrimitiveType(fieldType) ? MAP_CHECKED : MAP_NAME;
         arguments.add(toModelMapper(fieldType));
         return applyMethod(valueName, methodName, arguments.toList());
     }
