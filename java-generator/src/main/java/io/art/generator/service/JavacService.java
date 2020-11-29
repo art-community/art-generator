@@ -4,12 +4,14 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
-import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
+import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.INVOKE;
 import static com.sun.tools.javac.code.TypeTag.*;
-import static io.art.core.checker.EmptinessChecker.*;
+import static io.art.core.checker.EmptinessChecker.isNotEmpty;
 import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.TypeModel.*;
+import static java.util.stream.Collectors.*;
+import java.util.stream.*;
 
 @UtilityClass
 public class JavacService {
@@ -90,7 +92,7 @@ public class JavacService {
 
 
     public JCNewClass newObject(TypeModel classType, List<JCExpression> arguments) {
-        return maker().NewClass(null, classType.generateParameters(), classType.generate(), arguments, null);
+        return maker().NewClass(null, classType.generateParameters(), classType.generateBaseType(), arguments, null);
     }
 
 
@@ -100,7 +102,7 @@ public class JavacService {
 
 
     public JCExpression select(TypeModel owner, String member) {
-        return maker().Select(owner.generate(), name(member));
+        return maker().Select(owner.generateBaseType(), name(member));
     }
 
     public JCExpression select(String owner, String member) {
@@ -117,6 +119,6 @@ public class JavacService {
     }
 
     public JCMemberReference invokeReference(TypeModel type, String name) {
-        return maker().Reference(INVOKE, name(name), type.generate(), null);
+        return maker().Reference(INVOKE, name(name), type.generateBaseType(), null);
     }
 }

@@ -5,6 +5,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import io.art.core.factory.*;
 import io.art.generator.exception.*;
 import lombok.*;
+import static io.art.core.checker.EmptinessChecker.isEmpty;
 import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.extensions.StringExtensions.*;
@@ -119,8 +120,21 @@ public class TypeModel {
                 : maker().Ident(elements().getName(name));
     }
 
+    public JCExpression generateBaseType() {
+        if (nonNull(primitive)) {
+            return maker().TypeIdent(primitive);
+        }
+        return isArray()
+                ? maker().TypeArray(maker().Ident(elements().getName(name)))
+                : maker().Ident(elements().getName(name));
+    }
+
     public com.sun.tools.javac.util.List<JCExpression> generateParameters() {
-        return com.sun.tools.javac.util.List.from(getParameters().stream().map(TypeModel::generate).collect(toList()));
+        List<TypeModel> parameters = getParameters();
+        if (isEmpty(parameters)) {
+            return com.sun.tools.javac.util.List.nil();
+        }
+        return com.sun.tools.javac.util.List.from(parameters.stream().map(TypeModel::generate).collect(toList()));
     }
 
     public static TypeModel type(Type type) {
