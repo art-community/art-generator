@@ -4,6 +4,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
+import io.art.generator.collector.*;
 import io.art.generator.exception.*;
 import io.art.generator.inspector.*;
 import io.art.generator.model.*;
@@ -55,9 +56,9 @@ public class ServerModelImplementor {
                 if (parameterTypes.length > 1) {
                     throw new GenerationException(MORE_THAN_ONE_PARAMETER);
                 }
-                types.addAll(TypeInspector.collectCustomTypes(method.getGenericReturnType()));
+                types.addAll(TypeCollector.collectCustomTypes(method.getGenericReturnType()));
                 if (isNotEmpty(parameterTypes)) {
-                    types.addAll(TypeInspector.collectCustomTypes(parameterTypes[0]));
+                    types.addAll(TypeCollector.collectCustomTypes(parameterTypes[0]));
                 }
             }
         }

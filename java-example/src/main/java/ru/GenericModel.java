@@ -1,26 +1,25 @@
 package ru;
 
 import lombok.*;
-import java.time.*;
 import java.util.*;
 
 @Value
 @Builder
-public class GenericModel<K extends GenericTypeModel, V extends GenericTypeModel> {
-    K k;
-    V v;
+public class GenericModel<F, S extends GenericTypeParameter> {
+    F first;
+    S second;
 
-    K ka[];
-    V va[];
+    F[] fistArray;
+    S[] secondArray;
 
-    List<K> kList;
-    List<V> vList;
+    List<F> firstList;
+    List<S> secondList;
 
-    GenericModel<K, V> FModel;
-    GenericModel<K, V>[] FAModel;
+    GenericModel<F, S> firstModel;
+    GenericModel<F, S>[] firstModelArray;
 
-    List<GenericModel<K, V>>[] FALModel;
-    Set<GenericModel<K, V>>[] FASModel;
-    Collection<GenericModel<K, V>>[] FACModel;
-    Map<String, GenericModel<K, V>>[] FAMModel;
+    List<GenericModel<F, S>>[] firstModelList;
+    Set<GenericModel<F, S>>[] firstModelSet;
+    Collection<GenericModel<F, S>>[] firstModelCollection;
+    Map<String, GenericModel<F, S>>[] firstModelMap;
 }

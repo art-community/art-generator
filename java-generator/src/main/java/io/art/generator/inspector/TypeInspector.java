@@ -14,6 +14,7 @@ import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
+import java.util.*;
 
 @UtilityClass
 public class TypeInspector {
@@ -33,6 +34,7 @@ public class TypeInspector {
             throw new GenerationException(throwable);
         }
     }
+
 
     public boolean isBoolean(Type fieldType) {
         return fieldType == boolean.class || fieldType == Boolean.class;
@@ -118,6 +120,7 @@ public class TypeInspector {
         return !isPrimitiveType(type);
     }
 
+
     public Class<?> extractClass(ParameterizedType parameterizedType) {
         return extractClass(parameterizedType.getRawType());
     }
@@ -139,78 +142,20 @@ public class TypeInspector {
         throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
-    public ImmutableSet<Type> collectCustomTypes(Type root) {
-        if (root instanceof Class) {
-            return collectCustomTypes((Class<?>) root);
-        }
-
-        if (root instanceof ParameterizedType) {
-            return collectCustomTypes(root, (ParameterizedType) root);
-        }
-
-        if (root instanceof GenericArrayType) {
-            return immutableSetOf(((GenericArrayType) root).getGenericComponentType());
-        }
-
-        throw new GenerationException(format(UNSUPPORTED_TYPE, root));
+    public Type extractVariableType(ParameterizedType parameterizedType, TypeVariable<?> typeVariable) {
+        return parameterizedType.getActualTypeArguments()[typeVariableIndex(typeVariable)];
     }
 
-    public ImmutableSet<Type> collectCustomTypes(Class<?> root) {
-        ImmutableSet.Builder<Type> types = immutableSetBuilder();
-        if (isLibraryType(root)) {
-            return types.build();
+    public int typeVariableIndex(TypeVariable<?> typeVariable) {
+        TypeVariable<?>[] typeParameters = typeVariable.getGenericDeclaration().getTypeParameters();
+        int index = -1;
+        for (TypeVariable<?> v : typeParameters) {
+            index++;
+            if (typeVariable.equals(v))
+                return index;
         }
-        if (root.isArray()) {
-            return collectCustomTypes(root.getComponentType());
-        }
-        types.add(root);
-        for (Field property : getProperties(root)) {
-            Type type = property.getGenericType();
-
-            if (type.equals(root)) {
-                continue;
-            }
-
-            if (type instanceof Class) {
-                Class<?> typeAsClass = (Class<?>) type;
-                if (typeAsClass.isArray() && root.equals(typeAsClass.getComponentType())) {
-                    continue;
-                }
-                types.addAll(collectCustomTypes(type));
-                continue;
-            }
-
-            if (type instanceof ParameterizedType) {
-                types.addAll(collectCustomTypes(root, (ParameterizedType) type));
-            }
-        }
-        return types.build();
+        throw new GenerationException("");
     }
 
-    private static ImmutableSet<Type> collectCustomTypes(Type root, ParameterizedType parameterizedType) {
-        ImmutableSet.Builder<Type> types = immutableSetBuilder();
-        Class<?> rawClass = extractClass(parameterizedType.getRawType());
-        if (!root.equals(rawClass)) {
-            types.addAll(collectCustomTypes(rawClass));
-        }
-        Type[] arguments = parameterizedType.getActualTypeArguments();
-        for (Type argument : arguments) {
-            if (root.equals(argument)) {
-                continue;
-            }
-            if (argument instanceof Class) {
-                Class<?> argumentAsClass = (Class<?>) argument;
-                if (argumentAsClass.isArray() && root.equals(argumentAsClass.getComponentType())) {
-                    continue;
-                }
-                types.addAll(collectCustomTypes(argumentAsClass));
-                continue;
-            }
-            if (argument instanceof ParameterizedType) {
-                types.addAll(collectCustomTypes(root, (ParameterizedType) argument));
-            }
-        }
-        return types.build();
-    }
 
 }

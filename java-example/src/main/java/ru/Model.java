@@ -1,6 +1,7 @@
 package ru;
 
 import lombok.*;
+import lombok.Value;
 import java.time.*;
 import java.util.*;
 
@@ -126,10 +127,10 @@ public class Model {
     Collection<Collection<Map<String, Model>>[]> FCCMAModel;
     Collection<Map<String, Model>[]> FCMAModel;
 
-    GenericModel<GenericTypeModel, GenericTypeModelImplementation> FGModel;
-    GenericModel<GenericTypeModel, GenericTypeModelImplementation>[] FAGModel;
-    List<GenericModel<GenericTypeModel, GenericTypeModelImplementation>> FLGModel;
-    Set<GenericModel<GenericTypeModel, GenericTypeModelImplementation>> FSGModel;
-    Collection<GenericModel<GenericTypeModel, GenericTypeModelImplementation>> FCGModel;
-    Map<String, GenericModel<GenericTypeModel, GenericTypeModelImplementation>> FMGMModel;
+    GenericModel<GenericTypeParameter, GenericTypeParameterImplementation> FGModel;
+    GenericModel<GenericTypeParameter, GenericTypeParameterImplementation>[] FAGModel;
+    List<GenericModel<GenericTypeParameter, GenericTypeParameterImplementation>> FLGModel;
+    Set<GenericModel<GenericTypeParameter, GenericTypeParameterImplementation>> FSGModel;
+    Collection<GenericModel<GenericTypeParameter, GenericTypeParameterImplementation>> FCGModel;
+    Map<String, GenericModel<GenericTypeParameter, GenericTypeParameterImplementation>> FMGMModel;
 }

@@ -3,7 +3,6 @@ package io.art.generator.creator.mapper;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
-import io.art.core.factory.*;
 import io.art.generator.exception.*;
 import io.art.value.immutable.*;
 import io.art.value.mapping.*;
@@ -71,7 +70,7 @@ public class FromModelMapperCreator {
         }
 
         if (type instanceof ParameterizedType) {
-            return createParameterizedTypeMapperBody((ParameterizedType) type);
+            return createParameterizedTypeMapperBody((ParameterizedType) type, modelName);
         }
 
         if (type instanceof GenericArrayType) {
@@ -161,7 +160,7 @@ public class FromModelMapperCreator {
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
-    private JCExpression createParameterizedTypeMapperBody(ParameterizedType parameterizedType) {
+    private JCExpression createParameterizedTypeMapperBody(ParameterizedType parameterizedType, String modelName) {
         Type rawType = parameterizedType.getRawType();
         if (!(rawType instanceof Class)) {
             throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
@@ -197,7 +196,13 @@ public class FromModelMapperCreator {
             JCExpression valueMapper = fromModelMapper(typeArguments[1]);
             return applyClassMethod(type(EntityMapping.class), FROM_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
         }
-        throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
+        JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER_NAME);
+        for (Field field : getProperties(mappingClass)) {
+            String fieldName = field.getName();
+            Type fieldType = field.getGenericType();
+            builderInvocation = createFieldMapping(builderInvocation, fieldName, fieldType, modelName);
+        }
+        return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
     private JCExpression createGenericArrayTypeMapperBody(GenericArrayType genericArrayType) {
