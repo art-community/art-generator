@@ -94,12 +94,16 @@ public class TypeCollector {
     }
 
     private void collectTypes(ParameterizedType type) {
+        if (isLibraryType(type)) {
+            return;
+        }
+
         Class<?> rawClass = extractClass(type.getRawType());
         if (types.contains(type) || types.contains(rawClass)) {
             return;
         }
 
-        types.add(rawClass);
+        types.add(type);
         Type[] arguments = type.getActualTypeArguments();
         for (Type argumentType : arguments) {
             if (types.contains(argumentType) || argumentType.equals(type)) {

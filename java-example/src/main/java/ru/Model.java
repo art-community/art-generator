@@ -127,10 +127,10 @@ public class Model {
     Collection<Collection<Map<String, Model>>[]> FCCMAModel;
     Collection<Map<String, Model>[]> FCMAModel;
 
-    GenericModel<GenericTypeParameter, GenericTypeParameterImplementation> FGModel;
-    GenericModel<GenericTypeParameter, GenericTypeParameterImplementation>[] FAGModel;
-    List<GenericModel<GenericTypeParameter, GenericTypeParameterImplementation>> FLGModel;
-    Set<GenericModel<GenericTypeParameter, GenericTypeParameterImplementation>> FSGModel;
-    Collection<GenericModel<GenericTypeParameter, GenericTypeParameterImplementation>> FCGModel;
-    Map<String, GenericModel<GenericTypeParameter, GenericTypeParameterImplementation>> FMGMModel;
+    GenericModel<String, GenericTypeParameterImplementation<String>> FGModel;
+    GenericModel<String, GenericTypeParameterImplementation<String>>[] FAGModel;
+    List<GenericModel<String, GenericTypeParameterImplementation<String>>> FLGModel;
+    Set<GenericModel<String, GenericTypeParameterImplementation<String>>> FSGModel;
+    Collection<GenericModel<String, GenericTypeParameterImplementation<String>>> FCGModel;
+    Map<String, GenericModel<String, GenericTypeParameterImplementation<String>>> FMGMModel;
 }

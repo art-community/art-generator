@@ -1,17 +1,24 @@
 package io.art.generator.inspector;
 
+import com.sun.tools.javac.tree.*;
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
+import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.model.TypeModel.type;
+import static io.art.generator.service.JavacService.applyClassMethod;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
+import java.time.*;
+import java.util.*;
 
 @UtilityClass
 public class TypeInspector {
@@ -85,7 +92,36 @@ public class TypeInspector {
         if (byte.class.equals(type) || Byte.class.equals(type)) {
             return true;
         }
-        return float.class.equals(type) || Float.class.equals(type);
+        if (float.class.equals(type) || Float.class.equals(type)) {
+            return true;
+        }
+        if (UUID.class.equals(type)) {
+            return true;
+        }
+        if (LocalDateTime.class.equals(type)) {
+            return true;
+        }
+        if (ZonedDateTime.class.equals(type)) {
+            return true;
+        }
+        return Date.class.equals(type);
+    }
+
+
+    public boolean isCollectionType(Class<?> type) {
+        if (List.class.isAssignableFrom(type)) {
+            return true;
+        }
+        if (Queue.class.isAssignableFrom(type)) {
+            return true;
+        }
+        if (Deque.class.isAssignableFrom(type)) {
+            return true;
+        }
+        if (Set.class.isAssignableFrom(type)) {
+            return true;
+        }
+        return Collection.class.isAssignableFrom(type);
     }
 
     public boolean isJavaPrimitiveType(Type type) {
@@ -146,10 +182,6 @@ public class TypeInspector {
         if (type instanceof GenericArrayType) {
             Type componentType = ((GenericArrayType) type).getGenericComponentType();
             return extractGenericType(parameterizedType, componentType);
-        }
-        if (type instanceof ParameterizedType) {
-            Type rawType = ((ParameterizedType) type).getRawType();
-            return extractGenericType(parameterizedType, rawType);
         }
         return type;
     }

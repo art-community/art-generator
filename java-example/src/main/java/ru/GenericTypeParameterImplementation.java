@@ -4,6 +4,6 @@ import lombok.*;
 
 @Getter
 @Builder
-public class GenericTypeParameterImplementation extends GenericTypeParameter {
+public class GenericTypeParameterImplementation<T> extends GenericTypeParameter<T> {
     String variable;
 }
