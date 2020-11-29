@@ -5,14 +5,13 @@ import io.art.generator.model.*;
 import io.art.launcher.*;
 import io.art.model.module.*;
 import io.art.server.registry.*;
-import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.decorate.DecorateMethodCreator.*;
-import static io.art.generator.implementor.MappingImplementor.*;
+import static io.art.generator.implementor.MappersImplementor.*;
 import static io.art.generator.implementor.ServerModelImplementor.*;
 import static io.art.generator.loader.ModelLoader.*;
 import static io.art.generator.model.NewClass.*;
@@ -47,7 +46,7 @@ public class ModuleModelImplementor {
                 .type(type(ServiceSpecificationRegistry.class))
                 .initializer(() -> applyMethod(SERVICES_NAME));
 
-        implementCustomTypeMappings(collectCustomTypes(model.getServerModel())).forEach(mapping -> replaceInnerClass(mainClass(), mapping));
+        implementCustomTypeMappers(collectCustomTypes(model.getServerModel())).forEach(mapping -> replaceInnerClass(mainClass(), mapping));
 
         NewMethod mainMethod = newMethod()
                 .modifiers(PUBLIC | STATIC)

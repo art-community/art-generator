@@ -18,7 +18,7 @@ import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
-import static io.art.generator.selector.MappingToMethodSelector.*;
+import static io.art.generator.selector.ToMapperMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GenerationState.*;
@@ -31,9 +31,10 @@ import java.util.*;
 @UtilityClass
 public class ToModelMapperCreator {
     public JCExpression toModelMapper(Type type) {
-        String generatedMapping = getGeneratedMapping(type);
-        if (nonNull(generatedMapping)) {
-            return select(select(mainClass().getName(), generatedMapping), TO_MODEL_NAME);
+        System.out.println(type);
+        String generatedMapper = getGeneratedMapper(type);
+        if (nonNull(generatedMapper)) {
+            return select(select(mainClass().getName(), generatedMapper), TO_MODEL_NAME);
         }
         return createToModelMapper(type);
     }
@@ -80,26 +81,26 @@ public class ToModelMapperCreator {
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }
 
-    private JCExpression createClassMapperBody(Class<?> mappingClass, String valueName) {
-        if (byte[].class.equals(mappingClass)) {
+    private JCExpression createClassMapperBody(Class<?> modelClass, String valueName) {
+        if (byte[].class.equals(modelClass)) {
             return select(type(BinaryMapping.class), TO_BINARY);
         }
-        if (mappingClass.isArray()) {
-            if (isJavaPrimitiveType(mappingClass.getComponentType())) {
-                return select(type(ArrayMapping.class), selectToArrayJavaPrimitiveMethod(mappingClass));
+        if (modelClass.isArray()) {
+            if (isJavaPrimitiveType(modelClass.getComponentType())) {
+                return select(type(ArrayMapping.class), selectToArrayJavaPrimitiveMethod(modelClass));
             }
-            JCExpression parameterMapper = toModelMapper(mappingClass.getComponentType());
+            JCExpression parameterMapper = toModelMapper(modelClass.getComponentType());
             return applyClassMethod(type(ArrayMapping.class), TO_ARRAY, List.of(parameterMapper));
         }
-        if (isPrimitiveType(mappingClass)) {
-            return select(type(PrimitiveMapping.class), selectToPrimitiveMethod(mappingClass));
+        if (isPrimitiveType(modelClass)) {
+            return select(type(PrimitiveMapping.class), selectToPrimitiveMethod(modelClass));
         }
-        JCMethodInvocation builderInvocation = applyClassMethod(type(mappingClass), BUILDER_METHOD_NAME);
-        for (Field field : getProperties(mappingClass)) {
+        JCMethodInvocation builderInvocation = applyClassMethod(type(modelClass), BUILDER_METHOD_NAME);
+        for (Field field : getProperties(modelClass)) {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
-            JCMethodInvocation fieldMapping = createFieldMapping(fieldName, fieldType, valueName);
-            builderInvocation = applyMethod(builderInvocation, fieldName, List.of(fieldMapping));
+            JCMethodInvocation fieldMappers = createFieldMappers(fieldName, fieldType, valueName);
+            builderInvocation = applyMethod(builderInvocation, fieldName, List.of(fieldMappers));
         }
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
@@ -109,13 +110,13 @@ public class ToModelMapperCreator {
         if (!(rawType instanceof Class)) {
             throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
         }
-        Class<?> mappingClass = (Class<?>) rawType;
+        Class<?> rawClass = (Class<?>) rawType;
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
-        if (isCollectionType(mappingClass)) {
+        if (isCollectionType(rawClass)) {
             JCExpression parameterMapper = toModelMapper(typeArguments[0]);
-            return applyClassMethod(type(ArrayMapping.class), selectToCollectionMethod(mappingClass), List.of(parameterMapper));
+            return applyClassMethod(type(ArrayMapping.class), selectToCollectionMethod(rawClass), List.of(parameterMapper));
         }
-        if (Map.class.isAssignableFrom(mappingClass)) {
+        if (Map.class.isAssignableFrom(rawClass)) {
             if (isCustomType(typeArguments[0])) {
                 throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
             }
@@ -124,11 +125,11 @@ public class ToModelMapperCreator {
             JCExpression valueMapper = toModelMapper(typeArguments[1]);
             return applyClassMethod(type(EntityMapping.class), TO_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
         }
-        JCMethodInvocation builderInvocation = applyClassMethod(type(mappingClass), BUILDER_METHOD_NAME);
-        for (Field field : getProperties(mappingClass)) {
+        JCMethodInvocation builderInvocation = applyClassMethod(type(rawClass), BUILDER_METHOD_NAME);
+        for (Field field : getProperties(rawClass)) {
             String fieldName = field.getName();
-            Type fieldType = extractGenericType(parameterizedType, field.getGenericType());
-            JCMethodInvocation fieldMapping = createFieldMapping(fieldName, fieldType, valueName);
+            Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
+            JCMethodInvocation fieldMapping = createFieldMappers(fieldName, fieldType, valueName);
             builderInvocation = applyMethod(builderInvocation, fieldName, List.of(fieldMapping));
         }
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
@@ -139,11 +140,11 @@ public class ToModelMapperCreator {
         return applyClassMethod(type(ArrayMapping.class), TO_ARRAY, List.of(parameterMapper));
     }
 
-    private JCMethodInvocation createFieldMapping(String fieldName, Type fieldType, String valueName) {
-        ListBuffer<JCExpression> mapping = new ListBuffer<>();
-        mapping.add(maker().Literal(fieldName));
+    private JCMethodInvocation createFieldMappers(String fieldName, Type fieldType, String valueName) {
+        ListBuffer<JCExpression> arguments = new ListBuffer<>();
+        arguments.add(maker().Literal(fieldName));
         String methodName = isJavaPrimitiveType(fieldType) ? VALIDATED_MAP_NAME : MAP_NAME;
-        mapping.add(toModelMapper(fieldType));
-        return applyMethod(valueName, methodName, mapping.toList());
+        arguments.add(toModelMapper(fieldType));
+        return applyMethod(valueName, methodName, arguments.toList());
     }
 }

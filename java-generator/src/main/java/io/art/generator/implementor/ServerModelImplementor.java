@@ -6,7 +6,6 @@ import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.generator.collector.*;
 import io.art.generator.exception.*;
-import io.art.generator.inspector.*;
 import io.art.generator.model.*;
 import io.art.model.server.*;
 import io.art.server.implementation.*;

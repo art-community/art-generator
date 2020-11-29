@@ -19,7 +19,7 @@ import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
-import static io.art.generator.selector.MappingFromMethodSelector.*;
+import static io.art.generator.selector.FromMapperMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GenerationState.*;
@@ -32,7 +32,7 @@ import java.util.*;
 @UtilityClass
 public class FromModelMapperCreator {
     public JCExpression fromModelMapper(Type type) {
-        String generatedMapping = getGeneratedMapping(type);
+        String generatedMapping = getGeneratedMapper(type);
         if (nonNull(generatedMapping)) {
             return select(select(mainClass().getName(), generatedMapping), FROM_MODEL_NAME);
         }
@@ -81,25 +81,25 @@ public class FromModelMapperCreator {
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }
 
-    private JCExpression createClassMapperBody(Class<?> mappingClass, String modelName) {
-        if (byte[].class.equals(mappingClass)) {
+    private JCExpression createClassMapperBody(Class<?> modelClass, String modelName) {
+        if (byte[].class.equals(modelClass)) {
             return select(type(BinaryMapping.class), FROM_BINARY);
         }
-        if (mappingClass.isArray()) {
-            if (isJavaPrimitiveType(mappingClass.getComponentType())) {
-                return select(type(ArrayMapping.class), selectFromArrayJavaPrimitiveMethod(mappingClass));
+        if (modelClass.isArray()) {
+            if (isJavaPrimitiveType(modelClass.getComponentType())) {
+                return select(type(ArrayMapping.class), selectFromArrayJavaPrimitiveMethod(modelClass));
             }
-            JCExpression parameterMapper = fromModelMapper(mappingClass.getComponentType());
+            JCExpression parameterMapper = fromModelMapper(modelClass.getComponentType());
             return applyClassMethod(type(ArrayMapping.class), FROM_ARRAY, List.of(parameterMapper));
         }
-        if (isPrimitiveType(mappingClass)) {
-            return select(type(PrimitiveMapping.class), selectFromPrimitiveMethod(mappingClass));
+        if (isPrimitiveType(modelClass)) {
+            return select(type(PrimitiveMapping.class), selectFromPrimitiveMethod(modelClass));
         }
         JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER_NAME);
-        for (Field field : getProperties(mappingClass)) {
+        for (Field field : getProperties(modelClass)) {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
-            builderInvocation = createFieldMapping(builderInvocation, fieldName, fieldType, modelName);
+            builderInvocation = createFieldMappers(builderInvocation, fieldName, fieldType, modelName);
         }
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
@@ -109,13 +109,13 @@ public class FromModelMapperCreator {
         if (!(rawType instanceof Class)) {
             throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
         }
-        Class<?> mappingClass = (Class<?>) rawType;
+        Class<?> rawClass = (Class<?>) rawType;
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
-        if (isCollectionType(mappingClass)) {
+        if (isCollectionType(rawClass)) {
             JCExpression parameterMapper = fromModelMapper(typeArguments[0]);
-            return applyClassMethod(type(ArrayMapping.class), selectFromCollectionMethod(mappingClass), List.of(parameterMapper));
+            return applyClassMethod(type(ArrayMapping.class), selectFromCollectionMethod(rawClass), List.of(parameterMapper));
         }
-        if (Map.class.isAssignableFrom(mappingClass)) {
+        if (Map.class.isAssignableFrom(rawClass)) {
             if (isCustomType(typeArguments[0])) {
                 throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
             }
@@ -125,10 +125,10 @@ public class FromModelMapperCreator {
             return applyClassMethod(type(EntityMapping.class), FROM_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
         }
         JCMethodInvocation builderInvocation = applyClassMethod(type(Entity.class), ENTITY_BUILDER_NAME);
-        for (Field field : getProperties(mappingClass)) {
+        for (Field field : getProperties(rawClass)) {
             String fieldName = field.getName();
-            Type fieldType = extractGenericType(parameterizedType, field.getGenericType());
-            builderInvocation = createFieldMapping(builderInvocation, fieldName, fieldType, modelName);
+            Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
+            builderInvocation = createFieldMappers(builderInvocation, fieldName, fieldType, modelName);
         }
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
@@ -138,11 +138,11 @@ public class FromModelMapperCreator {
         return applyClassMethod(type(ArrayMapping.class), FROM_ARRAY, List.of(parameterMapper));
     }
 
-    private JCMethodInvocation createFieldMapping(JCMethodInvocation builderInvocation, String fieldName, Type fieldType, String modelName) {
-        ListBuffer<JCExpression> mapping = new ListBuffer<>();
-        mapping.add(literal(fieldName));
-        mapping.add(newLambda().expression(() -> applyMethod(modelName, (isBoolean(fieldType) ? IS_PREFIX : GET_PREFIX) + capitalize(fieldName))).generate());
-        mapping.add(fromModelMapper(fieldType));
-        return applyMethod(builderInvocation, LAZY_PUT_NAME, mapping.toList());
+    private JCMethodInvocation createFieldMappers(JCMethodInvocation builderInvocation, String fieldName, Type fieldType, String modelName) {
+        ListBuffer<JCExpression> arguments = new ListBuffer<>();
+        arguments.add(literal(fieldName));
+        arguments.add(newLambda().expression(() -> applyMethod(modelName, (isBoolean(fieldType) ? IS_PREFIX : GET_PREFIX) + capitalize(fieldName))).generate());
+        arguments.add(fromModelMapper(fieldType));
+        return applyMethod(builderInvocation, LAZY_PUT_NAME, arguments.toList());
     }
 }

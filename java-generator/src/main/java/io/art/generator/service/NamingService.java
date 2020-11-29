@@ -1,19 +1,23 @@
 package io.art.generator.service;
 
 
-import static java.lang.Math.abs;
+import static io.art.core.factory.MapFactory.*;
+import static java.lang.Math.*;
 import java.util.*;
-import java.util.concurrent.atomic.*;
 
 public class NamingService {
     private final static Random RANDOM = new Random();
-    private final static AtomicInteger counter = new AtomicInteger();
+    private final static Map<String, Integer> counter = concurrentHashMap();
 
     public static String randomName(String prefix) {
         return prefix + abs(RANDOM.nextInt());
     }
 
     public static String sequenceName(String prefix) {
-        return prefix + counter.incrementAndGet();
+        if (!counter.containsKey(prefix)) {
+            counter.put(prefix, 0);
+            return prefix + 0;
+        }
+        return prefix + counter.computeIfPresent(prefix, (name, value) -> ++value);
     }
 }

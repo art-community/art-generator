@@ -98,34 +98,18 @@ public class TypeCollector {
             return;
         }
 
-        Class<?> rawClass = extractClass(type.getRawType());
-        if (types.contains(type) || types.contains(rawClass)) {
+        if (types.contains(type)) {
             return;
         }
 
         types.add(type);
+
         Type[] arguments = type.getActualTypeArguments();
         for (Type argumentType : arguments) {
             if (types.contains(argumentType) || argumentType.equals(type)) {
                 continue;
             }
-            if (argumentType instanceof Class) {
-                Class<?> argumentAsClass = (Class<?>) argumentType;
-                if (argumentAsClass.isArray()) {
-                    Class<?> componentType = argumentAsClass.getComponentType();
-                    collectTypes(componentType);
-                    continue;
-                }
-                collectTypes(argumentAsClass);
-                continue;
-            }
-            if (argumentType instanceof GenericArrayType) {
-                collectTypes(((GenericArrayType) argumentType).getGenericComponentType());
-                continue;
-            }
-            if (argumentType instanceof ParameterizedType) {
-                collectTypes((ParameterizedType) argumentType);
-            }
+            collectTypes(argumentType);
         }
     }
 }

@@ -1,18 +1,15 @@
 package io.art.generator.inspector;
 
-import com.sun.tools.javac.tree.*;
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
-import io.art.value.mapping.*;
+import io.art.generator.reflection.*;
 import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
-import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
-import static io.art.generator.model.TypeModel.type;
-import static io.art.generator.service.JavacService.applyClassMethod;
+import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
 import java.lang.reflect.Field;
@@ -27,7 +24,9 @@ public class TypeInspector {
         try {
             for (Field field : type.getDeclaredFields()) {
                 Type fieldType = field.getGenericType();
-                String getterName = isBoolean(fieldType) ? IS_PREFIX + capitalize(field.getName()) : GET_PREFIX + capitalize(field.getName());
+                String getterName = isBoolean(fieldType)
+                        ? IS_PREFIX + capitalize(field.getName())
+                        : GET_PREFIX + capitalize(field.getName());
                 boolean hasGetter = stream(type.getDeclaredMethods()).anyMatch(method -> method.getName().equals(getterName));
                 if (hasGetter) {
                     fields.add(field);
@@ -175,13 +174,23 @@ public class TypeInspector {
         throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
-    public Type extractGenericType(ParameterizedType parameterizedType, Type type) {
+    public Type extractGenericPropertyType(ParameterizedType owner, Type type) {
         if (type instanceof TypeVariable<?>) {
-            return parameterizedType.getActualTypeArguments()[typeVariableIndex((TypeVariable<?>) type)];
+            return owner.getActualTypeArguments()[typeVariableIndex((TypeVariable<?>) type)];
         }
         if (type instanceof GenericArrayType) {
             Type componentType = ((GenericArrayType) type).getGenericComponentType();
-            return extractGenericType(parameterizedType, componentType);
+            return extractGenericPropertyType(owner, componentType);
+        }
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            Type[] extractedArguments = new Type[actualTypeArguments.length];
+            for (int index = 0, actualTypeArgumentsLength = actualTypeArguments.length; index < actualTypeArgumentsLength; index++) {
+                Type actualTypeArgument = actualTypeArguments[index];
+                extractedArguments[index] = extractGenericPropertyType(owner, actualTypeArgument);
+            }
+            return parameterizedType(extractClass(parameterizedType), extractedArguments);
         }
         return type;
     }

@@ -1,22 +1,17 @@
 package io.art.generator.state;
 
-import static io.art.core.factory.MapFactory.concurrentHashMap;
-import static java.util.Objects.*;
+import static io.art.core.factory.MapFactory.*;
 import java.lang.reflect.*;
 import java.util.*;
 
 public class GenerationState {
-    private final static Map<Type, String> GENERATED_MAPPINGS = concurrentHashMap();
+    private final static Map<Type, String> GENERATED_MAPPERS = concurrentHashMap();
 
-    public static void putGeneratedMapping(Type type, String name) {
-        GENERATED_MAPPINGS.put(type, name);
+    public static void putGeneratedMapper(Type type, String name) {
+        GENERATED_MAPPERS.put(type, name);
     }
 
-    public static String getGeneratedMapping(Type type) {
-        return GENERATED_MAPPINGS.get(type);
-    }
-
-    public static boolean hasGeneratedMapping(Type type) {
-        return nonNull(getGeneratedMapping(type));
+    public static String getGeneratedMapper(Type type) {
+        return GENERATED_MAPPERS.get(type);
     }
 }

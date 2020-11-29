@@ -20,29 +20,29 @@ import java.lang.reflect.*;
 import java.util.*;
 
 @UtilityClass
-public class MappingImplementor {
-    public ImmutableArray<NewClass> implementCustomTypeMappings(ImmutableSet<Type> types) {
-        types = types.stream().filter(type -> isNull(getGeneratedMapping(type))).collect(immutableSetCollector());
+public class MappersImplementor {
+    public ImmutableArray<NewClass> implementCustomTypeMappers(ImmutableSet<Type> types) {
+        types = types.stream().filter(type -> isNull(getGeneratedMapper(type))).collect(immutableSetCollector());
         ImmutableArray.Builder<NewClass> mappingClasses = immutableArrayBuilder();
-        Map<Type, String> typeMappings = map();
+        Map<Type, String> typeMappers = map();
         Type[] typesArray = types.toArray(new Type[0]);
         for (Type type : typesArray) {
             Class<?> typeAsClass = extractClass(type);
-            long id = typeMappings
+            long id = typeMappers
                     .keySet()
                     .stream()
-                    .filter(key -> extractClass(key).getSimpleName().equals(typeAsClass.getSimpleName()))
+                    .filter(modelType -> extractClass(modelType).getSimpleName().equals(typeAsClass.getSimpleName()))
                     .count();
-            typeMappings.put(type, typeAsClass.getSimpleName() + MAPPING_INTERFACE_NAME + id);
-            putGeneratedMapping(type, typeAsClass.getSimpleName() + MAPPING_INTERFACE_NAME + id);
+            typeMappers.put(type, typeAsClass.getSimpleName() + MAPPING_INTERFACE_NAME + id);
+            putGeneratedMapper(type, typeAsClass.getSimpleName() + MAPPING_INTERFACE_NAME + id);
         }
-        for (Map.Entry<Type, String> entry : typeMappings.entrySet()) {
+        for (Map.Entry<Type, String> entry : typeMappers.entrySet()) {
             Type[] arguments = {
                     entry.getKey(),
                     Entity.class
             };
-            ParameterizedType toType = parameterizedType(ValueToModelMapper.class, arguments, null);
-            ParameterizedType fromType = parameterizedType(ValueFromModelMapper.class, arguments, null);
+            ParameterizedType toType = parameterizedType(ValueToModelMapper.class, arguments);
+            ParameterizedType fromType = parameterizedType(ValueFromModelMapper.class, arguments);
             NewClass mapping = NewClass.newClass()
                     .name(entry.getValue())
                     .modifiers(INTERFACE)
