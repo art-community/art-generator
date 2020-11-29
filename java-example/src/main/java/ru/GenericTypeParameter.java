@@ -1,5 +1,5 @@
 package ru;
 
-public class GenericTypeParameter {
+public class GenericTypeParameter<T> {
 
 }

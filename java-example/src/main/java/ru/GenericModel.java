@@ -5,7 +5,7 @@ import java.util.*;
 
 @Value
 @Builder
-public class GenericModel<F, S extends GenericTypeParameter> {
+public class GenericModel<F, S extends GenericTypeParameter<F>> {
     F first;
     S second;
 

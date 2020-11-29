@@ -4,9 +4,7 @@ import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
-import static io.art.core.collection.ImmutableSet.*;
 import static io.art.core.extensions.StringExtensions.*;
-import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
@@ -14,7 +12,6 @@ import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
-import java.util.*;
 
 @UtilityClass
 public class TypeInspector {
@@ -24,7 +21,7 @@ public class TypeInspector {
             for (Field field : type.getDeclaredFields()) {
                 Type fieldType = field.getGenericType();
                 String getterName = isBoolean(fieldType) ? IS_PREFIX + capitalize(field.getName()) : GET_PREFIX + capitalize(field.getName());
-                boolean hasGetter = stream(type.getMethods()).anyMatch(method -> method.getName().equals(getterName));
+                boolean hasGetter = stream(type.getDeclaredMethods()).anyMatch(method -> method.getName().equals(getterName));
                 if (hasGetter) {
                     fields.add(field);
                 }
