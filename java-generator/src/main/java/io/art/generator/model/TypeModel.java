@@ -121,9 +121,6 @@ public class TypeModel {
     }
 
     public JCExpression generateBaseType() {
-        if (nonNull(primitive)) {
-            return maker().TypeIdent(primitive);
-        }
         return isArray()
                 ? maker().TypeArray(maker().Ident(elements().getName(name)))
                 : maker().Ident(elements().getName(name));

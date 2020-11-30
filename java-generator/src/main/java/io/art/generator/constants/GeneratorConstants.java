@@ -65,6 +65,12 @@ public interface GeneratorConstants {
             ConfiguratorCustomizer.class.getName(),
             ValueCustomizer.class.getName(),
             ServerCustomizer.class.getName(),
+            List.class.getName(),
+            Set.class.getName(),
+            Collection.class.getName(),
+            Queue.class.getName(),
+            Deque.class.getName(),
+            Map.class.getName()
     };
 
     interface Names {

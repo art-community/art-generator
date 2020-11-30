@@ -5,6 +5,7 @@ import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.INVOKE;
+import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.NEW;
 import static com.sun.tools.javac.code.TypeTag.*;
 import static io.art.core.checker.EmptinessChecker.isNotEmpty;
 import static io.art.generator.constants.GeneratorConstants.*;
@@ -120,5 +121,9 @@ public class JavacService {
 
     public JCMemberReference invokeReference(TypeModel type, String name) {
         return maker().Reference(INVOKE, name(name), type.generateBaseType(), null);
+    }
+
+    public JCMemberReference newReference(TypeModel type) {
+        return maker().Reference(NEW, null, type.generateBaseType(), null);
     }
 }
