@@ -8,7 +8,7 @@ import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.collection.ImmutableSet.*;
 import static io.art.core.factory.MapFactory.*;
-import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.inspector.TypeInspector.*;

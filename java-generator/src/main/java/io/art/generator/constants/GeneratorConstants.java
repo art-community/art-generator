@@ -7,7 +7,6 @@ import io.art.launcher.*;
 import io.art.model.customizer.*;
 import io.art.model.implementation.*;
 import io.art.model.modeler.*;
-import io.art.server.decorator.*;
 import io.art.server.implementation.*;
 import io.art.server.model.*;
 import io.art.server.registry.*;
@@ -36,27 +35,31 @@ public interface GeneratorConstants {
             Entity.class.getName(),
             Primitive.class.getName(),
             Value.class.getName(),
+
             ValueToModelMapper.class.getName(),
             ValueFromModelMapper.class.getName(),
-            ServiceSpecificationRegistry.class.getName(),
+
             ServiceSpecification.class.getName(),
             ServiceMethodSpecification.class.getName(),
-            ServiceMethodImplementation.class.getName(),
-            ModuleModel.class.getName(),
-            ServiceLoggingDecorator.class.getName(),
             ServiceMethodIdentifier.class.getName(),
+            ServiceMethodImplementation.class.getName(),
+            ServiceSpecificationRegistry.class.getName(),
+
             MethodProcessingMode.class.getName(),
-            MethodDecoratorScope.class.getName(),
-            ConfiguratorCustomizer.class.getName(),
-            ValueCustomizer.class.getName(),
-            ServerCustomizer.class.getName(),
+
             Flux.class.getName(),
             Mono.class.getName(),
+
             ModuleLauncher.class.getName(),
-            ArrayValue.class.getName(),
+
+            ModuleModel.class.getName(),
             ModuleModeler.class.getName(),
             ServerModeler.class.getName(),
             ServerModel.class.getName(),
+
+            ConfiguratorCustomizer.class.getName(),
+            ValueCustomizer.class.getName(),
+            ServerCustomizer.class.getName(),
     };
 
     interface Names {
@@ -70,8 +73,6 @@ public interface GeneratorConstants {
         String CONFIGURE_NAME = "configure";
         String MAKE_NAME = "make";
         String SERVER_NAME = "server";
-        String APPLY_NAME = "apply";
-        String MAPPING_INTERFACE_NAME = "Mapping";
         String PROVIDE_NAME = "provide";
         String MODEL_NAME = "model";
         String MODULE_MODEL_NAME = "moduleModel";
@@ -81,15 +82,8 @@ public interface GeneratorConstants {
         String SERVICES_NAME = "services";
         String REGISTRY_NAME = "registry";
         String REGISTER_NAME = "register";
-        String VALUE_NAME = "value";
-        String ENTITY_BUILDER_NAME = "entityBuilder";
-        String LAZY_PUT_NAME = "lazyPut";
-        String MAP_NAME = "map";
         String IS_PREFIX = "is";
         String GET_PREFIX = "get";
-        String TO_MODEL_NAME = "toModel";
-        String FROM_MODEL_NAME = "fromModel";
-        String MAP_CHECKED_NAME = "mapChecked";
     }
 
     interface Annotations {
@@ -221,6 +215,16 @@ public interface GeneratorConstants {
         ImmutableSet<Class<?>> LIBRARY_TYPES = immutableSetOf(
                 Object.class
         );
+
+        String TO_MODEL_NAME = "toModel";
+        String FROM_MODEL_NAME = "fromModel";
+        String MAP_CHECKED_NAME = "mapChecked";
+        String MAPPING_INTERFACE_NAME = "Mapping";
+        String VALUE_NAME = "value";
+        String ENTITY_BUILDER_NAME = "entityBuilder";
+        String LAZY_PUT_NAME = "lazyPut";
+        String MAP_NAME = "map";
+
     }
 
     interface ServiceSpecificationMethods {
@@ -231,8 +235,6 @@ public interface GeneratorConstants {
         String OUTPUT_MODE = "outputMode";
         String INPUT_MAPPER = "inputMapper";
         String OUTPUT_MAPPER = "outputMapper";
-        String INPUT_DECORATOR = "inputDecorator";
-        String OUTPUT_DECORATOR = "outputDecorator";
         String IMPLEMENTATION = "implementation";
         String RUNNER_METHOD = "runner";
         String HANDLER_METHOD = "handler";
@@ -243,7 +245,6 @@ public interface GeneratorConstants {
     interface ModelMethods {
         String IMPLEMENT_NAME = "implement";
         String GET_SERVER_MODEL = "getServerModel";
-        String GET_SERVICE_MODEL = "getServiceModel";
     }
 
     interface TypeModels {
@@ -252,17 +253,22 @@ public interface GeneratorConstants {
         TypeModel ARRAY_MAPPING_TYPE = type(ArrayMapping.class);
         TypeModel PRIMITIVE_MAPPING_TYPE = type(PrimitiveMapping.class);
         TypeModel ENTITY_MAPPING_TYPE = type(EntityMapping.class);
+
         TypeModel MODULE_MODEL_TYPE = type(ModuleModel.class);
-        TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
         TypeModel MODULE_MODELER_TYPE = type(ModuleModeler.class);
+
+        TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
         TypeModel SERVER_MODELER_TYPE = type(ServerModeler.class);
+
         TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerCustomizer.class);
         TypeModel CONFIGURATOR_CUSTOMIZER_TYPE = type(ConfiguratorCustomizer.class);
-        TypeModel SERVICE_SPECIFICATION_REGISTRY_TYPE = type(ServiceSpecificationRegistry.class);
+
         TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
-        TypeModel METHOD_PROCESSING_MODE_TYPE = type(MethodProcessingMode.class);
         TypeModel SERVICE_METHOD_SPECIFICATION_TYPE = type(ServiceMethodSpecification.class);
         TypeModel SERVICE_METHOD_IMPLEMENTATION_TYPE = type(ServiceMethodImplementation.class);
+        TypeModel SERVICE_SPECIFICATION_REGISTRY_TYPE = type(ServiceSpecificationRegistry.class);
+        TypeModel METHOD_PROCESSING_MODE_TYPE = type(MethodProcessingMode.class);
+
         TypeModel MODULE_LAUNCHER_TYPE = type(ModuleLauncher.class);
         TypeModel STRING_ARRAY_TYPE = type(String[].class);
         TypeModel VOID_TYPE = type(void.class);
