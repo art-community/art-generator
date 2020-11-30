@@ -39,8 +39,9 @@ public class MyService {
     }
 
     public Response myMethod8(Flux<Request> request) {
-        logger(MyService.class).info("myMethod8" + request.blockFirst());
-        return Response.builder().build();
+        Request first = request.blockFirst();
+        logger(MyService.class).info("myMethod8" + first);
+        return Response.builder().FBString(first.getFBString()).build();
     }
 
 
