@@ -8,6 +8,15 @@ import java.util.*;
 @Value
 @Builder
 public class Model {
+    int FInteger;
+    char FCharacter;
+    short FShort;
+    byte FByte;
+    boolean FBoolean;
+    long FLong;
+    double FDouble;
+    float FFloat;
+
     Integer FBInteger;
     Short FBShort;
     Byte FBByte;

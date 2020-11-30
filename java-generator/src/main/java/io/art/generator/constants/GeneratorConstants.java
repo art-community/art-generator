@@ -11,13 +11,16 @@ import io.art.server.implementation.*;
 import io.art.server.model.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
+import io.art.value.constants.ValueConstants.ValueType.*;
 import io.art.value.immutable.Value;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import reactor.core.publisher.*;
+import static io.art.core.constants.StringConstants.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.model.TypeModel.*;
+import static io.art.value.constants.ValueConstants.*;
 import java.time.*;
 import java.util.*;
 
@@ -35,6 +38,8 @@ public interface GeneratorConstants {
             Entity.class.getName(),
             Primitive.class.getName(),
             Value.class.getName(),
+            ValueType.class.getName().replace(DOLLAR, DOT),
+            PrimitiveType.class.getName().replace(DOLLAR, DOT),
 
             ValueToModelMapper.class.getName(),
             ValueFromModelMapper.class.getName(),
@@ -103,6 +108,15 @@ public interface GeneratorConstants {
     }
 
     interface MappersConstants {
+        String TO_MODEL_NAME = "toModel";
+        String FROM_MODEL_NAME = "fromModel";
+        String MAP_PRIMITIVE_NAME = "mapPrimitive";
+        String MAPPING_INTERFACE_NAME = "Mapping";
+        String VALUE_NAME = "value";
+        String ENTITY_BUILDER_NAME = "entityBuilder";
+        String LAZY_PUT_NAME = "lazyPut";
+        String MAP_NAME = "map";
+
         interface PrimitiveMappingMethods {
             String TO_UUID = "toUuid";
             String TO_STRING = "toString";
@@ -215,16 +229,6 @@ public interface GeneratorConstants {
         ImmutableSet<Class<?>> LIBRARY_TYPES = immutableSetOf(
                 Object.class
         );
-
-        String TO_MODEL_NAME = "toModel";
-        String FROM_MODEL_NAME = "fromModel";
-        String MAP_CHECKED_NAME = "mapChecked";
-        String MAPPING_INTERFACE_NAME = "Mapping";
-        String VALUE_NAME = "value";
-        String ENTITY_BUILDER_NAME = "entityBuilder";
-        String LAZY_PUT_NAME = "lazyPut";
-        String MAP_NAME = "map";
-
     }
 
     interface ServiceSpecificationMethods {

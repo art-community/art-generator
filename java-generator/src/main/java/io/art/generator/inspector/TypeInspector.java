@@ -2,6 +2,7 @@ package io.art.generator.inspector;
 
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
+import io.art.value.constants.ValueConstants.ValueType.*;
 import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
@@ -10,6 +11,7 @@ import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.reflection.GenericArrayTypeImplementation.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
+import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
 import java.lang.reflect.Field;
@@ -104,6 +106,34 @@ public class TypeInspector {
             return true;
         }
         return Date.class.equals(type);
+    }
+
+    public PrimitiveType primitiveTypeFromJava(Type type) {
+        if (char.class.equals(type) || Character.class.equals(type)) {
+            return STRING;
+        }
+        if (int.class.equals(type) || Integer.class.equals(type)) {
+            return INT;
+        }
+        if (short.class.equals(type) || Short.class.equals(type)) {
+            return INT;
+        }
+        if (long.class.equals(type) || Long.class.equals(type)) {
+            return LONG;
+        }
+        if (boolean.class.equals(type) || Boolean.class.equals(type)) {
+            return BOOL;
+        }
+        if (double.class.equals(type) || Double.class.equals(type)) {
+            return DOUBLE;
+        }
+        if (byte.class.equals(type) || Byte.class.equals(type)) {
+            return BYTE;
+        }
+        if (float.class.equals(type) || Float.class.equals(type)) {
+            return FLOAT;
+        }
+        throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
 
