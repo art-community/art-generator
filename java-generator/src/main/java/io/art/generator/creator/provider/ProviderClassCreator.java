@@ -24,12 +24,10 @@ public class ProviderClassCreator {
     public NewClass createProviderClass(ModuleModel model) {
         NewClass providerClass = newClass().modifiers(PUBLIC).name(providerClassName());
 
-        stream(IMPORTING_CLASSES)
-                .map(ImportModel::classImport)
-                .forEach(providerClass::addImport);
+        stream(IMPORTING_CLASSES).map(ImportModel::classImport).forEach(providerClass::addImport);
 
         NewField modelField = newField()
-                .name(MODEL_NAME)
+                .name(MODEL_STATIC_NAME)
                 .modifiers(PRIVATE | FINAL | STATIC)
                 .type(MODULE_MODEL_TYPE)
                 .initializer(() -> applyMethod(DECORATE_NAME, List.of(applyClassMethod(type(mainClass().asClass()), CONFIGURE_NAME))));
@@ -38,20 +36,13 @@ public class ProviderClassCreator {
                 .name(PROVIDE_NAME)
                 .modifiers(PUBLIC | FINAL | STATIC)
                 .returnType(MODULE_MODEL_TYPE)
-                .statement(() -> returnVariable(MODEL_NAME));
-
-        NewField servicesRegistryField = newField()
-                .name(SERVICES_REGISTRY_NAME)
-                .modifiers(PRIVATE | FINAL | STATIC)
-                .type(SERVICE_SPECIFICATION_REGISTRY_TYPE)
-                .initializer(() -> applyMethod(SERVICES_NAME));
+                .statement(() -> returnVariable(MODEL_STATIC_NAME));
 
         return providerClass
+                .field(modelField)
+                .method(modelMethod)
+                .method(createDecorateMethod())
                 .inner(implementCustomTypeMappers(collectCustomTypes(model.getServerModel())))
-                .field(MODEL_NAME, modelField)
-                .field(SERVICES_REGISTRY_NAME, servicesRegistryField)
-                .method(SERVICES_NAME, implementServerModel(model.getServerModel()))
-                .method(MODEL_NAME, modelMethod)
-                .method(DECORATE_NAME, createDecorateMethod());
+                .method(implementServerModel(model.getServerModel()));
     }
 }

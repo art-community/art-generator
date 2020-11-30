@@ -1,13 +1,14 @@
 package io.art.generator.model;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.*;
 import lombok.*;
 import lombok.experimental.*;
-import static io.art.core.factory.ListFactory.linkedList;
-import static io.art.generator.constants.GeneratorConstants.Names.BUILDER_METHOD_NAME;
-import static io.art.generator.constants.GeneratorConstants.Names.BUILD_METHOD_NAME;
+import static io.art.core.factory.ListFactory.*;
+import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.service.JavacService.*;
+import static java.util.function.UnaryOperator.*;
+import java.util.function.*;
 
 @Getter
 @Setter
@@ -27,11 +28,15 @@ public class NewBuilder {
     }
 
     public JCMethodInvocation generate() {
+        return generate(identity());
+    }
+
+    public JCMethodInvocation generate(UnaryOperator<JCMethodInvocation> decorator) {
         JCMethodInvocation invocation = applyClassMethod(type, BUILDER_METHOD_NAME);
         for (NamedMethodCall call : methods) {
             invocation = applyMethod(invocation, call.name, call.expressions);
         }
-        return applyMethod(invocation, BUILD_METHOD_NAME);
+        return applyMethod(decorator.apply(invocation), BUILD_METHOD_NAME);
     }
 
     public static NewBuilder newBuilder(TypeModel type) {

@@ -11,10 +11,11 @@ import io.art.model.server.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;
-import static io.art.core.collection.ImmutableSet.immutableSetBuilder;
+import static io.art.core.collection.ImmutableSet.*;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
+import static io.art.generator.constants.GeneratorConstants.ModelMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.constants.GeneratorConstants.ServiceSpecificationMethods.*;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
@@ -26,6 +27,7 @@ import static io.art.generator.inspector.ServiceMethodsInspector.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewBuilder.*;
 import static io.art.generator.model.NewMethod.*;
+import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import java.lang.reflect.*;
@@ -36,18 +38,19 @@ public class ServerModelImplementor {
         TypeModel registryType = SERVICE_SPECIFICATION_REGISTRY_TYPE;
         NewMethod servicesMethod = newMethod()
                 .name(SERVICES_NAME)
+                .parameter(newParameter(SERVER_MODEL_TYPE, SERVER_MODEL_NAME))
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
-        ImmutableSet<ServiceModel<?>> services = serverModel.getServices();
-        services.forEach(serviceModel -> servicesMethod.statement(() -> maker().Exec(executeRegisterMethod(servicesMethod, serviceModel))));
+        ImmutableMap<String, ServiceModel<?>> services = serverModel.getServices();
+        services.values().forEach(serviceModel -> servicesMethod.statement(() -> maker().Exec(executeRegisterMethod(servicesMethod, serviceModel))));
         return servicesMethod.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
     public ImmutableSet<Type> collectCustomTypes(ServerModel serverModel) {
         ImmutableSet.Builder<Type> types = immutableSetBuilder();
-        ImmutableSet<ServiceModel<?>> services = serverModel.getServices();
-        for (ServiceModel<?> service : services) {
+        ImmutableMap<String, ServiceModel<?>> services = serverModel.getServices();
+        for (ServiceModel<?> service : services.values()) {
             for (Method method : service.getServiceClass().getDeclaredMethods()) {
                 Type[] parameterTypes = method.getGenericParameterTypes();
                 if (parameterTypes.length > 1) {
@@ -118,7 +121,7 @@ public class ServerModelImplementor {
                 .method(INPUT_MODE, select(methodProcessingModeType, inputMode.name()))
                 .method(OUTPUT_MODE, select(methodProcessingModeType, outputMode.name()))
                 .method(IMPLEMENTATION, executeHandlerMethod(serviceClass, serviceMethod))
-                .generate();
+                .generate(builder -> decorateMethodBuilder(builder, serviceClass, serviceMethod));
     }
 
     private JCMethodInvocation executeHandlerMethod(Class<?> serviceClass, Method serviceMethod) {
@@ -137,5 +140,10 @@ public class ServerModelImplementor {
         JCLiteral methodName = literal(serviceMethod.getName());
         List<JCExpression> arguments = List.of(reference, serviceName, methodName);
         return applyClassMethod(SERVICE_METHOD_IMPLEMENTATION_TYPE, name, arguments);
+    }
+
+    private JCMethodInvocation decorateMethodBuilder(JCMethodInvocation builder, Class<?> serviceClass, Method serviceMethod) {
+        List<JCExpression> arguments = List.of(literal(serviceClass.getSimpleName()), literal(serviceMethod.getName()), builder);
+        return applyMethod(SERVER_MODEL_NAME, IMPLEMENT_NAME, arguments);
     }
 }

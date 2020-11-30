@@ -1,6 +1,7 @@
 package io.art.generator.loader;
 
 import io.art.generator.exception.*;
+import io.art.model.customizer.*;
 import io.art.model.module.*;
 import lombok.experimental.*;
 import static io.art.generator.constants.GeneratorConstants.Annotations.*;
@@ -18,7 +19,8 @@ public class ModelLoader {
                     .filter(ModelLoader::hasConfiguratorAnnotation)
                     .findFirst()
                     .orElseThrow(() -> new GenerationException(MODULE_CONFIGURATOR_NOT_FOUND));
-            return (ModuleModel) configuratorMethod.invoke(null);
+            ModuleCustomizer moduleCustomizer = (ModuleCustomizer) configuratorMethod.invoke(null);
+            return moduleCustomizer.apply();
         } catch (Throwable throwable) {
             throw new GenerationException(throwable);
         }

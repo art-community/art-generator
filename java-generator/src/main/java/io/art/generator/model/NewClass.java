@@ -43,16 +43,16 @@ public class NewClass {
         return this;
     }
 
-    public NewClass field(String name, NewField field) {
-        fields.put(name, field);
+    public NewClass field(NewField field) {
+        fields.put(field.name(), field);
         if (!field.type().isJdk() && !field.type().getPackageName().isEmpty()) {
             imports.add(classImport(field.type().getFullName()));
         }
         return this;
     }
 
-    public NewClass method(String name, NewMethod method) {
-        methods.put(name, method);
+    public NewClass method(NewMethod method) {
+        methods.put(method.name(), method);
         return this;
     }
 

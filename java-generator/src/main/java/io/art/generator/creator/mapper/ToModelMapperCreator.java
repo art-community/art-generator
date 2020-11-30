@@ -4,9 +4,6 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.generator.exception.*;
-import io.art.generator.model.*;
-import io.art.value.immutable.*;
-import io.art.value.mapping.*;
 import lombok.experimental.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
@@ -143,7 +140,7 @@ public class ToModelMapperCreator {
     private JCMethodInvocation createFieldMappers(String fieldName, Type fieldType, String valueName) {
         ListBuffer<JCExpression> arguments = new ListBuffer<>();
         arguments.add(maker().Literal(fieldName));
-        String methodName = isJavaPrimitiveType(fieldType) ? MAP_CHECKED : MAP_NAME;
+        String methodName = isJavaPrimitiveType(fieldType) ? MAP_CHECKED_NAME : MAP_NAME;
         arguments.add(toModelMapper(fieldType));
         return applyMethod(valueName, methodName, arguments.toList());
     }
