@@ -24,37 +24,35 @@ rootProject.name = "art-generator"
 include("java-generator")
 include("java-example")
 
-include("core")
-project(":core").projectDir = file("/Users/anton/Development/Projects/art/art-java/core")
-include("value")
-project(":value").projectDir = file("/Users/anton/Development/Projects/art/art-java/value")
-include("logging")
-project(":logging").projectDir = file("/Users/anton/Development/Projects/art/art-java/logging")
-include("server")
-project(":server").projectDir = file("/Users/anton/Development/Projects/art/art-java/server")
-include("resilience")
-project(":resilience").projectDir = file("/Users/anton/Development/Projects/art/art-java/resilience")
-include("model")
-project(":model").projectDir = file("/Users/anton/Development/Projects/art/art-java/model")
-include("launcher")
-project(":launcher").projectDir = file("/Users/anton/Development/Projects/art/art-java/launcher")
-include("configurator")
-project(":configurator").projectDir = file("/Users/anton/Development/Projects/art/art-java/configurator")
-include("json")
-project(":json").projectDir = file("/Users/anton/Development/Projects/art/art-java/json")
-include("protobuf")
-project(":protobuf").projectDir = file("/Users/anton/Development/Projects/art/art-java/protobuf")
-include("rsocket")
-project(":rsocket").projectDir = file("/Users/anton/Development/Projects/art/art-java/rsocket")
-include("message-pack")
-project(":message-pack").projectDir = file("/Users/anton/Development/Projects/art/art-java/message-pack")
-include("communicator")
-project(":communicator").projectDir = file("/Users/anton/Development/Projects/art/art-java/communicator")
-include("yaml-configuration")
-project(":yaml-configuration").projectDir = file("/Users/anton/Development/Projects/art/art-java/yaml-configuration")
-include("xml")
-project(":xml").projectDir = file("/Users/anton/Development/Projects/art/art-java/xml")
-include("tarantool")
-project(":tarantool").projectDir = file("/Users/anton/Development/Projects/art/art-java/tarantool")
-include("template-engine")
-project(":template-engine").projectDir = file("/Users/anton/Development/Projects/art/art-java/template-engine")
+val artDirectory: String by settings
+val artGitUrl: String by settings
+
+if (!file(artDirectory).exists()) {
+    ProcessBuilder("git", "clone", artGitUrl, file(artDirectory).absolutePath).start().waitFor()
+    ProcessBuilder("git", "checkout", "1.3.0").directory(file(artDirectory)).start().waitFor()
+}
+
+val artModules = listOf(
+        "core",
+        "value",
+        "logging",
+        "server",
+        "resilience",
+        "model",
+        "launcher",
+        "configurator",
+        "json",
+        "protobuf",
+        "rsocket",
+        "message-pack",
+        "communicator",
+        "yaml-configuration",
+        "xml",
+        "tarantool",
+        "template-engine"
+)
+
+artModules.forEach { module ->
+    include(module)
+    project(":$module").projectDir = file("${artDirectory}$module")
+}

@@ -48,8 +48,8 @@ public interface GeneratorConstants {
             MethodProcessingMode.class.getName(),
             MethodDecoratorScope.class.getName(),
             ConfiguratorCustomizer.class.getName(),
-            ValueConfiguratorCustomizer.class.getName(),
-            ServerConfiguratorCustomizer.class.getName(),
+            ValueCustomizer.class.getName(),
+            ServerCustomizer.class.getName(),
             Flux.class.getName(),
             Mono.class.getName(),
             ModuleLauncher.class.getName(),
@@ -256,7 +256,7 @@ public interface GeneratorConstants {
         TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
         TypeModel MODULE_MODELER_TYPE = type(ModuleModeler.class);
         TypeModel SERVER_MODELER_TYPE = type(ServerModeler.class);
-        TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerConfiguratorCustomizer.class);
+        TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerCustomizer.class);
         TypeModel CONFIGURATOR_CUSTOMIZER_TYPE = type(ConfiguratorCustomizer.class);
         TypeModel SERVICE_SPECIFICATION_REGISTRY_TYPE = type(ServiceSpecificationRegistry.class);
         TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
