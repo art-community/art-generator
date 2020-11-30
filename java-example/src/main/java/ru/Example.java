@@ -1,16 +1,16 @@
 package ru;
 
 import io.art.model.annotation.*;
-import io.art.model.customizer.*;
-import static io.art.model.module.ModuleModel.*;
+import io.art.model.modeler.*;
+import static io.art.model.implementation.ModuleModel.module;
 
 @Module
 public class Example {
-    @Configurator
-    public static ModuleCustomizer configure() {
+    @Modeler
+    public static ModuleModeler model() {
         return module()
                 .serve(server -> server
-                        .rsocket(rsocket -> rsocket.to(MyService.class, ServiceCustomizer::enableLogging))
+                        .rsocket(rsocket -> rsocket.to(MyService.class, ServiceModeler::enableLogging))
                 );
     }
 }

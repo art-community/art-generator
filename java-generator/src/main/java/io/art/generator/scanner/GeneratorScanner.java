@@ -5,20 +5,19 @@ import com.sun.source.util.*;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.tree.JCTree.*;
-import io.art.core.factory.*;
 import io.art.generator.context.GeneratorContextConfiguration.*;
 import io.art.generator.model.*;
 import lombok.*;
 import static com.sun.source.tree.Tree.Kind.*;
 import static io.art.core.constants.StringConstants.*;
-import static io.art.core.factory.SetFactory.immutableSetOf;
-import static io.art.core.factory.SetFactory.setOf;
+import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.GeneratorConstants.Annotations.*;
-import static io.art.generator.constants.GeneratorConstants.Names.MAIN_NAME;
-import static java.lang.reflect.Modifier.*;
+import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static java.util.Objects.*;
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
+import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -77,12 +76,12 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                     .filter(method -> method.getReturnType().type.getTag().equals(TypeTag.VOID))
                     .findFirst();
 
-            Optional<JCMethodDecl> configureMethodDeclaration = classDeclaration.getMembers()
+            Optional<JCMethodDecl> modelMethodDeclaration = classDeclaration.getMembers()
                     .stream()
                     .filter(member -> member.getKind() == METHOD)
                     .map(member -> (JCMethodDecl) member)
-                    .filter(method -> hasAnnotation(method.getModifiers().getAnnotations(), CONFIGURATOR_ANNOTATION_NAME))
-                    .filter(method -> method.getModifiers().getFlags().containsAll(setOf(STATIC, PUBLIC)))
+                    .filter(method -> hasAnnotation(method.getModifiers().getAnnotations(), MODELER_ANNOTATION_NAME))
+                    .filter(method -> method.getModifiers().getFlags().containsAll(setOf(PUBLIC, STATIC)))
                     .findFirst();
 
             ExistedClass.ExistedClassBuilder mainClassBuilder = ExistedClass.builder()
@@ -99,13 +98,13 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                 mainClassBuilder.method(mainMethod.getName(), mainMethod);
             }
 
-            if (configureMethodDeclaration.isPresent()) {
-                ExistedMethod configureMethod = ExistedMethod.builder()
-                        .declaration(configureMethodDeclaration.get())
-                        .name(configureMethodDeclaration.get().name.toString())
+            if (modelMethodDeclaration.isPresent()) {
+                ExistedMethod modelMethod = ExistedMethod.builder()
+                        .declaration(modelMethodDeclaration.get())
+                        .name(modelMethodDeclaration.get().name.toString())
                         .build();
-                configurationBuilder.configureMethod(configureMethod);
-                mainClassBuilder.method(configureMethod.getName(), configureMethod);
+                configurationBuilder.modelMethod(modelMethod);
+                mainClassBuilder.method(modelMethod.getName(), modelMethod);
             }
 
             configurationBuilder.mainClass(this.mainClass = mainClassBuilder.build());

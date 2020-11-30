@@ -4,10 +4,9 @@ import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.generator.model.*;
 import io.art.launcher.*;
-import io.art.model.configurator.*;
 import io.art.model.customizer.*;
-import io.art.model.module.*;
-import io.art.model.server.*;
+import io.art.model.implementation.*;
+import io.art.model.modeler.*;
 import io.art.server.decorator.*;
 import io.art.server.implementation.*;
 import io.art.server.model.*;
@@ -48,16 +47,16 @@ public interface GeneratorConstants {
             ServiceMethodIdentifier.class.getName(),
             MethodProcessingMode.class.getName(),
             MethodDecoratorScope.class.getName(),
-            ConfiguratorModel.class.getName(),
-            ValueConfiguratorModel.class.getName(),
-            ServerConfiguratorModel.class.getName(),
+            ConfiguratorCustomizer.class.getName(),
+            ValueConfiguratorCustomizer.class.getName(),
+            ServerConfiguratorCustomizer.class.getName(),
             Flux.class.getName(),
             Mono.class.getName(),
             ModuleLauncher.class.getName(),
             ArrayValue.class.getName(),
-            ModuleCustomizer.class.getName(),
-            ConfiguratorCustomizer.class.getName(),
-            ServerModel.class.getName()
+            ModuleModeler.class.getName(),
+            ServerModeler.class.getName(),
+            ServerModel.class.getName(),
     };
 
     interface Names {
@@ -69,9 +68,8 @@ public interface GeneratorConstants {
         String LAUNCH_NAME = "launch";
         String DECORATE_NAME = "decorate";
         String CONFIGURE_NAME = "configure";
-        String CUSTOMIZE_NAME = "customize";
+        String MAKE_NAME = "make";
         String SERVER_NAME = "server";
-        String MODULE_NAME = "module";
         String APPLY_NAME = "apply";
         String MAPPING_INTERFACE_NAME = "Mapping";
         String PROVIDE_NAME = "provide";
@@ -79,7 +77,6 @@ public interface GeneratorConstants {
         String MODULE_MODEL_NAME = "moduleModel";
         String SERVER_MODEL_NAME = "serverModel";
         String MODEL_STATIC_NAME = "MODEL";
-        String SERVICES_REGISTRY_STATIC_NAME = "SERVICES_REGISTRY";
         String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
         String SERVICES_NAME = "services";
         String REGISTRY_NAME = "registry";
@@ -97,7 +94,7 @@ public interface GeneratorConstants {
 
     interface Annotations {
         String MODULE_ANNOTATION_NAME = "io.art.model.annotation.Module";
-        String CONFIGURATOR_ANNOTATION_NAME = "io.art.model.annotation.Configurator";
+        String MODELER_ANNOTATION_NAME = "io.art.model.annotation.Modeler";
     }
 
     interface ProcessorOptions {
@@ -106,7 +103,7 @@ public interface GeneratorConstants {
     }
 
     interface ExceptionMessages {
-        String MODULE_CONFIGURATOR_NOT_FOUND = "Module configurator method not found";
+        String MODULE_MODELER_NOT_FOUND = "Module modeler method not found";
         String MORE_THAN_ONE_PARAMETER = "More than one parameter not supported";
         String UNSUPPORTED_TYPE = "Unsupported type: {0}";
     }
@@ -257,10 +254,10 @@ public interface GeneratorConstants {
         TypeModel ENTITY_MAPPING_TYPE = type(EntityMapping.class);
         TypeModel MODULE_MODEL_TYPE = type(ModuleModel.class);
         TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
-        TypeModel MODULE_CUSTOMIZER_TYPE = type(ModuleCustomizer.class);
-        TypeModel CONFIGURATOR_MODEL_TYPE = type(ConfiguratorModel.class);
+        TypeModel MODULE_MODELER_TYPE = type(ModuleModeler.class);
+        TypeModel SERVER_MODELER_TYPE = type(ServerModeler.class);
+        TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerConfiguratorCustomizer.class);
         TypeModel CONFIGURATOR_CUSTOMIZER_TYPE = type(ConfiguratorCustomizer.class);
-        TypeModel SERVER_CONFIGURATOR_MODEL_TYPE = type(ServerConfiguratorModel.class);
         TypeModel SERVICE_SPECIFICATION_REGISTRY_TYPE = type(ServiceSpecificationRegistry.class);
         TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
         TypeModel METHOD_PROCESSING_MODE_TYPE = type(MethodProcessingMode.class);

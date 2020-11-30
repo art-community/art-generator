@@ -7,7 +7,7 @@ import io.art.core.constants.*;
 import io.art.generator.collector.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
-import io.art.model.server.*;
+import io.art.model.implementation.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;

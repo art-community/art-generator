@@ -1,8 +1,8 @@
 package io.art.generator.loader;
 
 import io.art.generator.exception.*;
-import io.art.model.customizer.*;
-import io.art.model.module.*;
+import io.art.model.implementation.*;
+import io.art.model.modeler.*;
 import lombok.experimental.*;
 import static io.art.generator.constants.GeneratorConstants.Annotations.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
@@ -16,18 +16,18 @@ public class ModelLoader {
         try {
             Class<?> mainClass = classLoader().loadClass(mainClass().getFullName());
             Method configuratorMethod = stream(mainClass.getMethods())
-                    .filter(ModelLoader::hasConfiguratorAnnotation)
+                    .filter(ModelLoader::hasModelerAnnotation)
                     .findFirst()
-                    .orElseThrow(() -> new GenerationException(MODULE_CONFIGURATOR_NOT_FOUND));
-            ModuleCustomizer moduleCustomizer = (ModuleCustomizer) configuratorMethod.invoke(null);
-            return moduleCustomizer.apply();
+                    .orElseThrow(() -> new GenerationException(MODULE_MODELER_NOT_FOUND));
+            ModuleModeler modeler = (ModuleModeler) configuratorMethod.invoke(null);
+            return modeler.make();
         } catch (Throwable throwable) {
             throw new GenerationException(throwable);
         }
     }
 
-    private boolean hasConfiguratorAnnotation(Method method) {
+    private boolean hasModelerAnnotation(Method method) {
         return stream(method.getAnnotations())
-                .anyMatch(annotation -> annotation.annotationType().getName().equals(CONFIGURATOR_ANNOTATION_NAME));
+                .anyMatch(annotation -> annotation.annotationType().getName().equals(MODELER_ANNOTATION_NAME));
     }
 }

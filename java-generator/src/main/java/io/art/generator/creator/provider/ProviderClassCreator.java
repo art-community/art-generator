@@ -2,7 +2,7 @@ package io.art.generator.creator.provider;
 
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
-import io.art.model.module.*;
+import io.art.model.implementation.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.constants.GeneratorConstants.*;
@@ -30,7 +30,7 @@ public class ProviderClassCreator {
                 .name(MODEL_STATIC_NAME)
                 .modifiers(PRIVATE | FINAL | STATIC)
                 .type(MODULE_MODEL_TYPE)
-                .initializer(() -> applyMethod(DECORATE_NAME, List.of(applyClassMethod(type(mainClass().asClass()), CONFIGURE_NAME))));
+                .initializer(() -> applyMethod(DECORATE_NAME, List.of(applyClassMethod(type(mainClass().asClass()), modelMethod().getName()))));
 
         NewMethod modelMethod = newMethod()
                 .name(PROVIDE_NAME)

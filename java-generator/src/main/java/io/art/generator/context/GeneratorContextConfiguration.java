@@ -1,6 +1,5 @@
 package io.art.generator.context;
 
-import com.sun.tools.javac.file.*;
 import com.sun.tools.javac.main.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.processing.*;
@@ -20,7 +19,7 @@ public class GeneratorContextConfiguration {
     private final JavacElements elements;
     private final ExistedClass mainClass;
     private final ExistedMethod mainMethod;
-    private final ExistedMethod configureMethod;
+    private final ExistedMethod modelMethod;
     @Singular("exitedClass")
     private final Map<String, ExistedClass> existedClasses;
 }

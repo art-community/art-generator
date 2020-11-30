@@ -21,11 +21,18 @@ public class DecorateMethodCreator {
         return newMethod()
                 .modifiers(PRIVATE | STATIC)
                 .name(DECORATE_NAME)
-                .parameter(newParameter(MODULE_CUSTOMIZER_TYPE, MODEL_NAME))
+                .parameter(newParameter(MODULE_MODELER_TYPE, MODEL_NAME))
                 .returnType(MODULE_MODEL_TYPE)
-                .statement(() -> newVariable().name(MODULE_MODEL_NAME).type(MODULE_MODEL_TYPE).initializer(() -> applyMethod(MODEL_NAME, APPLY_NAME)).generate())
-                .statement(() -> newVariable().name(SERVER_MODEL_NAME).type(SERVER_MODEL_TYPE).initializer(() -> applyMethod(MODULE_MODEL_NAME, GET_SERVER_MODEL)).generate())
-                .statement(() -> maker().Return(createModelConfigureMethod()));
+                .statement(() -> newVariable()
+                        .name(MODULE_MODEL_NAME)
+                        .type(MODULE_MODEL_TYPE)
+                        .initializer(() -> applyMethod(MODEL_NAME, MAKE_NAME)).generate())
+                .statement(() -> newVariable()
+                        .name(SERVER_MODEL_NAME)
+                        .type(SERVER_MODEL_TYPE)
+                        .initializer(() -> applyMethod(MODULE_MODEL_NAME, GET_SERVER_MODEL)).generate())
+                .statement(() -> maker()
+                        .Return(createModelConfigureMethod()));
     }
 
     private JCMethodInvocation createModelConfigureMethod() {
@@ -45,7 +52,7 @@ public class DecorateMethodCreator {
 
     private JCLambda createServerLambda() {
         return newLambda()
-                .parameter(newParameter(SERVER_CONFIGURATOR_MODEL_TYPE, SERVER_NAME))
+                .parameter(newParameter(SERVER_CUSTOMIZER_TYPE, SERVER_NAME))
                 .expression(() -> applyMethod(SERVER_NAME, REGISTRY_NAME, List.of(applyMethod(SERVICES_NAME, List.of(ident(SERVER_MODEL_NAME))))))
                 .generate();
     }
