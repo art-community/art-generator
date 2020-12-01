@@ -59,6 +59,15 @@ public class JavacService {
         return maker().Apply(List.nil(), select(classType, method), arguments);
     }
 
+    public JCMethodInvocation applyClassMethod(TypeModel classType, List<TypeModel> typeParameters, String method, List<JCExpression> arguments) {
+        if (isNotEmpty(classType.getParameters())) {
+            return maker().Apply(classType.generateParameters(), select(classType, method), arguments);
+        }
+        ListBuffer<JCExpression> parameters = new ListBuffer<>();
+        parameters.addAll(typeParameters.stream().map(TypeModel::generate).collect(toList()));
+        return maker().Apply(parameters.toList(), select(classType, method), arguments);
+    }
+
 
     public JCMethodInvocation applyMethod(String method) {
         return maker().Apply(List.nil(), ident(method), List.nil());

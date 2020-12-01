@@ -45,6 +45,7 @@ public class MyService {
     }
 
 
+
     public Mono<Response> myMethod9() {
         logger(MyService.class).info("myMethod9");
         return Mono.just(Response.builder().build());
