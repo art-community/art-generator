@@ -4,15 +4,13 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
-import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.INVOKE;
-import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.NEW;
+import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.tools.javac.code.TypeTag.*;
-import static io.art.core.checker.EmptinessChecker.isNotEmpty;
+import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.TypeModel.*;
 import static java.util.stream.Collectors.*;
-import java.util.stream.*;
 
 @UtilityClass
 public class JavacService {
@@ -53,18 +51,15 @@ public class JavacService {
     }
 
     public JCMethodInvocation applyClassMethod(TypeModel classType, String method, List<JCExpression> arguments) {
-        if (isNotEmpty(classType.getParameters())) {
-            return maker().Apply(classType.generateParameters(), select(classType, method), arguments);
-        }
-        return maker().Apply(List.nil(), select(classType, method), arguments);
+        return applyClassMethod(classType, List.nil(), method, arguments);
     }
 
-    public JCMethodInvocation applyClassMethod(TypeModel classType, List<TypeModel> typeParameters, String method, List<JCExpression> arguments) {
+    public JCMethodInvocation applyClassMethod(TypeModel classType, List<TypeModel> methodTypeParameters, String method, List<JCExpression> arguments) {
         if (isNotEmpty(classType.getParameters())) {
             return maker().Apply(classType.generateParameters(), select(classType, method), arguments);
         }
         ListBuffer<JCExpression> parameters = new ListBuffer<>();
-        parameters.addAll(typeParameters.stream().map(TypeModel::generate).collect(toList()));
+        parameters.addAll(methodTypeParameters.stream().map(TypeModel::generate).collect(toList()));
         return maker().Apply(parameters.toList(), select(classType, method), arguments);
     }
 

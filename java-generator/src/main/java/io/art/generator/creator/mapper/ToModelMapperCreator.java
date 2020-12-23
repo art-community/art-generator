@@ -7,7 +7,6 @@ import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.value.constants.ValueConstants.ValueType.*;
 import lombok.*;
-import lombok.experimental.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
@@ -27,7 +26,7 @@ import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GenerationState.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
-import static lombok.AccessLevel.PRIVATE;
+import static lombok.AccessLevel.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
 import java.util.*;
@@ -35,7 +34,7 @@ import java.util.*;
 @RequiredArgsConstructor(access = PRIVATE)
 public class ToModelMapperCreator {
     private final String valueName;
-    
+
     public static JCExpression toModelMapper(Type type) {
         String generatedMapper = getGeneratedMapper(type);
         if (nonNull(generatedMapper)) {
@@ -128,7 +127,8 @@ public class ToModelMapperCreator {
             JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
             JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
             JCExpression valueMapper = toModelMapper(typeArguments[1]);
-            return applyClassMethod(ENTITY_MAPPING_TYPE, TO_MAP, List.of(keyToModelMapper, keyFromModelMapper, valueMapper));
+            List<JCExpression> arguments = List.of(keyToModelMapper, keyFromModelMapper, valueMapper);
+            return applyClassMethod(ENTITY_MAPPING_TYPE, TO_MAP, arguments);
         }
         JCMethodInvocation builderInvocation = applyClassMethod(type(parameterizedType), BUILDER_METHOD_NAME);
         for (Field field : getProperties(rawClass)) {
@@ -141,9 +141,9 @@ public class ToModelMapperCreator {
     }
 
     private JCExpression createGenericArrayTypeMapperBody(GenericArrayType genericArrayType) {
-        JCExpression parameterMapper = toModelMapper(genericArrayType.getGenericComponentType());
-        List<JCExpression> arguments = List.of(newReference(type(genericArrayType)), parameterMapper);
-        List<TypeModel> typeParameters = List.of(type(genericArrayType.getGenericComponentType()));
+        Type genericComponentType = genericArrayType.getGenericComponentType();
+        List<JCExpression> arguments = List.of(newReference(type(genericArrayType)), toModelMapper(genericComponentType));
+        List<TypeModel> typeParameters = List.of(type(genericComponentType));
         return applyClassMethod(ARRAY_MAPPING_TYPE, typeParameters, TO_ARRAY, arguments);
     }
 
