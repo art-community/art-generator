@@ -1,5 +1,6 @@
 package ru;
 
+import io.art.core.lazy.*;
 import lombok.*;
 import lombok.Value;
 import java.time.*;
@@ -142,4 +143,6 @@ public class Model {
     Set<GenericModel<String, GenericTypeParameterImplementation<String>>> FSGModel;
     Collection<GenericModel<String, GenericTypeParameterImplementation<String>>> FCGModel;
     Map<String, GenericModel<String, GenericTypeParameterImplementation<String>>> FMGMModel;
+
+    LazyValue<String> lazy;
 }

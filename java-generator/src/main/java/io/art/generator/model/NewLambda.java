@@ -32,7 +32,7 @@ public class NewLambda {
         return this;
     }
 
-    public NewLambda blockStatement(Supplier<JCStatement> statement) {
+    public NewLambda statement(Supplier<JCStatement> statement) {
         statements.add(statement);
         return this;
     }

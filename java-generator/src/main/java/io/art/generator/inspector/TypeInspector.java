@@ -1,9 +1,11 @@
 package io.art.generator.inspector;
 
 import io.art.core.collection.*;
+import io.art.core.lazy.*;
 import io.art.generator.exception.*;
 import io.art.value.constants.ValueConstants.ValueType.*;
 import lombok.experimental.*;
+import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
@@ -18,8 +20,10 @@ import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.FLOA
 import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.INT;
 import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.LONG;
 import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.STRING;
+import static java.lang.reflect.Modifier.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
+import static java.util.stream.Collectors.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
 import java.time.*;
@@ -33,8 +37,8 @@ public class TypeInspector {
             for (Field field : type.getDeclaredFields()) {
                 Type fieldType = field.getGenericType();
                 String getterName = isBoolean(fieldType)
-                        ? IS_PREFIX + capitalize(field.getName())
-                        : GET_PREFIX + capitalize(field.getName());
+                        ? IS_NAME + capitalize(field.getName())
+                        : GET_NAME + capitalize(field.getName());
                 boolean hasGetter = stream(type.getDeclaredMethods()).anyMatch(method -> method.getName().equals(getterName));
                 if (hasGetter) fields.add(field);
             }
@@ -46,7 +50,11 @@ public class TypeInspector {
 
 
     public boolean isBoolean(Type fieldType) {
-        return fieldType == boolean.class || fieldType == Boolean.class;
+        return fieldType == boolean.class;
+    }
+
+    public boolean isLazyValue(Type fieldType) {
+        return LazyValue.class == extractClass(fieldType);
     }
 
     public boolean isLibraryType(Type type) {
@@ -61,56 +69,17 @@ public class TypeInspector {
             if (typeAsClass.isArray()) {
                 return isLibraryType(typeAsClass.getComponentType());
             }
-            boolean jdkBaseType = LIBRARY_BASE_TYPES
+            boolean libraryBasedType = LIBRARY_BASED_TYPES
                     .stream()
                     .anyMatch(matching -> matching.isAssignableFrom(typeAsClass));
-            boolean jdkType = LIBRARY_TYPES
+            boolean libraryType = LIBRARY_TYPES
                     .stream()
                     .anyMatch(matching -> matching.equals(typeAsClass));
-            return jdkType || jdkBaseType;
+            return libraryType || libraryBasedType;
         }
         return false;
     }
 
-    public boolean isPrimitiveType(Type type) {
-        if (String.class.equals(type)) {
-            return true;
-        }
-        if (char.class.equals(type) || Character.class.equals(type)) {
-            return true;
-        }
-        if (int.class.equals(type) || Integer.class.equals(type)) {
-            return true;
-        }
-        if (short.class.equals(type) || Short.class.equals(type)) {
-            return true;
-        }
-        if (long.class.equals(type) || Long.class.equals(type)) {
-            return true;
-        }
-        if (boolean.class.equals(type) || Boolean.class.equals(type)) {
-            return true;
-        }
-        if (double.class.equals(type) || Double.class.equals(type)) {
-            return true;
-        }
-        if (byte.class.equals(type) || Byte.class.equals(type)) {
-            return true;
-        }
-        if (float.class.equals(type) || Float.class.equals(type)) {
-            return true;
-        }
-        if (UUID.class.equals(type)) {
-            return true;
-        }
-        if (LocalDateTime.class.equals(type)) {
-            return true;
-        }
-        if (ZonedDateTime.class.equals(type)) {
-            return true;
-        }
-        return Date.class.equals(type);
-    }
 
     public boolean isCollectionType(Class<?> type) {
         if (List.class.isAssignableFrom(type)) {
@@ -153,8 +122,73 @@ public class TypeInspector {
         return float.class.equals(type);
     }
 
+
+    public boolean isPrimitiveType(Type type) {
+        if (String.class.equals(type)) {
+            return true;
+        }
+        if (char.class.equals(type) || Character.class.equals(type)) {
+            return true;
+        }
+        if (int.class.equals(type) || Integer.class.equals(type)) {
+            return true;
+        }
+        if (short.class.equals(type) || Short.class.equals(type)) {
+            return true;
+        }
+        if (long.class.equals(type) || Long.class.equals(type)) {
+            return true;
+        }
+        if (boolean.class.equals(type) || Boolean.class.equals(type)) {
+            return true;
+        }
+        if (double.class.equals(type) || Double.class.equals(type)) {
+            return true;
+        }
+        if (byte.class.equals(type) || Byte.class.equals(type)) {
+            return true;
+        }
+        if (float.class.equals(type) || Float.class.equals(type)) {
+            return true;
+        }
+        if (UUID.class.equals(type)) {
+            return true;
+        }
+        if (LocalDateTime.class.equals(type)) {
+            return true;
+        }
+        if (ZonedDateTime.class.equals(type)) {
+            return true;
+        }
+        return Date.class.equals(type);
+    }
+
     public boolean isComplexType(Type type) {
         return !isPrimitiveType(type);
+    }
+
+    public boolean hasBuilder(Class<?> type) {
+        return stream(type.getDeclaredMethods())
+                .filter(method -> method.getName().equals(BUILDER_METHOD_NAME))
+                .filter(method -> isStatic(method.getModifiers()) && isPublic(method.getModifiers()))
+                .filter(method -> method.getParameterCount() == 0)
+                .count() == 1;
+    }
+
+    public boolean hasAllArgumentsConstructor(Class<?> type) {
+        List<Type> fieldTypes = stream(type.getDeclaredFields())
+                .map(Field::getGenericType)
+                .collect(toList());
+        return stream(type.getConstructors())
+                .filter(constructor -> isPublic(constructor.getModifiers()))
+                .filter(constructor -> parameterTypesEqual(constructor.getParameters(), fieldTypes))
+                .anyMatch(constructor -> constructor.getParameterCount() == 0);
+    }
+
+    public boolean hasNoArgumentsConstructor(Class<?> type) {
+        return stream(type.getConstructors())
+                .filter(constructor -> isPublic(constructor.getModifiers()))
+                .anyMatch(constructor -> constructor.getParameterCount() == 0);
     }
 
 
@@ -238,5 +272,17 @@ public class TypeInspector {
             if (typeVariable.equals(parameter)) return index;
         }
         throw new GenerationException(format(TYPE_VARIABLE_WAS_NOT_FOUND, typeVariable));
+    }
+
+    public boolean parameterTypesEqual(Parameter[] current, List<Type> types) {
+        if (current.length != types.size()) {
+            return false;
+        }
+        for (int index = 0; index < current.length; index++) {
+            if (!orElse(current[index].getParameterizedType(), current[index].getType()).equals(types.get(index))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

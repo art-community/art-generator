@@ -2,6 +2,7 @@ package io.art.generator.constants;
 
 import io.art.core.collection.*;
 import io.art.core.constants.*;
+import io.art.core.lazy.*;
 import io.art.generator.model.*;
 import io.art.launcher.*;
 import io.art.model.customizer.*;
@@ -70,7 +71,9 @@ public interface GeneratorConstants {
             Collection.class.getName(),
             Queue.class.getName(),
             Deque.class.getName(),
-            Map.class.getName()
+            Map.class.getName(),
+
+            LazyValue.class.getName(),
     };
 
     interface Names {
@@ -86,6 +89,7 @@ public interface GeneratorConstants {
         String SERVER_NAME = "server";
         String PROVIDE_NAME = "provide";
         String MODEL_NAME = "model";
+        String MODELER_NAME = "modeler";
         String MODULE_MODEL_NAME = "moduleModel";
         String SERVER_MODEL_NAME = "serverModel";
         String MODEL_STATIC_NAME = "MODEL";
@@ -93,8 +97,8 @@ public interface GeneratorConstants {
         String SERVICES_NAME = "services";
         String REGISTRY_NAME = "registry";
         String REGISTER_NAME = "register";
-        String IS_PREFIX = "is";
-        String GET_PREFIX = "get";
+        String IS_NAME = "is";
+        String GET_NAME = "get";
     }
 
     interface Annotations {
@@ -114,6 +118,7 @@ public interface GeneratorConstants {
         String TYPE_VARIABLE_WAS_NOT_FOUND = "Type variable was not found: {0}";
         String NOT_PRIMITIVE_TYPE = "Not primitive type: {0}";
         String NOT_COLLECTION_TYPE = "Not collection type: {0}";
+        String NOT_FOUND_FACTORY_METHODS = "Not found valid factory methods (builder() method, no-args or all-args constructor) for type: {0}";
     }
 
     interface MappersConstants {
@@ -125,6 +130,7 @@ public interface GeneratorConstants {
         String ENTITY_BUILDER_NAME = "entityBuilder";
         String LAZY_PUT_NAME = "lazyPut";
         String MAP_NAME = "map";
+        String LAZY_NAME = "lazy";
 
         interface PrimitiveMappingMethods {
             String TO_UUID = "toUuid";
@@ -201,7 +207,7 @@ public interface GeneratorConstants {
             String TO_BINARY = "toBinary";
         }
 
-        ImmutableSet<Class<?>> LIBRARY_BASE_TYPES = immutableSetOf(
+        ImmutableSet<Class<?>> LIBRARY_BASED_TYPES = immutableSetOf(
                 void.class,
                 Void.class,
                 String.class,
@@ -236,7 +242,8 @@ public interface GeneratorConstants {
         );
 
         ImmutableSet<Class<?>> LIBRARY_TYPES = immutableSetOf(
-                Object.class
+                Object.class,
+                LazyValue.class
         );
     }
 
