@@ -112,6 +112,8 @@ public interface GeneratorConstants {
         String MORE_THAN_ONE_PARAMETER = "More than one parameter not supported";
         String UNSUPPORTED_TYPE = "Unsupported type: {0}";
         String TYPE_VARIABLE_WAS_NOT_FOUND = "Type variable was not found: {0}";
+        String NOT_PRIMITIVE_TYPE = "Not primitive type: {0}";
+        String NOT_COLLECTION_TYPE = "Not collection type: {0}";
     }
 
     interface MappersConstants {

@@ -2,6 +2,7 @@ package io.art.generator.selector;
 
 import io.art.generator.exception.*;
 import lombok.experimental.*;
+import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.PrimitiveMappingMethods.*;
 import static java.text.MessageFormat.*;
@@ -35,7 +36,7 @@ public class FromMapperMethodSelector {
         if (float.class.equals(arrayClass.getComponentType())) {
             return FROM_FLOAT_ARRAY;
         }
-        throw new GenerationException(format("Not java primitive type: {0}", arrayClass));
+        throw new GenerationException(format(NOT_PRIMITIVE_TYPE, arrayClass));
     }
 
     public static String selectFromPrimitiveMethod(Class<?> primitiveClass) {
@@ -78,7 +79,7 @@ public class FromMapperMethodSelector {
         if (Date.class.equals(primitiveClass)) {
             return FROM_DATE;
         }
-        throw new GenerationException(format("Not primitive type: {0}", primitiveClass));
+        throw new GenerationException(format(NOT_PRIMITIVE_TYPE, primitiveClass));
     }
 
     public static String selectFromCollectionMethod(Class<?> collectionClass) {
@@ -97,6 +98,6 @@ public class FromMapperMethodSelector {
         if (Collection.class.isAssignableFrom(collectionClass)) {
             return FROM_COLLECTION;
         }
-        throw new GenerationException(format("Not collection type: {0}", collectionClass));
+        throw new GenerationException(format(NOT_COLLECTION_TYPE, collectionClass));
     }
 }
