@@ -15,11 +15,11 @@ public class ModelLoader {
     public ModuleModel loadModel() {
         try {
             Class<?> mainClass = classLoader().loadClass(mainClass().getFullName());
-            Method configuratorMethod = stream(mainClass.getMethods())
+            Method modelMethod = stream(mainClass.getMethods())
                     .filter(ModelLoader::hasModelerAnnotation)
                     .findFirst()
                     .orElseThrow(() -> new GenerationException(MODULE_MODELER_NOT_FOUND));
-            ModuleModeler modeler = (ModuleModeler) configuratorMethod.invoke(null);
+            ModuleModeler modeler = (ModuleModeler) modelMethod.invoke(null);
             return modeler.make();
         } catch (Throwable throwable) {
             throw new GenerationException(throwable);
@@ -28,6 +28,7 @@ public class ModelLoader {
 
     private boolean hasModelerAnnotation(Method method) {
         return stream(method.getAnnotations())
-                .anyMatch(annotation -> annotation.annotationType().getName().equals(MODELER_ANNOTATION_NAME));
+                .map(annotation -> annotation.annotationType().getName())
+                .anyMatch(name -> name.equals(MODELER_ANNOTATION_NAME));
     }
 }

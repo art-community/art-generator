@@ -5,7 +5,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import io.art.core.factory.*;
 import io.art.generator.exception.*;
 import lombok.*;
-import static io.art.core.checker.EmptinessChecker.isEmpty;
+import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.extensions.StringExtensions.*;
@@ -136,9 +136,7 @@ public class TypeModel {
 
     public static TypeModel type(Type type) {
         TypeModel cached = CACHE.get(type);
-        if (nonNull(cached)) {
-            return cached;
-        }
+        if (nonNull(cached)) return cached;
         CACHE.put(type, cached = new TypeModel(type));
         return cached;
     }

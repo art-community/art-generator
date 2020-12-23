@@ -59,8 +59,8 @@ public interface GeneratorConstants {
 
             ModuleModel.class.getName(),
             ModuleModeler.class.getName(),
-            ServerModeler.class.getName(),
             ServerModel.class.getName(),
+            ServerModeler.class.getName(),
 
             ConfiguratorCustomizer.class.getName(),
             ValueCustomizer.class.getName(),
@@ -111,6 +111,7 @@ public interface GeneratorConstants {
         String MODULE_MODELER_NOT_FOUND = "Module modeler method not found";
         String MORE_THAN_ONE_PARAMETER = "More than one parameter not supported";
         String UNSUPPORTED_TYPE = "Unsupported type: {0}";
+        String TYPE_VARIABLE_WAS_NOT_FOUND = "Type variable was not found: {0}";
     }
 
     interface MappersConstants {
@@ -268,7 +269,6 @@ public interface GeneratorConstants {
         TypeModel MODULE_MODELER_TYPE = type(ModuleModeler.class);
 
         TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
-        TypeModel SERVER_MODELER_TYPE = type(ServerModeler.class);
 
         TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerCustomizer.class);
         TypeModel CONFIGURATOR_CUSTOMIZER_TYPE = type(ConfiguratorCustomizer.class);

@@ -11,7 +11,13 @@ import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.reflection.GenericArrayTypeImplementation.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
-import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.*;
+import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.BOOL;
+import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.BYTE;
+import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.DOUBLE;
+import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.FLOAT;
+import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.INT;
+import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.LONG;
+import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.STRING;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
 import java.lang.reflect.Field;
@@ -30,9 +36,7 @@ public class TypeInspector {
                         ? IS_PREFIX + capitalize(field.getName())
                         : GET_PREFIX + capitalize(field.getName());
                 boolean hasGetter = stream(type.getDeclaredMethods()).anyMatch(method -> method.getName().equals(getterName));
-                if (hasGetter) {
-                    fields.add(field);
-                }
+                if (hasGetter) fields.add(field);
             }
             return fields.build();
         } catch (Throwable throwable) {
@@ -108,35 +112,6 @@ public class TypeInspector {
         return Date.class.equals(type);
     }
 
-    public PrimitiveType primitiveTypeFromJava(Type type) {
-        if (char.class.equals(type) || Character.class.equals(type)) {
-            return STRING;
-        }
-        if (int.class.equals(type) || Integer.class.equals(type)) {
-            return INT;
-        }
-        if (short.class.equals(type) || Short.class.equals(type)) {
-            return INT;
-        }
-        if (long.class.equals(type) || Long.class.equals(type)) {
-            return LONG;
-        }
-        if (boolean.class.equals(type) || Boolean.class.equals(type)) {
-            return BOOL;
-        }
-        if (double.class.equals(type) || Double.class.equals(type)) {
-            return DOUBLE;
-        }
-        if (byte.class.equals(type) || Byte.class.equals(type)) {
-            return BYTE;
-        }
-        if (float.class.equals(type) || Float.class.equals(type)) {
-            return FLOAT;
-        }
-        throw new GenerationException(format(UNSUPPORTED_TYPE, type));
-    }
-
-
     public boolean isCollectionType(Class<?> type) {
         if (List.class.isAssignableFrom(type)) {
             return true;
@@ -178,8 +153,37 @@ public class TypeInspector {
         return float.class.equals(type);
     }
 
-    public boolean isCustomType(Type type) {
+    public boolean isComplexType(Type type) {
         return !isPrimitiveType(type);
+    }
+
+
+    public PrimitiveType primitiveTypeFromJava(Type type) {
+        if (char.class.equals(type) || Character.class.equals(type)) {
+            return STRING;
+        }
+        if (int.class.equals(type) || Integer.class.equals(type)) {
+            return INT;
+        }
+        if (short.class.equals(type) || Short.class.equals(type)) {
+            return INT;
+        }
+        if (long.class.equals(type) || Long.class.equals(type)) {
+            return LONG;
+        }
+        if (boolean.class.equals(type) || Boolean.class.equals(type)) {
+            return BOOL;
+        }
+        if (double.class.equals(type) || Double.class.equals(type)) {
+            return DOUBLE;
+        }
+        if (byte.class.equals(type) || Byte.class.equals(type)) {
+            return BYTE;
+        }
+        if (float.class.equals(type) || Float.class.equals(type)) {
+            return FLOAT;
+        }
+        throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
 
@@ -203,6 +207,7 @@ public class TypeInspector {
         }
         throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
+
 
     public Type extractGenericPropertyType(ParameterizedType owner, Type type) {
         if (type instanceof TypeVariable<?>) {
@@ -230,12 +235,8 @@ public class TypeInspector {
         int index = -1;
         for (TypeVariable<?> parameter : typeParameters) {
             index++;
-            if (typeVariable.equals(parameter)) {
-                return index;
-            }
+            if (typeVariable.equals(parameter)) return index;
         }
-        throw new GenerationException("");
+        throw new GenerationException(format(TYPE_VARIABLE_WAS_NOT_FOUND, typeVariable));
     }
-
-
 }

@@ -116,7 +116,7 @@ public class ToModelMapperCreator {
             return applyClassMethod(ARRAY_MAPPING_TYPE, selectToCollectionMethod(rawClass), List.of(parameterMapper));
         }
         if (Map.class.isAssignableFrom(rawClass)) {
-            if (isCustomType(typeArguments[0])) {
+            if (isComplexType(typeArguments[0])) {
                 throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
             }
             JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);

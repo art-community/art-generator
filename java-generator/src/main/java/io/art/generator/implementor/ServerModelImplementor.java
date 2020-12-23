@@ -47,7 +47,7 @@ public class ServerModelImplementor {
         return servicesMethod.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
-    public ImmutableSet<Type> collectCustomTypes(ServerModel serverModel) {
+    public ImmutableSet<Type> collectModelTypes(ServerModel serverModel) {
         ImmutableSet.Builder<Type> types = immutableSetBuilder();
         ImmutableMap<String, ServiceModel<?>> services = serverModel.getServices();
         for (ServiceModel<?> service : services.values()) {
@@ -56,9 +56,9 @@ public class ServerModelImplementor {
                 if (parameterTypes.length > 1) {
                     throw new GenerationException(MORE_THAN_ONE_PARAMETER);
                 }
-                types.addAll(TypeCollector.collectCustomTypes(method.getGenericReturnType()));
+                types.addAll(TypeCollector.collectModelTypes(method.getGenericReturnType()));
                 if (isNotEmpty(parameterTypes)) {
-                    types.addAll(TypeCollector.collectCustomTypes(parameterTypes[0]));
+                    types.addAll(TypeCollector.collectModelTypes(parameterTypes[0]));
                 }
             }
         }

@@ -13,7 +13,7 @@ import java.util.*;
 public class TypeCollector {
     private final Set<Type> types = setOf();
 
-    public static ImmutableSet<Type> collectCustomTypes(Type root) {
+    public static ImmutableSet<Type> collectModelTypes(Type root) {
         TypeCollector collector = new TypeCollector();
         collector.collectTypes(root);
         return immutableSetOf(collector.types);
