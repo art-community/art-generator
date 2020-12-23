@@ -21,7 +21,6 @@ import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
-import static io.art.generator.model.NewVariable.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.selector.ToMapperMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
@@ -128,7 +127,7 @@ public class ToModelMapperCreator {
         if (isPrimitiveType(modelClass)) {
             return select(PRIMITIVE_MAPPING_TYPE, selectToPrimitiveMethod(modelClass));
         }
-        return createForBuilderProperties(modelClass);
+        return createForProperties(modelClass);
     }
 
     private JCExpression createBody(ParameterizedType parameterizedType) {
@@ -153,7 +152,7 @@ public class ToModelMapperCreator {
             return applyClassMethod(ENTITY_MAPPING_TYPE, TO_MAP, arguments);
         }
 
-        return createForBuilderProperties(parameterizedType, rawClass);
+        return createForProperties(parameterizedType, rawClass);
     }
 
     private JCExpression createBody(GenericArrayType genericArrayType) {
@@ -164,33 +163,34 @@ public class ToModelMapperCreator {
     }
 
 
-    private JCMethodInvocation createForBuilderProperties(Class<?> modelClass) {
+    private JCMethodInvocation createForProperties(Class<?> modelClass) {
         JCMethodInvocation builderInvocation = applyClassMethod(type(modelClass), BUILDER_METHOD_NAME);
         for (Field field : getProperties(modelClass)) {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
-            JCMethodInvocation fieldMappers = createForBuilderField(fieldName, fieldType);
+            JCMethodInvocation fieldMappers = createForField(fieldName, fieldType);
             builderInvocation = applyMethod(builderInvocation, fieldName, List.of(fieldMappers));
         }
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
-    private JCMethodInvocation createForBuilderProperties(ParameterizedType parameterizedType, Class<?> rawClass) {
+    private JCMethodInvocation createForProperties(ParameterizedType parameterizedType, Class<?> rawClass) {
         JCMethodInvocation builderInvocation = applyClassMethod(type(parameterizedType), BUILDER_METHOD_NAME);
         for (Field field : getProperties(rawClass)) {
             String fieldName = field.getName();
             Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
-            JCMethodInvocation fieldMapping = createForBuilderField(fieldName, fieldType);
+            JCMethodInvocation fieldMapping = createForField(fieldName, fieldType);
             builderInvocation = applyMethod(builderInvocation, fieldName, List.of(fieldMapping));
         }
 
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
-    private JCMethodInvocation createForBuilderField(String fieldName, Type fieldType) {
+
+    private JCMethodInvocation createForField(String fieldName, Type fieldType) {
         boolean javaPrimitiveType = isJavaPrimitiveType(fieldType);
         if (isLazyValue(fieldType)) {
-            return createForBuilderLazyField(fieldName, ((ParameterizedType) fieldType).getActualTypeArguments()[0], javaPrimitiveType);
+            return createForLazyField(fieldName, ((ParameterizedType) fieldType).getActualTypeArguments()[0], javaPrimitiveType);
         }
         ListBuffer<JCExpression> arguments = new ListBuffer<>();
         arguments.add(maker().Literal(fieldName));
@@ -201,7 +201,7 @@ public class ToModelMapperCreator {
         return applyMethod(valueName, javaPrimitiveType ? MAP_PRIMITIVE_NAME : MAP_NAME, arguments.toList());
     }
 
-    private JCMethodInvocation createForBuilderLazyField(String fieldName, Type fieldType, boolean javaPrimitiveType) {
+    private JCMethodInvocation createForLazyField(String fieldName, Type fieldType, boolean javaPrimitiveType) {
         ListBuffer<JCExpression> arguments = new ListBuffer<>();
         arguments.add(maker().Literal(fieldName));
         if (javaPrimitiveType) {
