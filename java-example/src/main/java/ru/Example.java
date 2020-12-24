@@ -8,6 +8,8 @@ import static io.art.model.modeler.ModuleModeler.*;
 public class Example {
     @Modeler
     public static ModuleModeler model() {
-        return module().serve(server -> server.rsocket(rsocket -> rsocket.to(MyService.class, ServiceModeler::enableLogging)));
+        return module().serve(server -> server
+                .rsocket(rsocket -> rsocket.to(MyService.class, ServiceModeler::enableLogging))
+        );
     }
 }
