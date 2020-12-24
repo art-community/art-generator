@@ -2,7 +2,7 @@ package ru;
 
 import io.art.model.annotation.*;
 import io.art.model.modeler.*;
-import static io.art.model.implementation.ModuleModel.*;
+import static io.art.model.modeler.ModuleModeler.*;
 
 @Module
 public class Example {

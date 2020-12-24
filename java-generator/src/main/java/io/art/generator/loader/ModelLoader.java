@@ -20,7 +20,7 @@ public class ModelLoader {
                     .findFirst()
                     .orElseThrow(() -> new GenerationException(MODULE_MODELER_NOT_FOUND));
             ModuleModeler modeler = (ModuleModeler) modelMethod.invoke(null);
-            return modeler.make();
+            return modeler.apply();
         } catch (Throwable throwable) {
             throw new GenerationException(throwable);
         }

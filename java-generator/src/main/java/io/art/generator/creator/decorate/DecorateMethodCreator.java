@@ -25,27 +25,23 @@ public class DecorateMethodCreator {
                 .statement(() -> newVariable()
                         .name(MODULE_MODEL_NAME)
                         .type(MODULE_MODEL_TYPE)
-                        .initializer(() -> applyMethod(MODELER_NAME, MAKE_NAME)).generate())
+                        .initializer(() -> applyMethod(MODELER_NAME, APPLY_NAME)).generate())
                 .statement(() -> newVariable()
                         .name(SERVER_MODEL_NAME)
                         .type(SERVER_MODEL_TYPE)
                         .initializer(() -> applyMethod(MODULE_MODEL_NAME, GET_SERVER_MODEL)).generate())
-                .statement(() -> returnMethodCall(modelConfigureMethod()));
+                .statement(() -> returnMethodCall(customizerMethod()));
     }
 
-    private JCMethodInvocation modelConfigureMethod() {
-        return applyMethod(MODULE_MODEL_NAME, CONFIGURE_NAME, List.of(configuratorLambda()));
+    private JCMethodInvocation customizerMethod() {
+        return applyMethod(MODULE_MODEL_NAME, CUSTOMIZE_NAME, List.of(customizerLambda()));
     }
 
-    private JCLambda configuratorLambda() {
+    private JCLambda customizerLambda() {
         return newLambda()
-                .parameter(newParameter(CONFIGURATOR_CUSTOMIZER_TYPE, CONFIGURATOR_NAME))
-                .expression(DecorateMethodCreator::configuratorLambdaBody)
+                .parameter(newParameter(MODULE_CUSTOMIZER_TYPE, CUSTOMIZER_NAME))
+                .expression(() -> applyMethod(CUSTOMIZER_NAME, SERVER_NAME, List.of(serverLambda())))
                 .generate();
-    }
-
-    private JCMethodInvocation configuratorLambdaBody() {
-        return applyMethod(CONFIGURATOR_NAME, SERVER_NAME, List.of(serverLambda()));
     }
 
     private JCLambda serverLambda() {

@@ -63,7 +63,7 @@ public interface GeneratorConstants {
             ServerModel.class.getName(),
             ServerModeler.class.getName(),
 
-            ConfiguratorCustomizer.class.getName(),
+            ModuleCustomizer.class.getName(),
             ValueCustomizer.class.getName(),
             ServerCustomizer.class.getName(),
             List.class.getName(),
@@ -79,13 +79,13 @@ public interface GeneratorConstants {
     interface Names {
         String PROVIDER_CLASS_NAME_SUFFIX = "Provider";
         String BUILDER_METHOD_NAME = "builder";
-        String CONFIGURATOR_NAME = "configurator";
+        String CUSTOMIZER_NAME = "customizer";
         String BUILD_METHOD_NAME = "build";
         String MAIN_NAME = "main";
         String LAUNCH_NAME = "launch";
         String DECORATE_NAME = "decorate";
-        String CONFIGURE_NAME = "configure";
-        String MAKE_NAME = "make";
+        String CUSTOMIZE_NAME = "customize";
+        String APPLY_NAME = "apply";
         String SERVER_NAME = "server";
         String PROVIDE_NAME = "provide";
         String MODEL_NAME = "model";
@@ -280,7 +280,7 @@ public interface GeneratorConstants {
         TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
 
         TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerCustomizer.class);
-        TypeModel CONFIGURATOR_CUSTOMIZER_TYPE = type(ConfiguratorCustomizer.class);
+        TypeModel MODULE_CUSTOMIZER_TYPE = type(ModuleCustomizer.class);
 
         TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
         TypeModel SERVICE_METHOD_SPECIFICATION_TYPE = type(ServiceMethodSpecification.class);
