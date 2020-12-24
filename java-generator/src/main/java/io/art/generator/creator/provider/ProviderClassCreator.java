@@ -42,7 +42,7 @@ public class ProviderClassCreator {
                 .field(modelField)
                 .method(modelMethod)
                 .method(createDecorateMethod())
-                .inner(implementCustomTypeMappers(collectModelTypes(model.getServerModel())))
+                .inners(implementTypeMappers(collectModelTypes(model.getServerModel())))
                 .method(implementServerModel(model.getServerModel()));
     }
 }

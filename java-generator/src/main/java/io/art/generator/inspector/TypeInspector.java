@@ -167,6 +167,7 @@ public class TypeInspector {
         return !isPrimitiveType(type);
     }
 
+
     public boolean hasBuilder(Class<?> type) {
         return stream(type.getDeclaredMethods())
                 .filter(method -> method.getName().equals(BUILDER_METHOD_NAME))

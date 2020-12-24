@@ -42,7 +42,11 @@ public class JavacService {
     }
 
     public JCReturn returnMethodCall(String variable, String method, List<JCExpression> arguments) {
-        return maker().Return(maker().Apply(List.nil(), select(variable, method), arguments));
+        return returnMethodCall(maker().Apply(List.nil(), select(variable, method), arguments));
+    }
+
+    public JCReturn returnMethodCall(JCExpression method) {
+        return maker().Return(method);
     }
 
 
@@ -129,5 +133,10 @@ public class JavacService {
 
     public JCMemberReference newReference(TypeModel type) {
         return maker().Reference(NEW, null, type.generateBaseType(), null);
+    }
+
+
+    public JCExpressionStatement executeMethod(JCExpression method) {
+        return maker().Exec(method);
     }
 }

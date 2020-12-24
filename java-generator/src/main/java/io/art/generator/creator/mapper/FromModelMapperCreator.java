@@ -46,44 +46,44 @@ public class FromModelMapperCreator {
         FromModelMapperCreator creator = new FromModelMapperCreator(sequenceName(MODEL_NAME));
 
         if (isLibraryType(type)) {
-            return creator.createBody(type);
+            return creator.body(type);
         }
 
         if (type instanceof GenericArrayType) {
-            return creator.createBody(type);
+            return creator.body(type);
         }
 
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {
-                return creator.createBody(type);
+                return creator.body(type);
             }
         }
 
         return newLambda()
                 .parameter(newParameter(type(type), creator.modelName))
-                .expression(() -> creator.createBody(type))
+                .expression(() -> creator.body(type))
                 .generate();
     }
 
 
-    private JCExpression createBody(Type type) {
+    private JCExpression body(Type type) {
         if (type instanceof Class) {
-            return createBody((Class<?>) type);
+            return body((Class<?>) type);
         }
 
         if (type instanceof ParameterizedType) {
-            return createBody((ParameterizedType) type);
+            return body((ParameterizedType) type);
         }
 
         if (type instanceof GenericArrayType) {
-            return createBody((GenericArrayType) type);
+            return body((GenericArrayType) type);
         }
 
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }
 
-    private JCExpression createBody(Class<?> modelClass) {
+    private JCExpression body(Class<?> modelClass) {
         if (byte[].class.equals(modelClass)) {
             return select(BINARY_MAPPING_TYPE, FROM_BINARY);
         }
@@ -101,12 +101,12 @@ public class FromModelMapperCreator {
         for (Field field : getProperties(modelClass)) {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
-            builderInvocation = createForField(builderInvocation, fieldName, fieldType);
+            builderInvocation = forField(builderInvocation, fieldName, fieldType);
         }
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
-    private JCExpression createBody(ParameterizedType parameterizedType) {
+    private JCExpression body(ParameterizedType parameterizedType) {
         Type rawType = parameterizedType.getRawType();
         if (!(rawType instanceof Class)) {
             throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
@@ -131,20 +131,20 @@ public class FromModelMapperCreator {
         for (Field field : getProperties(rawClass)) {
             String fieldName = field.getName();
             Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
-            builderInvocation = createForField(builderInvocation, fieldName, fieldType);
+            builderInvocation = forField(builderInvocation, fieldName, fieldType);
         }
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
-    private JCExpression createBody(GenericArrayType genericArrayType) {
+    private JCExpression body(GenericArrayType genericArrayType) {
         JCExpression parameterMapper = fromModelMapper(genericArrayType.getGenericComponentType());
         return applyClassMethod(ARRAY_MAPPING_TYPE, FROM_ARRAY, List.of(parameterMapper));
     }
 
 
-    private JCMethodInvocation createForField(JCMethodInvocation builderInvocation, String fieldName, Type fieldType) {
+    private JCMethodInvocation forField(JCMethodInvocation builderInvocation, String fieldName, Type fieldType) {
         if (isLazyValue(fieldType)) {
-            return createForLazyField(builderInvocation, fieldName, (ParameterizedType) fieldType);
+            return forLazyField(builderInvocation, fieldName, (ParameterizedType) fieldType);
         }
         ListBuffer<JCExpression> arguments = new ListBuffer<>();
         arguments.add(literal(fieldName));
@@ -154,7 +154,7 @@ public class FromModelMapperCreator {
         return applyMethod(builderInvocation, LAZY_PUT_NAME, arguments.toList());
     }
 
-    private JCMethodInvocation createForLazyField(JCMethodInvocation builderInvocation, String fieldName, ParameterizedType fieldType) {
+    private JCMethodInvocation forLazyField(JCMethodInvocation builderInvocation, String fieldName, ParameterizedType fieldType) {
         ListBuffer<JCExpression> arguments = new ListBuffer<>();
         arguments.add(literal(fieldName));
         arguments.add(applyMethod(modelName, GET_NAME + capitalize(fieldName)));

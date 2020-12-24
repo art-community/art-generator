@@ -45,74 +45,73 @@ public class ToModelMapperCreator {
         return createToModelMapper(type);
     }
 
-
     public static JCExpression createToModelMapper(Type type) {
         ToModelMapperCreator creator = new ToModelMapperCreator(sequenceName(VALUE_NAME));
 
         if (isLibraryType(type)) {
-            return creator.createBody(type);
+            return creator.body(type);
         }
 
         if (type instanceof GenericArrayType) {
-            return creator.createBody(type);
+            return creator.body(type);
         }
 
         if (type instanceof Class) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {
-                return creator.createBody(type);
+                return creator.body(type);
             }
         }
 
         if (hasBuilder(extractClass(type))) {
-            return createByBuilder(type, creator);
+            return byBuilder(type, creator);
         }
 
         if (hasAllArgumentsConstructor(extractClass(type))) {
-            return createByConstructor(type, creator);
+            return byConstructor(type, creator);
         }
 
         if (hasNoArgumentsConstructor(extractClass(type))) {
-               return createBySetter(type, creator);
+            return bySetter(type, creator);
         }
 
         throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
     }
 
 
-    private static JCLambda createBySetter(Type type, ToModelMapperCreator creator) {
+    private static JCLambda bySetter(Type type, ToModelMapperCreator creator) {
         throw new NotImplementedException("TODO:");
     }
 
-    private static JCLambda createByConstructor(Type type, ToModelMapperCreator creator) {
+    private static JCLambda byConstructor(Type type, ToModelMapperCreator creator) {
         throw new NotImplementedException("TODO:");
     }
 
-    private static JCLambda createByBuilder(Type type, ToModelMapperCreator creator) {
+    private static JCLambda byBuilder(Type type, ToModelMapperCreator creator) {
         return newLambda()
                 .parameter(newParameter(ENTITY_TYPE, creator.valueName))
-                .expression(() -> creator.createBody(type))
+                .expression(() -> creator.body(type))
                 .generate();
     }
 
 
-    private JCExpression createBody(Type type) {
+    private JCExpression body(Type type) {
         if (type instanceof Class) {
-            return createBody((Class<?>) type);
+            return body((Class<?>) type);
         }
 
         if (type instanceof ParameterizedType) {
-            return createBody((ParameterizedType) type);
+            return body((ParameterizedType) type);
         }
 
         if (type instanceof GenericArrayType) {
-            return createBody((GenericArrayType) type);
+            return body((GenericArrayType) type);
         }
 
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }
 
-    private JCExpression createBody(Class<?> modelClass) {
+    private JCExpression body(Class<?> modelClass) {
         if (byte[].class.equals(modelClass)) {
             return select(BINARY_MAPPING_TYPE, TO_BINARY);
         }
@@ -127,10 +126,10 @@ public class ToModelMapperCreator {
         if (isPrimitiveType(modelClass)) {
             return select(PRIMITIVE_MAPPING_TYPE, selectToPrimitiveMethod(modelClass));
         }
-        return createForProperties(modelClass);
+        return forProperties(modelClass);
     }
 
-    private JCExpression createBody(ParameterizedType parameterizedType) {
+    private JCExpression body(ParameterizedType parameterizedType) {
         Type rawType = parameterizedType.getRawType();
         if (!(rawType instanceof Class)) {
             throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
@@ -152,10 +151,10 @@ public class ToModelMapperCreator {
             return applyClassMethod(ENTITY_MAPPING_TYPE, TO_MAP, arguments);
         }
 
-        return createForProperties(parameterizedType, rawClass);
+        return forProperties(parameterizedType, rawClass);
     }
 
-    private JCExpression createBody(GenericArrayType genericArrayType) {
+    private JCExpression body(GenericArrayType genericArrayType) {
         Type genericComponentType = genericArrayType.getGenericComponentType();
         List<JCExpression> arguments = List.of(newReference(type(genericArrayType)), toModelMapper(genericComponentType));
         List<TypeModel> typeParameters = List.of(type(genericComponentType));
@@ -163,23 +162,23 @@ public class ToModelMapperCreator {
     }
 
 
-    private JCMethodInvocation createForProperties(Class<?> modelClass) {
+    private JCMethodInvocation forProperties(Class<?> modelClass) {
         JCMethodInvocation builderInvocation = applyClassMethod(type(modelClass), BUILDER_METHOD_NAME);
         for (Field field : getProperties(modelClass)) {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
-            JCMethodInvocation fieldMappers = createForField(fieldName, fieldType);
+            JCMethodInvocation fieldMappers = forField(fieldName, fieldType);
             builderInvocation = applyMethod(builderInvocation, fieldName, List.of(fieldMappers));
         }
         return applyMethod(builderInvocation, BUILD_METHOD_NAME);
     }
 
-    private JCMethodInvocation createForProperties(ParameterizedType parameterizedType, Class<?> rawClass) {
+    private JCMethodInvocation forProperties(ParameterizedType parameterizedType, Class<?> rawClass) {
         JCMethodInvocation builderInvocation = applyClassMethod(type(parameterizedType), BUILDER_METHOD_NAME);
         for (Field field : getProperties(rawClass)) {
             String fieldName = field.getName();
             Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
-            JCMethodInvocation fieldMapping = createForField(fieldName, fieldType);
+            JCMethodInvocation fieldMapping = forField(fieldName, fieldType);
             builderInvocation = applyMethod(builderInvocation, fieldName, List.of(fieldMapping));
         }
 
@@ -187,13 +186,13 @@ public class ToModelMapperCreator {
     }
 
 
-    private JCMethodInvocation createForField(String fieldName, Type fieldType) {
+    private JCMethodInvocation forField(String fieldName, Type fieldType) {
         boolean javaPrimitiveType = isJavaPrimitiveType(fieldType);
         if (isLazyValue(fieldType)) {
-            return createForLazyField(fieldName, ((ParameterizedType) fieldType).getActualTypeArguments()[0], javaPrimitiveType);
+            return forLazyField(fieldName, ((ParameterizedType) fieldType).getActualTypeArguments()[0], javaPrimitiveType);
         }
         ListBuffer<JCExpression> arguments = new ListBuffer<>();
-        arguments.add(maker().Literal(fieldName));
+        arguments.add(literal(fieldName));
         if (javaPrimitiveType) {
             arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
         }
@@ -201,9 +200,9 @@ public class ToModelMapperCreator {
         return applyMethod(valueName, javaPrimitiveType ? MAP_PRIMITIVE_NAME : MAP_NAME, arguments.toList());
     }
 
-    private JCMethodInvocation createForLazyField(String fieldName, Type fieldType, boolean javaPrimitiveType) {
+    private JCMethodInvocation forLazyField(String fieldName, Type fieldType, boolean javaPrimitiveType) {
         ListBuffer<JCExpression> arguments = new ListBuffer<>();
-        arguments.add(maker().Literal(fieldName));
+        arguments.add(literal(fieldName));
         if (javaPrimitiveType) {
             arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
         }

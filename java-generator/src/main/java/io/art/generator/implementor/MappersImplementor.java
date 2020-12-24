@@ -24,7 +24,7 @@ import java.util.*;
 
 @UtilityClass
 public class MappersImplementor {
-    public ImmutableArray<NewClass> implementCustomTypeMappers(ImmutableSet<Type> types) {
+    public ImmutableArray<NewClass> implementTypeMappers(ImmutableSet<Type> types) {
         types = types.stream().filter(type -> isNull(getGeneratedMapper(type))).collect(immutableSetCollector());
         ImmutableArray.Builder<NewClass> mappingClasses = immutableArrayBuilder();
         Map<Type, String> typeMappers = map();

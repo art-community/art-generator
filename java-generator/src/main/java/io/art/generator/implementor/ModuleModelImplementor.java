@@ -28,7 +28,7 @@ public class ModuleModelImplementor {
                 .parameter(newParameter(STRING_ARRAY_TYPE, MAIN_METHOD_ARGUMENTS_NAME))
                 .addImport(classImport(MODULE_LAUNCHER_TYPE.getFullName()))
                 .addImport(classImport(providerClassFullName()))
-                .statement(() -> maker().Exec(applyClassMethod(MODULE_LAUNCHER_TYPE, LAUNCH_NAME, List.of(applyMethod(providerClassName(), PROVIDE_NAME)))));
+                .statement(() -> executeMethod(applyClassMethod(MODULE_LAUNCHER_TYPE, LAUNCH_NAME, List.of(applyMethod(providerClassName(), PROVIDE_NAME)))));
 
         replaceMethod(mainClass(), mainMethod);
     }

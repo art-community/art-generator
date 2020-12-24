@@ -31,8 +31,7 @@ public class DecorateMethodCreator {
                         .name(SERVER_MODEL_NAME)
                         .type(SERVER_MODEL_TYPE)
                         .initializer(() -> applyMethod(MODULE_MODEL_NAME, GET_SERVER_MODEL)).generate())
-                .statement(() -> maker()
-                        .Return(createModelConfigureMethod()));
+                .statement(() -> returnMethodCall(createModelConfigureMethod()));
     }
 
     private JCMethodInvocation createModelConfigureMethod() {

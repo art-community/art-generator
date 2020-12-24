@@ -37,7 +37,7 @@ public class NewClass {
         return this;
     }
 
-    public NewClass inner(ImmutableArray<NewClass> newClasses) {
+    public NewClass inners(ImmutableArray<NewClass> newClasses) {
         newClasses.forEach(innerClass -> imports.addAll(innerClass.imports));
         innerClasses.addAll(newClasses.toMutable());
         return this;
