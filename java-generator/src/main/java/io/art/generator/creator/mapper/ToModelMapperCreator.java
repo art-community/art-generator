@@ -197,7 +197,7 @@ public class ToModelMapperCreator {
             arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
         }
         arguments.add(toModelMapper(fieldType));
-        return applyMethod(valueName, javaPrimitiveType ? MAP_PRIMITIVE_NAME : MAP_NAME, arguments.toList());
+        return applyMethod(applyMethod(valueName, MAPPING_METHOD_NAME), javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME, arguments.toList());
     }
 
     private JCMethodInvocation forLazyField(String fieldName, Type fieldType, boolean javaPrimitiveType) {
@@ -208,7 +208,7 @@ public class ToModelMapperCreator {
         }
         arguments.add(toModelMapper(fieldType));
         JCLambda supplier = newLambda()
-                .expression(() -> applyMethod(valueName, javaPrimitiveType ? MAP_PRIMITIVE_NAME : MAP_NAME, arguments.toList()))
+                .expression(() -> applyMethod(applyMethod(valueName, MAPPING_METHOD_NAME), javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME, arguments.toList()))
                 .generate();
         return applyClassMethod(type(LazyValue.class), LAZY_NAME, List.of(supplier));
     }

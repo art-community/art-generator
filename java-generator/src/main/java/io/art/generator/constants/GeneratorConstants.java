@@ -123,7 +123,8 @@ public interface GeneratorConstants {
     interface MappersConstants {
         String TO_MODEL_NAME = "toModel";
         String FROM_MODEL_NAME = "fromModel";
-        String MAP_PRIMITIVE_NAME = "mapPrimitive";
+        String MAPPING_METHOD_NAME = "mapping";
+        String MAP_OR_DEFAULT_NAME = "mapOrDefault";
         String MAPPING_INTERFACE_NAME = "Mapping";
         String VALUE_NAME = "value";
         String ENTITY_BUILDER_NAME = "entityBuilder";

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.*;
 
 public class GenerationState {
     private final static Map<Type, String> GENERATED_MAPPERS = concurrentHashMap();
-    private final static AtomicBoolean completed = new AtomicBoolean();
+    private final static AtomicBoolean COMPLETED = new AtomicBoolean();
 
     public static void putGeneratedMapper(Type type, String name) {
         GENERATED_MAPPERS.put(type, name);
@@ -17,11 +17,11 @@ public class GenerationState {
         return GENERATED_MAPPERS.get(type);
     }
 
-    public static boolean isCompleted() {
-        return completed.get();
+    public static boolean completed() {
+        return COMPLETED.get();
     }
 
     public static void complete() {
-        completed.set(true);
+        COMPLETED.set(true);
     }
 }

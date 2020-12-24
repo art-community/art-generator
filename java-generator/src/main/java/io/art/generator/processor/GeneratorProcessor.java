@@ -48,7 +48,7 @@ public class GeneratorProcessor extends AbstractProcessor {
             return false;
         }
         if (GeneratorContext.isInitialized()) {
-            if (isCompleted()) {
+            if (completed()) {
                 return false;
             }
             generate();
