@@ -73,6 +73,7 @@ public class TypeModel {
                 .filter(type -> !(type instanceof TypeVariable))
                 .map(TypeModel::type)
                 .collect(toCollection(ArrayFactory::dynamicArray));
+        if (!adoptedTypeClass.isPrimitive()) return;
         stream(TypeTag.values())
                 .filter(tag -> tag.name().toLowerCase().equals(adoptedTypeClass.getSimpleName().toLowerCase()))
                 .findFirst()
@@ -102,15 +103,28 @@ public class TypeModel {
         this.parameters = emptyList();
     }
 
-    public JCExpression generateUnboxed() {
-        return generate(false);
-    }
-
-    public JCExpression generateBoxed() {
-        return generate(true);
+    public JCExpression generateFullType() {
+        if (nonNull(primitive)) {
+            return maker().TypeIdent(primitive);
+        }
+        if (!parameters.isEmpty()) {
+            com.sun.tools.javac.util.List<JCExpression> arguments = com.sun.tools.javac.util.List.from(parameters
+                    .stream()
+                    .map(TypeModel::generateFullType)
+                    .collect(toCollection(ArrayFactory::dynamicArray)));
+            return maker().TypeApply(isArray()
+                    ? maker().TypeArray(maker().Ident(elements().getName(name)))
+                    : maker().Ident(elements().getName(name)), arguments);
+        }
+        return isArray()
+                ? maker().TypeArray(maker().Ident(elements().getName(name)))
+                : maker().Ident(elements().getName(name));
     }
 
     public JCExpression generateBaseType() {
+        if (nonNull(primitive)) {
+            return maker().TypeIdent(primitive);
+        }
         return isArray()
                 ? maker().TypeArray(maker().Ident(elements().getName(name)))
                 : maker().Ident(elements().getName(name));
@@ -122,27 +136,9 @@ public class TypeModel {
             return com.sun.tools.javac.util.List.nil();
         }
         List<JCExpression> expressions = parameters.stream()
-                .map(TypeModel::generateBoxed)
+                .map(TypeModel::generateFullType)
                 .collect(toList());
         return com.sun.tools.javac.util.List.from(expressions);
-    }
-
-    private JCExpression generate(boolean boxedPrimitives) {
-        if (nonNull(primitive) && !boxedPrimitives) {
-            return maker().TypeIdent(primitive);
-        }
-        if (!parameters.isEmpty()) {
-            com.sun.tools.javac.util.List<JCExpression> arguments = com.sun.tools.javac.util.List.from(parameters
-                    .stream()
-                    .map(TypeModel::generateBoxed)
-                    .collect(toCollection(ArrayFactory::dynamicArray)));
-            return maker().TypeApply(isArray()
-                    ? maker().TypeArray(maker().Ident(elements().getName(name)))
-                    : maker().Ident(elements().getName(name)), arguments);
-        }
-        return isArray()
-                ? maker().TypeArray(maker().Ident(elements().getName(name)))
-                : maker().Ident(elements().getName(name));
     }
 
     public static TypeModel type(Type type) {
