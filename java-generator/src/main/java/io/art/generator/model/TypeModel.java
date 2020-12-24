@@ -103,21 +103,11 @@ public class TypeModel {
     }
 
     public JCExpression generate() {
-        if (nonNull(primitive)) {
-            return maker().TypeIdent(primitive);
-        }
-        if (!parameters.isEmpty()) {
-            com.sun.tools.javac.util.List<JCExpression> arguments = com.sun.tools.javac.util.List.from(parameters
-                    .stream()
-                    .map(TypeModel::generate)
-                    .collect(toCollection(ArrayFactory::dynamicArray)));
-            return maker().TypeApply(isArray()
-                    ? maker().TypeArray(maker().Ident(elements().getName(name)))
-                    : maker().Ident(elements().getName(name)), arguments);
-        }
-        return isArray()
-                ? maker().TypeArray(maker().Ident(elements().getName(name)))
-                : maker().Ident(elements().getName(name));
+        return generate(false);
+    }
+
+    public JCExpression generateUnboxed() {
+        return generate(true);
     }
 
     public JCExpression generateBaseType() {
@@ -131,7 +121,28 @@ public class TypeModel {
         if (isEmpty(parameters)) {
             return com.sun.tools.javac.util.List.nil();
         }
-        return com.sun.tools.javac.util.List.from(parameters.stream().map(TypeModel::generate).collect(toList()));
+        List<JCExpression> expressions = parameters.stream()
+                .map(TypeModel::generateUnboxed)
+                .collect(toList());
+        return com.sun.tools.javac.util.List.from(expressions);
+    }
+
+    private JCExpression generate(boolean unboxPrimitive) {
+        if (nonNull(primitive) && !unboxPrimitive) {
+            return maker().TypeIdent(primitive);
+        }
+        if (!parameters.isEmpty()) {
+            com.sun.tools.javac.util.List<JCExpression> arguments = com.sun.tools.javac.util.List.from(parameters
+                    .stream()
+                    .map(TypeModel::generateUnboxed)
+                    .collect(toCollection(ArrayFactory::dynamicArray)));
+            return maker().TypeApply(isArray()
+                    ? maker().TypeArray(maker().Ident(elements().getName(name)))
+                    : maker().Ident(elements().getName(name)), arguments);
+        }
+        return isArray()
+                ? maker().TypeArray(maker().Ident(elements().getName(name)))
+                : maker().Ident(elements().getName(name));
     }
 
     public static TypeModel type(Type type) {

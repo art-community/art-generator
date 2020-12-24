@@ -63,7 +63,7 @@ public class JavacService {
             return maker().Apply(classType.generateParameters(), select(classType, method), arguments);
         }
         ListBuffer<JCExpression> parameters = new ListBuffer<>();
-        parameters.addAll(methodTypeParameters.stream().map(TypeModel::generate).collect(toList()));
+        parameters.addAll(methodTypeParameters.stream().map(TypeModel::generateUnboxed).collect(toList()));
         return maker().Apply(parameters.toList(), select(classType, method), arguments);
     }
 
