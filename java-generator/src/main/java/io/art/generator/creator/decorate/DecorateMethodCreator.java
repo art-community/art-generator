@@ -8,7 +8,6 @@ import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.constants.GeneratorConstants.ModelMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
-import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
@@ -31,25 +30,25 @@ public class DecorateMethodCreator {
                         .name(SERVER_MODEL_NAME)
                         .type(SERVER_MODEL_TYPE)
                         .initializer(() -> applyMethod(MODULE_MODEL_NAME, GET_SERVER_MODEL)).generate())
-                .statement(() -> returnMethodCall(createModelConfigureMethod()));
+                .statement(() -> returnMethodCall(modelConfigureMethod()));
     }
 
-    private JCMethodInvocation createModelConfigureMethod() {
-        return applyMethod(MODULE_MODEL_NAME, CONFIGURE_NAME, List.of(createConfiguratorLambda()));
+    private JCMethodInvocation modelConfigureMethod() {
+        return applyMethod(MODULE_MODEL_NAME, CONFIGURE_NAME, List.of(configuratorLambda()));
     }
 
-    private JCLambda createConfiguratorLambda() {
+    private JCLambda configuratorLambda() {
         return newLambda()
                 .parameter(newParameter(CONFIGURATOR_CUSTOMIZER_TYPE, CONFIGURATOR_NAME))
-                .expression(DecorateMethodCreator::createConfiguratorLambdaBody)
+                .expression(DecorateMethodCreator::configuratorLambdaBody)
                 .generate();
     }
 
-    private JCMethodInvocation createConfiguratorLambdaBody() {
-        return applyMethod(CONFIGURATOR_NAME, SERVER_NAME, List.of(createServerLambda()));
+    private JCMethodInvocation configuratorLambdaBody() {
+        return applyMethod(CONFIGURATOR_NAME, SERVER_NAME, List.of(serverLambda()));
     }
 
-    private JCLambda createServerLambda() {
+    private JCLambda serverLambda() {
         return newLambda()
                 .parameter(newParameter(SERVER_CUSTOMIZER_TYPE, SERVER_NAME))
                 .expression(() -> applyMethod(SERVER_NAME, REGISTRY_NAME, List.of(applyMethod(SERVICES_NAME, List.of(ident(SERVER_MODEL_NAME))))))
