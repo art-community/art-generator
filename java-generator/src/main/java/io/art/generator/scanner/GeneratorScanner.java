@@ -9,6 +9,7 @@ import io.art.generator.context.GeneratorContextConfiguration.*;
 import io.art.generator.model.*;
 import lombok.*;
 import static com.sun.source.tree.Tree.Kind.*;
+import static com.sun.tools.javac.code.Symbol.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.GeneratorConstants.Annotations.*;
@@ -16,8 +17,7 @@ import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static java.util.Objects.*;
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.element.Modifier.*;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -58,12 +58,15 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
         String existedClassName = packageUnit.getPackageName().toString() + DOT + classDeclaration.name.toString();
         configurationBuilder.exitedClass(existedClassName, existedClass);
 
-        List<JCAnnotation> annotations = classDeclaration.getModifiers().getAnnotations();
-        if (isNull(annotations) || annotations.isEmpty()) {
-            return result;
-        }
+        Optional<JCMethodDecl> modelMethodDeclaration = classDeclaration.getMembers()
+                .stream()
+                .filter(member -> member.getKind() == METHOD)
+                .map(member -> (JCMethodDecl) member)
+                .filter(method -> hasModelerAnnotation(method.getModifiers().getAnnotations()))
+                .filter(method -> method.getModifiers().getFlags().containsAll(setOf(PUBLIC, STATIC)))
+                .findFirst();
 
-        if (isNull(mainClass) && hasAnnotation(annotations, MODULE_ANNOTATION_NAME)) {
+        if (isNull(mainClass) && modelMethodDeclaration.isPresent()) {
             Optional<JCMethodDecl> mainMethodDeclaration = classDeclaration.getMembers()
                     .stream()
                     .filter(member -> member.getKind() == METHOD)
@@ -74,14 +77,6 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                     .filter(method -> nonNull(method.getReturnType().type))
                     .filter(method -> nonNull(method.getReturnType().type.getTag()))
                     .filter(method -> method.getReturnType().type.getTag().equals(TypeTag.VOID))
-                    .findFirst();
-
-            Optional<JCMethodDecl> modelMethodDeclaration = classDeclaration.getMembers()
-                    .stream()
-                    .filter(member -> member.getKind() == METHOD)
-                    .map(member -> (JCMethodDecl) member)
-                    .filter(method -> hasAnnotation(method.getModifiers().getAnnotations(), MODELER_ANNOTATION_NAME))
-                    .filter(method -> method.getModifiers().getFlags().containsAll(setOf(PUBLIC, STATIC)))
                     .findFirst();
 
             ExistedClass.ExistedClassBuilder mainClassBuilder = ExistedClass.builder()
@@ -98,30 +93,31 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                 mainClassBuilder.method(mainMethod.getName(), mainMethod);
             }
 
-            if (modelMethodDeclaration.isPresent()) {
-                ExistedMethod modelMethod = ExistedMethod.builder()
-                        .declaration(modelMethodDeclaration.get())
-                        .name(modelMethodDeclaration.get().name.toString())
-                        .build();
-                configurationBuilder.modelMethod(modelMethod);
-                mainClassBuilder.method(modelMethod.getName(), modelMethod);
-            }
+            ExistedMethod modelMethod = ExistedMethod.builder()
+                    .declaration(modelMethodDeclaration.get())
+                    .name(modelMethodDeclaration.get().name.toString())
+                    .build();
+
+            configurationBuilder.modelMethod(modelMethod);
+            mainClassBuilder.method(modelMethod.getName(), modelMethod);
 
             configurationBuilder.mainClass(this.mainClass = mainClassBuilder.build());
         }
         return result;
     }
 
-    private boolean hasAnnotation(List<JCAnnotation> annotations, String annotationName) {
+    private boolean hasModelerAnnotation(List<JCAnnotation> annotations) {
         return annotations
                 .stream()
                 .map(JCAnnotation::getAnnotationType)
                 .filter(Objects::nonNull)
-                .map(annotation -> ((JCIdent) annotation).sym)
+                .map(annotation -> annotation.type)
                 .filter(Objects::nonNull)
-                .map(Symbol::getQualifiedName)
+                .map(Type::asElement)
                 .filter(Objects::nonNull)
-                .anyMatch(name -> name.toString().equals(annotationName));
+                .map(TypeSymbol::getQualifiedName)
+                .filter(Objects::nonNull)
+                .anyMatch(name -> name.toString().equals(MODELER_ANNOTATION_NAME));
     }
 
 }

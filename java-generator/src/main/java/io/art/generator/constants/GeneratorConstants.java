@@ -102,7 +102,6 @@ public interface GeneratorConstants {
     }
 
     interface Annotations {
-        String MODULE_ANNOTATION_NAME = "io.art.model.annotation.Module";
         String MODELER_ANNOTATION_NAME = "io.art.model.annotation.Modeler";
     }
 
