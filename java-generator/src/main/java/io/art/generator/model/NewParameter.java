@@ -20,7 +20,7 @@ public class NewParameter {
     public JCVariableDecl generate() {
         JCModifiers modifiers = maker().Modifiers(PARAMETER);
         Name name = elements().getName(this.name);
-        JCExpression type = this.type.generate();
+        JCExpression type = this.type.generateUnboxed();
         return maker().VarDef(modifiers, name, type, null);
     }
 }

@@ -102,11 +102,11 @@ public class TypeModel {
         this.parameters = emptyList();
     }
 
-    public JCExpression generate() {
+    public JCExpression generateUnboxed() {
         return generate(false);
     }
 
-    public JCExpression generateUnboxed() {
+    public JCExpression generateBoxed() {
         return generate(true);
     }
 
@@ -122,19 +122,19 @@ public class TypeModel {
             return com.sun.tools.javac.util.List.nil();
         }
         List<JCExpression> expressions = parameters.stream()
-                .map(TypeModel::generateUnboxed)
+                .map(TypeModel::generateBoxed)
                 .collect(toList());
         return com.sun.tools.javac.util.List.from(expressions);
     }
 
-    private JCExpression generate(boolean unboxPrimitive) {
-        if (nonNull(primitive) && !unboxPrimitive) {
+    private JCExpression generate(boolean boxedPrimitives) {
+        if (nonNull(primitive) && !boxedPrimitives) {
             return maker().TypeIdent(primitive);
         }
         if (!parameters.isEmpty()) {
             com.sun.tools.javac.util.List<JCExpression> arguments = com.sun.tools.javac.util.List.from(parameters
                     .stream()
-                    .map(TypeModel::generateUnboxed)
+                    .map(TypeModel::generateBoxed)
                     .collect(toCollection(ArrayFactory::dynamicArray)));
             return maker().TypeApply(isArray()
                     ? maker().TypeArray(maker().Ident(elements().getName(name)))

@@ -44,7 +44,7 @@ public class NewMethod {
     public JCMethodDecl generate() {
         JCModifiers modifiers = maker().Modifiers(this.modifiers);
         Name name = elements().getName(this.name);
-        JCExpression type = returnType.generate();
+        JCExpression type = returnType.generateUnboxed();
         JCBlock body = maker().Block(0L, from(statements.stream().map(Supplier::get).collect(toCollection(ArrayFactory::dynamicArray))));
         List<JCVariableDecl> parameters = this.parameters.stream().map(NewParameter::generate).collect(toCollection(ArrayFactory::dynamicArray));
         return maker().MethodDef(modifiers, name, type, nil(), from(parameters), nil(), body, null);

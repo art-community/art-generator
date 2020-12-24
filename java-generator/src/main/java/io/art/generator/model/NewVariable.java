@@ -43,7 +43,7 @@ public class NewVariable {
     public JCVariableDecl generate() {
         JCModifiers modifiers = maker().Modifiers(this.modifiers);
         Name name = elements().getName(this.name);
-        JCExpression type = this.type.generate();
+        JCExpression type = this.type.generateUnboxed();
         JCExpression initializationExpression = initializer.get();
         return maker().VarDef(modifiers, name, type, initializationExpression);
     }
