@@ -29,6 +29,8 @@ import java.util.*;
 public class ToModelMapperCreator {
     private final String entityName = sequenceName(ENTITY_NAME);
     private final ToModelFieldMappingCreator fieldMappingCreator = new ToModelFieldMappingCreator(entityName);
+    private final ToModelMapperCreatorByBuilder builder = new ToModelMapperCreatorByBuilder(fieldMappingCreator);
+    private final ToModelMapperCreatorByInitializer initializer = new ToModelMapperCreatorByInitializer(fieldMappingCreator);
 
     public static JCExpression toModelMapper(Type type) {
         String generatedMapper = getGeneratedMapper(type);
@@ -98,12 +100,10 @@ public class ToModelMapperCreator {
         }
 
         if (hasBuilder(modelClass)) {
-            ToModelMapperCreatorByBuilder builder = new ToModelMapperCreatorByBuilder(new ToModelFieldMappingCreator(entityName));
             return builder.forProperties(modelClass);
         }
 
         if (hasAtLeastOneFieldConstructorArgument(modelClass) || hasAtLeastOneSetter(modelClass)) {
-            ToModelMapperCreatorByInitializer initializer = new ToModelMapperCreatorByInitializer(new ToModelFieldMappingCreator(entityName));
             return initializer.forProperties(modelClass);
         }
 
@@ -138,12 +138,10 @@ public class ToModelMapperCreator {
         }
 
         if (hasBuilder(rawClass)) {
-            ToModelMapperCreatorByBuilder builder = new ToModelMapperCreatorByBuilder(fieldMappingCreator);
             return builder.forProperties(parameterizedType, rawClass);
         }
 
         if (hasAtLeastOneFieldConstructorArgument(rawClass) || hasAtLeastOneSetter(rawClass)) {
-            ToModelMapperCreatorByInitializer initializer = new ToModelMapperCreatorByInitializer(new ToModelFieldMappingCreator(entityName));
             return initializer.forProperties(parameterizedType, rawClass);
         }
 
