@@ -66,24 +66,7 @@ public class ToModelMapperCreator {
             return byBuilder(type, creator);
         }
 
-        if (hasAllArgumentsConstructor(extractClass(type))) {
-            return byConstructor(type, creator);
-        }
-
-        if (hasNoArgumentsConstructor(extractClass(type))) {
-            return bySetter(type, creator);
-        }
-
         throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
-    }
-
-
-    private static JCLambda bySetter(Type type, ToModelMapperCreator creator) {
-        throw new NotImplementedException("TODO:");
-    }
-
-    private static JCLambda byConstructor(Type type, ToModelMapperCreator creator) {
-        throw new NotImplementedException("TODO:");
     }
 
     private static JCLambda byBuilder(Type type, ToModelMapperCreator creator) {

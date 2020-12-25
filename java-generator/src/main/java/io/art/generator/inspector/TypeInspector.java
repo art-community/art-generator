@@ -5,7 +5,6 @@ import io.art.core.lazy.*;
 import io.art.generator.exception.*;
 import io.art.value.constants.ValueConstants.ValueType.*;
 import lombok.experimental.*;
-import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
@@ -23,7 +22,6 @@ import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.STRI
 import static java.lang.reflect.Modifier.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
-import static java.util.stream.Collectors.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
 import java.time.*;
@@ -34,13 +32,16 @@ public class TypeInspector {
     public ImmutableArray<Field> getProperties(Class<?> type) {
         ImmutableArray.Builder<Field> fields = immutableArrayBuilder();
         try {
-            for (Field field : type.getDeclaredFields()) {
+            Method[] declaredMethods = type.getDeclaredMethods();
+            Field[] declaredFields = type.getDeclaredFields();
+            for (Field field : declaredFields) {
                 Type fieldType = field.getGenericType();
-                String getterName = isBoolean(fieldType)
-                        ? IS_NAME + capitalize(field.getName())
-                        : GET_NAME + capitalize(field.getName());
-                boolean hasGetter = stream(type.getDeclaredMethods()).anyMatch(method -> method.getName().equals(getterName));
-                if (hasGetter) fields.add(field);
+                String getterName = isBoolean(fieldType) ? IS_NAME + capitalize(field.getName()) : GET_NAME + capitalize(field.getName());
+                String setterName = SET_NAME + capitalize(field.getName());
+                boolean hasGetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(getterName));
+                boolean hasSetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(setterName));
+                boolean hasConstructorArgument = hasConstructorArgument(type, field.getName());
+                if (hasGetter || hasSetter || hasConstructorArgument) fields.add(field);
             }
             return fields.build();
         } catch (Throwable throwable) {
@@ -176,20 +177,32 @@ public class TypeInspector {
                 .count() == 1;
     }
 
-    public boolean hasAllArgumentsConstructor(Class<?> type) {
-        List<Type> fieldTypes = stream(type.getDeclaredFields())
-                .map(Field::getGenericType)
-                .collect(toList());
-        return stream(type.getConstructors())
-                .filter(constructor -> isPublic(constructor.getModifiers()))
-                .filter(constructor -> parameterTypesEqual(constructor.getParameters(), fieldTypes))
-                .anyMatch(constructor -> constructor.getParameterCount() == 0);
-    }
-
     public boolean hasNoArgumentsConstructor(Class<?> type) {
         return stream(type.getConstructors())
                 .filter(constructor -> isPublic(constructor.getModifiers()))
                 .anyMatch(constructor -> constructor.getParameterCount() == 0);
+    }
+
+    public boolean hasConstructorArgument(Class<?> type, String argumentName) {
+        return stream(type.getConstructors())
+                .filter(constructor -> isPublic(constructor.getModifiers()))
+                .flatMap(constructor -> stream(constructor.getParameters()))
+                .anyMatch(parameter -> argumentName.equals(parameter.getName()));
+    }
+
+    public boolean hasConstructorArguments(Class<?> type, List<String> argumentNames) {
+        for (Constructor<?> constructor : type.getConstructors()) {
+            if (!isPublic(constructor.getModifiers())) continue;
+            Parameter[] parameters = constructor.getParameters();
+            if (argumentNames.size() != parameters.length) return false;
+            for (int i = 0; i < parameters.length; i++) {
+                Parameter parameter = parameters[i];
+                if (!parameter.getName().equals(argumentNames.get(i))) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 
@@ -273,17 +286,5 @@ public class TypeInspector {
             if (typeVariable.equals(parameter)) return index;
         }
         throw new GenerationException(format(TYPE_VARIABLE_WAS_NOT_FOUND, typeVariable));
-    }
-
-    public boolean parameterTypesEqual(Parameter[] current, List<Type> types) {
-        if (current.length != types.size()) {
-            return false;
-        }
-        for (int index = 0; index < current.length; index++) {
-            if (!orElse(current[index].getParameterizedType(), current[index].getType()).equals(types.get(index))) {
-                return false;
-            }
-        }
-        return true;
     }
 }
