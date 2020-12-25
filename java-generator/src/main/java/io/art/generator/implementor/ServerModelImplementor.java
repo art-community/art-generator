@@ -14,6 +14,7 @@ import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.collection.ImmutableSet.*;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
+import static io.art.generator.caller.MethodCaller.method;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.ModelMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
@@ -68,7 +69,7 @@ public class ServerModelImplementor {
     private JCMethodInvocation executeRegisterMethod(NewMethod servicesMethod, ServiceModel<?> serviceModel) {
         JCMethodInvocation specificationBuilder = executeServiceSpecificationBuilder(servicesMethod, serviceModel.getServiceClass());
         List<JCExpression> arguments = List.of(literal(serviceModel.getServiceClass().getSimpleName()), specificationBuilder);
-        return applyMethod(REGISTRY_NAME, REGISTER_NAME, arguments);
+        return method(REGISTRY_NAME, REGISTER_NAME).addArguments(arguments).apply();
     }
 
     private JCMethodInvocation executeServiceSpecificationBuilder(NewMethod servicesMethod, Class<?> serviceClass) {
@@ -139,11 +140,11 @@ public class ServerModelImplementor {
         JCLiteral serviceName = literal(serviceClass.getSimpleName());
         JCLiteral methodName = literal(serviceMethod.getName());
         List<JCExpression> arguments = List.of(reference, serviceName, methodName);
-        return applyClassMethod(SERVICE_METHOD_IMPLEMENTATION_TYPE, name, arguments);
+        return method(SERVICE_METHOD_IMPLEMENTATION_TYPE, name).addArguments(arguments).apply();
     }
 
     private JCMethodInvocation decorateMethodBuilder(JCMethodInvocation builder, Class<?> serviceClass, Method serviceMethod) {
         List<JCExpression> arguments = List.of(literal(serviceClass.getSimpleName()), literal(serviceMethod.getName()), builder);
-        return applyMethod(SERVER_MODEL_NAME, IMPLEMENT_NAME, arguments);
+        return method(SERVER_MODEL_NAME, IMPLEMENT_NAME).addArguments(arguments).apply();
     }
 }

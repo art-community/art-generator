@@ -6,11 +6,9 @@ import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.tools.javac.code.TypeTag.*;
-import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.TypeModel.*;
-import static java.util.stream.Collectors.*;
 
 @UtilityClass
 public class JavacService {
@@ -47,51 +45,6 @@ public class JavacService {
 
     public JCReturn returnMethodCall(JCExpression method) {
         return maker().Return(method);
-    }
-
-
-    public JCMethodInvocation applyClassMethod(TypeModel classType, String method) {
-        return applyClassMethod(classType, method, List.nil());
-    }
-
-    public JCMethodInvocation applyClassMethod(TypeModel classType, String method, List<JCExpression> arguments) {
-        return applyClassMethod(classType, List.nil(), method, arguments);
-    }
-
-    public JCMethodInvocation applyClassMethod(TypeModel classType, List<TypeModel> methodTypeParameters, String method, List<JCExpression> arguments) {
-        if (isNotEmpty(classType.getParameters())) {
-            return maker().Apply(classType.generateParameters(), select(classType, method), arguments);
-        }
-        ListBuffer<JCExpression> parameters = new ListBuffer<>();
-        parameters.addAll(methodTypeParameters.stream().map(TypeModel::generateFullType).collect(toList()));
-        return maker().Apply(parameters.toList(), select(classType, method), arguments);
-    }
-
-
-    public JCMethodInvocation applyMethod(String method) {
-        return maker().Apply(List.nil(), ident(method), List.nil());
-    }
-
-    public JCMethodInvocation applyMethod(String method, List<JCExpression> arguments) {
-        return maker().Apply(List.nil(), ident(method), arguments);
-    }
-
-
-    public JCMethodInvocation applyMethod(String owner, String method) {
-        return maker().Apply(List.nil(), select(owner, method), List.nil());
-    }
-
-    public JCMethodInvocation applyMethod(String owner, String method, List<JCExpression> arguments) {
-        return maker().Apply(List.nil(), select(owner, method), arguments);
-    }
-
-
-    public JCMethodInvocation applyMethod(JCExpression owner, String method) {
-        return maker().Apply(List.nil(), select(owner, method), List.nil());
-    }
-
-    public JCMethodInvocation applyMethod(JCExpression owner, String method, List<JCExpression> arguments) {
-        return maker().Apply(List.nil(), select(owner, method), arguments);
     }
 
 

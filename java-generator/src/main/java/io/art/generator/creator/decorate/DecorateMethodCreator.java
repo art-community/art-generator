@@ -5,6 +5,7 @@ import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
+import static io.art.generator.caller.MethodCaller.method;
 import static io.art.generator.constants.GeneratorConstants.ModelMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
@@ -25,29 +26,29 @@ public class DecorateMethodCreator {
                 .statement(() -> newVariable()
                         .name(MODULE_MODEL_NAME)
                         .type(MODULE_MODEL_TYPE)
-                        .initializer(() -> applyMethod(MODELER_NAME, APPLY_NAME)).generate())
+                        .initializer(() -> method(MODELER_NAME, APPLY_NAME).apply()).generate())
                 .statement(() -> newVariable()
                         .name(SERVER_MODEL_NAME)
                         .type(SERVER_MODEL_TYPE)
-                        .initializer(() -> applyMethod(MODULE_MODEL_NAME, GET_SERVER_MODEL)).generate())
+                        .initializer(() -> method(MODULE_MODEL_NAME, GET_SERVER_MODEL).apply()).generate())
                 .statement(() -> returnMethodCall(customizerMethod()));
     }
 
     private JCMethodInvocation customizerMethod() {
-        return applyMethod(MODULE_MODEL_NAME, CUSTOMIZE_NAME, List.of(customizerLambda()));
+        return method(MODULE_MODEL_NAME, CUSTOMIZE_NAME).addArguments(List.of(customizerLambda())).apply();
     }
 
     private JCLambda customizerLambda() {
         return newLambda()
                 .parameter(newParameter(MODULE_CUSTOMIZER_TYPE, CUSTOMIZER_NAME))
-                .expression(() -> applyMethod(CUSTOMIZER_NAME, SERVER_NAME, List.of(serverLambda())))
+                .expression(() -> method(CUSTOMIZER_NAME, SERVER_NAME).addArguments(List.of(serverLambda())).apply())
                 .generate();
     }
 
     private JCLambda serverLambda() {
         return newLambda()
                 .parameter(newParameter(SERVER_CUSTOMIZER_TYPE, SERVER_NAME))
-                .expression(() -> applyMethod(SERVER_NAME, REGISTRY_NAME, List.of(applyMethod(SERVICES_NAME, List.of(ident(SERVER_MODEL_NAME))))))
+                .expression(() -> method(SERVER_NAME, REGISTRY_NAME).addArguments(List.of(method(SERVICES_NAME).addArguments(List.of(ident(SERVER_MODEL_NAME))).apply())).apply())
                 .generate();
     }
 }

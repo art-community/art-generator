@@ -2,11 +2,11 @@ package io.art.generator.model;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
+import io.art.generator.caller.*;
 import lombok.*;
 import lombok.experimental.*;
 import static io.art.core.factory.ListFactory.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
-import static io.art.generator.service.JavacService.*;
 import static java.util.function.UnaryOperator.*;
 import java.util.function.*;
 
@@ -32,11 +32,11 @@ public class NewBuilder {
     }
 
     public JCMethodInvocation generate(UnaryOperator<JCMethodInvocation> decorator) {
-        JCMethodInvocation invocation = applyClassMethod(type, BUILDER_METHOD_NAME);
+        JCMethodInvocation invocation = MethodCaller.method(type, BUILDER_METHOD_NAME).apply();
         for (NamedMethodCall call : methods) {
-            invocation = applyMethod(invocation, call.name, call.expressions);
+            invocation = MethodCaller.method(invocation, call.name).addArguments(call.expressions).apply();
         }
-        return applyMethod(decorator.apply(invocation), BUILD_METHOD_NAME);
+        return MethodCaller.method(decorator.apply(invocation), BUILD_METHOD_NAME).apply();
     }
 
     public static NewBuilder newBuilder(TypeModel type) {

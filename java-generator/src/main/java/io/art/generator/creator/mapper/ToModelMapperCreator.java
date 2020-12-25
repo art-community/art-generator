@@ -9,6 +9,7 @@ import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.value.constants.ValueConstants.ValueType.*;
 import lombok.*;
+import static io.art.generator.caller.MethodCaller.method;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
@@ -121,7 +122,7 @@ public class ToModelMapperCreator {
             }
             JCExpression parameterMapper = toModelMapper(modelClass.getComponentType());
             List<JCExpression> arguments = List.of(newReference(type(modelClass)), parameterMapper);
-            return applyClassMethod(ARRAY_MAPPING_TYPE, TO_ARRAY, arguments);
+            return method(ARRAY_MAPPING_TYPE, TO_ARRAY).addArguments(arguments).apply();
         }
         if (isPrimitiveType(modelClass)) {
             return select(PRIMITIVE_MAPPING_TYPE, selectToPrimitiveMethod(modelClass));
@@ -138,7 +139,7 @@ public class ToModelMapperCreator {
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
         if (isCollectionType(rawClass)) {
             JCExpression parameterMapper = toModelMapper(typeArguments[0]);
-            return applyClassMethod(ARRAY_MAPPING_TYPE, selectToCollectionMethod(rawClass), List.of(parameterMapper));
+            return method(ARRAY_MAPPING_TYPE, selectToCollectionMethod(rawClass)).addArguments(List.of(parameterMapper)).apply();
         }
         if (Map.class.isAssignableFrom(rawClass)) {
             if (isComplexType(typeArguments[0])) {
@@ -148,7 +149,7 @@ public class ToModelMapperCreator {
             JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
             JCExpression valueMapper = toModelMapper(typeArguments[1]);
             List<JCExpression> arguments = List.of(keyToModelMapper, keyFromModelMapper, valueMapper);
-            return applyClassMethod(ENTITY_MAPPING_TYPE, TO_MAP, arguments);
+            return method(ENTITY_MAPPING_TYPE, TO_MAP).addArguments(arguments).apply();
         }
 
         return forProperties(parameterizedType, rawClass);
@@ -158,31 +159,31 @@ public class ToModelMapperCreator {
         Type genericComponentType = genericArrayType.getGenericComponentType();
         List<JCExpression> arguments = List.of(newReference(type(genericArrayType)), toModelMapper(genericComponentType));
         List<TypeModel> typeParameters = List.of(type(genericComponentType));
-        return applyClassMethod(ARRAY_MAPPING_TYPE, typeParameters, TO_ARRAY, arguments);
+        return method(ARRAY_MAPPING_TYPE, TO_ARRAY).addTypeParameters(typeParameters).addArguments(arguments).apply();
     }
 
 
     private JCMethodInvocation forProperties(Class<?> modelClass) {
-        JCMethodInvocation builderInvocation = applyClassMethod(type(modelClass), BUILDER_METHOD_NAME);
+        JCMethodInvocation builderInvocation = method(type(modelClass), BUILDER_METHOD_NAME).apply();
         for (Field field : getProperties(modelClass)) {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
             JCMethodInvocation fieldMappers = forField(fieldName, fieldType);
-            builderInvocation = applyMethod(builderInvocation, fieldName, List.of(fieldMappers));
+            builderInvocation = method(builderInvocation, fieldName).addArguments(List.of(fieldMappers)).apply();
         }
-        return applyMethod(builderInvocation, BUILD_METHOD_NAME);
+        return method(builderInvocation, BUILD_METHOD_NAME).apply();
     }
 
     private JCMethodInvocation forProperties(ParameterizedType parameterizedType, Class<?> rawClass) {
-        JCMethodInvocation builderInvocation = applyClassMethod(type(parameterizedType), BUILDER_METHOD_NAME);
+        JCMethodInvocation builderInvocation = method(type(parameterizedType), BUILDER_METHOD_NAME).apply();
         for (Field field : getProperties(rawClass)) {
             String fieldName = field.getName();
             Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
             JCMethodInvocation fieldMapping = forField(fieldName, fieldType);
-            builderInvocation = applyMethod(builderInvocation, fieldName, List.of(fieldMapping));
+            builderInvocation = method(builderInvocation, fieldName).addArguments(List.of(fieldMapping)).apply();
         }
 
-        return applyMethod(builderInvocation, BUILD_METHOD_NAME);
+        return method(builderInvocation, BUILD_METHOD_NAME).apply();
     }
 
 
@@ -197,7 +198,8 @@ public class ToModelMapperCreator {
             arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
         }
         arguments.add(toModelMapper(fieldType));
-        return applyMethod(applyMethod(valueName, MAPPING_METHOD_NAME), javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME, arguments.toList());
+        String method = javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME;
+        return method(method(valueName, MAPPING_METHOD_NAME).apply(), method).addArguments(arguments.toList()).apply();
     }
 
     private JCMethodInvocation forLazyField(String fieldName, Type fieldType, boolean javaPrimitiveType) {
@@ -208,8 +210,11 @@ public class ToModelMapperCreator {
         }
         arguments.add(toModelMapper(fieldType));
         JCLambda supplier = newLambda()
-                .expression(() -> applyMethod(applyMethod(valueName, MAPPING_METHOD_NAME), javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME, arguments.toList()))
+                .expression(() -> {
+                    String method = javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME;
+                    return method(method(valueName, MAPPING_METHOD_NAME).apply(), method).addArguments(arguments.toList()).apply();
+                })
                 .generate();
-        return applyClassMethod(type(LazyValue.class), LAZY_NAME, List.of(supplier));
+        return method(type(LazyValue.class), LAZY_NAME).addArguments(List.of(supplier)).apply();
     }
 }
