@@ -41,15 +41,11 @@ public class ToModelFieldMappingCreator {
         }
         arguments.add(toModelMapper(fieldType));
         JCLambda lambda = newLambda().expression(() -> mappingMethod(javaPrimitiveType, arguments)).generate();
-        return method(type(LazyValue.class), LAZY_NAME)
-                .addArguments(lambda)
-                .apply();
+        return method(type(LazyValue.class), LAZY_NAME).addArguments(lambda).apply();
     }
 
     JCMethodInvocation mappingMethod(boolean javaPrimitiveType, List<JCExpression> arguments) {
         String method = javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME;
-        return method(method(entityName, MAPPING_METHOD_NAME).apply(), method)
-                .addArguments(arguments)
-                .apply();
+        return method(method(entityName, MAPPING_METHOD_NAME).apply(), method).addArguments(arguments).apply();
     }
 }

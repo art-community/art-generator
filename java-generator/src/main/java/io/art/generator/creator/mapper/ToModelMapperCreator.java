@@ -64,7 +64,7 @@ public class ToModelMapperCreator {
                 .generate();
     }
 
-    JCExpression body(Type type) {
+    private JCExpression body(Type type) {
         if (type instanceof Class) {
             return body((Class<?>) type);
         }
