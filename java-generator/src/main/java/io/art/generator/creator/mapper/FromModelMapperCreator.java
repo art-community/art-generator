@@ -144,7 +144,6 @@ public class FromModelMapperCreator {
         return method(ARRAY_MAPPING_TYPE, FROM_ARRAY).addArguments(parameterMapper).apply();
     }
 
-
     private JCMethodInvocation forField(JCMethodInvocation builderInvocation, String fieldName, Type fieldType) {
         if (isLazyValue(fieldType)) {
             return forLazyField(builderInvocation, fieldName, (ParameterizedType) fieldType);
