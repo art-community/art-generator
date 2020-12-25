@@ -25,7 +25,6 @@ import java.util.*;
 public class ToModelMapperCreatorByBuilder {
     private final ToModelFieldMappingCreator fieldMappingCreator;
 
-
     JCExpression body(Type type) {
         if (type instanceof Class) {
             return body((Class<?>) type);
@@ -41,7 +40,6 @@ public class ToModelMapperCreatorByBuilder {
 
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }
-
 
     private JCExpression body(Class<?> modelClass) {
         if (byte[].class.equals(modelClass)) {
@@ -97,7 +95,6 @@ public class ToModelMapperCreatorByBuilder {
                 .addArguments(newReference(type(genericArrayType)), toModelMapper(genericComponentType))
                 .apply();
     }
-
 
     private JCMethodInvocation forProperties(Class<?> modelClass) {
         JCMethodInvocation builderInvocation = method(type(modelClass), BUILDER_METHOD_NAME).apply();

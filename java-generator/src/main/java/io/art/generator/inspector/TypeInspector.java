@@ -177,6 +177,17 @@ public class TypeInspector {
                 .count() == 1;
     }
 
+    public boolean hasAtLeastOneSetter(Class<?> type) {
+        return stream(type.getDeclaredMethods())
+                .filter(method -> method.getName().startsWith(SET_NAME))
+                .filter(method -> isPublic(method.getModifiers()))
+                .anyMatch(method -> method.getParameterCount() == 1);
+    }
+
+    public boolean hasAtLeastOneFieldConstructorArgument(Class<?> type) {
+        return getProperties(type).stream().anyMatch(field -> hasConstructorArgument(type, field.getName()));
+    }
+
     public boolean hasNoArgumentsConstructor(Class<?> type) {
         return stream(type.getConstructors())
                 .filter(constructor -> isPublic(constructor.getModifiers()))

@@ -22,11 +22,17 @@ public class ToModelMapperCreator {
     }
 
     public static JCExpression createToModelMapper(Type type) {
-        boolean hasBuilder = hasBuilder(extractClass(type));
         String entityName = sequenceName(ENTITY_NAME);
-        if (hasBuilder) {
+        Class<?> rawClass = extractClass(type);
+
+        if (hasBuilder(rawClass)) {
             return new ToModelMapperCreatorByBuilder(new ToModelFieldMappingCreator(entityName)).body(type);
         }
-        return new ToModelMapperCreatorByInitializer(new ToModelFieldMappingCreator(entityName)).body(type);
+
+        if (hasAtLeastOneFieldConstructorArgument(rawClass) || hasAtLeastOneSetter(rawClass)) {
+            return new ToModelMapperCreatorByInitializer(new ToModelFieldMappingCreator(entityName)).body(type);
+        }
+
+        throw new IllegalStateException();
     }
 }

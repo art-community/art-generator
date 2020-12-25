@@ -41,11 +41,11 @@ public class ToModelMapperCreatorByInitializer {
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }
 
-
     private JCExpression body(Class<?> modelClass) {
         if (byte[].class.equals(modelClass)) {
             return select(BINARY_MAPPING_TYPE, TO_BINARY);
         }
+
         if (modelClass.isArray()) {
             if (isJavaPrimitiveType(modelClass.getComponentType())) {
                 return select(ARRAY_MAPPING_TYPE, selectToArrayJavaPrimitiveMethod(modelClass));
@@ -55,9 +55,11 @@ public class ToModelMapperCreatorByInitializer {
                     .addArguments(newReference(type(modelClass)), parameterMapper)
                     .apply();
         }
+
         if (isPrimitiveType(modelClass)) {
             return select(PRIMITIVE_MAPPING_TYPE, selectToPrimitiveMethod(modelClass));
         }
+
         return forProperties(modelClass);
     }
 
@@ -68,12 +70,14 @@ public class ToModelMapperCreatorByInitializer {
         }
         Class<?> rawClass = (Class<?>) rawType;
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
+
         if (isCollectionType(rawClass)) {
             JCExpression parameterMapper = toModelMapper(typeArguments[0]);
             return method(ARRAY_MAPPING_TYPE, selectToCollectionMethod(rawClass))
                     .addArguments(parameterMapper)
                     .apply();
         }
+
         if (Map.class.isAssignableFrom(rawClass)) {
             if (isComplexType(typeArguments[0])) {
                 throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
