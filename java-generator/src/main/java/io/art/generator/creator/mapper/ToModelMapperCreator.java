@@ -1,12 +1,12 @@
 package io.art.generator.creator.mapper;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.*;
 import io.art.core.exception.*;
 import io.art.core.lazy.*;
 import io.art.generator.exception.*;
 import io.art.value.constants.ValueConstants.ValueType.*;
 import lombok.*;
+import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
@@ -191,7 +191,7 @@ public class ToModelMapperCreator {
         if (isLazyValue(fieldType)) {
             return forLazyField(fieldName, ((ParameterizedType) fieldType).getActualTypeArguments()[0], javaPrimitiveType);
         }
-        ListBuffer<JCExpression> arguments = new ListBuffer<>();
+        List<JCExpression> arguments = dynamicArray();
         arguments.add(literal(fieldName));
         if (javaPrimitiveType) {
             arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
@@ -201,19 +201,23 @@ public class ToModelMapperCreator {
     }
 
     private JCMethodInvocation forLazyField(String fieldName, Type fieldType, boolean javaPrimitiveType) {
-        ListBuffer<JCExpression> arguments = new ListBuffer<>();
+        List<JCExpression> arguments = dynamicArray();
         arguments.add(literal(fieldName));
         if (javaPrimitiveType) {
             arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
         }
         arguments.add(toModelMapper(fieldType));
-        JCLambda supplier = newLambda().expression(() -> mappingMethod(javaPrimitiveType, arguments)).generate();
-        return method(type(LazyValue.class), LAZY_NAME).addArguments(supplier).apply();
+        JCLambda lambda = newLambda().expression(() -> mappingMethod(javaPrimitiveType, arguments)).generate();
+        return method(type(LazyValue.class), LAZY_NAME)
+                .addArguments(lambda)
+                .apply();
     }
 
 
-    private JCMethodInvocation mappingMethod(boolean javaPrimitiveType, ListBuffer<JCExpression> arguments) {
+    private JCMethodInvocation mappingMethod(boolean javaPrimitiveType, List<JCExpression> arguments) {
         String method = javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME;
-        return method(method(valueName, MAPPING_METHOD_NAME).apply(), method).addArguments(arguments.toList()).apply();
+        return method(method(valueName, MAPPING_METHOD_NAME).apply(), method)
+                .addArguments(arguments)
+                .apply();
     }
 }

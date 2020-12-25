@@ -1,10 +1,10 @@
 package io.art.generator.creator.mapper;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.*;
 import io.art.generator.exception.*;
 import lombok.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
@@ -115,7 +115,9 @@ public class FromModelMapperCreator {
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
         if (isCollectionType(rawClass)) {
             JCExpression parameterMapper = fromModelMapper(typeArguments[0]);
-            return method(ARRAY_MAPPING_TYPE, selectFromCollectionMethod(rawClass)).addArguments(parameterMapper).apply();
+            return method(ARRAY_MAPPING_TYPE, selectFromCollectionMethod(rawClass))
+                    .addArguments(parameterMapper)
+                    .apply();
         }
         if (Map.class.isAssignableFrom(rawClass)) {
             if (isComplexType(typeArguments[0])) {
@@ -147,20 +149,20 @@ public class FromModelMapperCreator {
         if (isLazyValue(fieldType)) {
             return forLazyField(builderInvocation, fieldName, (ParameterizedType) fieldType);
         }
-        ListBuffer<JCExpression> arguments = new ListBuffer<>();
+        List<JCExpression> arguments = dynamicArray();
         arguments.add(literal(fieldName));
         String method = (isBoolean(fieldType) ? IS_NAME : GET_NAME) + capitalize(fieldName);
         JCMethodInvocation getter = method(modelName, method).apply();
         arguments.add(newLambda().expression(() -> getter).generate());
         arguments.add(fromModelMapper(fieldType));
-        return method(builderInvocation, LAZY_PUT_NAME).addArguments(arguments.toList()).apply();
+        return method(builderInvocation, LAZY_PUT_NAME).addArguments(arguments).apply();
     }
 
     private JCMethodInvocation forLazyField(JCMethodInvocation builderInvocation, String fieldName, ParameterizedType fieldType) {
-        ListBuffer<JCExpression> arguments = new ListBuffer<>();
+        List<JCExpression> arguments = dynamicArray();
         arguments.add(literal(fieldName));
         arguments.add(method(modelName, GET_NAME + capitalize(fieldName)).apply());
         arguments.add(fromModelMapper(fieldType.getActualTypeArguments()[0]));
-        return method(builderInvocation, LAZY_PUT_NAME).addArguments(arguments.toList()).apply();
+        return method(builderInvocation, LAZY_PUT_NAME).addArguments(arguments).apply();
     }
 }
