@@ -103,7 +103,7 @@ public class ToModelMapperCreator {
             return builder.forProperties(modelClass);
         }
 
-        if (hasAtLeastOneFieldConstructorArgument(modelClass) || hasAtLeastOneSetter(modelClass)) {
+        if (hasAtLeastOneFieldConstructorArgument(modelClass) || (hasNoArgumentsConstructor(modelClass) && hasAtLeastOneSetter(modelClass))) {
             return initializer.forProperties(modelClass);
         }
 
