@@ -1,13 +1,14 @@
 package io.art.generator.model;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.*;
 import io.art.generator.caller.*;
 import lombok.*;
 import lombok.experimental.*;
+import static io.art.core.factory.ArrayFactory.*;
 import static io.art.core.factory.ListFactory.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static java.util.function.UnaryOperator.*;
+import java.util.*;
 import java.util.function.*;
 
 @Getter
@@ -16,14 +17,19 @@ import java.util.function.*;
 @RequiredArgsConstructor
 public class NewBuilder {
     private final TypeModel type;
-    private java.util.List<NamedMethodCall> methods = linkedList();
+    private List<NamedMethodCall> methods = linkedList();
 
     public NewBuilder method(String name, JCExpression argument) {
-        return method(name, List.of(argument));
+        return method(name, fixedArrayOf(argument));
     }
 
-    public NewBuilder method(String name, List<JCExpression> arguments) {
-        methods.add(new NamedMethodCall(name, arguments));
+    public NewBuilder method(String name, Collection<JCExpression> arguments) {
+        methods.add(new NamedMethodCall(name, fixedArrayOf(arguments)));
+        return this;
+    }
+
+    public NewBuilder method(String name, JCExpression... arguments) {
+        methods.add(new NamedMethodCall(name, fixedArrayOf(arguments)));
         return this;
     }
 
@@ -46,6 +52,6 @@ public class NewBuilder {
     @AllArgsConstructor
     private static class NamedMethodCall {
         private final String name;
-        private final List<JCExpression> expressions;
+        private final java.util.List<JCExpression> expressions;
     }
 }

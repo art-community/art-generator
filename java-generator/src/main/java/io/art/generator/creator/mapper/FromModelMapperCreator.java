@@ -1,12 +1,11 @@
 package io.art.generator.creator.mapper;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.generator.exception.*;
 import lombok.*;
 import static io.art.core.extensions.StringExtensions.*;
-import static io.art.generator.caller.MethodCaller.method;
+import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
@@ -125,8 +124,9 @@ public class FromModelMapperCreator {
             JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
             JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
             JCExpression valueMapper = fromModelMapper(typeArguments[1]);
-            List<JCExpression> arguments = List.of(keyToModelMapper, keyFromModelMapper, valueMapper);
-            return method(ENTITY_MAPPING_TYPE, FROM_MAP).addArguments(arguments).apply();
+            return method(ENTITY_MAPPING_TYPE, FROM_MAP)
+                    .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
+                    .apply();
         }
         JCMethodInvocation builderInvocation = method(ENTITY_TYPE, ENTITY_BUILDER_NAME).apply();
         for (Field field : getProperties(rawClass)) {

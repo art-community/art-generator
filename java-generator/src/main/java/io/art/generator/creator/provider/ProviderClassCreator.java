@@ -1,11 +1,10 @@
 package io.art.generator.creator.provider;
 
-import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
-import static io.art.generator.caller.MethodCaller.method;
+import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;

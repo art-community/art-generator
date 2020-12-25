@@ -1,12 +1,10 @@
 package io.art.generator.creator.mapper;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.core.exception.*;
 import io.art.core.lazy.*;
 import io.art.generator.exception.*;
-import io.art.generator.model.*;
 import io.art.value.constants.ValueConstants.ValueType.*;
 import lombok.*;
 import static io.art.generator.caller.MethodCaller.*;
@@ -121,8 +119,7 @@ public class ToModelMapperCreator {
                 return select(ARRAY_MAPPING_TYPE, selectToArrayJavaPrimitiveMethod(modelClass));
             }
             JCExpression parameterMapper = toModelMapper(modelClass.getComponentType());
-            List<JCExpression> arguments = List.of(newReference(type(modelClass)), parameterMapper);
-            return method(ARRAY_MAPPING_TYPE, TO_ARRAY).addArguments(arguments).apply();
+            return method(ARRAY_MAPPING_TYPE, TO_ARRAY).addArguments(newReference(type(modelClass)), parameterMapper).apply();
         }
         if (isPrimitiveType(modelClass)) {
             return select(PRIMITIVE_MAPPING_TYPE, selectToPrimitiveMethod(modelClass));
@@ -148,8 +145,9 @@ public class ToModelMapperCreator {
             JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
             JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
             JCExpression valueMapper = toModelMapper(typeArguments[1]);
-            List<JCExpression> arguments = List.of(keyToModelMapper, keyFromModelMapper, valueMapper);
-            return method(ENTITY_MAPPING_TYPE, TO_MAP).addArguments(arguments).apply();
+            return method(ENTITY_MAPPING_TYPE, TO_MAP)
+                    .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
+                    .apply();
         }
 
         return forProperties(parameterizedType, rawClass);
@@ -157,9 +155,10 @@ public class ToModelMapperCreator {
 
     private JCExpression body(GenericArrayType genericArrayType) {
         Type genericComponentType = genericArrayType.getGenericComponentType();
-        List<JCExpression> arguments = List.of(newReference(type(genericArrayType)), toModelMapper(genericComponentType));
-        List<TypeModel> typeParameters = List.of(type(genericComponentType));
-        return method(ARRAY_MAPPING_TYPE, TO_ARRAY).addTypeParameters(typeParameters).addArguments(arguments).apply();
+        return method(ARRAY_MAPPING_TYPE, TO_ARRAY)
+                .addTypeParameters(type(genericComponentType))
+                .addArguments(newReference(type(genericArrayType)), toModelMapper(genericComponentType))
+                .apply();
     }
 
 

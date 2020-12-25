@@ -1,7 +1,6 @@
 package io.art.generator.implementor;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.generator.collector.*;
@@ -14,7 +13,7 @@ import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.collection.ImmutableSet.*;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
-import static io.art.generator.caller.MethodCaller.method;
+import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.ModelMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
@@ -68,16 +67,16 @@ public class ServerModelImplementor {
 
     private JCMethodInvocation executeRegisterMethod(NewMethod servicesMethod, ServiceModel<?> serviceModel) {
         JCMethodInvocation specificationBuilder = executeServiceSpecificationBuilder(servicesMethod, serviceModel.getServiceClass());
-        List<JCExpression> arguments = List.of(literal(serviceModel.getServiceClass().getSimpleName()), specificationBuilder);
-        return method(REGISTRY_NAME, REGISTER_NAME).addArguments(arguments).apply();
+        return method(REGISTRY_NAME, REGISTER_NAME)
+                .addArguments(literal(serviceModel.getServiceClass().getSimpleName()), specificationBuilder)
+                .apply();
     }
 
     private JCMethodInvocation executeServiceSpecificationBuilder(NewMethod servicesMethod, Class<?> serviceClass) {
         NewBuilder builder = newBuilder(SERVICE_SPECIFICATION_TYPE).method(SERVICE_ID, literal(serviceClass.getSimpleName()));
         for (Method method : getServiceMethods(serviceClass)) {
             JCMethodInvocation methodSpecificationBuilder = executeMethodSpecificationBuilder(servicesMethod, serviceClass, method);
-            List<JCExpression> arguments = List.of(literal(method.getName()), methodSpecificationBuilder);
-            builder.method(METHOD, arguments);
+            builder.method(METHOD, literal(method.getName()), methodSpecificationBuilder);
         }
         return builder.generate();
     }
@@ -139,12 +138,14 @@ public class ServerModelImplementor {
         JCMemberReference reference = invokeReference(type(serviceClass), (serviceMethod.getName()));
         JCLiteral serviceName = literal(serviceClass.getSimpleName());
         JCLiteral methodName = literal(serviceMethod.getName());
-        List<JCExpression> arguments = List.of(reference, serviceName, methodName);
-        return method(SERVICE_METHOD_IMPLEMENTATION_TYPE, name).addArguments(arguments).apply();
+        return method(SERVICE_METHOD_IMPLEMENTATION_TYPE, name)
+                .addArguments(reference, serviceName, methodName)
+                .apply();
     }
 
     private JCMethodInvocation decorateMethodBuilder(JCMethodInvocation builder, Class<?> serviceClass, Method serviceMethod) {
-        List<JCExpression> arguments = List.of(literal(serviceClass.getSimpleName()), literal(serviceMethod.getName()), builder);
-        return method(SERVER_MODEL_NAME, IMPLEMENT_NAME).addArguments(arguments).apply();
+        return method(SERVER_MODEL_NAME, IMPLEMENT_NAME)
+                .addArguments(literal(serviceClass.getSimpleName()), literal(serviceMethod.getName()), builder)
+                .apply();
     }
 }
