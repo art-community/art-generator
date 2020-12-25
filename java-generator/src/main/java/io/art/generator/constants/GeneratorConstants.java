@@ -99,6 +99,7 @@ public interface GeneratorConstants {
         String REGISTER_NAME = "register";
         String IS_NAME = "is";
         String GET_NAME = "get";
+        String SET_NAME = "set";
     }
 
     interface Annotations {
