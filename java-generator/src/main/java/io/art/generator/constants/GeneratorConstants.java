@@ -127,7 +127,7 @@ public interface GeneratorConstants {
         String MAPPING_METHOD_NAME = "mapping";
         String MAP_OR_DEFAULT_NAME = "mapOrDefault";
         String MAPPING_INTERFACE_NAME = "Mapping";
-        String VALUE_NAME = "value";
+        String ENTITY_NAME = "entity";
         String ENTITY_BUILDER_NAME = "entityBuilder";
         String LAZY_PUT_NAME = "lazyPut";
         String MAP_NAME = "map";

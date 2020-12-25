@@ -7,9 +7,10 @@ import io.art.core.factory.*;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.util.List.*;
+import static io.art.core.factory.ArrayFactory.*;
+import static io.art.generator.context.GeneratorContext.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
-import static io.art.generator.context.GeneratorContext.*;
 import java.util.List;
 import java.util.*;
 import java.util.function.*;
@@ -32,9 +33,19 @@ public class NewLambda {
         return this;
     }
 
-    public NewLambda statement(Supplier<JCStatement> statement) {
+    public NewLambda addStatement(Supplier<JCStatement> statement) {
         statements.add(statement);
         return this;
+    }
+
+    public NewLambda addStatements(Collection<Supplier<JCStatement>> statements) {
+        this.statements.addAll(statements);
+        return this;
+    }
+
+    @SafeVarargs
+    public final NewLambda addStatements(Supplier<JCStatement>... statements) {
+        return addStatements(fixedArrayOf(statements));
     }
 
     public JCLambda generate() {
