@@ -87,9 +87,4 @@ public class JavacService {
     public JCMemberReference newReference(TypeModel type) {
         return maker().Reference(NEW, null, type.generateBaseType(), null);
     }
-
-
-    public JCExpressionStatement executeMethod(JCExpression method) {
-        return maker().Exec(method);
-    }
 }

@@ -93,7 +93,7 @@ public class FromModelMapperCreator {
                 return select(ARRAY_MAPPING_TYPE, selectFromArrayJavaPrimitiveMethod(modelClass));
             }
             JCExpression parameterMapper = fromModelMapper(modelClass.getComponentType());
-            return method(ARRAY_MAPPING_TYPE, FROM_ARRAY).addArguments(List.of(parameterMapper)).apply();
+            return method(ARRAY_MAPPING_TYPE, FROM_ARRAY).addArguments(parameterMapper).apply();
         }
         if (isPrimitiveType(modelClass)) {
             return select(PRIMITIVE_MAPPING_TYPE, selectFromPrimitiveMethod(modelClass));
@@ -116,7 +116,7 @@ public class FromModelMapperCreator {
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
         if (isCollectionType(rawClass)) {
             JCExpression parameterMapper = fromModelMapper(typeArguments[0]);
-            return method(ARRAY_MAPPING_TYPE, selectFromCollectionMethod(rawClass)).addArguments(List.of(parameterMapper)).apply();
+            return method(ARRAY_MAPPING_TYPE, selectFromCollectionMethod(rawClass)).addArguments(parameterMapper).apply();
         }
         if (Map.class.isAssignableFrom(rawClass)) {
             if (isComplexType(typeArguments[0])) {
@@ -139,7 +139,7 @@ public class FromModelMapperCreator {
 
     private JCExpression body(GenericArrayType genericArrayType) {
         JCExpression parameterMapper = fromModelMapper(genericArrayType.getGenericComponentType());
-        return method(ARRAY_MAPPING_TYPE, FROM_ARRAY).addArguments(List.of(parameterMapper)).apply();
+        return method(ARRAY_MAPPING_TYPE, FROM_ARRAY).addArguments(parameterMapper).apply();
     }
 
 

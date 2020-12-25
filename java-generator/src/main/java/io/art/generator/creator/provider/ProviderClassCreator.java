@@ -31,7 +31,7 @@ public class ProviderClassCreator {
                 .name(MODEL_STATIC_NAME)
                 .modifiers(PRIVATE | FINAL | STATIC)
                 .type(MODULE_MODEL_TYPE)
-                .initializer(() -> method(DECORATE_NAME).addArguments(List.of(method(type(mainClass().asClass()), modelMethod().getName()).apply())).apply());
+                .initializer(() -> method(DECORATE_NAME).addArguments(method(type(mainClass().asClass()), modelMethod().getName()).apply()).apply());
 
         NewMethod modelMethod = newMethod()
                 .name(PROVIDE_NAME)

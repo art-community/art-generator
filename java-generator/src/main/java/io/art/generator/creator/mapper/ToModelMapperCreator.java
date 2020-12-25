@@ -9,7 +9,7 @@ import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.value.constants.ValueConstants.ValueType.*;
 import lombok.*;
-import static io.art.generator.caller.MethodCaller.method;
+import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
@@ -139,7 +139,7 @@ public class ToModelMapperCreator {
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
         if (isCollectionType(rawClass)) {
             JCExpression parameterMapper = toModelMapper(typeArguments[0]);
-            return method(ARRAY_MAPPING_TYPE, selectToCollectionMethod(rawClass)).addArguments(List.of(parameterMapper)).apply();
+            return method(ARRAY_MAPPING_TYPE, selectToCollectionMethod(rawClass)).addArguments(parameterMapper).apply();
         }
         if (Map.class.isAssignableFrom(rawClass)) {
             if (isComplexType(typeArguments[0])) {
@@ -169,7 +169,7 @@ public class ToModelMapperCreator {
             String fieldName = field.getName();
             Type fieldType = field.getGenericType();
             JCMethodInvocation fieldMappers = forField(fieldName, fieldType);
-            builderInvocation = method(builderInvocation, fieldName).addArguments(List.of(fieldMappers)).apply();
+            builderInvocation = method(builderInvocation, fieldName).addArguments(fieldMappers).apply();
         }
         return method(builderInvocation, BUILD_METHOD_NAME).apply();
     }
@@ -180,7 +180,7 @@ public class ToModelMapperCreator {
             String fieldName = field.getName();
             Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
             JCMethodInvocation fieldMapping = forField(fieldName, fieldType);
-            builderInvocation = method(builderInvocation, fieldName).addArguments(List.of(fieldMapping)).apply();
+            builderInvocation = method(builderInvocation, fieldName).addArguments(fieldMapping).apply();
         }
 
         return method(builderInvocation, BUILD_METHOD_NAME).apply();
@@ -198,8 +198,7 @@ public class ToModelMapperCreator {
             arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
         }
         arguments.add(toModelMapper(fieldType));
-        String method = javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME;
-        return method(method(valueName, MAPPING_METHOD_NAME).apply(), method).addArguments(arguments.toList()).apply();
+        return mappingMethod(javaPrimitiveType, arguments);
     }
 
     private JCMethodInvocation forLazyField(String fieldName, Type fieldType, boolean javaPrimitiveType) {
@@ -209,12 +208,13 @@ public class ToModelMapperCreator {
             arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
         }
         arguments.add(toModelMapper(fieldType));
-        JCLambda supplier = newLambda()
-                .expression(() -> {
-                    String method = javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME;
-                    return method(method(valueName, MAPPING_METHOD_NAME).apply(), method).addArguments(arguments.toList()).apply();
-                })
-                .generate();
-        return method(type(LazyValue.class), LAZY_NAME).addArguments(List.of(supplier)).apply();
+        JCLambda supplier = newLambda().expression(() -> mappingMethod(javaPrimitiveType, arguments)).generate();
+        return method(type(LazyValue.class), LAZY_NAME).addArguments(supplier).apply();
+    }
+
+
+    private JCMethodInvocation mappingMethod(boolean javaPrimitiveType, ListBuffer<JCExpression> arguments) {
+        String method = javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME;
+        return method(method(valueName, MAPPING_METHOD_NAME).apply(), method).addArguments(arguments.toList()).apply();
     }
 }

@@ -91,4 +91,8 @@ public class MethodCaller {
         parameters.addAll(typeParameters.stream().map(TypeModel::generateFullType).collect(toList()));
         return maker().Apply(parameters.toList(), select(classType, method), arguments.toList());
     }
+
+    public JCExpressionStatement execute() {
+        return maker().Exec(apply());
+    }
 }
