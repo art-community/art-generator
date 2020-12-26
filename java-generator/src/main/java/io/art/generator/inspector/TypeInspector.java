@@ -50,6 +50,15 @@ public class TypeInspector {
         }
     }
 
+    public ImmutableArray<Field> getPropertySetters(Class<?> type) {
+        return getProperties(type)
+                .stream()
+                .filter(field -> stream(type.getDeclaredMethods())
+                        .filter(method -> method.getGenericReturnType().equals(field.getGenericType()))
+                        .anyMatch(method -> method.getName().equals(SET_NAME + capitalize(field.getName()))))
+                .collect(immutableArrayCollector());
+    }
+
 
     public boolean isBoolean(Type fieldType) {
         return fieldType == boolean.class;
@@ -189,7 +198,9 @@ public class TypeInspector {
 
     public boolean hasAtLeastOneFieldConstructorArgument(Type type) {
         Class<?> rawClass = extractClass(type);
-        return getProperties(rawClass).stream().anyMatch(field -> hasConstructorArgument(type, field.getName()));
+        return getProperties(rawClass)
+                .stream()
+                .anyMatch(field -> hasConstructorArgument(type, field.getName()));
     }
 
     public boolean hasNoArgumentsConstructor(Type type) {
@@ -207,16 +218,16 @@ public class TypeInspector {
                 .anyMatch(parameter -> argumentName.equals(parameter.getName()));
     }
 
-    public boolean hasConstructorWithArguments(Type type) {
+    public boolean hasConstructorWithAllProperties(Type type) {
         Class<?> rawClass = extractClass(type);
         List<String> argumentNames = getProperties(rawClass)
                 .stream()
                 .map(Field::getName)
                 .collect(toList());
-        return hasConstructorArguments(rawClass, argumentNames);
+        return matchConstructorArguments(rawClass, argumentNames);
     }
 
-    public boolean hasConstructorArguments(Type type, List<String> argumentNames) {
+    public boolean matchConstructorArguments(Type type, List<String> argumentNames) {
         Class<?> rawClass = extractClass(type);
         for (Constructor<?> constructor : rawClass.getConstructors()) {
             if (!isPublic(constructor.getModifiers())) continue;

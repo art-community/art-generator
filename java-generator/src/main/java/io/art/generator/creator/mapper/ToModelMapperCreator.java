@@ -57,9 +57,11 @@ public class ToModelMapperCreator {
                 return new ToModelMapperCreatorByBuilder().create(modelClass);
             }
 
-            if (hasAtLeastOneFieldConstructorArgument(type) || hasAtLeastOneSetter(type)) {
+            if (hasAtLeastOneFieldConstructorArgument(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
                 return new ToModelMapperCreatorByInitializer().create(modelClass);
             }
+
+            throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
         }
 
         if (type instanceof ParameterizedType) {
@@ -95,9 +97,11 @@ public class ToModelMapperCreator {
                 return new ToModelMapperCreatorByBuilder().create(parameterizedType);
             }
 
-            if (hasAtLeastOneFieldConstructorArgument(type) || hasAtLeastOneSetter(type)) {
+            if (hasAtLeastOneFieldConstructorArgument(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
                 return new ToModelMapperCreatorByInitializer().create(parameterizedType);
             }
+
+            throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
         }
 
         if (type instanceof GenericArrayType) {
