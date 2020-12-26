@@ -209,6 +209,18 @@ public interface GeneratorConstants {
         }
 
         ImmutableSet<Class<?>> LIBRARY_BASED_TYPES = immutableSetOf(
+                List.class,
+                Collection.class,
+                Set.class,
+                Queue.class,
+                Deque.class,
+                Map.class,
+                Flux.class,
+                Mono.class,
+                Date.class
+        );
+
+        ImmutableSet<Class<?>> LIBRARY_TYPES = immutableSetOf(
                 void.class,
                 Void.class,
                 String.class,
@@ -228,21 +240,9 @@ public interface GeneratorConstants {
                 Float.class,
                 double.class,
                 Double.class,
-                List.class,
-                Collection.class,
-                Set.class,
-                Queue.class,
-                Deque.class,
-                Map.class,
-                Flux.class,
-                Mono.class,
                 UUID.class,
                 LocalDateTime.class,
                 ZonedDateTime.class,
-                Date.class
-        );
-
-        ImmutableSet<Class<?>> LIBRARY_TYPES = immutableSetOf(
                 Object.class,
                 LazyValue.class
         );
