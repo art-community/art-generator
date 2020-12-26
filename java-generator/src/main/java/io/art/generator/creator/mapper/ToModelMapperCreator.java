@@ -55,11 +55,11 @@ public class ToModelMapperCreator {
             }
 
             if (hasBuilder(type)) {
-                return new ToModelMapperCreatorByBuilder().create(modelClass);
+                return new ToModelMapperByBuilderCreator().create(modelClass);
             }
 
             if (hasAtLeastOneFieldConstructorArgument(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
-                return new ToModelMapperCreatorByInitializer().create(modelClass);
+                return new ToModelMapperByInitializerCreator().create(modelClass);
             }
 
             throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
@@ -91,11 +91,11 @@ public class ToModelMapperCreator {
             }
 
             if (hasBuilder(type)) {
-                return new ToModelMapperCreatorByBuilder().create(parameterizedType);
+                return new ToModelMapperByBuilderCreator().create(parameterizedType);
             }
 
             if (hasAtLeastOneFieldConstructorArgument(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
-                return new ToModelMapperCreatorByInitializer().create(parameterizedType);
+                return new ToModelMapperByInitializerCreator().create(parameterizedType);
             }
 
             throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));

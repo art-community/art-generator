@@ -14,7 +14,7 @@ import static io.art.generator.service.NamingService.*;
 import java.lang.reflect.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class ToModelMapperCreatorByBuilder {
+public class ToModelMapperByBuilderCreator {
     private final String entityName = sequenceName(ENTITY_NAME);
     private final ToModelFieldMappingCreator fieldMappingCreator = new ToModelFieldMappingCreator(entityName);
 

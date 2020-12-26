@@ -15,7 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class ToModelMapperCreatorByInitializer {
+public class ToModelMapperByInitializerCreator {
     private final String entityName = sequenceName(ENTITY_NAME);
     private final ToModelFieldMappingCreator fieldMappingCreator = new ToModelFieldMappingCreator(entityName);
 
