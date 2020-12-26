@@ -136,13 +136,13 @@ public class Model {
     Collection<Collection<Map<String, Model>>[]> FCCMAModel;
     Collection<Map<String, Model>[]> FCMAModel;
 
-    GenericModel<String, GenericTypeParameterImplementation<String>> FGModel;
-    GenericModel<Long, GenericTypeParameterImplementation<Long>> FGSModel;
-    GenericModel<String, GenericTypeParameterImplementation<String>>[] FAGModel;
-    List<GenericModel<String, GenericTypeParameterImplementation<String>>> FLGModel;
-    Set<GenericModel<String, GenericTypeParameterImplementation<String>>> FSGModel;
-    Collection<GenericModel<String, GenericTypeParameterImplementation<String>>> FCGModel;
-    Map<String, GenericModel<String, GenericTypeParameterImplementation<String>>> FMGMModel;
+    GenericModel<String, GenericTypeParameterImplementation<String, Integer>> FGModel;
+    GenericModel<Long, GenericTypeParameterImplementation<Long, Integer>> FGSModel;
+    GenericModel<String, GenericTypeParameterImplementation<String, Integer>>[] FAGModel;
+    List<GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FLGModel;
+    Set<GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FSGModel;
+    Collection<GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FCGModel;
+    Map<String, GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FMGMModel;
 
     LazyValue<String> lazy;
 }
