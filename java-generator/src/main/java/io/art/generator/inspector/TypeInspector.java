@@ -50,11 +50,12 @@ public class TypeInspector {
         }
     }
 
-    public ImmutableArray<Field> getPropertySetters(Class<?> type) {
+    public ImmutableArray<Field> getMutableProperties(Class<?> type) {
         return getProperties(type)
                 .stream()
                 .filter(field -> stream(type.getDeclaredMethods())
-                        .filter(method -> method.getGenericReturnType().equals(field.getGenericType()))
+                        .filter(method -> method.getParameterCount() == 1)
+                        .filter(method -> method.getGenericParameterTypes()[0].equals(field.getGenericType()))
                         .anyMatch(method -> method.getName().equals(SET_NAME + capitalize(field.getName()))))
                 .collect(immutableArrayCollector());
     }

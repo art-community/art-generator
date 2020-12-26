@@ -33,7 +33,7 @@ public class ToModelFieldMappingCreator {
         return mapMethodCall(javaPrimitiveType, arguments);
     }
 
-    JCMethodInvocation forLazyField(String fieldName, ParameterizedType fieldType, boolean javaPrimitiveType) {
+    private JCMethodInvocation forLazyField(String fieldName, ParameterizedType fieldType, boolean javaPrimitiveType) {
         Type fieldTypeArgument = fieldType.getActualTypeArguments()[0];
         List<JCExpression> arguments = dynamicArray();
         arguments.add(literal(fieldName));
