@@ -2,6 +2,7 @@ package io.art.generator.creator.mapper;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.generator.exception.*;
+import io.art.generator.model.*;
 import lombok.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
@@ -66,13 +67,9 @@ public class ToModelMapperCreator {
 
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            Type rawType = parameterizedType.getRawType();
-            if (!(rawType instanceof Class)) {
-                throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
-            }
-
-            Class<?> rawClass = (Class<?>) rawType;
-            Type[] typeArguments = parameterizedType.getActualTypeArguments();
+            ExtractedParametrizedType extractedType = ExtractedParametrizedType.from(parameterizedType);
+            Class<?> rawClass = extractedType.getRawClass();
+            Type[] typeArguments = extractedType.getTypeArguments();
 
             if (isCollectionType(rawClass)) {
                 JCExpression parameterMapper = toModelMapper(typeArguments[0]);

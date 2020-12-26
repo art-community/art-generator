@@ -2,6 +2,7 @@ package io.art.generator.creator.mapper;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.generator.exception.*;
+import io.art.generator.model.*;
 import lombok.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.core.factory.ArrayFactory.*;
@@ -95,12 +96,9 @@ public class FromModelMapperCreator {
     }
 
     private JCPolyExpression create(ParameterizedType parameterizedType) {
-        Type rawType = parameterizedType.getRawType();
-        if (!(rawType instanceof Class)) {
-            throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
-        }
-        Class<?> rawClass = (Class<?>) rawType;
-        Type[] typeArguments = parameterizedType.getActualTypeArguments();
+        ExtractedParametrizedType extractedType = ExtractedParametrizedType.from(parameterizedType);
+        Class<?> rawClass = extractedType.getRawClass();
+        Type[] typeArguments = extractedType.getTypeArguments();
         if (isCollectionType(rawClass)) {
             JCExpression parameterMapper = fromModelMapper(typeArguments[0]);
             return method(ARRAY_MAPPING_TYPE, selectFromCollectionMethod(rawClass))

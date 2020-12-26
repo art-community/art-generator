@@ -43,24 +43,8 @@ public class ToModelMapperCreatorByInitializer {
     }
 
     private JCMethodInvocation forProperties(Class<?> modelClass) {
-        JCMethodInvocation builderInvocation = method(type(modelClass), BUILDER_METHOD_NAME).apply();
-        for (Field field : getProperties(modelClass)) {
-            String fieldName = field.getName();
-            Type fieldType = field.getGenericType();
-            JCMethodInvocation fieldMappers = fieldMappingCreator.forField(fieldName, fieldType);
-            builderInvocation = method(builderInvocation, fieldName).addArguments(fieldMappers).apply();
-        }
-        return method(builderInvocation, BUILD_METHOD_NAME).apply();
     }
 
     private JCMethodInvocation forProperties(ParameterizedType parameterizedType, Class<?> rawClass) {
-        JCMethodInvocation builderInvocation = method(type(parameterizedType), BUILDER_METHOD_NAME).apply();
-        for (Field field : getProperties(rawClass)) {
-            String fieldName = field.getName();
-            Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
-            JCMethodInvocation fieldMapping = fieldMappingCreator.forField(fieldName, fieldType);
-            builderInvocation = method(builderInvocation, fieldName).addArguments(fieldMapping).apply();
-        }
-        return method(builderInvocation, BUILD_METHOD_NAME).apply();
     }
 }
