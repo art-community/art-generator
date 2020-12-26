@@ -21,8 +21,8 @@ public class ToModelFieldMappingCreator {
 
     JCMethodInvocation forField(String fieldName, Type fieldType) {
         boolean javaPrimitiveType = isJavaPrimitiveType(fieldType);
-        if (isLazyValue(fieldType)) {
-            return forLazyField(fieldName, ((ParameterizedType) fieldType).getActualTypeArguments()[0], javaPrimitiveType);
+        if (fieldType instanceof ParameterizedType && isLazyValue(fieldType)) {
+            return forLazyField(fieldName, (ParameterizedType) fieldType, javaPrimitiveType);
         }
         List<JCExpression> arguments = dynamicArray();
         arguments.add(literal(fieldName));
@@ -33,13 +33,14 @@ public class ToModelFieldMappingCreator {
         return mapMethodCall(javaPrimitiveType, arguments);
     }
 
-    JCMethodInvocation forLazyField(String fieldName, Type fieldType, boolean javaPrimitiveType) {
+    JCMethodInvocation forLazyField(String fieldName, ParameterizedType fieldType, boolean javaPrimitiveType) {
+        Type fieldTypeArgument = fieldType.getActualTypeArguments()[0];
         List<JCExpression> arguments = dynamicArray();
         arguments.add(literal(fieldName));
         if (javaPrimitiveType) {
-            arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
+            arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldTypeArgument).name()));
         }
-        arguments.add(toModelMapper(fieldType));
+        arguments.add(toModelMapper(fieldTypeArgument));
         JCLambda lambda = newLambda().expression(() -> mapMethodCall(javaPrimitiveType, arguments)).generate();
         return method(type(LazyValue.class), LAZY_NAME).addArguments(lambda).apply();
     }

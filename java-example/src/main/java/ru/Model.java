@@ -146,4 +146,5 @@ public class Model {
     Map<String, GenericModel<String, GenericTypeParameterImplementation<String>>> FMGMModel;
 
     LazyValue<String> lazy;
+    LazyValue<String>[] lazyArray;
 }

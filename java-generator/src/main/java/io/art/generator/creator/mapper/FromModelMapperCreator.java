@@ -130,7 +130,7 @@ public class FromModelMapperCreator {
     }
 
     private JCMethodInvocation forField(JCMethodInvocation builderInvocation, String fieldName, Type fieldType) {
-        if (isLazyValue(fieldType)) {
+        if (fieldType instanceof ParameterizedType && isLazyValue(fieldType)) {
             return forLazyField(builderInvocation, fieldName, (ParameterizedType) fieldType);
         }
         List<JCExpression> arguments = dynamicArray();
