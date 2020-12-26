@@ -96,7 +96,6 @@ public class Model {
     Model[] FAModel;
     List<Model>[] FALModel;
     Set<Model>[] FASModel;
-    Collection<Model>[] FACModel;
     Map<String, Model>[] FAMModel;
 
     List<Model> FLModel;
@@ -146,5 +145,4 @@ public class Model {
     Map<String, GenericModel<String, GenericTypeParameterImplementation<String>>> FMGMModel;
 
     LazyValue<String> lazy;
-    LazyValue<String>[] lazyArray;
 }
