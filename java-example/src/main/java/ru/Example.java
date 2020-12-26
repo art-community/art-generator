@@ -1,14 +1,15 @@
 package ru;
 
 import io.art.model.annotation.*;
-import io.art.model.modeler.*;
-import static io.art.model.modeler.ModuleModeler.*;
+import io.art.model.configurator.*;
+import static io.art.model.configurator.ModuleModelConfigurator.*;
 
 public class Example {
-    @Modeler
-    public static ModuleModeler model() {
-        return module().serve(server -> server
-                .rsocket(rsocket -> rsocket.to(MyService.class, ServiceModeler::enableLogging))
-        );
+    @Configurator
+    public static ModuleModelConfigurator configure() {
+        return module(Example.class)
+                .serve(server -> server
+                        .rsocket(rsocket -> rsocket.to(MyService.class, ServiceModelConfigurator::enableLogging))
+                );
     }
 }

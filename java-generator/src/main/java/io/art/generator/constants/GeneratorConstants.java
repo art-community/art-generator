@@ -5,9 +5,9 @@ import io.art.core.constants.*;
 import io.art.core.lazy.*;
 import io.art.generator.model.*;
 import io.art.launcher.*;
+import io.art.model.configurator.*;
 import io.art.model.customizer.*;
 import io.art.model.implementation.*;
-import io.art.model.modeler.*;
 import io.art.server.implementation.*;
 import io.art.server.model.*;
 import io.art.server.registry.*;
@@ -59,9 +59,9 @@ public interface GeneratorConstants {
             ModuleLauncher.class.getName(),
 
             ModuleModel.class.getName(),
-            ModuleModeler.class.getName(),
+            ModuleModelConfigurator.class.getName(),
             ServerModel.class.getName(),
-            ServerModeler.class.getName(),
+            ServerModelConfigurator.class.getName(),
 
             ModuleCustomizer.class.getName(),
             ValueCustomizer.class.getName(),
@@ -85,11 +85,11 @@ public interface GeneratorConstants {
         String LAUNCH_NAME = "launch";
         String DECORATE_NAME = "decorate";
         String CUSTOMIZE_NAME = "customize";
-        String APPLY_NAME = "apply";
+        String CONFIGURE_NAME = "configure";
         String SERVER_NAME = "server";
         String PROVIDE_NAME = "provide";
         String MODEL_NAME = "model";
-        String MODELER_NAME = "modeler";
+        String CONFIGURATOR_NAME = "configurator";
         String MODULE_MODEL_NAME = "moduleModel";
         String SERVER_MODEL_NAME = "serverModel";
         String MODEL_STATIC_NAME = "MODEL";
@@ -103,7 +103,7 @@ public interface GeneratorConstants {
     }
 
     interface Annotations {
-        String MODELER_ANNOTATION_NAME = "io.art.model.annotation.Modeler";
+        String CONFIGURATOR_ANNOTATION_NAME = "io.art.model.annotation.Configurator";
     }
 
     interface ProcessorOptions {
@@ -112,7 +112,7 @@ public interface GeneratorConstants {
     }
 
     interface ExceptionMessages {
-        String MODULE_MODELER_NOT_FOUND = "Module modeler method not found";
+        String MODULE_CONFIGURATOR_NOT_FOUND = "Module configurator method not found";
         String MORE_THAN_ONE_PARAMETER = "More than one parameter not supported";
         String UNSUPPORTED_TYPE = "Unsupported type: {0}";
         String TYPE_VARIABLE_WAS_NOT_FOUND = "Type variable was not found: {0}";
@@ -276,7 +276,7 @@ public interface GeneratorConstants {
         TypeModel ENTITY_MAPPING_TYPE = type(EntityMapping.class);
 
         TypeModel MODULE_MODEL_TYPE = type(ModuleModel.class);
-        TypeModel MODULE_MODELER_TYPE = type(ModuleModeler.class);
+        TypeModel MODULE_CONFIGURATOR_TYPE = type(ModuleModelConfigurator.class);
 
         TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
 

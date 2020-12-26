@@ -117,7 +117,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                 .filter(Objects::nonNull)
                 .map(TypeSymbol::getQualifiedName)
                 .filter(Objects::nonNull)
-                .anyMatch(name -> name.toString().equals(MODELER_ANNOTATION_NAME));
+                .anyMatch(name -> name.toString().equals(CONFIGURATOR_ANNOTATION_NAME));
     }
 
 }

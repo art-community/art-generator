@@ -47,24 +47,6 @@ public class ServerModelImplementor {
         return servicesMethod.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
-    public ImmutableSet<Type> collectModelTypes(ServerModel serverModel) {
-        ImmutableSet.Builder<Type> types = immutableSetBuilder();
-        ImmutableMap<String, ServiceModel<?>> services = serverModel.getServices();
-        for (ServiceModel<?> service : services.values()) {
-            for (Method method : service.getServiceClass().getDeclaredMethods()) {
-                Type[] parameterTypes = method.getGenericParameterTypes();
-                if (parameterTypes.length > 1) {
-                    throw new GenerationException(MORE_THAN_ONE_PARAMETER);
-                }
-                types.addAll(TypeCollector.collectModelTypes(method.getGenericReturnType()));
-                if (isNotEmpty(parameterTypes)) {
-                    types.addAll(TypeCollector.collectModelTypes(parameterTypes[0]));
-                }
-            }
-        }
-        return types.build();
-    }
-
     private JCMethodInvocation executeRegisterMethod(NewMethod servicesMethod, ServiceModel<?> serviceModel) {
         JCMethodInvocation specificationBuilder = executeServiceSpecificationBuilder(servicesMethod, serviceModel.getServiceClass());
         return method(REGISTRY_NAME, REGISTER_NAME)

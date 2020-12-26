@@ -1,8 +1,8 @@
 package io.art.generator.loader;
 
 import io.art.generator.exception.*;
+import io.art.model.configurator.*;
 import io.art.model.implementation.*;
-import io.art.model.modeler.*;
 import lombok.experimental.*;
 import static io.art.generator.constants.GeneratorConstants.Annotations.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
@@ -18,9 +18,9 @@ public class ModelLoader {
             Method modelMethod = stream(mainClass.getMethods())
                     .filter(ModelLoader::hasModelerAnnotation)
                     .findFirst()
-                    .orElseThrow(() -> new GenerationException(MODULE_MODELER_NOT_FOUND));
-            ModuleModeler modeler = (ModuleModeler) modelMethod.invoke(null);
-            return modeler.apply();
+                    .orElseThrow(() -> new GenerationException(MODULE_CONFIGURATOR_NOT_FOUND));
+            ModuleModelConfigurator modeler = (ModuleModelConfigurator) modelMethod.invoke(null);
+            return modeler.configure();
         } catch (Throwable throwable) {
             throw new GenerationException(throwable);
         }
@@ -29,6 +29,6 @@ public class ModelLoader {
     private boolean hasModelerAnnotation(Method method) {
         return stream(method.getAnnotations())
                 .map(annotation -> annotation.annotationType().getName())
-                .anyMatch(name -> name.equals(MODELER_ANNOTATION_NAME));
+                .anyMatch(name -> name.equals(CONFIGURATOR_ANNOTATION_NAME));
     }
 }

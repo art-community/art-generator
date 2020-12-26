@@ -30,7 +30,7 @@ public class ToModelFieldMappingCreator {
             arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
         }
         arguments.add(toModelMapper(fieldType));
-        return mappingMethod(javaPrimitiveType, arguments);
+        return mapMethodCall(javaPrimitiveType, arguments);
     }
 
     JCMethodInvocation forLazyField(String fieldName, Type fieldType, boolean javaPrimitiveType) {
@@ -40,11 +40,11 @@ public class ToModelFieldMappingCreator {
             arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
         }
         arguments.add(toModelMapper(fieldType));
-        JCLambda lambda = newLambda().expression(() -> mappingMethod(javaPrimitiveType, arguments)).generate();
+        JCLambda lambda = newLambda().expression(() -> mapMethodCall(javaPrimitiveType, arguments)).generate();
         return method(type(LazyValue.class), LAZY_NAME).addArguments(lambda).apply();
     }
 
-    JCMethodInvocation mappingMethod(boolean javaPrimitiveType, List<JCExpression> arguments) {
+    private JCMethodInvocation mapMethodCall(boolean javaPrimitiveType, List<JCExpression> arguments) {
         String method = javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME;
         return method(method(entityName, MAPPING_METHOD_NAME).apply(), method).addArguments(arguments).apply();
     }

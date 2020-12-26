@@ -45,45 +45,29 @@ public class FromModelMapperCreator {
     public static JCExpression createFromModelMapper(Type type) {
         FromModelMapperCreator creator = new FromModelMapperCreator(sequenceName(MODEL_NAME));
 
-        if (isLibraryType(type)) {
-            return creator.body(type);
-        }
-
-        if (type instanceof GenericArrayType) {
-            return creator.body(type);
-        }
-
         if (type instanceof Class) {
-            Class<?> typeAsClass = (Class<?>) type;
-            if (typeAsClass.isArray()) {
-                return creator.body(type);
-            }
-        }
-
-        return newLambda()
-                .parameter(newParameter(type(type), creator.modelName))
-                .expression(() -> creator.body(type))
-                .generate();
-    }
-
-
-    private JCExpression body(Type type) {
-        if (type instanceof Class) {
-            return body((Class<?>) type);
+            return creator.create((Class<?>) type);
         }
 
         if (type instanceof ParameterizedType) {
-            return body((ParameterizedType) type);
+            return creator.create((ParameterizedType) type);
+
         }
 
         if (type instanceof GenericArrayType) {
-            return body((GenericArrayType) type);
+            return creator.create((GenericArrayType) type);
         }
 
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }
 
-    private JCExpression body(Class<?> modelClass) {
+
+    private JCMethodInvocation create(GenericArrayType type) {
+        JCExpression parameterMapper = fromModelMapper(type.getGenericComponentType());
+        return method(ARRAY_MAPPING_TYPE, FROM_ARRAY).addArguments(parameterMapper).apply();
+    }
+
+    private JCExpression create(Class<?> modelClass) {
         if (byte[].class.equals(modelClass)) {
             return select(BINARY_MAPPING_TYPE, FROM_BINARY);
         }
@@ -103,10 +87,14 @@ public class FromModelMapperCreator {
             Type fieldType = field.getGenericType();
             builderInvocation = forField(builderInvocation, fieldName, fieldType);
         }
-        return method(builderInvocation, BUILD_METHOD_NAME).apply();
+        final JCMethodInvocation finalBuilderInvocation = builderInvocation;
+        return newLambda()
+                .parameter(newParameter(type(modelClass), modelName))
+                .expression(() -> method(finalBuilderInvocation, BUILD_METHOD_NAME).apply())
+                .generate();
     }
 
-    private JCExpression body(ParameterizedType parameterizedType) {
+    private JCPolyExpression create(ParameterizedType parameterizedType) {
         Type rawType = parameterizedType.getRawType();
         if (!(rawType instanceof Class)) {
             throw new GenerationException(format(UNSUPPORTED_TYPE, rawType.getTypeName()));
@@ -136,12 +124,11 @@ public class FromModelMapperCreator {
             Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
             builderInvocation = forField(builderInvocation, fieldName, fieldType);
         }
-        return method(builderInvocation, BUILD_METHOD_NAME).apply();
-    }
-
-    private JCExpression body(GenericArrayType genericArrayType) {
-        JCExpression parameterMapper = fromModelMapper(genericArrayType.getGenericComponentType());
-        return method(ARRAY_MAPPING_TYPE, FROM_ARRAY).addArguments(parameterMapper).apply();
+        final JCMethodInvocation finalBuilderInvocation = builderInvocation;
+        return newLambda()
+                .parameter(newParameter(type(parameterizedType), modelName))
+                .expression(() -> method(finalBuilderInvocation, BUILD_METHOD_NAME).apply())
+                .generate();
     }
 
     private JCMethodInvocation forField(JCMethodInvocation builderInvocation, String fieldName, Type fieldType) {

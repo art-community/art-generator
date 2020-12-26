@@ -22,6 +22,7 @@ import static io.art.value.constants.ValueConstants.ValueType.PrimitiveType.STRI
 import static java.lang.reflect.Modifier.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
+import static java.util.stream.Collectors.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.*;
 import java.time.*;
@@ -169,40 +170,55 @@ public class TypeInspector {
     }
 
 
-    public boolean hasBuilder(Class<?> type) {
-        return stream(type.getDeclaredMethods())
+    public boolean hasBuilder(Type type) {
+        Class<?> rawClass = extractClass(type);
+        return stream(rawClass.getDeclaredMethods())
                 .filter(method -> method.getName().equals(BUILDER_METHOD_NAME))
                 .filter(method -> isStatic(method.getModifiers()) && isPublic(method.getModifiers()))
                 .filter(method -> method.getParameterCount() == 0)
                 .count() == 1;
     }
 
-    public boolean hasAtLeastOneSetter(Class<?> type) {
-        return stream(type.getDeclaredMethods())
+    public boolean hasAtLeastOneSetter(Type type) {
+        Class<?> rawClass = extractClass(type);
+        return stream(rawClass.getDeclaredMethods())
                 .filter(method -> method.getName().startsWith(SET_NAME))
                 .filter(method -> isPublic(method.getModifiers()))
                 .anyMatch(method -> method.getParameterCount() == 1);
     }
 
-    public boolean hasAtLeastOneFieldConstructorArgument(Class<?> type) {
-        return getProperties(type).stream().anyMatch(field -> hasConstructorArgument(type, field.getName()));
+    public boolean hasAtLeastOneFieldConstructorArgument(Type type) {
+        Class<?> rawClass = extractClass(type);
+        return getProperties(rawClass).stream().anyMatch(field -> hasConstructorArgument(type, field.getName()));
     }
 
-    public boolean hasNoArgumentsConstructor(Class<?> type) {
-        return stream(type.getConstructors())
+    public boolean hasNoArgumentsConstructor(Type type) {
+        Class<?> rawClass = extractClass(type);
+        return stream(rawClass.getConstructors())
                 .filter(constructor -> isPublic(constructor.getModifiers()))
                 .anyMatch(constructor -> constructor.getParameterCount() == 0);
     }
 
-    public boolean hasConstructorArgument(Class<?> type, String argumentName) {
-        return stream(type.getConstructors())
+    public boolean hasConstructorArgument(Type type, String argumentName) {
+        Class<?> rawClass = extractClass(type);
+        return stream(rawClass.getConstructors())
                 .filter(constructor -> isPublic(constructor.getModifiers()))
                 .flatMap(constructor -> stream(constructor.getParameters()))
                 .anyMatch(parameter -> argumentName.equals(parameter.getName()));
     }
 
-    public boolean hasConstructorArguments(Class<?> type, List<String> argumentNames) {
-        for (Constructor<?> constructor : type.getConstructors()) {
+    public boolean hasConstructorWithArguments(Type type) {
+        Class<?> rawClass = extractClass(type);
+        List<String> argumentNames = getProperties(rawClass)
+                .stream()
+                .map(Field::getName)
+                .collect(toList());
+        return hasConstructorArguments(rawClass, argumentNames);
+    }
+
+    public boolean hasConstructorArguments(Type type, List<String> argumentNames) {
+        Class<?> rawClass = extractClass(type);
+        for (Constructor<?> constructor : rawClass.getConstructors()) {
             if (!isPublic(constructor.getModifiers())) continue;
             Parameter[] parameters = constructor.getParameters();
             if (argumentNames.size() != parameters.length) return false;
