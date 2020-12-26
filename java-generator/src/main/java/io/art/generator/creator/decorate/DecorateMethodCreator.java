@@ -30,10 +30,10 @@ public class DecorateMethodCreator {
                         .name(SERVER_MODEL_NAME)
                         .type(SERVER_MODEL_TYPE)
                         .initializer(() -> method(MODULE_MODEL_NAME, GET_SERVER_MODEL).apply()).generate())
-                .statement(() -> returnMethodCall(customizerMethod()));
+                .statement(() -> returnMethodCall(customizeMethod()));
     }
 
-    private JCMethodInvocation customizerMethod() {
+    private JCMethodInvocation customizeMethod() {
         return method(MODULE_MODEL_NAME, CUSTOMIZE_NAME).addArguments(customizerLambda()).apply();
     }
 
@@ -47,7 +47,11 @@ public class DecorateMethodCreator {
     private JCLambda serverLambda() {
         return newLambda()
                 .parameter(newParameter(SERVER_CUSTOMIZER_TYPE, SERVER_NAME))
-                .expression(() -> method(SERVER_NAME, REGISTRY_NAME).addArguments(method(SERVICES_NAME).addArguments(ident(SERVER_MODEL_NAME)).apply()).apply())
+                .expression(() -> method(SERVER_NAME, REGISTRY_NAME)
+                        .addArguments(method(SERVICES_NAME)
+                                .addArguments(ident(SERVER_MODEL_NAME))
+                                .apply())
+                        .apply())
                 .generate();
     }
 }

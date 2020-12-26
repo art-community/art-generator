@@ -21,6 +21,7 @@ public class ToModelMapperByInitializerCreator {
 
     JCExpression create(Class<?> type) {
         if (hasNoArgumentsConstructor(type)) {
+
         }
 
         if (hasConstructorWithAllProperties(type)) {
@@ -43,8 +44,10 @@ public class ToModelMapperByInitializerCreator {
     }
 
     private JCMethodInvocation forProperties(Class<?> modelClass) {
+        return null;
     }
 
     private JCMethodInvocation forProperties(ParameterizedType parameterizedType, Class<?> rawClass) {
+        return null;
     }
 }
