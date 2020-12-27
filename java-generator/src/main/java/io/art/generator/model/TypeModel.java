@@ -113,11 +113,11 @@ public class TypeModel {
                     .map(TypeModel::generateFullType)
                     .collect(toCollection(ArrayFactory::dynamicArray)));
             return maker().TypeApply(isArray()
-                    ? maker().TypeArray(maker().Ident(elements().getName(name)))
+                    ? maker().TypeArray(generateArrayFullType())
                     : maker().Ident(elements().getName(name)), arguments);
         }
         return isArray()
-                ? maker().TypeArray(maker().Ident(elements().getName(name)))
+                ? maker().TypeArray(generateArrayFullType())
                 : maker().Ident(elements().getName(name));
     }
 
@@ -126,8 +126,22 @@ public class TypeModel {
             return maker().TypeIdent(primitive);
         }
         return isArray()
-                ? maker().TypeArray(maker().Ident(elements().getName(name)))
+                ? maker().TypeArray(generateArrayBaseType())
                 : maker().Ident(elements().getName(name));
+    }
+
+    private JCExpression generateArrayFullType() {
+        if (type instanceof GenericArrayType) {
+            return type(((GenericArrayType) type).getGenericComponentType()).generateFullType();
+        }
+        return type(((Class<?>) type).getComponentType()).generateFullType();
+    }
+
+    private JCExpression generateArrayBaseType() {
+        if (type instanceof GenericArrayType) {
+            return type(((GenericArrayType) type).getGenericComponentType()).generateBaseType();
+        }
+        return type(((Class<?>) type).getComponentType()).generateBaseType();
     }
 
     public com.sun.tools.javac.util.List<JCExpression> generateParameters() {
