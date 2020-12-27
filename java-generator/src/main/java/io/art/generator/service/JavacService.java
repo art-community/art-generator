@@ -54,7 +54,7 @@ public class JavacService {
 
 
     public JCNewClass newObject(TypeModel classType, List<JCExpression> arguments) {
-        return maker().NewClass(null, classType.generateParameters(), classType.generateBaseType(), arguments, null);
+        return maker().NewClass(null, List.nil(), classType.generateFullType(), arguments, null);
     }
 
     public JCNewClass newObject(TypeModel classType, java.util.List<JCExpression> arguments) {

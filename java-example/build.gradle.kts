@@ -27,3 +27,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:+")
 }
 tasks["compileJava"].dependsOn("clean").dependsOn(project(":java-generator").tasks["build"])
+
+tasks.withType<org.gradle.api.tasks.compile.JavaCompile> {
+    this.options.compilerArgs.add("-Xlint")
+}
