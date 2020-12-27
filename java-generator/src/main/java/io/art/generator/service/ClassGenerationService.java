@@ -32,7 +32,7 @@ public class ClassGenerationService {
         try (Writer writer = classFile.openWriter()) {
             writer.write(compilationUnit.toString());
         }
-        success(format(GENERATED_CLASS, className, classFile.toUri().getPath()));
+        success(format(GENERATED_CLASS, className));
     }
 
     private ListBuffer<JCTree> createImports(Set<ImportModel> newImports) {

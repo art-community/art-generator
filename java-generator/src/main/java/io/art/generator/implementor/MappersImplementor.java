@@ -43,7 +43,7 @@ public class MappersImplementor {
                     .count();
             typeMappers.put(type, typeAsClass.getSimpleName() + MAPPING_INTERFACE_NAME + id);
             putGeneratedMapper(type, typeAsClass.getSimpleName() + MAPPING_INTERFACE_NAME + id);
-            success(format(GENERATED_MAPPER, type.getTypeName()));
+            info(format(GENERATED_MAPPER, type.getTypeName()));
         }
         for (Map.Entry<Type, String> entry : typeMappers.entrySet()) {
             Type[] arguments = {

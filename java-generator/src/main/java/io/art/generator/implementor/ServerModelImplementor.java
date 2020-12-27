@@ -62,7 +62,7 @@ public class ServerModelImplementor {
         for (Method method : getServiceMethods(serviceClass)) {
             JCMethodInvocation methodSpecificationBuilder = executeMethodSpecificationBuilder(servicesMethod, serviceClass, method);
             builder.method(METHOD, literal(method.getName()), methodSpecificationBuilder);
-            success(format(GENERATED_SERVICE_METHOD_SPECIFICATION, SignatureFormatter.formatSignature(serviceClass, method)));
+            info(format(GENERATED_SERVICE_METHOD_SPECIFICATION, SignatureFormatter.formatSignature(serviceClass, method)));
         }
         return builder.generate();
     }
