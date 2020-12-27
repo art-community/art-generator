@@ -2,7 +2,6 @@ package ru;
 
 import io.art.core.lazy.*;
 import lombok.*;
-import lombok.Value;
 import java.time.*;
 import java.util.*;
 
@@ -145,14 +144,15 @@ public class Model {
     Collection<GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FCGModel;
     Map<String, GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FMGMModel;
 
-    LazyValue<String> lazyS;
-    LazyValue<Long> lazyL;
-    Collection<LazyValue<Long>> lazyCL;
-    LazyValue<Collection<Long>> lazyLC;
-    LazyValue<Collection<LazyValue<Long>>> lazyLCL;
-    LazyValue<Long>[] lazyAL;
-    LazyValue<Long[]> lazyLA;
-    LazyValue<Collection<Long>[]> lazyLAC;
-    LazyValue<Collection<Long[]>> lazyLACL;
-    LazyValue<Collection<Long[]>>[][][][][][] lazyLACLM;
+    LazyValue<String> FLazyString;
+    LazyValue<Long> FLazyLong;
+    Collection<LazyValue<Long>> FCLazyLong;
+    LazyValue<Collection<Long>> FLazyCLong;
+    LazyValue<Collection<LazyValue<Long>>> FCLazyCLong;
+    LazyValue<Long>[] FLazyLongA;
+    LazyValue<Long[]> FLazyALong;
+    LazyValue<Collection<Long>[]> FLazyCLongA;
+    LazyValue<Collection<Long[]>> FLazyCALong;
+    LazyValue<Collection<Long[]>>[][][][][][] FLazyCLAMultiA;
+    Map<String, LazyValue<Collection<Long[][]>[][]>[][]>[][][][][][] MSLazyMCMLongMultiA;
 }
