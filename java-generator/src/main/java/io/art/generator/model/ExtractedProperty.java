@@ -11,11 +11,15 @@ import static io.art.generator.inspector.TypeInspector.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
+import java.util.*;
+import java.util.concurrent.*;
 
 @Getter
 @Builder
 @Accessors(fluent = true)
 public class ExtractedProperty {
+    private final static Map<Type, ImmutableArray<ExtractedProperty>> CACHE = new ConcurrentHashMap<>();
+
     private final String name;
     private final Type type;
     private final int index;
@@ -27,6 +31,8 @@ public class ExtractedProperty {
     private final String setterName;
 
     public static ImmutableArray<ExtractedProperty> from(Class<?> type) {
+        ImmutableArray<ExtractedProperty> cached = CACHE.get(type);
+        if (nonNull(cached)) return cached;
         ImmutableArray.Builder<ExtractedProperty> properties = immutableArrayBuilder();
         Class<?> superclass = type.getSuperclass();
         if (nonNull(superclass)) properties.addAll(from(superclass));
@@ -56,7 +62,8 @@ public class ExtractedProperty {
                         .build());
             }
         }
-
-        return properties.build();
+        cached = properties.build();
+        CACHE.put(type, cached);
+        return cached;
     }
 }

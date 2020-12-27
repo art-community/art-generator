@@ -17,6 +17,7 @@ import static io.art.generator.constants.GeneratorConstants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.GenerationService.*;
 import static io.art.generator.state.GenerationState.*;
+import static java.text.MessageFormat.format;
 import static javax.lang.model.SourceVersion.*;
 import javax.annotation.processing.*;
 import javax.lang.model.element.*;

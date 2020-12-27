@@ -28,7 +28,7 @@ public class MyService {
         return Response.builder().build();
     }
 
-    public Response myMethod6(Request request) {
+    public Response myMethod6(Request request, Request request2) {
         logger(MyService.class).info("myMethod6" + request);
         return Response.builder().build();
     }

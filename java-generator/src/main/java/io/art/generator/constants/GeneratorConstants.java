@@ -121,6 +121,8 @@ public interface GeneratorConstants {
         String NOT_PRIMITIVE_TYPE = "Not primitive type: {0}";
         String NOT_COLLECTION_TYPE = "Not collection type: {0}";
         String NOT_FOUND_FACTORY_METHODS = "Not found valid factory methods (builder() method, no-args or all-args constructor) for type: {0}";
+        String VALIDATION_EXCEPTION_MESSAGE_FORMAT = "Validation exception for signature: [{0}]\n\t{1}";
+        String GENERATION_EXCEPTION_MESSAGE_FORMAT = "Generation exception:\n\t{0}";
     }
 
     interface MappersConstants {
@@ -133,7 +135,6 @@ public interface GeneratorConstants {
         String ENTITY_BUILDER_NAME = "entityBuilder";
         String LAZY_PUT_NAME = "lazyPut";
         String MAP_NAME = "map";
-        String LAZY_NAME = "lazy";
 
         interface PrimitiveMappingMethods {
             String TO_UUID = "toUuid";
@@ -208,6 +209,11 @@ public interface GeneratorConstants {
         interface BinaryMappingMethods {
             String FROM_BINARY = "fromBinary";
             String TO_BINARY = "toBinary";
+        }
+
+        interface LazyMappingMethods {
+            String TO_LAZY = "toLazy";
+            String FROM_LAZY = "fromLazy";
         }
 
         ImmutableSet<Class<?>> LIBRARY_BASED_TYPES = immutableSetOf(

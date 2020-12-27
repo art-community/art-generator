@@ -21,6 +21,7 @@ import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.creator.registry.RegistryVariableCreator.*;
+import static io.art.generator.formater.SignatureFormatter.*;
 import static io.art.generator.inspector.ServiceMethodsInspector.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewBuilder.*;
@@ -65,7 +66,7 @@ public class ServerModelImplementor {
         TypeModel methodProcessingModeType = METHOD_PROCESSING_MODE_TYPE;
         Type[] parameterTypes = serviceMethod.getGenericParameterTypes();
         if (parameterTypes.length > 1) {
-            throw new GenerationException(MORE_THAN_ONE_PARAMETER);
+            throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(serviceClass, serviceMethod));
         }
         Type returnType = serviceMethod.getGenericReturnType();
         MethodProcessingMode inputMode = isEmpty(parameterTypes) ? BLOCKING : calculateProcessingMode(parameterTypes[0]);

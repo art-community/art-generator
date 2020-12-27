@@ -7,6 +7,7 @@ import lombok.experimental.*;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.collection.ImmutableSet.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
+import static io.art.generator.formater.SignatureFormatter.*;
 import java.lang.reflect.*;
 
 @UtilityClass
@@ -18,7 +19,7 @@ public class ServiceTypesCollector {
             for (Method method : service.getServiceClass().getDeclaredMethods()) {
                 Type[] parameterTypes = method.getGenericParameterTypes();
                 if (parameterTypes.length > 1) {
-                    throw new GenerationException(MORE_THAN_ONE_PARAMETER);
+                    throw new ValidationException(formatSignature(service.getServiceClass(), method), MORE_THAN_ONE_PARAMETER);
                 }
                 types.addAll(TypeCollector.collectModelTypes(method.getGenericReturnType()));
                 if (isNotEmpty(parameterTypes)) {

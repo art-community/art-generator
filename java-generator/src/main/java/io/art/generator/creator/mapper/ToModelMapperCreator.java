@@ -11,6 +11,7 @@ import static io.art.generator.constants.GeneratorConstants.MappersConstants.Arr
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.LazyMappingMethods.TO_LAZY;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
@@ -93,7 +94,7 @@ public class ToModelMapperCreator {
 
             if (isLazyValue(type)) {
                 Type fieldTypeArgument = typeArguments[0];
-                return method(type(LazyValueMapping.class), "toLazy").addArguments(toModelMapper(fieldTypeArgument)).apply();
+                return method(type(LazyValueMapping.class), TO_LAZY).addArguments(toModelMapper(fieldTypeArgument)).apply();
             }
 
             if (hasBuilder(type)) {

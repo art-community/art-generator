@@ -7,8 +7,11 @@ import lombok.experimental.*;
 import static com.sun.tools.javac.main.Option.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.constants.ArrayConstants.*;
+import static io.art.core.extensions.StringExtensions.toCommaDelimitedString;
 import static io.art.generator.constants.GeneratorConstants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.logger.GeneratorLogger.*;
+import static java.text.MessageFormat.*;
 import static java.util.stream.Collectors.*;
 import java.io.*;
 import java.util.*;
@@ -31,6 +34,8 @@ public class CompilationService {
                 .map(existed -> existed.getPackageUnit().getSourceFile().getName())
                 .collect(toCollection(ArrayFactory::dynamicArray));
         arguments.addAll(classes);
+        info(format("Recompile classes {0}", toCommaDelimitedString(classes)));
         javacTool.run(inputStream, outputStream, System.err, arguments.build().toArray(new String[0]));
+        success("Recompilation done");
     }
 }

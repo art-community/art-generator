@@ -10,7 +10,9 @@ import lombok.*;
 import lombok.experimental.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.service.JavacService.*;
+import static java.text.MessageFormat.*;
 import static java.util.stream.Collectors.*;
 import javax.tools.*;
 import java.io.*;
@@ -24,10 +26,12 @@ public class ClassGenerationService {
         definitions.addAll(createImports(newClass.imports()));
         definitions.add(newClass.generate());
         JCCompilationUnit compilationUnit = maker().TopLevel(List.nil(), ident(packageName), definitions.toList());
-        JavaFileObject classFile = processingEnvironment().getFiler().createSourceFile(packageName + DOT + newClass.name());
+        String className = packageName + DOT + newClass.name();
+        JavaFileObject classFile = processingEnvironment().getFiler().createSourceFile(className);
         try (Writer writer = classFile.openWriter()) {
             writer.write(compilationUnit.toString());
         }
+        success(format("Generated class {0} to file {1}", className, classFile.toUri().getPath()));
     }
 
     private ListBuffer<JCTree> createImports(Set<ImportModel> newImports) {
