@@ -3,5 +3,10 @@ rsocket:
     transport:
       port: 5678
       mode: ws
-  connectors:
-    MyClient:
+  communicator:
+    connectors:
+      MyClient:
+        transport:
+          mode: ws
+          ws:
+            baseUrl: "ws://127.0.0.1:5678"
