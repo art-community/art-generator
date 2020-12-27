@@ -3,6 +3,7 @@ package io.art.generator.creator.mapper;
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
+import io.art.value.mapping.*;
 import lombok.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.core.factory.ArrayFactory.*;
@@ -116,6 +117,12 @@ public class FromModelMapperCreator {
                     .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
                     .apply();
         }
+
+        if (isLazyValue(parameterizedType)) {
+            Type fieldTypeArgument = typeArguments[0];
+            return method(type(LazyValueMapping.class), "fromLazy").addArguments(fromModelMapper(fieldTypeArgument)).apply();
+        }
+
         JCMethodInvocation builderInvocation = method(ENTITY_TYPE, ENTITY_BUILDER_NAME).apply();
         for (Field field : getProperties(rawClass)) {
             String fieldName = field.getName();
@@ -130,23 +137,12 @@ public class FromModelMapperCreator {
     }
 
     private JCMethodInvocation forField(JCMethodInvocation builderInvocation, String fieldName, Type fieldType) {
-        if (fieldType instanceof ParameterizedType && isLazyValue(fieldType)) {
-            return forLazyField(builderInvocation, fieldName, (ParameterizedType) fieldType);
-        }
         List<JCExpression> arguments = dynamicArray();
         arguments.add(literal(fieldName));
         String method = (isBoolean(fieldType) ? IS_NAME : GET_NAME) + capitalize(fieldName);
         JCMethodInvocation getter = method(modelName, method).apply();
         arguments.add(newLambda().expression(() -> getter).generate());
         arguments.add(fromModelMapper(fieldType));
-        return method(builderInvocation, LAZY_PUT_NAME).addArguments(arguments).apply();
-    }
-
-    private JCMethodInvocation forLazyField(JCMethodInvocation builderInvocation, String fieldName, ParameterizedType fieldType) {
-        List<JCExpression> arguments = dynamicArray();
-        arguments.add(literal(fieldName));
-        arguments.add(method(modelName, GET_NAME + capitalize(fieldName)).apply());
-        arguments.add(fromModelMapper(fieldType.getActualTypeArguments()[0]));
         return method(builderInvocation, LAZY_PUT_NAME).addArguments(arguments).apply();
     }
 }

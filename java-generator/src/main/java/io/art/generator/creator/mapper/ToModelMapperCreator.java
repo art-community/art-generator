@@ -3,6 +3,7 @@ package io.art.generator.creator.mapper;
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
+import io.art.value.mapping.*;
 import lombok.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
@@ -88,6 +89,11 @@ public class ToModelMapperCreator {
                 return method(ENTITY_MAPPING_TYPE, TO_MAP)
                         .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
                         .apply();
+            }
+
+            if (isLazyValue(type)) {
+                Type fieldTypeArgument = typeArguments[0];
+                return method(type(LazyValueMapping.class), "toLazy").addArguments(toModelMapper(fieldTypeArgument)).apply();
             }
 
             if (hasBuilder(type)) {

@@ -145,5 +145,13 @@ public class Model {
     Collection<GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FCGModel;
     Map<String, GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FMGMModel;
 
-    LazyValue<String> lazy;
+    LazyValue<String> lazyS;
+    LazyValue<Long> lazyL;
+    Collection<LazyValue<Long>> lazyCL;
+    LazyValue<Collection<Long>> lazyLC;
+    LazyValue<Collection<LazyValue<Long>>> lazyLCL;
+    LazyValue<Long>[] lazyAL;
+    LazyValue<Long[]> lazyLA;
+    LazyValue<Collection<Long>[]> lazyLAC;
+    LazyValue<Collection<Long[]>> lazyLACL;
 }

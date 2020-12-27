@@ -34,6 +34,8 @@ public interface GeneratorConstants {
             ArrayMapping.class.getName(),
             EntityMapping.class.getName(),
             BinaryMapping.class.getName(),
+            LazyValueMapping.class.getName(),
+
             ArrayValue.class.getName(),
             BinaryValue.class.getName(),
             Entity.class.getName(),
