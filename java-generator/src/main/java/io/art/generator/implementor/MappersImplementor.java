@@ -9,6 +9,7 @@ import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.collection.ImmutableSet.*;
 import static io.art.core.factory.MapFactory.*;
+import static io.art.generator.constants.GeneratorConstants.LoggingMessages.GENERATED_MAPPER;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
@@ -42,7 +43,7 @@ public class MappersImplementor {
                     .count();
             typeMappers.put(type, typeAsClass.getSimpleName() + MAPPING_INTERFACE_NAME + id);
             putGeneratedMapper(type, typeAsClass.getSimpleName() + MAPPING_INTERFACE_NAME + id);
-            success(format("Generated mapper for type: {0}", type.getTypeName()));
+            success(format(GENERATED_MAPPER, type.getTypeName()));
         }
         for (Map.Entry<Type, String> entry : typeMappers.entrySet()) {
             Type[] arguments = {

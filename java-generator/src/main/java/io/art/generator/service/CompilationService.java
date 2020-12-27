@@ -2,12 +2,17 @@ package io.art.generator.service;
 
 import com.sun.tools.javac.api.*;
 import io.art.core.collection.*;
+import io.art.core.extensions.*;
 import io.art.core.factory.*;
+import io.art.generator.exception.*;
 import lombok.experimental.*;
+import static com.sun.tools.javac.main.Main.Result.*;
 import static com.sun.tools.javac.main.Option.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.constants.ArrayConstants.*;
 import static io.art.core.extensions.StringExtensions.toCommaDelimitedString;
+import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
+import static io.art.generator.constants.GeneratorConstants.LoggingMessages.*;
 import static io.art.generator.constants.GeneratorConstants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.logger.GeneratorLogger.*;
@@ -19,6 +24,7 @@ import java.util.*;
 @UtilityClass
 public class CompilationService {
     public void recompile() {
+        success(RECOMPILATION_STARTED);
         JavacTool javacTool = JavacTool.create();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(EMPTY_BYTES);
@@ -34,8 +40,11 @@ public class CompilationService {
                 .map(existed -> existed.getPackageUnit().getSourceFile().getName())
                 .collect(toCollection(ArrayFactory::dynamicArray));
         arguments.addAll(classes);
-        info(format("Recompile classes {0}", toCommaDelimitedString(classes)));
-        javacTool.run(inputStream, outputStream, System.err, arguments.build().toArray(new String[0]));
-        success("Recompilation done");
+        String[] recompileArguments = arguments.build().toArray(new String[0]);
+        info(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(recompileArguments)));
+        if (OK.exitCode != javacTool.run(inputStream, outputStream, System.err, recompileArguments)) {
+            throw new GenerationException(RECOMPILATION_FAILED);
+        }
+        success(RECOMPILATION_COMPLETED);
     }
 }

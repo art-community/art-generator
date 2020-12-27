@@ -9,6 +9,7 @@ import io.art.generator.model.*;
 import lombok.*;
 import lombok.experimental.*;
 import static io.art.core.constants.StringConstants.*;
+import static io.art.generator.constants.GeneratorConstants.LoggingMessages.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.service.JavacService.*;
@@ -31,7 +32,7 @@ public class ClassGenerationService {
         try (Writer writer = classFile.openWriter()) {
             writer.write(compilationUnit.toString());
         }
-        success(format("Generated class {0} to file {1}", className, classFile.toUri().getPath()));
+        success(format(GENERATED_CLASS, className, classFile.toUri().getPath()));
     }
 
     private ListBuffer<JCTree> createImports(Set<ImportModel> newImports) {

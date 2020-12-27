@@ -123,6 +123,19 @@ public interface GeneratorConstants {
         String NOT_FOUND_FACTORY_METHODS = "Not found valid factory methods (builder() method, no-args or all-args constructor) for type: {0}";
         String VALIDATION_EXCEPTION_MESSAGE_FORMAT = "Validation exception for signature: [{0}]\n\t{1}";
         String GENERATION_EXCEPTION_MESSAGE_FORMAT = "Generation exception:\n\t{0}";
+        String RECOMPILATION_FAILED = "Recompilaton failed";
+    }
+
+    interface LoggingMessages {
+        String RECOMPILE_ARGUMENTS = "Executing recompliation with arguments: {0}";
+        String RECOMPILATION_STARTED = "Recompilation started";
+        String RECOMPILATION_COMPLETED = "Recompilation completed";
+        String GENERATION_STARTED = "Generation started";
+        String GENERATION_COMPLETED = "Generation completed";
+        String GENERATED_MAPPER = "Generated mapper for type: {0}";
+        String GENERATED_CLASS = "Generated class {0} to file {1}";
+        String GENERATED_SERVICE_METHOD_SPECIFICATION = "Generated service method specification: {0}";
+        String GENERATED_MAIN_METHOD = "Generated main method for existed main class [{0}] with content:{1}";
     }
 
     interface MappersConstants {

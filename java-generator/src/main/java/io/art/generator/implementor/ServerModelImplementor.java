@@ -4,6 +4,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.generator.exception.*;
+import io.art.generator.formater.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.*;
 import lombok.experimental.*;
@@ -13,6 +14,7 @@ import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
+import static io.art.generator.constants.GeneratorConstants.LoggingMessages.*;
 import static io.art.generator.constants.GeneratorConstants.ModelMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.constants.GeneratorConstants.ServiceSpecificationMethods.*;
@@ -23,12 +25,14 @@ import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.creator.registry.RegistryVariableCreator.*;
 import static io.art.generator.formater.SignatureFormatter.*;
 import static io.art.generator.inspector.ServiceMethodsInspector.*;
+import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewBuilder.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
+import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 
 @UtilityClass
@@ -58,6 +62,7 @@ public class ServerModelImplementor {
         for (Method method : getServiceMethods(serviceClass)) {
             JCMethodInvocation methodSpecificationBuilder = executeMethodSpecificationBuilder(servicesMethod, serviceClass, method);
             builder.method(METHOD, literal(method.getName()), methodSpecificationBuilder);
+            success(format(GENERATED_SERVICE_METHOD_SPECIFICATION, SignatureFormatter.formatSignature(serviceClass, method)));
         }
         return builder.generate();
     }
