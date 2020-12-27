@@ -3,3 +3,5 @@ rsocket:
     transport:
       port: 5678
       mode: ws
+  connectors:
+    MyClient:

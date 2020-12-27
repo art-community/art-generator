@@ -14,8 +14,8 @@ import java.lang.reflect.*;
 public class ServiceTypesCollector {
     public ImmutableSet<Type> collectModelTypes(ServerModel serverModel) {
         ImmutableSet.Builder<Type> types = immutableSetBuilder();
-        ImmutableMap<String, ServiceModel<?>> services = serverModel.getServices();
-        for (ServiceModel<?> service : services.values()) {
+        ImmutableMap<String, ServiceModel> services = serverModel.getServices();
+        for (ServiceModel service : services.values()) {
             for (Method method : service.getServiceClass().getDeclaredMethods()) {
                 Type[] parameterTypes = method.getGenericParameterTypes();
                 if (parameterTypes.length > 1) {

@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":java-generator"))
     implementation(project(":core"))
     implementation(project(":server"))
+    implementation(project(":communicator"))
     implementation(project(":value"))
     implementation(project(":logging"))
     implementation(project(":launcher"))

@@ -45,12 +45,12 @@ public class ServerModelImplementor {
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
-        ImmutableMap<String, ServiceModel<?>> services = serverModel.getServices();
+        ImmutableMap<String, ServiceModel> services = serverModel.getServices();
         services.values().forEach(serviceModel -> servicesMethod.statement(() -> maker().Exec(executeRegisterMethod(servicesMethod, serviceModel))));
         return servicesMethod.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
-    private JCMethodInvocation executeRegisterMethod(NewMethod servicesMethod, ServiceModel<?> serviceModel) {
+    private JCMethodInvocation executeRegisterMethod(NewMethod servicesMethod, ServiceModel serviceModel) {
         JCMethodInvocation specificationBuilder = executeServiceSpecificationBuilder(servicesMethod, serviceModel.getServiceClass());
         return method(REGISTRY_NAME, REGISTER_NAME)
                 .addArguments(literal(serviceModel.getServiceClass().getSimpleName()), specificationBuilder)
