@@ -45,15 +45,15 @@ public class GeneratorProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
         if (this.processingEnvironment.getOptions().get(DISABLE_OPTION) != null) {
-            return false;
+            return true;
         }
         if (GeneratorContext.isInitialized()) {
             if (completed()) {
-                return false;
+                return true;
             }
             generate();
             complete();
-            return false;
+            return true;
         }
         JavacElements elements = JavacElements.instance(processingEnvironment.getContext());
         configurationBuilder
@@ -67,6 +67,6 @@ public class GeneratorProcessor extends AbstractProcessor {
             scanner.scan(trees.getPath(rootElement), trees);
         }
         initialize(configurationBuilder.build());
-        return false;
+        return true;
     }
 }
