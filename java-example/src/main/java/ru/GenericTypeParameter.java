@@ -1,5 +1,9 @@
 package ru;
 
-public class GenericTypeParameter<T> {
+import lombok.*;
 
+@Getter
+@AllArgsConstructor
+public class GenericTypeParameter<T> {
+    String parent;
 }

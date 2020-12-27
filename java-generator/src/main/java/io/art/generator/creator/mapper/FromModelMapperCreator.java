@@ -28,7 +28,6 @@ import static io.art.generator.state.GenerationState.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import static lombok.AccessLevel.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -84,10 +83,8 @@ public class FromModelMapperCreator {
             return select(PRIMITIVE_MAPPING_TYPE, selectFromPrimitiveMethod(modelClass));
         }
         JCMethodInvocation builderInvocation = method(ENTITY_TYPE, ENTITY_BUILDER_NAME).apply();
-        for (Field field : getProperties(modelClass)) {
-            String fieldName = field.getName();
-            Type fieldType = field.getGenericType();
-            builderInvocation = forField(builderInvocation, fieldName, fieldType);
+        for (ExtractedProperty property : getProperties(modelClass)) {
+            builderInvocation = forProperty(builderInvocation, property.name(), property.type());
         }
         final JCMethodInvocation finalBuilderInvocation = builderInvocation;
         return newLambda()
@@ -124,10 +121,9 @@ public class FromModelMapperCreator {
         }
 
         JCMethodInvocation builderInvocation = method(ENTITY_TYPE, ENTITY_BUILDER_NAME).apply();
-        for (Field field : getProperties(rawClass)) {
-            String fieldName = field.getName();
-            Type fieldType = extractGenericPropertyType(parameterizedType, field.getGenericType());
-            builderInvocation = forField(builderInvocation, fieldName, fieldType);
+        for (ExtractedProperty property : getProperties(rawClass)) {
+            Type fieldType = extractGenericPropertyType(parameterizedType, property.type());
+            builderInvocation = forProperty(builderInvocation, property.name(), fieldType);
         }
         final JCMethodInvocation finalBuilderInvocation = builderInvocation;
         return newLambda()
@@ -136,13 +132,13 @@ public class FromModelMapperCreator {
                 .generate();
     }
 
-    private JCMethodInvocation forField(JCMethodInvocation builderInvocation, String fieldName, Type fieldType) {
+    private JCMethodInvocation forProperty(JCMethodInvocation builderInvocation, String propertyName, Type propertyType) {
         List<JCExpression> arguments = dynamicArray();
-        arguments.add(literal(fieldName));
-        String method = (isBoolean(fieldType) ? IS_NAME : GET_NAME) + capitalize(fieldName);
+        arguments.add(literal(propertyName));
+        String method = (isBoolean(propertyType) ? IS_NAME : GET_NAME) + capitalize(propertyName);
         JCMethodInvocation getter = method(modelName, method).apply();
         arguments.add(newLambda().expression(() -> getter).generate());
-        arguments.add(fromModelMapper(fieldType));
+        arguments.add(fromModelMapper(propertyType));
         return method(builderInvocation, LAZY_PUT_NAME).addArguments(arguments).apply();
     }
 }

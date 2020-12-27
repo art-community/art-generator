@@ -3,6 +3,7 @@ package io.art.generator.inspector;
 import io.art.core.collection.*;
 import io.art.core.lazy.*;
 import io.art.generator.exception.*;
+import io.art.generator.model.*;
 import io.art.value.constants.ValueConstants.ValueType.*;
 import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
@@ -30,33 +31,21 @@ import java.util.*;
 
 @UtilityClass
 public class TypeInspector {
-    public ImmutableArray<Field> getProperties(Class<?> type) {
-        ImmutableArray.Builder<Field> fields = immutableArrayBuilder();
-        try {
-            Method[] declaredMethods = type.getDeclaredMethods();
-            Field[] declaredFields = type.getDeclaredFields();
-            for (Field field : declaredFields) {
-                Type fieldType = field.getGenericType();
-                String getterName = isBoolean(fieldType) ? IS_NAME + capitalize(field.getName()) : GET_NAME + capitalize(field.getName());
-                String setterName = SET_NAME + capitalize(field.getName());
-                boolean hasGetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(getterName));
-                boolean hasSetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(setterName));
-                boolean hasConstructorArgument = hasConstructorArgument(type, field.getGenericType());
-                if (hasGetter || hasSetter || hasConstructorArgument) fields.add(field);
-            }
-            return fields.build();
-        } catch (Throwable throwable) {
-            throw new GenerationException(throwable);
-        }
+    public ImmutableArray<ExtractedProperty> getProperties(Class<?> type) {
+        return ExtractedProperty.from(type);
     }
 
-    public ImmutableArray<Field> getMutableProperties(Class<?> type) {
+    public ImmutableArray<ExtractedProperty> getSettableProperties(Class<?> type) {
         return getProperties(type)
                 .stream()
-                .filter(field -> stream(type.getDeclaredMethods())
-                        .filter(method -> method.getParameterCount() == 1)
-                        .filter(method -> method.getGenericParameterTypes()[0].equals(field.getGenericType()))
-                        .anyMatch(method -> method.getName().equals(SET_NAME + capitalize(field.getName()))))
+                .filter(ExtractedProperty::hasSetter)
+                .collect(immutableArrayCollector());
+    }
+
+    public ImmutableArray<ExtractedProperty> getConstructorProperties(Class<?> type) {
+        return getProperties(type)
+                .stream()
+                .filter(ExtractedProperty::usedInConstructorArguments)
                 .collect(immutableArrayCollector());
     }
 
@@ -204,16 +193,18 @@ public class TypeInspector {
                 .anyMatch(constructor -> constructor.getParameterCount() == 0);
     }
 
-    public boolean hasConstructorArgument(Type type, Type argumentType) {
+    public boolean hasConstructorArgument(Type type, Type argumentType, int argumentIndex) {
         Class<?> rawClass = extractClass(type);
         for (Constructor<?> constructor : rawClass.getConstructors()) {
             if (!isPublic(constructor.getModifiers())) {
                 continue;
             }
-            for (Parameter parameter : constructor.getParameters()) {
-                if (argumentType.equals(parameter.getParameterizedType())) {
-                    return true;
-                }
+            Parameter[] parameters = constructor.getParameters();
+            if (argumentIndex >= parameters.length) {
+                continue;
+            }
+            if (argumentType.equals(parameters[argumentIndex].getParameterizedType())) {
+                return true;
             }
         }
         return false;
@@ -221,11 +212,7 @@ public class TypeInspector {
 
     public boolean hasConstructorWithAllProperties(Type type) {
         Class<?> rawClass = extractClass(type);
-        List<Type> argumentNames = getProperties(rawClass)
-                .stream()
-                .map(Field::getGenericType)
-                .collect(toList());
-        return matchConstructorArguments(rawClass, argumentNames);
+        return matchConstructorArguments(rawClass, getConstructorProperties(rawClass).stream().map(ExtractedProperty::type).collect(toList()));
     }
 
     public boolean matchConstructorArguments(Type type, List<Type> argumentTypes) {

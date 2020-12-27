@@ -14,10 +14,10 @@ import java.lang.reflect.*;
 import java.util.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class ToModelFieldMappingCreator {
+public class ToModelPropertyMappingCreator {
     private final String entityName;
 
-    JCMethodInvocation forField(String fieldName, Type fieldType) {
+    JCMethodInvocation forProperty(String fieldName, Type fieldType) {
         boolean javaPrimitiveType = isJavaPrimitiveType(fieldType);
         List<JCExpression> arguments = dynamicArray();
         arguments.add(literal(fieldName));

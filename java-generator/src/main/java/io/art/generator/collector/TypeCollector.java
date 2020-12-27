@@ -2,6 +2,7 @@ package io.art.generator.collector;
 
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
+import io.art.generator.model.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.inspector.TypeInspector.*;
@@ -61,8 +62,8 @@ public class TypeCollector {
 
         types.add(type);
 
-        for (Field property : getProperties(type)) {
-            Type propertyType = property.getGenericType();
+        for (ExtractedProperty property : getProperties(type)) {
+            Type propertyType = property.type();
 
             if (types.contains(propertyType) || propertyType.equals(type)) {
                 continue;
