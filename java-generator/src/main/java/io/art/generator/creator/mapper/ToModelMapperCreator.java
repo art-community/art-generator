@@ -10,8 +10,8 @@ import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.LazyMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
-import static io.art.generator.constants.GeneratorConstants.MappersConstants.LazyMappingMethods.TO_LAZY;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
@@ -27,6 +27,9 @@ import java.util.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ToModelMapperCreator {
+    private final static ToModelMapperByBuilderCreator builderCreator = new ToModelMapperByBuilderCreator();
+    private final static ToModelMapperByInitializerCreator initializerCreator = new ToModelMapperByInitializerCreator();
+
     public static JCExpression toModelMapper(Type type) {
         String generatedMapper = getGeneratedMapper(type);
         if (nonNull(generatedMapper)) {
@@ -57,11 +60,11 @@ public class ToModelMapperCreator {
             }
 
             if (hasBuilder(type)) {
-                return new ToModelMapperByBuilderCreator().create(modelClass);
+                return builderCreator.create(modelClass);
             }
 
             if (hasConstructorWithAllProperties(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
-                return new ToModelMapperByInitializerCreator().create(modelClass);
+                return initializerCreator.create(modelClass);
             }
 
             throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
@@ -98,11 +101,11 @@ public class ToModelMapperCreator {
             }
 
             if (hasBuilder(type)) {
-                return new ToModelMapperByBuilderCreator().create(parameterizedType);
+                return builderCreator.create(parameterizedType);
             }
 
             if (hasConstructorWithAllProperties(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
-                return new ToModelMapperByInitializerCreator().create(parameterizedType);
+                return initializerCreator.create(parameterizedType);
             }
 
             throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));

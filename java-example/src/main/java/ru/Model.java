@@ -153,6 +153,6 @@ public class Model {
     LazyValue<Long[]> FLazyALong;
     LazyValue<Collection<Long>[]> FLazyCLongA;
     LazyValue<Collection<Long[]>> FLazyCALong;
-    LazyValue<Collection<Long[]>>[][][][][][] FLazyCLAMultiA;
-    Map<String, LazyValue<Collection<Long[][]>[][]>[][]>[][][][][][] MSLazyMCMLongMultiA;
+    LazyValue<Collection<Long[]>>[][] FLazyCLAMultiA;
+    Map<String, LazyValue<Collection<Long[][]>[]>[]>[] MSLazyMCMLongMultiA;
 }
