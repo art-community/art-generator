@@ -57,6 +57,10 @@ public class JavacService {
         return maker().NewClass(null, classType.generateParameters(), classType.generateBaseType(), arguments, null);
     }
 
+    public JCNewClass newObject(TypeModel classType, java.util.List<JCExpression> arguments) {
+        return newObject(classType, List.from(arguments));
+    }
+
 
     public JCExpression classReference(Class<?> owner) {
         return select(type(owner), CLASS_KEYWORD);

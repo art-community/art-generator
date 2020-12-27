@@ -58,7 +58,7 @@ public class ToModelMapperCreator {
                 return new ToModelMapperByBuilderCreator().create(modelClass);
             }
 
-            if (hasAtLeastOneFieldConstructorArgument(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
+            if (hasConstructorWithAllProperties(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
                 return new ToModelMapperByInitializerCreator().create(modelClass);
             }
 
@@ -94,7 +94,7 @@ public class ToModelMapperCreator {
                 return new ToModelMapperByBuilderCreator().create(parameterizedType);
             }
 
-            if (hasAtLeastOneFieldConstructorArgument(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
+            if (hasConstructorWithAllProperties(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
                 return new ToModelMapperByInitializerCreator().create(parameterizedType);
             }
 

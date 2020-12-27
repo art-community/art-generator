@@ -36,13 +36,21 @@ public class ToModelMapperByInitializerCreator {
                             .name(MODEL_NAME)
                             .initializer(() -> newObject(type(type), List.nil()))
                             .generate())
-                    .addStatements(forProperties(type))
+                    .addStatements(forPropertiesBySetters(type))
                     .addStatement(() -> returnVariable(MODEL_NAME))
                     .generate();
         }
 
         if (hasConstructorWithAllProperties(type)) {
-
+            return NewLambda.newLambda()
+                    .parameter(newParameter(ENTITY_TYPE, entityName))
+                    .addStatement(() -> newVariable()
+                            .type(type(type))
+                            .name(MODEL_NAME)
+                            .initializer(() -> newObject(type(type), forPropertiesByConstructor(type)))
+                            .generate())
+                    .addStatement(() -> returnVariable(MODEL_NAME))
+                    .generate();
         }
 
         throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
@@ -57,19 +65,27 @@ public class ToModelMapperByInitializerCreator {
                             .name(MODEL_NAME)
                             .initializer(() -> newObject(type(type), List.nil()))
                             .generate())
-                    .addStatements(forProperties(type, extractClass(type)))
+                    .addStatements(forPropertiesBySetters(type, extractClass(type)))
                     .addStatement(() -> returnVariable(MODEL_NAME))
                     .generate();
         }
 
         if (hasConstructorWithAllProperties(type)) {
-
+            return NewLambda.newLambda()
+                    .parameter(newParameter(ENTITY_TYPE, entityName))
+                    .addStatement(() -> newVariable()
+                            .type(type(type))
+                            .name(MODEL_NAME)
+                            .initializer(() -> newObject(type(type), forPropertiesByConstructor(type, extractClass(type))))
+                            .generate())
+                    .addStatement(() -> returnVariable(MODEL_NAME))
+                    .generate();
         }
 
         throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
     }
 
-    private List<Supplier<JCStatement>> forProperties(Class<?> modelClass) {
+    private List<Supplier<JCStatement>> forPropertiesBySetters(Class<?> modelClass) {
         ListBuffer<Supplier<JCStatement>> setters = new ListBuffer<>();
         for (Field field : getMutableProperties(modelClass)) {
             setters.add(() -> method(MODEL_NAME, SET_NAME + capitalize(field.getName()))
@@ -79,12 +95,28 @@ public class ToModelMapperByInitializerCreator {
         return setters.toList();
     }
 
-    private List<Supplier<JCStatement>> forProperties(ParameterizedType parameterizedType, Class<?> rawClass) {
+    private List<Supplier<JCStatement>> forPropertiesBySetters(ParameterizedType parameterizedType, Class<?> rawClass) {
         ListBuffer<Supplier<JCStatement>> setters = new ListBuffer<>();
         for (Field field : getMutableProperties(rawClass)) {
             setters.add(() -> method(MODEL_NAME, SET_NAME + capitalize(field.getName()))
                     .addArguments(fieldMappingCreator.forField(field.getName(), extractGenericPropertyType(parameterizedType, field.getGenericType())))
                     .execute());
+        }
+        return setters.toList();
+    }
+
+    private List<JCExpression> forPropertiesByConstructor(Class<?> modelClass) {
+        ListBuffer<JCExpression> setters = new ListBuffer<>();
+        for (Field field : getMutableProperties(modelClass)) {
+            setters.add(fieldMappingCreator.forField(field.getName(), field.getGenericType()));
+        }
+        return setters.toList();
+    }
+
+    private List<JCExpression> forPropertiesByConstructor(ParameterizedType parameterizedType, Class<?> rawClass) {
+        ListBuffer<JCExpression> setters = new ListBuffer<>();
+        for (Field field : getMutableProperties(rawClass)) {
+            setters.add(fieldMappingCreator.forField(field.getName(), extractGenericPropertyType(parameterizedType, field.getGenericType())));
         }
         return setters.toList();
     }

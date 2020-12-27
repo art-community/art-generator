@@ -41,7 +41,7 @@ public class TypeInspector {
                 String setterName = SET_NAME + capitalize(field.getName());
                 boolean hasGetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(getterName));
                 boolean hasSetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(setterName));
-                boolean hasConstructorArgument = hasConstructorArgument(type, field.getName());
+                boolean hasConstructorArgument = hasConstructorArgument(type, field.getGenericType());
                 if (hasGetter || hasSetter || hasConstructorArgument) fields.add(field);
             }
             return fields.build();
@@ -197,13 +197,6 @@ public class TypeInspector {
                 .anyMatch(method -> method.getParameterCount() == 1);
     }
 
-    public boolean hasAtLeastOneFieldConstructorArgument(Type type) {
-        Class<?> rawClass = extractClass(type);
-        return getProperties(rawClass)
-                .stream()
-                .anyMatch(field -> hasConstructorArgument(type, field.getName()));
-    }
-
     public boolean hasNoArgumentsConstructor(Type type) {
         Class<?> rawClass = extractClass(type);
         return stream(rawClass.getConstructors())
@@ -211,32 +204,39 @@ public class TypeInspector {
                 .anyMatch(constructor -> constructor.getParameterCount() == 0);
     }
 
-    public boolean hasConstructorArgument(Type type, String argumentName) {
+    public boolean hasConstructorArgument(Type type, Type argumentType) {
         Class<?> rawClass = extractClass(type);
-        return stream(rawClass.getConstructors())
-                .filter(constructor -> isPublic(constructor.getModifiers()))
-                .flatMap(constructor -> stream(constructor.getParameters()))
-                .anyMatch(parameter -> argumentName.equals(parameter.getName()));
+        for (Constructor<?> constructor : rawClass.getConstructors()) {
+            if (!isPublic(constructor.getModifiers())) {
+                continue;
+            }
+            for (Parameter parameter : constructor.getParameters()) {
+                if (argumentType.equals(parameter.getParameterizedType())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public boolean hasConstructorWithAllProperties(Type type) {
         Class<?> rawClass = extractClass(type);
-        List<String> argumentNames = getProperties(rawClass)
+        List<Type> argumentNames = getProperties(rawClass)
                 .stream()
-                .map(Field::getName)
+                .map(Field::getGenericType)
                 .collect(toList());
         return matchConstructorArguments(rawClass, argumentNames);
     }
 
-    public boolean matchConstructorArguments(Type type, List<String> argumentNames) {
+    public boolean matchConstructorArguments(Type type, List<Type> argumentTypes) {
         Class<?> rawClass = extractClass(type);
         for (Constructor<?> constructor : rawClass.getConstructors()) {
             if (!isPublic(constructor.getModifiers())) continue;
             Parameter[] parameters = constructor.getParameters();
-            if (argumentNames.size() != parameters.length) return false;
+            if (argumentTypes.size() != parameters.length) return false;
             for (int i = 0; i < parameters.length; i++) {
                 Parameter parameter = parameters[i];
-                if (!parameter.getName().equals(argumentNames.get(i))) {
+                if (!parameter.getParameterizedType().equals(argumentTypes.get(i))) {
                     return false;
                 }
             }

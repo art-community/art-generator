@@ -6,9 +6,9 @@ import lombok.Value;
 import java.time.*;
 import java.util.*;
 
-@NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
 public class Model {
     int FInteger;
     char FCharacter;
