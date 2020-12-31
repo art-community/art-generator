@@ -62,8 +62,8 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                 .stream()
                 .filter(member -> member.getKind() == METHOD)
                 .map(member -> (JCMethodDecl) member)
-                .filter(method -> hasModelerAnnotation(method.getModifiers().getAnnotations()))
-                .filter(method -> method.getModifiers().getFlags().containsAll(setOf(PUBLIC, STATIC)))
+                .filter(method -> hasConfiguratorAnnotation(method.getModifiers().getAnnotations()))
+                .filter(method -> method.getModifiers().getFlags().containsAll(setOf(PUBLIC)))
                 .findFirst();
 
         if (isNull(mainClass) && modelMethodDeclaration.isPresent()) {
@@ -98,7 +98,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                     .name(modelMethodDeclaration.get().name.toString())
                     .build();
 
-            configurationBuilder.modelMethod(modelMethod);
+            configurationBuilder.configureMethod(modelMethod);
             mainClassBuilder.method(modelMethod.getName(), modelMethod);
 
             configurationBuilder.mainClass(this.mainClass = mainClassBuilder.build());
@@ -106,7 +106,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
         return result;
     }
 
-    private boolean hasModelerAnnotation(List<JCAnnotation> annotations) {
+    private boolean hasConfiguratorAnnotation(List<JCAnnotation> annotations) {
         return annotations
                 .stream()
                 .map(JCAnnotation::getAnnotationType)

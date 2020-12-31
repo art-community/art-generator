@@ -29,7 +29,7 @@ public class GeneratorContext {
 
     private static final AtomicReference<ExistedMethod> mainMethod = new AtomicReference<>();
 
-    private static final AtomicReference<ExistedMethod> modelMethod = new AtomicReference<>();
+    private static final AtomicReference<ExistedMethod> configureMethod = new AtomicReference<>();
 
     private static final AtomicReference<GeneratorClassLoader> classLoader = new AtomicReference<>();
 
@@ -79,8 +79,8 @@ public class GeneratorContext {
         return mainMethod.get();
     }
 
-    public static ExistedMethod modelMethod() {
-        return modelMethod.get();
+    public static ExistedMethod configureMethod() {
+        return configureMethod.get();
     }
 
     public static GeneratorClassLoader classLoader() {
@@ -101,7 +101,7 @@ public class GeneratorContext {
             GeneratorContext.elements.set(configuration.getElements());
             GeneratorContext.mainClass.set(configuration.getMainClass());
             GeneratorContext.mainMethod.set(configuration.getMainMethod());
-            GeneratorContext.modelMethod.set(configuration.getModelMethod());
+            GeneratorContext.configureMethod.set(configuration.getConfigureMethod());
             GeneratorContext.classLoader.set(new GeneratorClassLoader());
         }
     }

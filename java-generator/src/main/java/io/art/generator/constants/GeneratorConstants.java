@@ -3,6 +3,7 @@ package io.art.generator.constants;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.core.lazy.*;
+import io.art.core.singleton.*;
 import io.art.generator.model.*;
 import io.art.launcher.*;
 import io.art.model.configurator.*;
@@ -76,6 +77,7 @@ public interface GeneratorConstants {
             Map.class.getName(),
 
             LazyValue.class.getName(),
+            SingletonsRegistry.class.getName()
     };
 
     interface Names {
@@ -102,6 +104,7 @@ public interface GeneratorConstants {
         String IS_NAME = "is";
         String GET_NAME = "get";
         String SET_NAME = "set";
+        String SINGLETON_NAME = "singleton";
     }
 
     interface Annotations {
@@ -122,7 +125,7 @@ public interface GeneratorConstants {
         String NOT_COLLECTION_TYPE = "Not collection type: {0}";
         String NOT_FOUND_FACTORY_METHODS = "Not found valid factory methods (builder() method, no-args or all-args constructor) for type: {0}";
         String VALIDATION_EXCEPTION_MESSAGE_FORMAT = "Validation exception for signature: [{0}]\n\t{1}";
-        String GENERATION_EXCEPTION_MESSAGE_FORMAT = "Generation exception:\n\t{0}";
+        String GENERATION_FAILED_MESSAGE_FORMAT = "Generation failed:\n\t{0}";
         String RECOMPILATION_FAILED = "Recompilaton failed";
     }
 
@@ -315,5 +318,7 @@ public interface GeneratorConstants {
         TypeModel MODULE_LAUNCHER_TYPE = type(ModuleLauncher.class);
         TypeModel STRING_ARRAY_TYPE = type(String[].class);
         TypeModel VOID_TYPE = type(void.class);
+
+        TypeModel SINGLETON_REGISTRY_TYPE = type(SingletonsRegistry .class);
     }
 }

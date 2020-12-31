@@ -33,6 +33,6 @@ public class ModuleModelImplementor {
                 .statement(() -> method(MODULE_LAUNCHER_TYPE, LAUNCH_NAME).addArguments(method(providerClassName(), PROVIDE_NAME).apply()).execute());
 
         replaceMethod(mainClass(), mainMethod);
-        success(format(GENERATED_MAIN_METHOD, mainClass().getName()));
+        success(format(GENERATED_MAIN_METHOD, mainClass().getFullName()));
     }
 }

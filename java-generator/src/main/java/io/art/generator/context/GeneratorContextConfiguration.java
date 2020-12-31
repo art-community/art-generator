@@ -19,7 +19,7 @@ public class GeneratorContextConfiguration {
     private final JavacElements elements;
     private final ExistedClass mainClass;
     private final ExistedMethod mainMethod;
-    private final ExistedMethod modelMethod;
+    private final ExistedMethod configureMethod;
     @Singular("exitedClass")
     private final Map<String, ExistedClass> existedClasses;
 }

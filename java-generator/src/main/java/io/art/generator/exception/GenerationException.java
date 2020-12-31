@@ -14,6 +14,6 @@ public class GenerationException extends RuntimeException {
     }
 
     public String write() {
-        return format(GENERATION_EXCEPTION_MESSAGE_FORMAT, getStackTraceAsString(this));
+        return format(GENERATION_FAILED_MESSAGE_FORMAT, getStackTraceAsString(this));
     }
 }

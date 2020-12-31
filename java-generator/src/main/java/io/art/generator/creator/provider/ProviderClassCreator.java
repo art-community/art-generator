@@ -1,6 +1,7 @@
 package io.art.generator.creator.provider;
 
 import io.art.core.collection.*;
+import io.art.generator.caller.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.*;
 import lombok.experimental.*;
@@ -22,6 +23,7 @@ import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static java.util.Arrays.*;
+import javax.lang.model.element.*;
 
 @UtilityClass
 public class ProviderClassCreator {
@@ -30,30 +32,44 @@ public class ProviderClassCreator {
 
         stream(IMPORTING_CLASSES).map(ImportModel::classImport).forEach(providerClass::addImport);
 
-        NewField modelField = newField()
-                .name(MODEL_STATIC_NAME)
-                .modifiers(PRIVATE | FINAL | STATIC)
-                .type(MODULE_MODEL_TYPE)
-                .initializer(() -> method(DECORATE_NAME)
-                        .addArguments(method(type(mainClass().asClass()), modelMethod().getName()).apply())
-                        .apply());
-
-        NewMethod modelMethod = newMethod()
-                .name(PROVIDE_NAME)
-                .modifiers(PUBLIC | FINAL | STATIC)
-                .returnType(MODULE_MODEL_TYPE)
-                .statement(() -> returnVariable(MODEL_STATIC_NAME));
-
         ImmutableArray<NewClass> mappers = implementTypeMappers(collectModelTypes(model.getServerModel()));
         success(GENERATED_MAPPERS);
+
         NewMethod serverModel = implementServerModel(model.getServerModel());
         success(GENERATED_SERVICE_SPECIFICATIONS);
 
         return providerClass
-                .field(modelField)
-                .method(modelMethod)
+                .field(createModelField())
+                .method(createModelMethod())
                 .method(createDecorateMethod())
                 .inners(mappers)
                 .method(serverModel);
+    }
+
+    private NewMethod createModelMethod() {
+        return newMethod()
+                .name(PROVIDE_NAME)
+                .modifiers(PUBLIC | FINAL | STATIC)
+                .returnType(MODULE_MODEL_TYPE)
+                .statement(() -> returnVariable(MODEL_STATIC_NAME));
+    }
+
+    private NewField createModelField() {
+        MethodCaller configureStatic = method(type(mainClass().asClass()), configureMethod().getName());
+
+        MethodCaller singletonMethod = method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
+                .addArgument(classReference(mainClass().asClass()))
+                .addArgument(newReference(type(mainClass().asClass())));
+        MethodCaller configureSingleton = method(singletonMethod.apply(), configureMethod().getName());
+
+        return newField()
+                .name(MODEL_STATIC_NAME)
+                .modifiers(PRIVATE | FINAL | STATIC)
+                .type(MODULE_MODEL_TYPE)
+                .initializer(() -> method(DECORATE_NAME)
+                        .addArguments(configureMethod().getDeclaration().getModifiers().getFlags().contains(Modifier.STATIC)
+                                ? configureStatic.apply()
+                                : configureSingleton.apply())
+                        .apply());
     }
 }
