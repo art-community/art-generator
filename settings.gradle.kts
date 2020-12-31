@@ -54,5 +54,5 @@ val artModules = listOf(
 
 artModules.forEach { module ->
     include(module)
-    project(":$module").projectDir = file("${artDirectory}$module")
+    project(":$module").projectDir = file("${artDirectory}/$module")
 }
