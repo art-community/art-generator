@@ -2,7 +2,7 @@ package io.art.generator.collector;
 
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
-import io.art.model.implementation.*;
+import io.art.model.implementation.server.*;
 import lombok.experimental.*;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.collection.ImmutableSet.*;

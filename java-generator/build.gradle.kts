@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":launcher"))
     implementation(project(":core"))
     implementation(project(":server"))
+    implementation(project(":communicator"))
     implementation(project(":value"))
     implementation(project(":model"))
 }

@@ -52,9 +52,22 @@ public class JavacService {
         return newObject(classType, List.nil());
     }
 
+    public JCNewClass newObject(String className) {
+        return newObject(className, List.nil());
+    }
+
 
     public JCNewClass newObject(TypeModel classType, List<JCExpression> arguments) {
         return maker().NewClass(null, List.nil(), classType.generateFullType(), arguments, null);
+    }
+
+    public JCNewClass newObject(String className, List<JCExpression> arguments) {
+        return maker().NewClass(null, List.nil(), ident(className), arguments, null);
+    }
+
+
+    public JCNewClass newObject(String className, java.util.List<JCExpression> arguments) {
+        return newObject(className, List.from(arguments));
     }
 
     public JCNewClass newObject(TypeModel classType, java.util.List<JCExpression> arguments) {

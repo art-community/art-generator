@@ -3,7 +3,7 @@ package io.art.generator.creator.provider;
 import io.art.core.collection.*;
 import io.art.generator.caller.*;
 import io.art.generator.model.*;
-import io.art.model.implementation.*;
+import io.art.model.implementation.module.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.caller.MethodCaller.*;
@@ -14,6 +14,7 @@ import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.decorate.DecorateMethodCreator.*;
+import static io.art.generator.implementor.CommunicatorModelImplementor.*;
 import static io.art.generator.implementor.MappersImplementor.*;
 import static io.art.generator.implementor.ServerModelImplementor.*;
 import static io.art.generator.logger.GeneratorLogger.*;
@@ -38,12 +39,16 @@ public class ProviderClassCreator {
         NewMethod serverModel = implementServerModel(model.getServerModel());
         success(GENERATED_SERVICE_SPECIFICATIONS);
 
+        NewMethod communicatorModel = implementCommunicator(model.getCommunicatorModel());
+        success(GENERATED_COMMUNICATOR_PROXIES);
+
         return providerClass
                 .field(createModelField())
                 .method(createModelMethod())
                 .method(createDecorateMethod())
                 .inners(mappers)
-                .method(serverModel);
+                .method(serverModel)
+                .method(communicatorModel);
     }
 
     private NewMethod createModelMethod() {

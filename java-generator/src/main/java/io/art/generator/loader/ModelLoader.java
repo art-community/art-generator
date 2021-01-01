@@ -2,7 +2,7 @@ package io.art.generator.loader;
 
 import io.art.generator.exception.*;
 import io.art.model.configurator.*;
-import io.art.model.implementation.*;
+import io.art.model.implementation.module.*;
 import lombok.experimental.*;
 import static io.art.core.singleton.SingletonsRegistry.*;
 import static io.art.core.wrapper.ExceptionWrapper.*;

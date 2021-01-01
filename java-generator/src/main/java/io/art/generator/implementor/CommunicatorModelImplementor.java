@@ -6,6 +6,7 @@ import io.art.core.constants.*;
 import io.art.generator.exception.*;
 import io.art.generator.formater.*;
 import io.art.generator.model.*;
+import io.art.model.implementation.communicator.*;
 import io.art.model.implementation.server.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
@@ -36,24 +37,23 @@ import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 
 @UtilityClass
-public class ServerModelImplementor {
-    public NewMethod implementServerModel(ServerModel serverModel) {
-        TypeModel registryType = SERVICE_SPECIFICATION_REGISTRY_TYPE;
-        NewMethod servicesMethod = newMethod()
-                .name(SERVICES_NAME)
-                .parameter(newParameter(SERVER_MODEL_TYPE, SERVER_MODEL_NAME))
+public class CommunicatorModelImplementor {
+    public NewMethod implementCommunicator(CommunicatorModel communicatorModel) {
+        TypeModel registryType = COMMUNICATOR_PROXY_REGISTRY_TYPE;
+        NewMethod communicatorsMethod = newMethod()
+                .name(COMMUNICATORS_NAME)
+                .parameter(newParameter(COMMUNICATOR_MODEL_TYPE, COMMUNICATOR_MODEL_NAME))
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
-        ImmutableMap<String, ServiceModel> services = serverModel.getServices();
-        services.values().forEach(serviceModel -> servicesMethod.statement(() -> maker().Exec(executeRegisterMethod(servicesMethod, serviceModel))));
-        return servicesMethod.statement(() -> returnVariable(REGISTRY_NAME));
+        ImmutableMap<String, CommunicatorSpecificationModel> communicators = communicatorModel.getCommunicators();
+        communicators.values().forEach(specificationModel -> communicatorsMethod.statement(() -> maker().Exec(executeRegisterMethod(specificationModel))));
+        return communicatorsMethod.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
-    private JCMethodInvocation executeRegisterMethod(NewMethod servicesMethod, ServiceModel serviceModel) {
-        JCMethodInvocation specificationBuilder = executeServiceSpecificationBuilder(servicesMethod, serviceModel.getServiceClass());
+    private JCMethodInvocation executeRegisterMethod(CommunicatorSpecificationModel specificationModel) {
         return method(REGISTRY_NAME, REGISTER_NAME)
-                .addArguments(literal(serviceModel.getServiceClass().getSimpleName()), specificationBuilder)
+                .addArguments(literal(specificationModel.getImplementationInterface().getSimpleName()), newObject(specificationModel.getImplementationInterface() + PROXY_CLASS_SUFFIX))
                 .apply();
     }
 

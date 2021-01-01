@@ -1,5 +1,6 @@
 package io.art.generator.constants;
 
+import io.art.communicator.registry.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.core.lazy.*;
@@ -8,7 +9,9 @@ import io.art.generator.model.*;
 import io.art.launcher.*;
 import io.art.model.configurator.*;
 import io.art.model.customizer.*;
-import io.art.model.implementation.*;
+import io.art.model.implementation.communicator.*;
+import io.art.model.implementation.module.*;
+import io.art.model.implementation.server.*;
 import io.art.server.implementation.*;
 import io.art.server.model.*;
 import io.art.server.registry.*;
@@ -77,7 +80,9 @@ public interface GeneratorConstants {
             Map.class.getName(),
 
             LazyValue.class.getName(),
-            SingletonsRegistry.class.getName()
+            SingletonsRegistry.class.getName(),
+
+            CommunicatorProxyRegistry.class.getName()
     };
 
     interface Names {
@@ -96,15 +101,18 @@ public interface GeneratorConstants {
         String CONFIGURATOR_NAME = "configurator";
         String MODULE_MODEL_NAME = "moduleModel";
         String SERVER_MODEL_NAME = "serverModel";
+        String COMMUNICATOR_MODEL_NAME = "communicatorModel";
         String MODEL_STATIC_NAME = "MODEL";
         String MAIN_METHOD_ARGUMENTS_NAME = "arguments";
         String SERVICES_NAME = "services";
+        String COMMUNICATORS_NAME = "communicators";
         String REGISTRY_NAME = "registry";
         String REGISTER_NAME = "register";
         String IS_NAME = "is";
         String GET_NAME = "get";
         String SET_NAME = "set";
         String SINGLETON_NAME = "singleton";
+        String PROXY_CLASS_SUFFIX = "Proxy";
     }
 
     interface Annotations {
@@ -141,6 +149,7 @@ public interface GeneratorConstants {
         String GENERATED_MAIN_METHOD = "Generated main method for existed main class: {0}";
         String GENERATED_MAPPERS = "All mappers were successfully generated";
         String GENERATED_SERVICE_SPECIFICATIONS = "All service specifications were successfully generated";
+        String GENERATED_COMMUNICATOR_PROXIES = "All communicator proxies were successfully generated";
     }
 
     interface MappersConstants {
@@ -305,6 +314,7 @@ public interface GeneratorConstants {
         TypeModel MODULE_CONFIGURATOR_TYPE = type(ModuleModelConfigurator.class);
 
         TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
+        TypeModel COMMUNICATOR_MODEL_TYPE = type(CommunicatorModel.class);
 
         TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerCustomizer.class);
         TypeModel MODULE_CUSTOMIZER_TYPE = type(ModuleCustomizer.class);
@@ -314,6 +324,8 @@ public interface GeneratorConstants {
         TypeModel SERVICE_METHOD_IMPLEMENTATION_TYPE = type(ServiceMethodImplementation.class);
         TypeModel SERVICE_SPECIFICATION_REGISTRY_TYPE = type(ServiceSpecificationRegistry.class);
         TypeModel METHOD_PROCESSING_MODE_TYPE = type(MethodProcessingMode.class);
+
+        TypeModel COMMUNICATOR_PROXY_REGISTRY_TYPE = type(CommunicatorProxyRegistry.class);
 
         TypeModel MODULE_LAUNCHER_TYPE = type(ModuleLauncher.class);
         TypeModel STRING_ARRAY_TYPE = type(String[].class);
