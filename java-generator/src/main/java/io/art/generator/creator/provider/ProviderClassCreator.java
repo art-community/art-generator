@@ -36,10 +36,10 @@ public class ProviderClassCreator {
         ImmutableArray<NewClass> mappers = implementTypeMappers(collectModelTypes(model.getServerModel()));
         success(GENERATED_MAPPERS);
 
-        NewMethod serverModel = implementServerModel(model.getServerModel());
+        NewMethod servicesMethod = implementServicesMethod(model.getServerModel());
         success(GENERATED_SERVICE_SPECIFICATIONS);
 
-        NewMethod communicatorModel = implementCommunicator(model.getCommunicatorModel());
+        NewMethod communicatorsMethod = implementCommunicatorsMethod(model.getCommunicatorModel());
         success(GENERATED_COMMUNICATOR_PROXIES);
 
         return providerClass
@@ -47,8 +47,8 @@ public class ProviderClassCreator {
                 .method(createModelMethod())
                 .method(createDecorateMethod())
                 .inners(mappers)
-                .method(serverModel)
-                .method(communicatorModel);
+                .method(servicesMethod)
+                .method(communicatorsMethod);
     }
 
     private NewMethod createModelMethod() {

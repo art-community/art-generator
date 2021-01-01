@@ -37,7 +37,7 @@ import java.lang.reflect.*;
 
 @UtilityClass
 public class ServerModelImplementor {
-    public NewMethod implementServerModel(ServerModel serverModel) {
+    public NewMethod implementServicesMethod(ServerModel serverModel) {
         TypeModel registryType = SERVICE_SPECIFICATION_REGISTRY_TYPE;
         NewMethod servicesMethod = newMethod()
                 .name(SERVICES_NAME)

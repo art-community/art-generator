@@ -12,6 +12,7 @@ import static io.art.generator.service.JavacService.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
 import java.util.*;
+import java.util.function.*;
 
 @Builder
 public class MethodCaller {
@@ -94,5 +95,13 @@ public class MethodCaller {
 
     public JCExpressionStatement execute() {
         return maker().Exec(apply());
+    }
+
+    public MethodCaller next(String method) {
+        return next(method, UnaryOperator.identity());
+    }
+
+    public MethodCaller next(String method, UnaryOperator<MethodCaller> caller) {
+        return caller.apply(method(apply(), method));
     }
 }

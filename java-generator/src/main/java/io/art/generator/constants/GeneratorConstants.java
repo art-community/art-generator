@@ -82,7 +82,9 @@ public interface GeneratorConstants {
             LazyValue.class.getName(),
             SingletonsRegistry.class.getName(),
 
-            CommunicatorProxyRegistry.class.getName()
+            CommunicatorProxyRegistry.class.getName(),
+            CommunicatorModel.class.getName(),
+            CommunicatorCustomizer.class.getName()
     };
 
     interface Names {
@@ -96,6 +98,7 @@ public interface GeneratorConstants {
         String CUSTOMIZE_NAME = "customize";
         String CONFIGURE_NAME = "configure";
         String SERVER_NAME = "server";
+        String COMMUNICATOR_NAME = "communicator";
         String PROVIDE_NAME = "provide";
         String MODEL_NAME = "model";
         String CONFIGURATOR_NAME = "configurator";
@@ -301,6 +304,7 @@ public interface GeneratorConstants {
     interface ModelMethods {
         String IMPLEMENT_NAME = "implement";
         String GET_SERVER_MODEL = "getServerModel";
+        String GET_COMMUNICATOR_MODEL = "getCommunicatorModel";
     }
 
     interface TypeModels {
@@ -317,6 +321,7 @@ public interface GeneratorConstants {
         TypeModel COMMUNICATOR_MODEL_TYPE = type(CommunicatorModel.class);
 
         TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerCustomizer.class);
+        TypeModel COMMUNICATOR_CUSTOMIZER_TYPE = type(CommunicatorCustomizer.class);
         TypeModel MODULE_CUSTOMIZER_TYPE = type(ModuleCustomizer.class);
 
         TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);

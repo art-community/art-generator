@@ -30,6 +30,10 @@ public class DecorateMethodCreator {
                         .name(SERVER_MODEL_NAME)
                         .type(SERVER_MODEL_TYPE)
                         .initializer(() -> method(MODULE_MODEL_NAME, GET_SERVER_MODEL).apply()).generate())
+                .statement(() -> newVariable()
+                        .name(COMMUNICATOR_MODEL_NAME)
+                        .type(COMMUNICATOR_MODEL_TYPE)
+                        .initializer(() -> method(MODULE_MODEL_NAME, GET_COMMUNICATOR_MODEL).apply()).generate())
                 .statement(() -> returnMethodCall(customizeMethod()));
     }
 
@@ -40,7 +44,11 @@ public class DecorateMethodCreator {
     private JCLambda customizerLambda() {
         return newLambda()
                 .parameter(newParameter(MODULE_CUSTOMIZER_TYPE, CUSTOMIZER_NAME))
-                .expression(() -> method(CUSTOMIZER_NAME, SERVER_NAME).addArguments(serverLambda()).apply())
+                .expression(() ->
+                        method(CUSTOMIZER_NAME, SERVER_NAME).addArguments(serverLambda())
+                                .next(COMMUNICATOR_NAME, communicator -> communicator.addArguments(communicatorLambda()))
+                                .apply()
+                )
                 .generate();
     }
 
@@ -50,6 +58,17 @@ public class DecorateMethodCreator {
                 .expression(() -> method(SERVER_NAME, REGISTRY_NAME)
                         .addArguments(method(SERVICES_NAME)
                                 .addArguments(ident(SERVER_MODEL_NAME))
+                                .apply())
+                        .apply())
+                .generate();
+    }
+
+    private JCLambda communicatorLambda() {
+        return newLambda()
+                .parameter(newParameter(COMMUNICATOR_CUSTOMIZER_TYPE, COMMUNICATOR_NAME))
+                .expression(() -> method(COMMUNICATOR_NAME, REGISTRY_NAME)
+                        .addArguments(method(COMMUNICATORS_NAME)
+                                .addArguments(ident(COMMUNICATOR_MODEL_NAME))
                                 .apply())
                         .apply())
                 .generate();

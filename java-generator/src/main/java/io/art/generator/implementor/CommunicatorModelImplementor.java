@@ -38,7 +38,7 @@ import java.lang.reflect.*;
 
 @UtilityClass
 public class CommunicatorModelImplementor {
-    public NewMethod implementCommunicator(CommunicatorModel communicatorModel) {
+    public NewMethod implementCommunicatorsMethod(CommunicatorModel communicatorModel) {
         TypeModel registryType = COMMUNICATOR_PROXY_REGISTRY_TYPE;
         NewMethod communicatorsMethod = newMethod()
                 .name(COMMUNICATORS_NAME)
@@ -52,8 +52,9 @@ public class CommunicatorModelImplementor {
     }
 
     private JCMethodInvocation executeRegisterMethod(CommunicatorSpecificationModel specificationModel) {
+        String proxyClassName = specificationModel.getImplementationInterface().getSimpleName() + PROXY_CLASS_SUFFIX;
         return method(REGISTRY_NAME, REGISTER_NAME)
-                .addArguments(literal(specificationModel.getImplementationInterface().getSimpleName()), newObject(specificationModel.getImplementationInterface() + PROXY_CLASS_SUFFIX))
+                .addArguments(literal(specificationModel.getImplementationInterface().getSimpleName()), newObject(proxyClassName))
                 .apply();
     }
 

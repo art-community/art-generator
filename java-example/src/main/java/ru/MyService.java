@@ -2,14 +2,12 @@ package ru;
 
 import lombok.experimental.*;
 import reactor.core.publisher.*;
-import static io.art.communicator.module.CommunicatorModule.communicator;
 import static io.art.logging.LoggingModule.*;
 
 @UtilityClass
 public class MyService {
     public void myMethod1() {
         logger(MyService.class).info("myMethod1");
-        communicator(MyClient.class).myMethod1();
     }
 
     public void myMethod2(Request request) {
