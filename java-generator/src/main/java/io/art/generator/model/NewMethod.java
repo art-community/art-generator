@@ -29,7 +29,7 @@ public class NewMethod {
 
     private Set<ImportModel> classImports = set();
 
-    private java.util.List<NewParameter> parameters = new LinkedList<>();
+    private java.util.Set<NewParameter> parameters = set();
     private java.util.List<Supplier<JCStatement>> statements = new LinkedList<>();
 
     public NewMethod addImport(ImportModel importModel) {
@@ -63,11 +63,12 @@ public class NewMethod {
     public static NewMethod overrideMethod(Method declaration) {
         TypeModel returnTypeModel = type(declaration.getGenericReturnType());
         List<TypeModel> parameterTypeModels = stream(declaration.getGenericParameterTypes()).map(TypeModel::type).collect(toList());
+        Set<NewParameter> parameters = stream(declaration.getParameters()).map(parameter -> newParameter(type(parameter.getParameterizedType()), parameter.getName())).collect(toSet());
         NewMethod method = newMethod()
                 .returnType(returnTypeModel)
                 .name(declaration.getName())
                 .modifiers(PUBLIC)
-                .parameters(stream(declaration.getParameters()).map(parameter -> newParameter(type(parameter.getParameterizedType()), parameter.getName())).collect(toList()));
+                .parameters(parameters);
         if (!returnTypeModel.isJdk()) {
             method.addImport(classImport(returnTypeModel.getFullName()));
         }

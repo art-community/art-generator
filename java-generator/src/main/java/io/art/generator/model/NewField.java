@@ -7,6 +7,8 @@ import io.art.core.factory.*;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.util.List.*;
+import static io.art.core.checker.NullityChecker.let;
+import static io.art.core.checker.NullityChecker.orNull;
 import static java.util.stream.Collectors.*;
 import static io.art.generator.context.GeneratorContext.*;
 import java.util.*;
@@ -17,6 +19,7 @@ import java.util.function.*;
 @Accessors(fluent = true)
 public class NewField {
     private String name;
+    private boolean fromConstructor;
     private long modifiers;
     private TypeModel type;
     private Supplier<JCExpression> initializer;
@@ -38,8 +41,8 @@ public class NewField {
         JCModifiers modifiers = maker().Modifiers(this.modifiers);
         Name name = elements().getName(this.name);
         JCExpression type = this.type.generateFullType();
-        JCExpression initializationExpression = initializer.get();
-        return maker().VarDef(modifiers, name, type, initializationExpression);
+        JCExpression initializationExpression = let(initializer, Supplier::get);
+        return maker().VarDef(modifiers, name, type, orNull(initializationExpression, () -> !fromConstructor));
     }
 
     public static NewField newField() {

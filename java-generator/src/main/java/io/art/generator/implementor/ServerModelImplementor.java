@@ -86,11 +86,11 @@ public class ServerModelImplementor {
             }
             switch (inputMode) {
                 case BLOCKING:
-                    methodBuilder.method(INPUT_MAPPER, toModelMapper(parameterTypes[0]));
+                    methodBuilder.method(INPUT_MAPPER_NAME, toModelMapper(parameterTypes[0]));
                     break;
                 case MONO:
                 case FLUX:
-                    methodBuilder.method(INPUT_MAPPER, toModelMapper(((ParameterizedType) parameterTypes[0]).getActualTypeArguments()[0]));
+                    methodBuilder.method(INPUT_MAPPER_NAME, toModelMapper(((ParameterizedType) parameterTypes[0]).getActualTypeArguments()[0]));
                     break;
             }
         }
@@ -101,17 +101,17 @@ public class ServerModelImplementor {
             }
             switch (outputMode) {
                 case BLOCKING:
-                    methodBuilder.method(OUTPUT_MAPPER, fromModelMapper(returnType));
+                    methodBuilder.method(OUTPUT_MAPPER_NAME, fromModelMapper(returnType));
                     break;
                 case MONO:
                 case FLUX:
-                    methodBuilder.method(OUTPUT_MAPPER, fromModelMapper(((ParameterizedType) returnType).getActualTypeArguments()[0]));
+                    methodBuilder.method(OUTPUT_MAPPER_NAME, fromModelMapper(((ParameterizedType) returnType).getActualTypeArguments()[0]));
                     break;
             }
         }
         return methodBuilder
-                .method(INPUT_MODE, select(methodProcessingModeType, inputMode.name()))
-                .method(OUTPUT_MODE, select(methodProcessingModeType, outputMode.name()))
+                .method(INPUT_MODE_NAME, select(methodProcessingModeType, inputMode.name()))
+                .method(OUTPUT_MODE_NAME, select(methodProcessingModeType, outputMode.name()))
                 .method(IMPLEMENTATION, executeHandlerMethod(serviceClass, serviceMethod))
                 .generate(builder -> decorateMethodBuilder(builder, serviceClass, serviceMethod));
     }

@@ -31,9 +31,6 @@ import java.time.*;
 import java.util.*;
 
 public interface GeneratorConstants {
-    String CLASS_KEYWORD = "class";
-    String JAVA_PACKAGE_PREFIX = "java.";
-
     String[] IMPORTING_CLASSES = new String[]{
             PrimitiveMapping.class.getName(),
             ArrayMapping.class.getName(),
@@ -90,11 +87,17 @@ public interface GeneratorConstants {
     };
 
     interface Names {
+        String CLASS_KEYWORD = "class";
+        String JAVA_PACKAGE_PREFIX = "java.";
+        String CONSTRUCTOR_NAME = "<init>";
+        String THIS_NAME = "this";
+
         String PROVIDER_CLASS_SUFFIX = "Provider";
         String PROXY_CLASS_SUFFIX = "Proxy";
 
         String SPECIFICATION_FIELD_PREFIX = "specification";
 
+        String IMPLEMENT_NAME = "implement";
         String COMMUNICATE_METHOD_NAME = "communicate";
         String BUILDER_METHOD_NAME = "builder";
         String BUILD_METHOD_NAME = "build";
@@ -122,6 +125,10 @@ public interface GeneratorConstants {
         String GET_NAME = "get";
         String SET_NAME = "set";
         String SINGLETON_NAME = "singleton";
+        String INPUT_MODE_NAME = "inputMode";
+        String OUTPUT_MODE_NAME = "outputMode";
+        String INPUT_MAPPER_NAME = "inputMapper";
+        String OUTPUT_MAPPER_NAME = "outputMapper";
     }
 
     interface Annotations {
@@ -147,7 +154,7 @@ public interface GeneratorConstants {
     }
 
     interface LoggingMessages {
-        String RECOMPILE_ARGUMENTS = "Executing recompliation with arguments: {0}";
+        String RECOMPILE_ARGUMENTS = "Executing recompilation with arguments: {0}";
         String RECOMPILATION_STARTED = "Recompilation started";
         String RECOMPILATION_COMPLETED = "Recompilation completed";
         String GENERATION_STARTED = "Generation started";
@@ -296,10 +303,6 @@ public interface GeneratorConstants {
         String SERVICE_ID = "serviceId";
         String METHOD_ID = "methodId";
         String METHOD = "method";
-        String INPUT_MODE = "inputMode";
-        String OUTPUT_MODE = "outputMode";
-        String INPUT_MAPPER = "inputMapper";
-        String OUTPUT_MAPPER = "outputMapper";
         String IMPLEMENTATION = "implementation";
         String RUNNER_METHOD = "runner";
         String HANDLER_METHOD = "handler";
@@ -307,8 +310,11 @@ public interface GeneratorConstants {
         String CONSUMER_METHOD = "consumer";
     }
 
+    interface CommunicatorSpecificationMethods {
+        String COMMUNICATOR_ID = "communicatorId";
+    }
+
     interface ModelMethods {
-        String IMPLEMENT_NAME = "implement";
         String GET_SERVER_MODEL = "getServerModel";
         String GET_COMMUNICATOR_MODEL = "getCommunicatorModel";
     }

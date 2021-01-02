@@ -6,7 +6,7 @@ import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.tools.javac.code.TypeTag.*;
-import static io.art.generator.constants.GeneratorConstants.*;
+import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.TypeModel.*;
 
@@ -103,5 +103,9 @@ public class JavacService {
 
     public JCMemberReference newReference(TypeModel type) {
         return maker().Reference(NEW, null, type.generateBaseType(), null);
+    }
+
+    public JCStatement assign(JCExpression left, JCExpression right) {
+        return maker().Exec(maker().Assign(left, right));
     }
 }
