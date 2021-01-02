@@ -6,6 +6,7 @@ import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.value.constants.ValueConstants.ValueType.*;
 import lombok.experimental.*;
+import reactor.core.publisher.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
@@ -50,6 +51,14 @@ public class TypeInspector {
 
     public boolean isBoolean(Type fieldType) {
         return fieldType == boolean.class;
+    }
+
+    public boolean isFlux(Type fieldType) {
+        return extractClass(fieldType).isAssignableFrom(Flux.class);
+    }
+
+    public boolean isMono(Type fieldType) {
+        return extractClass(fieldType).isAssignableFrom(Mono.class);
     }
 
     public boolean isLazyValue(Type fieldType) {

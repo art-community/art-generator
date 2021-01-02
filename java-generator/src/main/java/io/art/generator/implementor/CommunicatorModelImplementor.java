@@ -18,6 +18,7 @@ import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.creator.communicator.CommunicatorImplementationCreator.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.creator.registry.RegistryVariableCreator.*;
@@ -54,14 +55,14 @@ public class CommunicatorModelImplementor {
             CommunicatorSpecificationModel specificationModel = entry.getValue();
             NewClass proxyClass = newClass()
                     .field(newField().modifiers(PRIVATE).type(COMMUNICATOR_MODEL_TYPE).name(COMMUNICATOR_MODEL_NAME).byConstructor(true))
-                    .name(specificationModel.getImplementationInterface().getSimpleName() + PROXY_CLASS_SUFFIX)
+                    .name(specificationModel.getProxyClass().getSimpleName() + PROXY_CLASS_SUFFIX)
                     .modifiers(PUBLIC | STATIC)
-                    .implement(type(specificationModel.getImplementationInterface()));
-            Method[] declaredMethods = specificationModel.getImplementationInterface().getDeclaredMethods();
+                    .implement(type(specificationModel.getProxyClass()));
+            Method[] declaredMethods = specificationModel.getProxyClass().getDeclaredMethods();
             for (int i = 0; i < declaredMethods.length; i++) {
                 Method method = declaredMethods[i];
                 if (method.getParameterCount() > 1) {
-                    throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(specificationModel.getImplementationInterface(), method));
+                    throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(specificationModel.getProxyClass(), method));
                 }
                 String specificationFieldName = SPECIFICATION_FIELD_PREFIX + i;
                 proxyClass.field(newField()
@@ -93,7 +94,7 @@ public class CommunicatorModelImplementor {
     }
 
     private JCMethodInvocation executeRegisterMethod(CommunicatorSpecificationModel specificationModel) {
-        Class<?> implementationInterface = specificationModel.getImplementationInterface();
+        Class<?> implementationInterface = specificationModel.getProxyClass();
         String proxyClassName = implementationInterface.getSimpleName() + PROXY_CLASS_SUFFIX;
         return method(REGISTRY_NAME, REGISTER_NAME)
                 .addArguments(literal(implementationInterface.getSimpleName()), newObject(proxyClassName, com.sun.tools.javac.util.List.of(ident(COMMUNICATOR_MODEL_NAME))))
@@ -104,7 +105,7 @@ public class CommunicatorModelImplementor {
         TypeModel methodProcessingModeType = METHOD_PROCESSING_MODE_TYPE;
         Type[] parameterTypes = method.getGenericParameterTypes();
         if (parameterTypes.length > 1) {
-            throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(specificationModel.getImplementationInterface(), method));
+            throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(specificationModel.getProxyClass(), method));
         }
         Type returnType = method.getGenericReturnType();
         MethodProcessingMode inputMode = isEmpty(parameterTypes) ? BLOCKING : calculateProcessingMode(parameterTypes[0]);
@@ -135,7 +136,8 @@ public class CommunicatorModelImplementor {
         return specificationBuilder
                 .method(INPUT_MODE_NAME, select(methodProcessingModeType, inputMode.name()))
                 .method(OUTPUT_MODE_NAME, select(methodProcessingModeType, outputMode.name()))
-                .generate(builder -> decorateMethodBuilder(builder, specificationModel.getImplementationInterface()));
+                .method(IMPLEMENTATION_NAME, createCommunicatorImplementation(specificationModel, method).generate())
+                .generate(builder -> decorateMethodBuilder(builder, specificationModel.getProxyClass()));
     }
 
     private JCMethodInvocation decorateMethodBuilder(JCMethodInvocation builder, Class<?> interfaceClass) {
@@ -143,5 +145,4 @@ public class CommunicatorModelImplementor {
                 .addArguments(literal(interfaceClass.getSimpleName()), builder)
                 .apply();
     }
-
 }

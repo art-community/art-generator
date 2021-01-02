@@ -112,7 +112,7 @@ public class ServerModelImplementor {
         return methodBuilder
                 .method(INPUT_MODE_NAME, select(methodProcessingModeType, inputMode.name()))
                 .method(OUTPUT_MODE_NAME, select(methodProcessingModeType, outputMode.name()))
-                .method(IMPLEMENTATION, executeHandlerMethod(serviceClass, serviceMethod))
+                .method(IMPLEMENTATION_NAME, executeHandlerMethod(serviceClass, serviceMethod))
                 .generate(builder -> decorateMethodBuilder(builder, serviceClass, serviceMethod));
     }
 

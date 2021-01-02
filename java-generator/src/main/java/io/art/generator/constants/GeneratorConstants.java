@@ -13,6 +13,8 @@ import io.art.model.customizer.*;
 import io.art.model.implementation.communicator.*;
 import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
+import io.art.rsocket.communicator.*;
+import io.art.rsocket.constants.*;
 import io.art.server.implementation.*;
 import io.art.server.model.*;
 import io.art.server.registry.*;
@@ -43,8 +45,8 @@ public interface GeneratorConstants {
             Entity.class.getName(),
             Primitive.class.getName(),
             Value.class.getName(),
-            ValueType.class.getName().replace(DOLLAR, DOT),
-            PrimitiveType.class.getName().replace(DOLLAR, DOT),
+            ValueType.class.getName(),
+            PrimitiveType.class.getName(),
 
             ValueToModelMapper.class.getName(),
             ValueFromModelMapper.class.getName(),
@@ -83,7 +85,9 @@ public interface GeneratorConstants {
             CommunicatorProxyRegistry.class.getName(),
             CommunicatorModel.class.getName(),
             CommunicatorCustomizer.class.getName(),
-            CommunicatorSpecification.class.getName()
+            CommunicatorSpecification.class.getName(),
+            RsocketCommunicatorImplementation.class.getName(),
+            RsocketModuleConstants.CommunicationMode.class.getName()
     };
 
     interface Names {
@@ -98,6 +102,7 @@ public interface GeneratorConstants {
         String SPECIFICATION_FIELD_PREFIX = "specification";
 
         String IMPLEMENT_NAME = "implement";
+        String IMPLEMENTATION_NAME = "implementation";
         String COMMUNICATE_METHOD_NAME = "communicate";
         String BUILDER_METHOD_NAME = "builder";
         String BUILD_METHOD_NAME = "build";
@@ -303,7 +308,6 @@ public interface GeneratorConstants {
         String SERVICE_ID = "serviceId";
         String METHOD_ID = "methodId";
         String METHOD = "method";
-        String IMPLEMENTATION = "implementation";
         String RUNNER_METHOD = "runner";
         String HANDLER_METHOD = "handler";
         String PRODUCER_METHOD = "producer";
@@ -312,6 +316,12 @@ public interface GeneratorConstants {
 
     interface CommunicatorSpecificationMethods {
         String COMMUNICATOR_ID = "communicatorId";
+    }
+
+    interface RsocketImplementationMethods {
+        String CONNECTOR_ID = "connectorId";
+        String SERVICE_METHOD_NAME = "serviceMethod";
+        String COMMUNICATION_MODE = "communicationMode";
     }
 
     interface ModelMethods {
@@ -344,12 +354,14 @@ public interface GeneratorConstants {
 
         TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
         TypeModel SERVICE_METHOD_SPECIFICATION_TYPE = type(ServiceMethodSpecification.class);
+        TypeModel SERVICE_METHOD_IDENTIFIER_TYPE = type(ServiceMethodIdentifier.class);
         TypeModel SERVICE_METHOD_IMPLEMENTATION_TYPE = type(ServiceMethodImplementation.class);
         TypeModel SERVICE_SPECIFICATION_REGISTRY_TYPE = type(ServiceSpecificationRegistry.class);
         TypeModel METHOD_PROCESSING_MODE_TYPE = type(MethodProcessingMode.class);
 
         TypeModel COMMUNICATOR_PROXY_REGISTRY_TYPE = type(CommunicatorProxyRegistry.class);
         TypeModel COMMUNICATOR_SPECIFICATION_TYPE = type(CommunicatorSpecification.class);
-
+        TypeModel RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE = type(RsocketCommunicatorImplementation.class);
+        TypeModel RSOCKET_COMMUNICATION_MODE_TYPE = type(RsocketModuleConstants.CommunicationMode.class);
     }
 }

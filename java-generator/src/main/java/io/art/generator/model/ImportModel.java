@@ -26,7 +26,7 @@ public class ImportModel {
     }
 
     public static ImportModel classImport(String importText) {
-        return new ImportModel(importText, false, false);
+        return new ImportModel(importText.replace(DOLLAR, DOT), false, false);
     }
 
     public static ImportModel staticClassImport(String importText) {

@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":communicator"))
     implementation(project(":value"))
     implementation(project(":model"))
+    implementation(project(":rsocket"))
 }
 
 
