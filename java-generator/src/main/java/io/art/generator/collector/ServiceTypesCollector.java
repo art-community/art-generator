@@ -17,6 +17,7 @@ public class ServiceTypesCollector {
         ImmutableMap<String, ServiceModel> services = serverModel.getServices();
         for (ServiceModel service : services.values()) {
             for (Method method : service.getServiceClass().getDeclaredMethods()) {
+                if (method.isSynthetic()) continue;
                 Type[] parameterTypes = method.getGenericParameterTypes();
                 if (parameterTypes.length > 1) {
                     throw new ValidationException(formatSignature(service.getServiceClass(), method), MORE_THAN_ONE_PARAMETER);

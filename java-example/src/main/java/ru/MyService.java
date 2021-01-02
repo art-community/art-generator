@@ -3,6 +3,7 @@ package ru;
 import lombok.experimental.*;
 import reactor.core.publisher.*;
 import static io.art.logging.LoggingModule.*;
+import java.util.*;
 
 @UtilityClass
 public class MyService {
@@ -68,7 +69,8 @@ public class MyService {
 
     public Flux<Response> myMethod13() {
         logger(MyService.class).info("myMethod13");
-        return Flux.just(Response.builder().build());
+        Flux<Response> generate = Flux.generate(sink -> sink.next(Response.builder().FFloat(new Random().nextFloat()).build()));
+        return generate;
     }
 
     public Flux<Response> myMethod14(Request request) {
