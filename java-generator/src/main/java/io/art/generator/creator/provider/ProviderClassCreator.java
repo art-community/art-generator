@@ -40,6 +40,7 @@ public class ProviderClassCreator {
         success(GENERATED_SERVICE_SPECIFICATIONS);
 
         NewMethod communicatorsMethod = implementCommunicatorsMethod(model.getCommunicatorModel());
+        ImmutableArray<NewClass> communicatorProxies = implementCommunicatorProxies(model.getCommunicatorModel());
         success(GENERATED_COMMUNICATOR_PROXIES);
 
         return providerClass
@@ -47,6 +48,7 @@ public class ProviderClassCreator {
                 .method(createModelMethod())
                 .method(createDecorateMethod())
                 .inners(mappers)
+                .inners(communicatorProxies)
                 .method(servicesMethod)
                 .method(communicatorsMethod);
     }

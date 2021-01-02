@@ -1,6 +1,7 @@
 package io.art.generator.constants;
 
 import io.art.communicator.registry.*;
+import io.art.communicator.specification.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.core.lazy.*;
@@ -84,14 +85,20 @@ public interface GeneratorConstants {
 
             CommunicatorProxyRegistry.class.getName(),
             CommunicatorModel.class.getName(),
-            CommunicatorCustomizer.class.getName()
+            CommunicatorCustomizer.class.getName(),
+            CommunicatorSpecification.class.getName()
     };
 
     interface Names {
-        String PROVIDER_CLASS_NAME_SUFFIX = "Provider";
+        String PROVIDER_CLASS_SUFFIX = "Provider";
+        String PROXY_CLASS_SUFFIX = "Proxy";
+
+        String SPECIFICATION_FIELD_PREFIX = "specification";
+
+        String COMMUNICATE_METHOD_NAME = "communicate";
         String BUILDER_METHOD_NAME = "builder";
-        String CUSTOMIZER_NAME = "customizer";
         String BUILD_METHOD_NAME = "build";
+        String CUSTOMIZER_NAME = "customizer";
         String MAIN_NAME = "main";
         String LAUNCH_NAME = "launch";
         String DECORATE_NAME = "decorate";
@@ -115,7 +122,6 @@ public interface GeneratorConstants {
         String GET_NAME = "get";
         String SET_NAME = "set";
         String SINGLETON_NAME = "singleton";
-        String PROXY_CLASS_SUFFIX = "Proxy";
     }
 
     interface Annotations {
@@ -308,6 +314,10 @@ public interface GeneratorConstants {
     }
 
     interface TypeModels {
+        TypeModel STRING_ARRAY_TYPE = type(String[].class);
+        TypeModel VOID_TYPE = type(void.class);
+        TypeModel SINGLETON_REGISTRY_TYPE = type(SingletonsRegistry .class);
+
         TypeModel ENTITY_TYPE = type(Entity.class);
         TypeModel BINARY_MAPPING_TYPE = type(BinaryMapping.class);
         TypeModel ARRAY_MAPPING_TYPE = type(ArrayMapping.class);
@@ -315,14 +325,16 @@ public interface GeneratorConstants {
         TypeModel ENTITY_MAPPING_TYPE = type(EntityMapping.class);
 
         TypeModel MODULE_MODEL_TYPE = type(ModuleModel.class);
-        TypeModel MODULE_CONFIGURATOR_TYPE = type(ModuleModelConfigurator.class);
-
         TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
         TypeModel COMMUNICATOR_MODEL_TYPE = type(CommunicatorModel.class);
+
+        TypeModel MODULE_CONFIGURATOR_TYPE = type(ModuleModelConfigurator.class);
 
         TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerCustomizer.class);
         TypeModel COMMUNICATOR_CUSTOMIZER_TYPE = type(CommunicatorCustomizer.class);
         TypeModel MODULE_CUSTOMIZER_TYPE = type(ModuleCustomizer.class);
+
+        TypeModel MODULE_LAUNCHER_TYPE = type(ModuleLauncher.class);
 
         TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
         TypeModel SERVICE_METHOD_SPECIFICATION_TYPE = type(ServiceMethodSpecification.class);
@@ -331,11 +343,7 @@ public interface GeneratorConstants {
         TypeModel METHOD_PROCESSING_MODE_TYPE = type(MethodProcessingMode.class);
 
         TypeModel COMMUNICATOR_PROXY_REGISTRY_TYPE = type(CommunicatorProxyRegistry.class);
+        TypeModel COMMUNICATOR_SPECIFICATION_TYPE = type(CommunicatorSpecification.class);
 
-        TypeModel MODULE_LAUNCHER_TYPE = type(ModuleLauncher.class);
-        TypeModel STRING_ARRAY_TYPE = type(String[].class);
-        TypeModel VOID_TYPE = type(void.class);
-
-        TypeModel SINGLETON_REGISTRY_TYPE = type(SingletonsRegistry .class);
     }
 }

@@ -80,7 +80,10 @@ public class ServerModelImplementor {
                 .method(SERVICE_ID, literal(serviceClass.getSimpleName()))
                 .method(METHOD_ID, literal(serviceMethod.getName()));
         if (!isEmpty(parameterTypes)) {
-            servicesMethod.addImport(classImport(type(parameterTypes[0]).getName()));
+            TypeModel parameterTypeModel = type(parameterTypes[0]);
+            if (!parameterTypeModel.isJdk()) {
+                servicesMethod.addImport(classImport(parameterTypeModel.getFullName()));
+            }
             switch (inputMode) {
                 case BLOCKING:
                     methodBuilder.method(INPUT_MAPPER, toModelMapper(parameterTypes[0]));
@@ -92,7 +95,10 @@ public class ServerModelImplementor {
             }
         }
         if (!void.class.equals(returnType)) {
-            servicesMethod.addImport(classImport(type(returnType).getName()));
+            TypeModel returnTypeModel = type(returnType);
+            if (!returnTypeModel.isJdk()) {
+                servicesMethod.addImport(classImport(returnTypeModel.getName()));
+            }
             switch (outputMode) {
                 case BLOCKING:
                     methodBuilder.method(OUTPUT_MAPPER, fromModelMapper(returnType));

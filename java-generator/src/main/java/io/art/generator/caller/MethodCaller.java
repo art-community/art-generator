@@ -64,6 +64,10 @@ public class MethodCaller {
         return addArguments(fixedArrayOf(argument));
     }
 
+    public MethodCaller addArgument(String argument) {
+        return addArgument(ident(argument));
+    }
+
     public MethodCaller addArguments(Collection<JCExpression> arguments) {
         this.arguments.addAll(arguments);
         return this;

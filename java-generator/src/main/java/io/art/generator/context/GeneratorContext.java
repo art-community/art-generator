@@ -68,11 +68,11 @@ public class GeneratorContext {
     }
 
     public static String providerClassName() {
-        return mainClass.get().getName() + PROVIDER_CLASS_NAME_SUFFIX;
+        return mainClass.get().getName() + PROVIDER_CLASS_SUFFIX;
     }
 
     public static String providerClassFullName() {
-        return mainClass.get().getFullName() + PROVIDER_CLASS_NAME_SUFFIX;
+        return mainClass.get().getFullName() + PROVIDER_CLASS_SUFFIX;
     }
 
     public static ExistedMethod mainMethod() {
