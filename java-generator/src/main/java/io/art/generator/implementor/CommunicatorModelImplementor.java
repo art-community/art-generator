@@ -53,7 +53,7 @@ public class CommunicatorModelImplementor {
         for (Map.Entry<String, CommunicatorSpecificationModel> entry : communicatorModel.getCommunicators().entrySet()) {
             CommunicatorSpecificationModel specificationModel = entry.getValue();
             NewClass proxyClass = newClass()
-                    .field(newField().modifiers(PRIVATE).type(COMMUNICATOR_MODEL_TYPE).name(COMMUNICATOR_MODEL_NAME).fromConstructor(true))
+                    .field(newField().modifiers(PRIVATE).type(COMMUNICATOR_MODEL_TYPE).name(COMMUNICATOR_MODEL_NAME).byConstructor(true))
                     .name(specificationModel.getImplementationInterface().getSimpleName() + PROXY_CLASS_SUFFIX)
                     .modifiers(PUBLIC | STATIC)
                     .implement(type(specificationModel.getImplementationInterface()));
@@ -68,7 +68,7 @@ public class CommunicatorModelImplementor {
                         .type(COMMUNICATOR_SPECIFICATION_TYPE)
                         .name(specificationFieldName)
                         .modifiers(PRIVATE)
-                        .fromConstructor(true)
+                        .byConstructor(true)
                         .initializer(() -> specificationBuilder(specificationModel, method)));
 
                 NewMethod methodImplementation = overrideMethod(method);
