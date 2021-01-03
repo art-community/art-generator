@@ -8,6 +8,7 @@ import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.collection.ImmutableSet.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.formater.SignatureFormatter.*;
+import static io.art.generator.inspector.ServiceMethodsInspector.*;
 import java.lang.reflect.*;
 
 @UtilityClass
@@ -16,8 +17,7 @@ public class ServiceTypesCollector {
         ImmutableSet.Builder<Type> types = immutableSetBuilder();
         ImmutableMap<String, ServiceModel> services = serverModel.getServices();
         for (ServiceModel service : services.values()) {
-            for (Method method : service.getServiceClass().getDeclaredMethods()) {
-                if (method.isSynthetic()) continue;
+            for (Method method : getServiceMethods(service.getServiceClass())) {
                 Type[] parameterTypes = method.getGenericParameterTypes();
                 if (parameterTypes.length > 1) {
                     throw new ValidationException(formatSignature(service.getServiceClass(), method), MORE_THAN_ONE_PARAMETER);

@@ -11,7 +11,7 @@ import java.lang.reflect.*;
 public class ServiceMethodsInspector {
     public ImmutableArray<Method> getServiceMethods(Class<?> serviceClass) {
         return stream(serviceClass.getDeclaredMethods())
-                .filter(method -> isPublic(method.getModifiers()))
+                .filter(method -> isPublic(method.getModifiers()) && !method.isSynthetic())
                 .collect(immutableArrayCollector());
     }
 }
