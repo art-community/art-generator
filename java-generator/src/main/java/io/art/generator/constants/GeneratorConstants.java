@@ -330,6 +330,11 @@ public interface GeneratorConstants {
         String COMMUNICATOR_ID = "communicatorId";
     }
 
+    interface CommunicatorProxyMethods {
+        String GET_IMPLEMENTATIONS = "getImplementations";
+        String GET_PROTOCOL = "getProtocol";
+    }
+
     interface RsocketImplementationMethods {
         String CONNECTOR_ID = "connectorId";
         String SETUP_PAYLOAD = "setupPayload";
