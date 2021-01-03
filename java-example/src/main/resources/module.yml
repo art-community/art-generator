@@ -1,11 +1,13 @@
 rsocket:
   server:
+    logging: true
     transport:
       port: 5678
       mode: ws
   communicator:
     connectors:
       MyClient:
+        logging: true
         transport:
           mode: ws
           ws:
