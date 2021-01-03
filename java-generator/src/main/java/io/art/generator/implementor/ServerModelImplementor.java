@@ -8,7 +8,8 @@ import io.art.generator.formater.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.server.*;
 import lombok.experimental.*;
-import static com.sun.tools.javac.code.Flags.*;
+import static com.sun.tools.javac.code.Flags.PRIVATE;
+import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
@@ -31,6 +32,7 @@ import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
+import static java.lang.reflect.Modifier.isStatic;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 
@@ -128,7 +130,10 @@ public class ServerModelImplementor {
         if (void.class.equals(serviceMethod.getReturnType()) && isEmpty(serviceMethod.getParameterTypes())) {
             name = RUNNER;
         }
-        JCMemberReference reference = invokeReference(type(serviceClass), (serviceMethod.getName()));
+        JCExpression owner = isStatic(serviceMethod.getModifiers())
+                ? type(serviceClass).generateBaseType()
+                : method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME).addArguments(classReference(serviceClass)).addArguments(newReference(type(serviceClass))).apply();
+        JCMemberReference reference = invokeReference(owner, (serviceMethod.getName()));
         JCLiteral serviceName = literal(serviceClass.getSimpleName());
         JCLiteral methodName = literal(serviceMethod.getName());
         return method(SERVICE_METHOD_IMPLEMENTATION_TYPE, name)

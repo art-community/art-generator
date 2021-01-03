@@ -107,6 +107,10 @@ public class JavacService {
         return maker().Reference(INVOKE, name(name), type.generateBaseType(), null);
     }
 
+    public JCMemberReference invokeReference(JCExpression owner, String name) {
+        return maker().Reference(INVOKE, name(name), owner, null);
+    }
+
     public JCMemberReference newReference(TypeModel type) {
         return maker().Reference(NEW, null, type.generateBaseType(), null);
     }
