@@ -27,8 +27,8 @@ import java.util.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ToModelMapperCreator {
-    private final static ToModelMapperByBuilderCreator builderCreator = new ToModelMapperByBuilderCreator();
-    private final static ToModelMapperByInitializerCreator initializerCreator = new ToModelMapperByInitializerCreator();
+    private static final ToModelMapperByBuilderCreator builderCreator = new ToModelMapperByBuilderCreator();
+    private static final ToModelMapperByInitializerCreator initializerCreator = new ToModelMapperByInitializerCreator();
 
     public static JCExpression toModelMapper(Type type) {
         String generatedMapper = getGeneratedMapper(type);

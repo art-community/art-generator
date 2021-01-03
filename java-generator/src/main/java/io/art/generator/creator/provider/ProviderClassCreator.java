@@ -47,10 +47,10 @@ public class ProviderClassCreator {
                 .field(createModelField())
                 .method(createModelMethod())
                 .method(createDecorateMethod())
-                .inners(mappers)
-                .inners(communicatorProxies)
                 .method(servicesMethod)
-                .method(communicatorsMethod);
+                .method(communicatorsMethod)
+                .inners(mappers)
+                .inners(communicatorProxies);
     }
 
     private NewMethod createModelMethod() {

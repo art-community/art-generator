@@ -13,7 +13,7 @@ import java.lang.reflect.*;
 
 @UtilityClass
 public class ServiceTypesCollector {
-    public ImmutableSet<Type> collectModelTypes(ServerModel serverModel) {
+    public ImmutableSet<Type> collectModelTypes(ServerModuleModel serverModel) {
         ImmutableSet.Builder<Type> types = immutableSetBuilder();
         ImmutableMap<String, ServiceModel> services = serverModel.getServices();
         for (ServiceModel service : services.values()) {

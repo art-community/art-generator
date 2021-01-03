@@ -11,7 +11,6 @@ import io.art.generator.model.*;
 import io.art.generator.service.*;
 import io.art.model.implementation.communicator.*;
 import io.art.rsocket.communicator.*;
-import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;
@@ -60,49 +59,50 @@ public class CommunicatorModelImplementor {
 
     public ImmutableArray<NewClass> implementCommunicatorProxies(CommunicatorModuleModel communicatorModel) {
         ImmutableArray.Builder<NewClass> proxies = ImmutableArray.immutableArrayBuilder();
-        communicatorModel.getRsocketCommunicators().values().forEach(model -> proxies.add(implementRsocketProxy(model)));
+        communicatorModel.getRsocketCommunicators().values().forEach(model -> proxies.add(createRsocketProxy(model)));
         return proxies.build();
     }
 
-    private NewClass implementRsocketProxy(RsocketCommunicatorModel communicatorModel) {
+    private NewClass createRsocketProxy(RsocketCommunicatorModel communicatorModel) {
         Function<Method, NewBuilder> implementationBuilder = (Method method) -> createRsocketCommunicatorImplementation(communicatorModel, method);
         return createNewProxyClass(communicatorModel, RsocketCommunicator.class, implementationBuilder);
     }
 
-    private NewField createSpecificationField(String specificationFieldName) {
-        return newField()
-                .type(COMMUNICATOR_SPECIFICATION_TYPE)
-                .name(specificationFieldName)
-                .modifiers(PRIVATE)
-                .byConstructor(true);
-    }
-
-    @SneakyThrows
     private NewClass createNewProxyClass(CommunicatorModel communicatorModel, Class<?> communicatorClass, Function<Method, NewBuilder> implementationFactory) {
-        Method getImplementationsMethod = CommunicatorProxy.class.getDeclaredMethod(GET_IMPLEMENTATIONS);
-        Method getProtocolMethod = CommunicatorProxy.class.getDeclaredMethod(GET_PROTOCOL);
         JCExpression protocolExpression = select(type(communicatorModel.getProtocol().getClass()), communicatorModel.getProtocol().name());
         TypeModel proxyType = type(parameterizedType(CommunicatorProxy.class, arrayOf(communicatorClass)));
         TypeModel implementationsReturnType = type(parameterizedType(ImmutableArray.class, arrayOf(communicatorClass)));
+        NewMethod getImplementations = overrideMethod(GET_IMPLEMENTATIONS_METHOD, implementationsReturnType).statement(() -> returnMethodCall(REGISTRY_NAME, GET_NAME));
+        NewMethod getProtocol = overrideMethod(GET_PROTOCOL_METHOD).statement(() -> returnExpression(protocolExpression));
         NewClass proxy = newClass()
-                .field(newField().modifiers(PRIVATE).type(COMMUNICATOR_MODEL_TYPE).name(COMMUNICATOR_MODEL_NAME).byConstructor(true))
+                .field(newField()
+                        .modifiers(PRIVATE)
+                        .type(COMMUNICATOR_MODEL_TYPE)
+                        .name(COMMUNICATOR_MODEL_NAME)
+                        .byConstructor(true))
                 .name(communicatorModel.getProxyClass().getSimpleName() + PROXY_CLASS_SUFFIX)
                 .modifiers(PUBLIC | STATIC)
                 .implement(type(communicatorModel.getProxyClass()))
                 .implement(proxyType)
                 .field(createRegistryField(communicatorClass))
-                .method(overrideMethod(getImplementationsMethod, implementationsReturnType).statement(() -> returnMethodCall(REGISTRY_NAME, GET_NAME)))
-                .method(overrideMethod(getProtocolMethod).statement(() -> returnExpression(protocolExpression)));
+                .method(getImplementations)
+                .method(getProtocol);
         Method[] declaredMethods = communicatorModel.getProxyClass().getDeclaredMethods();
-        for (int i = 0; i < declaredMethods.length; i++) {
-            Method method = declaredMethods[i];
+        for (int index = 0; index < declaredMethods.length; index++) {
+            Method method = declaredMethods[index];
             if (method.isDefault() || method.isSynthetic()) continue;
             if (method.getParameterCount() > 1) {
                 throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(communicatorModel.getProxyClass(), method));
             }
-            String specificationFieldName = SPECIFICATION_FIELD_PREFIX + i;
-            proxy.field(createSpecificationField(specificationFieldName).initializer(() -> executeSpecificationBuilder(communicatorModel, method, implementationFactory.apply(method))));
-            proxy.method(createProxyMethod(method, specificationFieldName));
+            String specificationFieldName = SPECIFICATION_FIELD_PREFIX + index;
+            NewField specificationField = newField()
+                    .type(COMMUNICATOR_SPECIFICATION_TYPE)
+                    .name(specificationFieldName)
+                    .modifiers(PRIVATE)
+                    .byConstructor(true)
+                    .initializer(() -> executeSpecificationBuilder(communicatorModel, method, implementationFactory.apply(method)));
+            NewMethod proxyMethod = createProxyMethod(method, specificationFieldName);
+            proxy.field(specificationField).method(proxyMethod);
         }
         return proxy;
     }

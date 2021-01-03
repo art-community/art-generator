@@ -18,7 +18,7 @@ import java.util.concurrent.*;
 @Builder
 @Accessors(fluent = true)
 public class ExtractedProperty {
-    private final static Map<Type, ImmutableArray<ExtractedProperty>> CACHE = new ConcurrentHashMap<>();
+    private static final Map<Type, ImmutableArray<ExtractedProperty>> CACHE = new ConcurrentHashMap<>();
 
     private final String name;
     private final Type type;

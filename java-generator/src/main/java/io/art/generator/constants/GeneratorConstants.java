@@ -29,8 +29,10 @@ import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import reactor.core.publisher.*;
 import static io.art.core.factory.SetFactory.*;
+import static io.art.core.wrapper.ExceptionWrapper.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.value.constants.ValueConstants.*;
+import java.lang.reflect.*;
 import java.time.*;
 import java.util.*;
 
@@ -72,7 +74,7 @@ public interface GeneratorConstants {
 
             ModuleModel.class.getName(),
             ModuleModelConfigurator.class.getName(),
-            ServerModel.class.getName(),
+            ServerModuleModel.class.getName(),
             ServerModelConfigurator.class.getName(),
 
             ModuleCustomizer.class.getName(),
@@ -331,8 +333,8 @@ public interface GeneratorConstants {
     }
 
     interface CommunicatorProxyMethods {
-        String GET_IMPLEMENTATIONS = "getImplementations";
-        String GET_PROTOCOL = "getProtocol";
+        Method GET_IMPLEMENTATIONS_METHOD = wrapException(() -> CommunicatorProxy.class.getDeclaredMethod("getImplementations"));
+        Method GET_PROTOCOL_METHOD = wrapException(() -> CommunicatorProxy.class.getDeclaredMethod("getProtocol"));
     }
 
     interface RsocketImplementationMethods {
@@ -358,7 +360,7 @@ public interface GeneratorConstants {
         TypeModel ENTITY_MAPPING_TYPE = type(EntityMapping.class);
 
         TypeModel MODULE_MODEL_TYPE = type(ModuleModel.class);
-        TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
+        TypeModel SERVER_MODEL_TYPE = type(ServerModuleModel.class);
         TypeModel COMMUNICATOR_MODEL_TYPE = type(CommunicatorModuleModel.class);
 
         TypeModel MODULE_CONFIGURATOR_TYPE = type(ModuleModelConfigurator.class);

@@ -6,8 +6,8 @@ import static java.lang.Math.*;
 import java.util.*;
 
 public class NamingService {
-    private final static Random RANDOM = new Random();
-    private final static Map<String, Integer> counter = concurrentHashMap();
+    private static final Random RANDOM = new Random();
+    private static final Map<String, Integer> counter = concurrentHashMap();
 
     public static String randomName(String prefix) {
         return prefix + abs(RANDOM.nextInt());
