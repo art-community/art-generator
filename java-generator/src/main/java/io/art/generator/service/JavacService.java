@@ -2,6 +2,7 @@ package io.art.generator.service;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
+import com.sun.tools.javac.util.List;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
@@ -9,6 +10,7 @@ import static com.sun.tools.javac.code.TypeTag.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.TypeModel.*;
+import java.util.*;
 
 @UtilityClass
 public class JavacService {
@@ -40,10 +42,14 @@ public class JavacService {
     }
 
     public JCReturn returnMethodCall(String variable, String method, List<JCExpression> arguments) {
-        return returnMethodCall(maker().Apply(List.nil(), select(variable, method), arguments));
+        return returnExpression(maker().Apply(List.nil(), select(variable, method), arguments));
     }
 
-    public JCReturn returnMethodCall(JCExpression method) {
+    public JCReturn returnMethodCall(String variable, String method, JCExpression... arguments) {
+        return returnExpression(maker().Apply(List.nil(), select(variable, method), List.from(arguments)));
+    }
+
+    public JCReturn returnExpression(JCExpression method) {
         return maker().Return(method);
     }
 
@@ -66,11 +72,11 @@ public class JavacService {
     }
 
 
-    public JCNewClass newObject(String className, java.util.List<JCExpression> arguments) {
+    public JCNewClass newObject(String className, Collection<JCExpression> arguments) {
         return newObject(className, List.from(arguments));
     }
 
-    public JCNewClass newObject(TypeModel classType, java.util.List<JCExpression> arguments) {
+    public JCNewClass newObject(TypeModel classType, Collection<JCExpression> arguments) {
         return newObject(classType, List.from(arguments));
     }
 

@@ -1,5 +1,6 @@
 rsocket:
   server:
+    logging: true
     transport:
       port: 5678
       mode: ws

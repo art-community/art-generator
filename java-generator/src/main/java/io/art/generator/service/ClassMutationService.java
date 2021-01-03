@@ -77,7 +77,7 @@ public class ClassMutationService {
         ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
         List<JCTree> currentPackageDefinitions = existedClass.getPackageUnit().defs;
         newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toCollection(ArrayFactory::dynamicArray)));
-        java.util.List<JCImport> imports = newImports
+        newImports
                 .stream()
                 .distinct()
                 .map(newImport -> maker().Import(
@@ -87,8 +87,7 @@ public class ClassMutationService {
                         ),
                         newImport.isAsStatic())
                 )
-                .collect(toCollection(ArrayFactory::dynamicArray));
-        newPackageDefinitions.addAll(imports);
+                .forEach(newPackageDefinitions::add);
         newPackageDefinitions.add(currentPackageDefinitions.last());
         return newPackageDefinitions;
     }

@@ -15,7 +15,6 @@ import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.LoggingMessages.*;
-import static io.art.generator.constants.GeneratorConstants.ModelMethods.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
 import static io.art.generator.constants.GeneratorConstants.ServiceSpecificationMethods.*;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
@@ -113,31 +112,27 @@ public class ServerModelImplementor {
                 .method(INPUT_MODE_NAME, select(methodProcessingModeType, inputMode.name()))
                 .method(OUTPUT_MODE_NAME, select(methodProcessingModeType, outputMode.name()))
                 .method(IMPLEMENTATION_NAME, executeHandlerMethod(serviceClass, serviceMethod))
-                .generate(builder -> decorateMethodBuilder(builder, serviceClass, serviceMethod));
+                .generate(builder -> method(SERVER_MODEL_NAME, IMPLEMENT_NAME)
+                        .addArguments(literal(serviceClass.getSimpleName()), literal(serviceMethod.getName()), builder)
+                        .apply());
     }
 
     private JCMethodInvocation executeHandlerMethod(Class<?> serviceClass, Method serviceMethod) {
-        String name = HANDLER_METHOD;
+        String name = HANDLER;
         if (isEmpty(serviceMethod.getParameterTypes())) {
-            name = PRODUCER_METHOD;
+            name = PRODUCER;
         }
         if (void.class.equals(serviceMethod.getReturnType())) {
-            name = CONSUMER_METHOD;
+            name = CONSUMER;
         }
         if (void.class.equals(serviceMethod.getReturnType()) && isEmpty(serviceMethod.getParameterTypes())) {
-            name = RUNNER_METHOD;
+            name = RUNNER;
         }
         JCMemberReference reference = invokeReference(type(serviceClass), (serviceMethod.getName()));
         JCLiteral serviceName = literal(serviceClass.getSimpleName());
         JCLiteral methodName = literal(serviceMethod.getName());
         return method(SERVICE_METHOD_IMPLEMENTATION_TYPE, name)
                 .addArguments(reference, serviceName, methodName)
-                .apply();
-    }
-
-    private JCMethodInvocation decorateMethodBuilder(JCMethodInvocation builder, Class<?> serviceClass, Method serviceMethod) {
-        return method(SERVER_MODEL_NAME, IMPLEMENT_NAME)
-                .addArguments(literal(serviceClass.getSimpleName()), literal(serviceMethod.getName()), builder)
                 .apply();
     }
 }

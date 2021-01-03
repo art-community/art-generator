@@ -3,6 +3,7 @@ package io.art.generator.caller;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
+import io.art.core.factory.*;
 import io.art.generator.model.*;
 import lombok.*;
 import static io.art.core.checker.EmptinessChecker.*;
@@ -81,19 +82,19 @@ public class MethodCaller {
     public JCTree.JCMethodInvocation apply() {
         if (isNull(classType) && isNull(owner)) {
             ListBuffer<JCExpression> parameters = new ListBuffer<>();
-            parameters.addAll(typeParameters.stream().map(TypeModel::generateFullType).collect(toList()));
+            parameters.addAll(typeParameters.stream().map(TypeModel::generateFullType).collect(toCollection(ArrayFactory::dynamicArray)));
             return maker().Apply(parameters.toList(), ident(method), arguments.toList());
         }
         if (isNull(classType)) {
             ListBuffer<JCExpression> parameters = new ListBuffer<>();
-            parameters.addAll(typeParameters.stream().map(TypeModel::generateFullType).collect(toList()));
+            parameters.addAll(typeParameters.stream().map(TypeModel::generateFullType).collect(toCollection(ArrayFactory::dynamicArray)));
             return maker().Apply(parameters.toList(), select(owner, method), arguments.toList());
         }
         if (isNotEmpty(classType.getParameters())) {
             return maker().Apply(classType.generateParameters(), select(classType, method), arguments.toList());
         }
         ListBuffer<JCExpression> parameters = new ListBuffer<>();
-        parameters.addAll(typeParameters.stream().map(TypeModel::generateFullType).collect(toList()));
+        parameters.addAll(typeParameters.stream().map(TypeModel::generateFullType).collect(toCollection(ArrayFactory::dynamicArray)));
         return maker().Apply(parameters.toList(), select(classType, method), arguments.toList());
     }
 

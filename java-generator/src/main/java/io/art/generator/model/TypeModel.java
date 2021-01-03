@@ -151,7 +151,7 @@ public class TypeModel {
         }
         List<JCExpression> expressions = parameters.stream()
                 .map(TypeModel::generateFullType)
-                .collect(toList());
+                .collect(toCollection(ArrayFactory::dynamicArray));
         return com.sun.tools.javac.util.List.from(expressions);
     }
 

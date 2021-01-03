@@ -5,6 +5,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
+import io.art.core.factory.*;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.util.List.*;
@@ -89,7 +90,7 @@ public class NewClass {
         ListBuffer<JCTree> definitions = fields.values().stream().map(NewField::generate).collect(toCollection(ListBuffer::new));
         methods.values().stream().map(NewMethod::generate).forEach(definitions::add);
         innerClasses.stream().map(NewClass::generate).forEach(definitions::add);
-        List<JCExpression> implementations = List.from(interfaceTypes.stream().map(TypeModel::generateFullType).collect(toList()));
+        List<JCExpression> implementations = List.from(interfaceTypes.stream().map(TypeModel::generateFullType).collect(toCollection(ArrayFactory::dynamicArray)));
         return maker().ClassDef(modifiers, name, nil(), null, implementations, definitions.toList());
     }
 

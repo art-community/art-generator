@@ -34,7 +34,7 @@ public class DecorateMethodCreator {
                         .name(COMMUNICATOR_MODEL_NAME)
                         .type(COMMUNICATOR_MODEL_TYPE)
                         .initializer(() -> method(MODULE_MODEL_NAME, GET_COMMUNICATOR_MODEL).apply()).generate())
-                .statement(() -> returnMethodCall(customizeMethod()));
+                .statement(() -> returnExpression(customizeMethod()));
     }
 
     private JCMethodInvocation customizeMethod() {

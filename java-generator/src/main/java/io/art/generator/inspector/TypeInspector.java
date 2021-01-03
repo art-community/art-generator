@@ -1,6 +1,7 @@
 package io.art.generator.inspector;
 
 import io.art.core.collection.*;
+import io.art.core.factory.*;
 import io.art.core.lazy.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
@@ -219,7 +220,7 @@ public class TypeInspector {
 
     public boolean hasConstructorWithAllProperties(Type type) {
         Class<?> rawClass = extractClass(type);
-        return matchConstructorArguments(rawClass, getConstructorProperties(rawClass).stream().map(ExtractedProperty::type).collect(toList()));
+        return matchConstructorArguments(rawClass, getConstructorProperties(rawClass).stream().map(ExtractedProperty::type).collect(toCollection(ArrayFactory::dynamicArray)));
     }
 
     public boolean matchConstructorArguments(Type type, List<Type> argumentTypes) {

@@ -1,10 +1,13 @@
 package io.art.generator.constants;
 
+import io.art.communicator.constants.*;
+import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
 import io.art.communicator.specification.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.core.lazy.*;
+import io.art.core.model.*;
 import io.art.core.singleton.*;
 import io.art.generator.model.*;
 import io.art.launcher.*;
@@ -15,8 +18,8 @@ import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
 import io.art.rsocket.communicator.*;
 import io.art.rsocket.constants.*;
+import io.art.rsocket.model.*;
 import io.art.server.implementation.*;
-import io.art.server.model.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
 import io.art.value.constants.ValueConstants.ValueType.*;
@@ -25,7 +28,6 @@ import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import reactor.core.publisher.*;
-import static io.art.core.constants.StringConstants.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.value.constants.ValueConstants.*;
@@ -34,6 +36,10 @@ import java.util.*;
 
 public interface GeneratorConstants {
     String[] IMPORTING_CLASSES = new String[]{
+            ImmutableMap.class.getName(),
+            ImmutableArray.class.getName(),
+            ImmutableSet.class.getName(),
+
             PrimitiveMapping.class.getName(),
             ArrayMapping.class.getName(),
             EntityMapping.class.getName(),
@@ -83,11 +89,16 @@ public interface GeneratorConstants {
             SingletonsRegistry.class.getName(),
 
             CommunicatorProxyRegistry.class.getName(),
-            CommunicatorModel.class.getName(),
+            CommunicatorModuleModel.class.getName(),
             CommunicatorCustomizer.class.getName(),
             CommunicatorSpecification.class.getName(),
-            RsocketCommunicatorImplementation.class.getName(),
-            RsocketModuleConstants.CommunicationMode.class.getName()
+            CommunicatorProxy.class.getName(),
+            CommunicatorModuleConstants.CommunicationProtocol.class.getName(),
+
+            RsocketCommunicator.class.getName(),
+            RsocketModuleConstants.CommunicationMode.class.getName(),
+            RsocketSetupPayload.class.getName(),
+            RsocketModuleConstants.RsocketProtocol.class.getName()
     };
 
     interface Names {
@@ -134,6 +145,7 @@ public interface GeneratorConstants {
         String OUTPUT_MODE_NAME = "outputMode";
         String INPUT_MAPPER_NAME = "inputMapper";
         String OUTPUT_MAPPER_NAME = "outputMapper";
+        String SERVICE_METHOD_NAME = "serviceMethod";
     }
 
     interface Annotations {
@@ -308,10 +320,10 @@ public interface GeneratorConstants {
         String SERVICE_ID = "serviceId";
         String METHOD_ID = "methodId";
         String METHOD = "method";
-        String RUNNER_METHOD = "runner";
-        String HANDLER_METHOD = "handler";
-        String PRODUCER_METHOD = "producer";
-        String CONSUMER_METHOD = "consumer";
+        String RUNNER = "runner";
+        String HANDLER = "handler";
+        String PRODUCER = "producer";
+        String CONSUMER = "consumer";
     }
 
     interface CommunicatorSpecificationMethods {
@@ -320,7 +332,7 @@ public interface GeneratorConstants {
 
     interface RsocketImplementationMethods {
         String CONNECTOR_ID = "connectorId";
-        String SERVICE_METHOD_NAME = "serviceMethod";
+        String SETUP_PAYLOAD = "setupPayload";
         String COMMUNICATION_MODE = "communicationMode";
     }
 
@@ -342,7 +354,7 @@ public interface GeneratorConstants {
 
         TypeModel MODULE_MODEL_TYPE = type(ModuleModel.class);
         TypeModel SERVER_MODEL_TYPE = type(ServerModel.class);
-        TypeModel COMMUNICATOR_MODEL_TYPE = type(CommunicatorModel.class);
+        TypeModel COMMUNICATOR_MODEL_TYPE = type(CommunicatorModuleModel.class);
 
         TypeModel MODULE_CONFIGURATOR_TYPE = type(ModuleModelConfigurator.class);
 
@@ -361,7 +373,8 @@ public interface GeneratorConstants {
 
         TypeModel COMMUNICATOR_PROXY_REGISTRY_TYPE = type(CommunicatorProxyRegistry.class);
         TypeModel COMMUNICATOR_SPECIFICATION_TYPE = type(CommunicatorSpecification.class);
-        TypeModel RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE = type(RsocketCommunicatorImplementation.class);
+        TypeModel RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE = type(RsocketCommunicator.class);
         TypeModel RSOCKET_COMMUNICATION_MODE_TYPE = type(RsocketModuleConstants.CommunicationMode.class);
+        TypeModel RSOCKET_SETUP_PAYLOAD_TYPE = type(RsocketSetupPayload.class);
     }
 }

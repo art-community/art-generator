@@ -2,7 +2,6 @@ package io.art.generator.service;
 
 import com.sun.tools.javac.api.*;
 import io.art.core.collection.*;
-import io.art.core.extensions.*;
 import io.art.core.factory.*;
 import io.art.generator.exception.*;
 import lombok.experimental.*;
@@ -10,7 +9,7 @@ import static com.sun.tools.javac.main.Main.Result.*;
 import static com.sun.tools.javac.main.Option.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.constants.ArrayConstants.*;
-import static io.art.core.extensions.StringExtensions.toCommaDelimitedString;
+import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.LoggingMessages.*;
 import static io.art.generator.constants.GeneratorConstants.ProcessorOptions.*;

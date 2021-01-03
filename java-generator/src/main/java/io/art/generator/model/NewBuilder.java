@@ -52,6 +52,6 @@ public class NewBuilder {
     @AllArgsConstructor
     private static class NamedMethodCall {
         private final String name;
-        private final java.util.List<JCExpression> expressions;
+        private final Collection<JCExpression> expressions;
     }
 }
