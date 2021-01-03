@@ -9,8 +9,12 @@ public class Example {
     @Configurator
     public static ModuleModelConfigurator configure() {
         return module(Example.class)
-                .onLoad(() -> communicator(MyClient.class).myMethod6(null))
-                .serve(server -> server.rsocket(MyService.class))
+                .onLoad(() -> {
+                    communicator(MyClient.class).myMethod6(null);
+                    communicator(MyClient.class).myMethod7(null);
+                    communicator(MyClient.class).myMethod8(null);
+                })
+                .serve(server -> server.rsocket(MyService.class, RsocketServiceModelConfigurator::enableLogging))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)));
     }
 
