@@ -9,7 +9,7 @@ public class Example {
     @Configurator
     public static ModuleModelConfigurator configure() {
         return module(Example.class)
-                .onLoad(() -> communicator(MyClient.class).myMethod1())
+                .onLoad(() -> communicator(MyClient.class).myMethod6(null))
                 .serve(server -> server.rsocket(MyService.class))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)));
     }

@@ -1,6 +1,6 @@
 package io.art.generator.creator.mapper;
 
-import io.art.value.constants.ValueConstants.ValueType.*;
+import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import lombok.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.factory.ArrayFactory.*;
