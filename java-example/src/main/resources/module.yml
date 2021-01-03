@@ -3,12 +3,13 @@ rsocket:
     logging: true
     transport:
       port: 5678
-      mode: ws
+      mode: tcp
   communicator:
     connectors:
       MyClient:
         logging: true
         transport:
-          mode: ws
-          ws:
-            baseUrl: "ws://127.0.0.1:5678"
+          mode: tcp
+          tcp:
+            host: 127.0.0.1
+            port: 5678

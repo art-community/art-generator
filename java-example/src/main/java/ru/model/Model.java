@@ -1,4 +1,4 @@
-package ru;
+package ru.model;
 
 import io.art.core.lazy.*;
 import lombok.*;

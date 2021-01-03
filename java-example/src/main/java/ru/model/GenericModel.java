@@ -1,4 +1,4 @@
-package ru;
+package ru.model;
 
 import lombok.*;
 import java.util.*;

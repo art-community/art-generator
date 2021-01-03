@@ -3,6 +3,8 @@ package ru;
 import lombok.experimental.*;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.*;
+import ru.model.*;
+import static io.art.communicator.module.CommunicatorModule.communicator;
 import static io.art.logging.LoggingModule.*;
 import java.time.*;
 import java.util.*;
@@ -11,6 +13,7 @@ import java.util.*;
 public class MyService {
     public void myMethod1() {
         logger(MyService.class).info("myMethod1");
+        communicator(MyClient.class).myMethod2(Request.builder().FBString("test").build());
     }
 
     public void myMethod2(Request request) {

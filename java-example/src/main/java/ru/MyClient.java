@@ -1,6 +1,7 @@
 package ru;
 
 import reactor.core.publisher.*;
+import ru.model.*;
 
 public interface MyClient {
     void myMethod1();
