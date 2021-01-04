@@ -132,7 +132,7 @@ public class CommunicatorModelImplementor {
         Class<?> implementationInterface = specificationModel.getProxyClass();
         String proxyClassName = implementationInterface.getSimpleName() + PROXY_CLASS_SUFFIX;
         return method(REGISTRY_NAME, REGISTER_NAME)
-                .addArguments(literal(implementationInterface.getSimpleName()), newObject(proxyClassName, com.sun.tools.javac.util.List.of(ident(COMMUNICATOR_MODEL_NAME))))
+                .addArguments(literal(implementationInterface.getSimpleName()), newObject(proxyClassName, ident(COMMUNICATOR_MODEL_NAME)))
                 .apply();
     }
 

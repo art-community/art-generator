@@ -154,7 +154,7 @@ public interface TypeConstants {
             .put(double.class, DOUBLE)
             .put(byte.class, BYTE)
             .put(float.class, FLOAT)
-            .put(char.class, STRING)
+            .put(Character.class, STRING)
             .put(Integer.class, INT)
             .put(Short.class, INT)
             .put(Long.class, LONG)
