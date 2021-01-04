@@ -54,7 +54,7 @@ public class MappersImplementor {
             TypeModel type = type(entry.getKey());
             NewClass mapping = newClass()
                     .name(entry.getValue())
-                    .modifiers(INTERFACE)
+                    .modifiers(PRIVATE | INTERFACE)
                     .field(newField()
                             .name(TO_MODEL_NAME)
                             .type(type(toType))

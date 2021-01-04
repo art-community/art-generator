@@ -81,7 +81,7 @@ public class CommunicatorModelImplementor {
                         .name(COMMUNICATOR_MODEL_NAME)
                         .byConstructor(true))
                 .name(communicatorModel.getProxyClass().getSimpleName() + PROXY_CLASS_SUFFIX)
-                .modifiers(PUBLIC | STATIC)
+                .modifiers(PRIVATE | STATIC)
                 .implement(type(communicatorModel.getProxyClass()))
                 .implement(proxyType)
                 .field(createRegistryField(communicatorClass))

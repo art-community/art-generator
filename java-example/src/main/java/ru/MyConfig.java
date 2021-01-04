@@ -3,8 +3,9 @@ package ru;
 import lombok.*;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MyConfig {
+    private final Integer integer;
     private final String value;
     private final MyConfig nested;
 }

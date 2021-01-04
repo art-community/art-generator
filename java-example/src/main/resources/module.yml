@@ -1,6 +1,11 @@
+parent:
+  value: "parent"
 value: "test"
+integer: 123
 nested:
   value: "nested"
+  nested:
+    value: "2level"
 rsocket:
   server:
     transport:

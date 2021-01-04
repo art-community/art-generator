@@ -51,7 +51,7 @@ public class ConfiguratorModelImplementor {
             String proxyClassName = configurationClass.getSimpleName() + PROXY_CLASS_SUFFIX;
             NewClass proxy = newClass()
                     .name(proxyClassName)
-                    .modifiers(PUBLIC | STATIC)
+                    .modifiers(PRIVATE | STATIC)
                     .implement(proxyType)
                     .method(createConfigureMethod(configurationClass, model.getCustomConfigurations()));
             proxies.add(proxy);
@@ -64,22 +64,7 @@ public class ConfiguratorModelImplementor {
         String proxyClassName = configurationClass.getSimpleName() + PROXY_CLASS_SUFFIX;
         ImmutableArray<ExtractedProperty> properties = getConstructorProperties(configurationClass);
         NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass));
-        List<JCTree.JCExpression> constructorParameters = dynamicArray();
-        for (ExtractedProperty property : properties) {
-            String source = CONFIGURE_METHOD.getParameters()[0].getName();
-            if (configurationClasses.contains(property.type())) {
-                JCMethodInvocation getNested = method(NULLITY_CHECKER_TYPE, LET_NAME)
-                        .addArguments(method(source, GET_NESTED).addArguments(literal(property.name())).apply())
-                        .addArguments(invokeReference(method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME).addArguments(classReference(proxyClassName), newReference(proxyClassName)).apply(), CONFIGURE_NAME))
-                        .apply();
-                constructorParameters.add(getNested);
-                continue;
-            }
-            JCMethodInvocation getSourceValue = method(source, selectConfigurationSourceMethod(property.type()))
-                    .addArgument(literal(property.name()))
-                    .apply();
-            constructorParameters.add(getSourceValue);
-        }
+        List<JCExpression> constructorParameters = getConstructorParameters(configurationClasses, properties, proxyClassName);
         return method.statement(() -> returnExpression(newObject(type(configurationClass), constructorParameters)));
     }
 
@@ -89,6 +74,27 @@ public class ConfiguratorModelImplementor {
                 .addArguments(classReference(configurationClass), method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
                         .addArguments(classReference(proxyClassName), newReference(proxyClassName))
                         .apply())
+                .apply();
+    }
+
+    public List<JCExpression> getConstructorParameters(ImmutableSet<Class<?>> configurationClasses, ImmutableArray<ExtractedProperty> properties, String proxyClassName) {
+        List<JCTree.JCExpression> constructorParameters = dynamicArray();
+        for (ExtractedProperty property : properties) {
+            constructorParameters.add(createConstructorParameter(configurationClasses, property, proxyClassName));
+        }
+        return constructorParameters;
+    }
+
+    private JCExpression createConstructorParameter(ImmutableSet<Class<?>> configurationClasses, ExtractedProperty property, String proxyClassName) {
+        String source = CONFIGURE_METHOD.getParameters()[0].getName();
+        if (configurationClasses.contains(property.type())) {
+            return method(NULLITY_CHECKER_TYPE, LET_NAME)
+                    .addArguments(method(source, GET_NESTED).addArguments(literal(property.name())).apply())
+                    .addArguments(invokeReference(method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME).addArguments(classReference(extractClass(property.type()).getSimpleName() + PROXY_CLASS_SUFFIX), newReference(extractClass(property.type()).getSimpleName() + PROXY_CLASS_SUFFIX)).apply(), CONFIGURE_NAME))
+                    .apply();
+        }
+        return method(source, selectConfigurationSourceMethod(property.type()))
+                .addArgument(literal(property.name()))
                 .apply();
     }
 }
