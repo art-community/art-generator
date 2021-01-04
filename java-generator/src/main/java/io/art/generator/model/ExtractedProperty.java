@@ -6,19 +6,19 @@ import lombok.*;
 import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
+import static io.art.core.factory.MapFactory.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.inspector.TypeInspector.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 @Getter
 @Builder
 @Accessors(fluent = true)
 public class ExtractedProperty {
-    private static final Map<Type, ImmutableArray<ExtractedProperty>> CACHE = new ConcurrentHashMap<>();
+    private static final Map<Type, ImmutableArray<ExtractedProperty>> CACHE = concurrentHashMap();
 
     private final String name;
     private final Type type;

@@ -3,10 +3,14 @@ package io.art.generator.service;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.core.collection.*;
+import io.art.core.factory.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.tools.javac.code.TypeTag.*;
+import static io.art.core.collection.ImmutableArray.emptyImmutableArray;
+import static io.art.core.factory.ArrayFactory.immutableArrayOf;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.TypeModel.*;
@@ -37,12 +41,12 @@ public class JavacService {
     }
 
 
-    public JCExpressionStatement execMethodCall(String variable, String method, List<JCExpression> arguments) {
-        return maker().Exec(maker().Apply(List.nil(), select(variable, method), arguments));
+    public JCExpressionStatement execMethodCall(String variable, String method, ImmutableArray<JCExpression> arguments) {
+        return maker().Exec(maker().Apply(List.nil(), select(variable, method), List.from(arguments)));
     }
 
-    public JCReturn returnMethodCall(String variable, String method, List<JCExpression> arguments) {
-        return returnExpression(maker().Apply(List.nil(), select(variable, method), arguments));
+    public JCReturn returnMethodCall(String variable, String method, ImmutableArray<JCExpression> arguments) {
+        return returnExpression(maker().Apply(List.nil(), select(variable, method), List.from(arguments)));
     }
 
     public JCReturn returnMethodCall(String variable, String method, JCExpression... arguments) {
@@ -55,29 +59,29 @@ public class JavacService {
 
 
     public JCNewClass newObject(TypeModel classType) {
-        return newObject(classType, List.nil());
+        return newObject(classType, emptyImmutableArray());
     }
 
     public JCNewClass newObject(String className) {
-        return newObject(className, List.nil());
+        return newObject(className, emptyImmutableArray());
     }
 
 
-    public JCNewClass newObject(TypeModel classType, List<JCExpression> arguments) {
-        return maker().NewClass(null, List.nil(), classType.generateFullType(), arguments, null);
+    public JCNewClass newObject(TypeModel classType, ImmutableArray<JCExpression> arguments) {
+        return maker().NewClass(null, List.nil(), classType.generateFullType(), List.from(arguments), null);
     }
 
-    public JCNewClass newObject(String className, List<JCExpression> arguments) {
-        return maker().NewClass(null, List.nil(), ident(className), arguments, null);
+    public JCNewClass newObject(String className, ImmutableArray<JCExpression> arguments) {
+        return maker().NewClass(null, List.nil(), ident(className), List.from(arguments), null);
     }
 
 
-    public JCNewClass newObject(String className, Collection<JCExpression> arguments) {
-        return newObject(className, List.from(arguments));
+    public JCNewClass newObject(String className, JCExpression... arguments) {
+        return newObject(className, immutableArrayOf(arguments));
     }
 
-    public JCNewClass newObject(TypeModel classType, Collection<JCExpression> arguments) {
-        return newObject(classType, List.from(arguments));
+    public JCNewClass newObject(TypeModel classType, JCExpression... arguments) {
+        return newObject(classType, immutableArrayOf(arguments));
     }
 
 

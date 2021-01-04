@@ -1,9 +1,8 @@
 package io.art.generator.caller;
 
-import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
-import io.art.core.factory.*;
+import io.art.core.collection.*;
 import io.art.generator.model.*;
 import lombok.*;
 import static io.art.core.checker.EmptinessChecker.*;
@@ -11,8 +10,6 @@ import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.JavacService.*;
 import static java.util.Objects.*;
-import static java.util.stream.Collectors.*;
-import java.util.*;
 import java.util.function.*;
 
 @Builder
@@ -48,53 +45,53 @@ public class MethodCaller {
 
 
     public MethodCaller addTypeParameter(TypeModel parameter) {
-        return addTypeParameters(fixedArrayOf(parameter));
+        return addTypeParameters(immutableArrayOf(parameter));
     }
 
-    public MethodCaller addTypeParameters(Collection<TypeModel> parameters) {
-        typeParameters.addAll(parameters);
+    public MethodCaller addTypeParameters(ImmutableArray<TypeModel> parameters) {
+        typeParameters.addAll(parameters.toMutable());
         return this;
     }
 
     public MethodCaller addTypeParameters(TypeModel... parameters) {
-        return addTypeParameters(fixedArrayOf(parameters));
+        return addTypeParameters(immutableArrayOf(parameters));
     }
 
 
     public MethodCaller addArgument(JCExpression argument) {
-        return addArguments(fixedArrayOf(argument));
+        return addArguments(immutableArrayOf(argument));
     }
 
     public MethodCaller addArgument(String argument) {
         return addArgument(ident(argument));
     }
 
-    public MethodCaller addArguments(Collection<JCExpression> arguments) {
-        this.arguments.addAll(arguments);
+    public MethodCaller addArguments(ImmutableArray<JCExpression> arguments) {
+        this.arguments.addAll(arguments.toMutable());
         return this;
     }
 
     public MethodCaller addArguments(JCExpression... arguments) {
-        return addArguments(fixedArrayOf(arguments));
+        return addArguments(immutableArrayOf(arguments));
     }
 
 
-    public JCTree.JCMethodInvocation apply() {
+    public JCMethodInvocation apply() {
         if (isNull(classType) && isNull(owner)) {
             ListBuffer<JCExpression> parameters = new ListBuffer<>();
-            parameters.addAll(typeParameters.stream().map(TypeModel::generateFullType).collect(toCollection(ArrayFactory::dynamicArray)));
+            typeParameters.stream().map(TypeModel::generateFullType).forEach(parameters::add);
             return maker().Apply(parameters.toList(), ident(method), arguments.toList());
         }
         if (isNull(classType)) {
             ListBuffer<JCExpression> parameters = new ListBuffer<>();
-            parameters.addAll(typeParameters.stream().map(TypeModel::generateFullType).collect(toCollection(ArrayFactory::dynamicArray)));
+            typeParameters.stream().map(TypeModel::generateFullType).forEach(parameters::add);
             return maker().Apply(parameters.toList(), select(owner, method), arguments.toList());
         }
         if (isNotEmpty(classType.getParameters())) {
             return maker().Apply(classType.generateParameters(), select(classType, method), arguments.toList());
         }
         ListBuffer<JCExpression> parameters = new ListBuffer<>();
-        parameters.addAll(typeParameters.stream().map(TypeModel::generateFullType).collect(toCollection(ArrayFactory::dynamicArray)));
+        typeParameters.stream().map(TypeModel::generateFullType).forEach(parameters::add);
         return maker().Apply(parameters.toList(), select(classType, method), arguments.toList());
     }
 

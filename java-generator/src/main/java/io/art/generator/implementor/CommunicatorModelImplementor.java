@@ -5,7 +5,6 @@ import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
-import io.art.core.factory.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.generator.service.*;
@@ -14,12 +13,12 @@ import io.art.rsocket.communicator.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;
+import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
 import static io.art.generator.caller.MethodCaller.*;
-import static io.art.generator.constants.CommunicatorConstants.CommunicatorProxyMethods.GET_IMPLEMENTATIONS_METHOD;
-import static io.art.generator.constants.CommunicatorConstants.CommunicatorProxyMethods.GET_PROTOCOL_METHOD;
+import static io.art.generator.constants.CommunicatorConstants.CommunicatorProxyMethods.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
@@ -37,9 +36,7 @@ import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.service.JavacService.*;
-import static java.util.stream.Collectors.*;
 import java.lang.reflect.*;
-import java.util.*;
 import java.util.function.*;
 
 @UtilityClass
@@ -118,11 +115,11 @@ public class CommunicatorModelImplementor {
     private NewMethod createProxyMethod(Method method, String specificationFieldName) {
         NewMethod methodImplementation = overrideMethod(method);
 
-        List<JCExpression> arguments = methodImplementation.parameters()
+        ImmutableArray<JCExpression> arguments = methodImplementation.parameters()
                 .stream()
                 .map(NewParameter::getName)
                 .map(JavacService::ident)
-                .collect(toCollection(ArrayFactory::dynamicArray));
+                .collect(immutableArrayCollector());
 
         if (method.getReturnType() == void.class) {
             return methodImplementation.statement(() -> method(specificationFieldName, COMMUNICATE_METHOD_NAME).addArguments(arguments).execute());

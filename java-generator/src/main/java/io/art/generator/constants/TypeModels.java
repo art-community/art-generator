@@ -55,7 +55,6 @@ public interface TypeModels {
     TypeModel MODULE_LAUNCHER_TYPE = type(ModuleLauncher.class);
 
     TypeModel CUSTOM_CONFIGURATION_REGISTRY_TYPE = type(CustomConfigurationRegistry.class);
-    TypeModel CUSTOM_CONFIGURATION_PROXY_TYPE = type(CustomConfigurationProxy.class);
     TypeModel CONFIGURATOR_MODULE_MODEL_TYPE = type(ConfiguratorModuleModel.class);
 
     TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);

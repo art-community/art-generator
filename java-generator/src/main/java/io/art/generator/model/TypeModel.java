@@ -2,11 +2,15 @@ package io.art.generator.model;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.tree.JCTree.*;
-import io.art.core.factory.*;
+import com.sun.tools.javac.util.*;
+import com.sun.tools.javac.util.List;
+import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import lombok.*;
+import static com.sun.tools.javac.util.List.*;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.checker.NullityChecker.*;
+import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.core.factory.MapFactory.*;
@@ -16,7 +20,6 @@ import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.inspector.TypeInspector.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
-import static java.util.Collections.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
 import java.lang.reflect.Type;
@@ -29,7 +32,7 @@ public class TypeModel {
     private static final Map<Type, TypeModel> CACHE = concurrentHashMap();
 
     private Type type;
-    private List<TypeModel> parameters;
+    private ImmutableArray<TypeModel> parameters;
 
     private String packageName = EMPTY_STRING;
     private String ownerName;
@@ -72,7 +75,7 @@ public class TypeModel {
         this.parameters = stream(adoptedTypeClass.getTypeParameters())
                 .filter(type -> !(type instanceof TypeVariable))
                 .map(TypeModel::type)
-                .collect(toCollection(ArrayFactory::dynamicArray));
+                .collect(immutableArrayCollector());
         if (!adoptedTypeClass.isPrimitive()) return;
         stream(TypeTag.values())
                 .filter(tag -> tag.name().toLowerCase().equals(adoptedTypeClass.getSimpleName().toLowerCase()))
@@ -88,7 +91,7 @@ public class TypeModel {
         this.packageName = emptyIfNull(let(ownerClass.getPackage(), Package::getName));
         this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
         this.fullName = ownerClass.getName();
-        this.parameters = stream(parameterizedType.getActualTypeArguments()).map(TypeModel::new).collect(toCollection(ArrayFactory::dynamicArray));
+        this.parameters = stream(parameterizedType.getActualTypeArguments()).map(TypeModel::new).collect(immutableArrayCollector());
     }
 
     private void ofGenericArrayType(GenericArrayType genericArrayType) {
@@ -100,7 +103,7 @@ public class TypeModel {
         this.packageName = emptyIfNull(let(ownerClass.getPackage(), Package::getName));
         this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
         this.fullName = ownerClass.getName();
-        this.parameters = emptyList();
+        this.parameters = emptyImmutableArray();
     }
 
     public JCExpression generateFullType() {
@@ -108,13 +111,13 @@ public class TypeModel {
             return maker().TypeIdent(primitive);
         }
         if (!parameters.isEmpty()) {
-            com.sun.tools.javac.util.List<JCExpression> arguments = com.sun.tools.javac.util.List.from(parameters
+            ListBuffer<JCExpression> arguments = parameters
                     .stream()
                     .map(TypeModel::generateFullType)
-                    .collect(toCollection(ArrayFactory::dynamicArray)));
+                    .collect(toCollection(ListBuffer::new));
             return maker().TypeApply(isArray()
                     ? maker().TypeArray(generateArrayFullType())
-                    : maker().Ident(elements().getName(name)), arguments);
+                    : maker().Ident(elements().getName(name)), arguments.toList());
         }
         return isArray()
                 ? maker().TypeArray(generateArrayFullType())
@@ -144,15 +147,15 @@ public class TypeModel {
         return type(((Class<?>) type).getComponentType()).generateBaseType();
     }
 
-    public com.sun.tools.javac.util.List<JCExpression> generateParameters() {
-        List<TypeModel> parameters = getParameters();
+    public List<JCExpression> generateParameters() {
+        ImmutableArray<TypeModel> parameters = getParameters();
         if (isEmpty(parameters)) {
-            return com.sun.tools.javac.util.List.nil();
+            return nil();
         }
-        List<JCExpression> expressions = parameters.stream()
+        ListBuffer<JCExpression> expressions = parameters.stream()
                 .map(TypeModel::generateFullType)
-                .collect(toCollection(ArrayFactory::dynamicArray));
-        return com.sun.tools.javac.util.List.from(expressions);
+                .collect(toCollection(ListBuffer::new));
+        return expressions.toList();
     }
 
     public static TypeModel type(Type type) {

@@ -151,10 +151,10 @@ public class TypeInspector {
     public boolean hasConstructorWithAllProperties(Type type) {
         Class<?> rawClass = extractClass(type);
         ImmutableArray<ExtractedProperty> properties = getConstructorProperties(rawClass);
-        return matchConstructorArguments(rawClass, properties.stream().map(ExtractedProperty::type).collect(toCollection(ArrayFactory::dynamicArray)));
+        return matchConstructorArguments(rawClass, properties.stream().map(ExtractedProperty::type).collect(immutableArrayCollector()));
     }
 
-    public boolean matchConstructorArguments(Type type, List<Type> argumentTypes) {
+    public boolean matchConstructorArguments(Type type, ImmutableArray<Type> argumentTypes) {
         Class<?> rawClass = extractClass(type);
         for (Constructor<?> constructor : rawClass.getConstructors()) {
             if (!isPublic(constructor.getModifiers())) continue;

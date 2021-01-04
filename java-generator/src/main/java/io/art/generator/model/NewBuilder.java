@@ -1,11 +1,11 @@
 package io.art.generator.model;
 
 import com.sun.tools.javac.tree.JCTree.*;
+import com.sun.tools.javac.util.*;
 import io.art.generator.caller.*;
 import lombok.*;
 import lombok.experimental.*;
 import static io.art.core.factory.ArrayFactory.*;
-import static io.art.core.factory.ListFactory.*;
 import static io.art.generator.constants.Names.*;
 import static java.util.function.UnaryOperator.*;
 import java.util.*;
@@ -17,7 +17,7 @@ import java.util.function.*;
 @RequiredArgsConstructor
 public class NewBuilder {
     private final TypeModel type;
-    private List<NamedMethodCall> methods = linkedList();
+    private ListBuffer<NamedMethodCall> methods = new ListBuffer<>();
 
     public NewBuilder method(String name, JCExpression argument) {
         return method(name, fixedArrayOf(argument));
@@ -40,7 +40,7 @@ public class NewBuilder {
     public JCMethodInvocation generate(UnaryOperator<JCMethodInvocation> decorator) {
         JCMethodInvocation invocation = MethodCaller.method(type, BUILDER_METHOD_NAME).apply();
         for (NamedMethodCall call : methods) {
-            invocation = MethodCaller.method(invocation, call.name).addArguments(call.expressions).apply();
+            invocation = MethodCaller.method(invocation, call.name).addArguments(immutableArrayOf(call.expressions)).apply();
         }
         return MethodCaller.method(decorator.apply(invocation), BUILD_METHOD_NAME).apply();
     }

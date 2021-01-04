@@ -11,7 +11,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 public class TypeCollector {
-    private final Set<Type> types = setOf();
+    private final Set<Type> types = set();
 
     public static ImmutableSet<Type> collectModelTypes(Type root) {
         TypeCollector collector = new TypeCollector();

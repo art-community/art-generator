@@ -2,12 +2,13 @@ package io.art.generator.service;
 
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.core.collection.*;
 import io.art.generator.model.*;
 import lombok.*;
 import lombok.experimental.*;
 import static io.art.core.constants.StringConstants.*;
+import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.logger.GeneratorLogger.*;
@@ -15,14 +16,13 @@ import static io.art.generator.service.JavacService.*;
 import static java.text.MessageFormat.*;
 import javax.tools.*;
 import java.io.*;
-import java.util.*;
 
 @UtilityClass
 public class ClassGenerationService {
     @SneakyThrows
     public void generateClass(NewClass newClass, String packageName) {
         ListBuffer<JCTree> definitions = new ListBuffer<>();
-        definitions.addAll(createImports(newClass.imports()));
+        definitions.addAll(createImports(immutableSetOf(newClass.imports())));
         definitions.add(newClass.generate());
         JCCompilationUnit compilationUnit = maker().TopLevel(List.nil(), ident(packageName), definitions.toList());
         String className = packageName + DOT + newClass.name();
@@ -33,7 +33,7 @@ public class ClassGenerationService {
         success(format(GENERATED_CLASS, className));
     }
 
-    private ListBuffer<JCTree> createImports(Set<ImportModel> newImports) {
+    private ListBuffer<JCTree> createImports(ImmutableSet<ImportModel> newImports) {
         ListBuffer<JCTree> definitions = new ListBuffer<>();
         newImports
                 .stream()

@@ -3,15 +3,12 @@ package io.art.generator.model;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
-import io.art.core.factory.*;
 import lombok.*;
 import lombok.experimental.*;
-import static com.sun.tools.javac.util.List.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
-import java.util.List;
 import java.util.*;
 import java.util.function.*;
 
@@ -19,9 +16,9 @@ import java.util.function.*;
 @Setter
 @Accessors(fluent = true)
 public class NewLambda {
-    private List<NewParameter> parameters = new LinkedList<>();
+    private final ListBuffer<NewParameter> parameters = new ListBuffer<>();
+    private final ListBuffer<Supplier<JCStatement>> statements = new ListBuffer<>();
     private Supplier<JCExpression> expression;
-    private List<Supplier<JCStatement>> statements = new LinkedList<>();
 
     public NewLambda parameter(NewParameter parameter) {
         parameters.add(parameter);
@@ -49,10 +46,13 @@ public class NewLambda {
     }
 
     public JCLambda generate() {
-        JCBlock body = maker().Block(0L, from(statements.stream().map(Supplier::get).collect(toCollection(ArrayFactory::dynamicArray))));
-        ListBuffer<JCVariableDecl> parameters = this.parameters.stream().map(NewParameter::generate).collect(toCollection(ListBuffer::new));
+        JCBlock body = maker().Block(0L, statements.stream().map(Supplier::get).collect(toCollection(ListBuffer::new)).toList());
+        com.sun.tools.javac.util.List<JCVariableDecl> parameters = this.parameters.stream()
+                .map(NewParameter::generate)
+                .collect(toCollection(ListBuffer::new))
+                .toList();
         JCTree lambdaBody = nonNull(expression) ? expression.get() : body;
-        return maker().Lambda(parameters.toList(), lambdaBody);
+        return maker().Lambda(parameters, lambdaBody);
     }
 
     public static NewLambda newLambda() {

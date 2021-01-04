@@ -8,6 +8,7 @@ import io.art.generator.model.*;
 import io.art.model.implementation.configurator.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
+import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ConfiguratorConstants.ConfigurationSourceMethods.*;
@@ -24,7 +25,6 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.selector.ConfigurationSourceMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
-import java.util.*;
 
 @UtilityClass
 public class ConfiguratorModelImplementor {
@@ -42,7 +42,7 @@ public class ConfiguratorModelImplementor {
     }
 
     public ImmutableArray<NewClass> implementConfigurationProxies(ConfiguratorModuleModel model) {
-        ImmutableArray.Builder<NewClass> proxies = ImmutableArray.immutableArrayBuilder();
+        ImmutableArray.Builder<NewClass> proxies = immutableArrayBuilder();
         for (Class<?> configurationClass : model.getCustomConfigurations()) {
             if (!hasConstructorWithAllProperties(configurationClass)) {
                 //throw new ValidationException("");
@@ -64,7 +64,7 @@ public class ConfiguratorModelImplementor {
         String proxyClassName = configurationClass.getSimpleName() + PROXY_CLASS_SUFFIX;
         ImmutableArray<ExtractedProperty> properties = getConstructorProperties(configurationClass);
         NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass));
-        List<JCExpression> constructorParameters = getConstructorParameters(configurationClasses, properties, proxyClassName);
+        ImmutableArray<JCExpression> constructorParameters = getConstructorParameters(configurationClasses, properties, proxyClassName);
         return method.statement(() -> returnExpression(newObject(type(configurationClass), constructorParameters)));
     }
 
@@ -77,12 +77,12 @@ public class ConfiguratorModelImplementor {
                 .apply();
     }
 
-    public List<JCExpression> getConstructorParameters(ImmutableSet<Class<?>> configurationClasses, ImmutableArray<ExtractedProperty> properties, String proxyClassName) {
-        List<JCTree.JCExpression> constructorParameters = dynamicArray();
+    public ImmutableArray<JCExpression> getConstructorParameters(ImmutableSet<Class<?>> configurationClasses, ImmutableArray<ExtractedProperty> properties, String proxyClassName) {
+        ImmutableArray.Builder<JCTree.JCExpression> constructorParameters = immutableArrayBuilder();
         for (ExtractedProperty property : properties) {
             constructorParameters.add(createConstructorParameter(configurationClasses, property, proxyClassName));
         }
-        return constructorParameters;
+        return constructorParameters.build();
     }
 
     private JCExpression createConstructorParameter(ImmutableSet<Class<?>> configurationClasses, ExtractedProperty property, String proxyClassName) {

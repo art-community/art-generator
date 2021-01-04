@@ -1,11 +1,12 @@
 package io.art.generator.creator.mapper;
 
 import com.sun.tools.javac.tree.JCTree.*;
+import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import lombok.*;
+import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
-import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.MappersConstants.ArrayMappingMethods.*;
@@ -139,12 +140,12 @@ public class FromModelMapperCreator {
     }
 
     private JCMethodInvocation forProperty(JCMethodInvocation builderInvocation, String propertyName, Type propertyType) {
-        List<JCExpression> arguments = dynamicArray();
+        ImmutableArray.Builder<JCExpression> arguments = immutableArrayBuilder();
         arguments.add(literal(propertyName));
         String method = (isBoolean(propertyType) ? IS_NAME : GET_NAME) + capitalize(propertyName);
         JCMethodInvocation getter = method(modelName, method).apply();
         arguments.add(newLambda().expression(() -> getter).generate());
         arguments.add(fromModelMapper(propertyType));
-        return method(builderInvocation, LAZY_PUT_NAME).addArguments(arguments).apply();
+        return method(builderInvocation, LAZY_PUT_NAME).addArguments(arguments.build()).apply();
     }
 }

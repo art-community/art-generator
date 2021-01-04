@@ -33,11 +33,11 @@ public class CompilationService {
         arguments.add(D.getText());
         arguments.add(options().get(D));
         arguments.add(DISABLE_OPTION_ENABLED);
-        List<String> classes = existedClasses()
+        ImmutableArray<String> classes = existedClasses()
                 .values()
                 .stream()
                 .map(existed -> existed.getPackageUnit().getSourceFile().getName())
-                .collect(toCollection(ArrayFactory::dynamicArray));
+                .collect(immutableArrayCollector());
         arguments.addAll(classes);
         String[] recompileArguments = arguments.build().toArray(new String[0]);
         info(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(recompileArguments)));

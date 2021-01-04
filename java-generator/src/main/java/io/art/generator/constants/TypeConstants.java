@@ -1,6 +1,5 @@
 package io.art.generator.constants;
 
-import io.art.core.builder.*;
 import io.art.core.collection.*;
 import io.art.core.lazy.*;
 import io.art.generator.model.*;
@@ -10,7 +9,7 @@ import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.ConfiguratorConstants.ConfigurationSourceMethods.*;
 import static io.art.generator.constants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.MappersConstants.PrimitiveMappingMethods.*;
-import static io.art.generator.model.TypeMethodNames.*;
+import static io.art.generator.model.TypeMappingNames.*;
 import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.BOOL;
 import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.BYTE;
 import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.DOUBLE;
@@ -64,45 +63,45 @@ public interface TypeConstants {
             Optional.class
     );
 
-    Map<Type, TypeMethodNames> TYPE_MAPPING_METHODS = MapBuilder.<Type, TypeMethodNames>mapBuilder()
-            .with(char[].class, typeMethods(FROM_CHAR_ARRAY, TO_CHAR_ARRAY))
-            .with(short[].class, typeMethods(FROM_SHORT_ARRAY, TO_SHORT_ARRAY))
-            .with(int[].class, typeMethods(FROM_INT_ARRAY, TO_INT_ARRAY))
-            .with(long[].class, typeMethods(FROM_LONG_ARRAY, TO_LONG_ARRAY))
-            .with(boolean[].class, typeMethods(FROM_BOOL_ARRAY, TO_BOOL_ARRAY))
-            .with(double[].class, typeMethods(FROM_DOUBLE_ARRAY, TO_DOUBLE_ARRAY))
-            .with(byte[].class, typeMethods(FROM_BYTE_ARRAY, TO_BYTE_ARRAY))
-            .with(float[].class, typeMethods(FROM_FLOAT_ARRAY, TO_FLOAT_ARRAY))
-            .with(char.class, typeMethods(FROM_CHAR, TO_CHAR, GET_CHAR))
-            .with(short.class, typeMethods(FROM_SHORT, TO_SHORT, GET_SHORT))
-            .with(int.class, typeMethods(FROM_INT, TO_INT, GET_INT))
-            .with(long.class, typeMethods(FROM_LONG, TO_LONG, GET_LONG))
-            .with(boolean.class, typeMethods(FROM_BOOL, TO_BOOL, GET_BOOL))
-            .with(double.class, typeMethods(FROM_DOUBLE, TO_DOUBLE, GET_DOUBLE))
-            .with(byte.class, typeMethods(FROM_BYTE, TO_BYTE, GET_BYTE))
-            .with(float.class, typeMethods(FROM_FLOAT, TO_FLOAT, GET_FLOAT))
-            .with(Character.class, typeMethods(FROM_CHAR, TO_CHAR, GET_CHAR))
-            .with(Short.class, typeMethods(FROM_SHORT, TO_SHORT, GET_SHORT))
-            .with(Integer.class, typeMethods(FROM_INT, TO_INT, GET_INT))
-            .with(Long.class, typeMethods(FROM_LONG, TO_LONG, GET_LONG))
-            .with(Boolean.class, typeMethods(FROM_BOOL, TO_BOOL, GET_BOOL))
-            .with(Double.class, typeMethods(FROM_DOUBLE, TO_DOUBLE, GET_DOUBLE))
-            .with(Byte.class, typeMethods(FROM_BYTE, TO_BYTE, GET_BYTE))
-            .with(Float.class, typeMethods(FROM_FLOAT, TO_FLOAT, GET_FLOAT))
-            .with(String.class, typeMethods(FROM_STRING, TO_STRING, GET_STRING))
-            .with(UUID.class, typeMethods(FROM_UUID, TO_UUID, GET_UUID))
-            .with(LocalDateTime.class, typeMethods(FROM_LOCAL_DATE_TIME, TO_LOCAL_DATE_TIME, GET_LOCAL_DATE_TIME))
-            .with(ZonedDateTime.class, typeMethods(FROM_ZONED_DATE_TIME, TO_ZONED_DATE_TIME, GET_ZONED_DATE_TIME))
-            .with(Date.class, typeMethods(FROM_DATE, TO_DATE, GET_DATE))
-            .with(Duration.class, typeMethods(FROM_DURATION, TO_DURATION, GET_DURATION))
-            .with(List.class, typeMethods(FROM_LIST, TO_LIST))
-            .with(Queue.class, typeMethods(FROM_QUEUE, TO_QUEUE))
-            .with(Deque.class, typeMethods(FROM_DEQUE, TO_DEQUE))
-            .with(Set.class, typeMethods(FROM_SET, TO_SET))
-            .with(Collection.class, typeMethods(FROM_COLLECTION, TO_COLLECTION))
+    ImmutableMap<Type, TypeMappingNames> TYPE_MAPPING_METHODS = ImmutableMap.<Type, TypeMappingNames>immutableMapBuilder()
+            .put(char[].class, typeMappings(FROM_CHAR_ARRAY, TO_CHAR_ARRAY))
+            .put(short[].class, typeMappings(FROM_SHORT_ARRAY, TO_SHORT_ARRAY))
+            .put(int[].class, typeMappings(FROM_INT_ARRAY, TO_INT_ARRAY))
+            .put(long[].class, typeMappings(FROM_LONG_ARRAY, TO_LONG_ARRAY))
+            .put(boolean[].class, typeMappings(FROM_BOOL_ARRAY, TO_BOOL_ARRAY))
+            .put(double[].class, typeMappings(FROM_DOUBLE_ARRAY, TO_DOUBLE_ARRAY))
+            .put(byte[].class, typeMappings(FROM_BYTE_ARRAY, TO_BYTE_ARRAY))
+            .put(float[].class, typeMappings(FROM_FLOAT_ARRAY, TO_FLOAT_ARRAY))
+            .put(char.class, typeMappings(FROM_CHAR, TO_CHAR, GET_CHAR))
+            .put(short.class, typeMappings(FROM_SHORT, TO_SHORT, GET_SHORT))
+            .put(int.class, typeMappings(FROM_INT, TO_INT, GET_INT))
+            .put(long.class, typeMappings(FROM_LONG, TO_LONG, GET_LONG))
+            .put(boolean.class, typeMappings(FROM_BOOL, TO_BOOL, GET_BOOL))
+            .put(double.class, typeMappings(FROM_DOUBLE, TO_DOUBLE, GET_DOUBLE))
+            .put(byte.class, typeMappings(FROM_BYTE, TO_BYTE, GET_BYTE))
+            .put(float.class, typeMappings(FROM_FLOAT, TO_FLOAT, GET_FLOAT))
+            .put(Character.class, typeMappings(FROM_CHAR, TO_CHAR, GET_CHAR))
+            .put(Short.class, typeMappings(FROM_SHORT, TO_SHORT, GET_SHORT))
+            .put(Integer.class, typeMappings(FROM_INT, TO_INT, GET_INT))
+            .put(Long.class, typeMappings(FROM_LONG, TO_LONG, GET_LONG))
+            .put(Boolean.class, typeMappings(FROM_BOOL, TO_BOOL, GET_BOOL))
+            .put(Double.class, typeMappings(FROM_DOUBLE, TO_DOUBLE, GET_DOUBLE))
+            .put(Byte.class, typeMappings(FROM_BYTE, TO_BYTE, GET_BYTE))
+            .put(Float.class, typeMappings(FROM_FLOAT, TO_FLOAT, GET_FLOAT))
+            .put(String.class, typeMappings(FROM_STRING, TO_STRING, GET_STRING))
+            .put(UUID.class, typeMappings(FROM_UUID, TO_UUID, GET_UUID))
+            .put(LocalDateTime.class, typeMappings(FROM_LOCAL_DATE_TIME, TO_LOCAL_DATE_TIME, GET_LOCAL_DATE_TIME))
+            .put(ZonedDateTime.class, typeMappings(FROM_ZONED_DATE_TIME, TO_ZONED_DATE_TIME, GET_ZONED_DATE_TIME))
+            .put(Date.class, typeMappings(FROM_DATE, TO_DATE, GET_DATE))
+            .put(Duration.class, typeMappings(FROM_DURATION, TO_DURATION, GET_DURATION))
+            .put(List.class, typeMappings(FROM_LIST, TO_LIST))
+            .put(Queue.class, typeMappings(FROM_QUEUE, TO_QUEUE))
+            .put(Deque.class, typeMappings(FROM_DEQUE, TO_DEQUE))
+            .put(Set.class, typeMappings(FROM_SET, TO_SET))
+            .put(Collection.class, typeMappings(FROM_COLLECTION, TO_COLLECTION))
             .build();
 
-    Set<Type> PRIMITIVE_TYPES = setOf(
+    ImmutableSet<Type> PRIMITIVE_TYPES = immutableSetOf(
             String.class,
             char.class,
             int.class,
@@ -127,7 +126,7 @@ public interface TypeConstants {
             Date.class
     );
 
-    Set<Type> JAVA_PRIMITIVE_TYPES = setOf(
+    ImmutableSet<Type> JAVA_PRIMITIVE_TYPES = immutableSetOf(
             char.class,
             int.class,
             short.class,
@@ -138,7 +137,7 @@ public interface TypeConstants {
             float.class
     );
 
-    Set<Class<?>> COLLECTION_TYPES = setOf(
+    ImmutableSet<Class<?>> COLLECTION_TYPES = immutableSetOf(
             List.class,
             Queue.class,
             Deque.class,
@@ -146,22 +145,22 @@ public interface TypeConstants {
             Collection.class
     );
 
-    Map<Type, PrimitiveType> JAVA_TO_PRIMITIVE_TYPE = MapBuilder.<Type, PrimitiveType>mapBuilder()
-            .with(char.class, STRING)
-            .with(int.class, INT)
-            .with(short.class, INT)
-            .with(long.class, LONG)
-            .with(boolean.class, BOOL)
-            .with(double.class, DOUBLE)
-            .with(byte.class, BYTE)
-            .with(float.class, FLOAT)
-            .with(char.class, STRING)
-            .with(Integer.class, INT)
-            .with(Short.class, INT)
-            .with(Long.class, LONG)
-            .with(Boolean.class, BOOL)
-            .with(Double.class, DOUBLE)
-            .with(Byte.class, BYTE)
-            .with(Float.class, FLOAT)
+    ImmutableMap<Type, PrimitiveType> JAVA_TO_PRIMITIVE_TYPE = ImmutableMap.<Type, PrimitiveType>immutableMapBuilder()
+            .put(char.class, STRING)
+            .put(int.class, INT)
+            .put(short.class, INT)
+            .put(long.class, LONG)
+            .put(boolean.class, BOOL)
+            .put(double.class, DOUBLE)
+            .put(byte.class, BYTE)
+            .put(float.class, FLOAT)
+            .put(char.class, STRING)
+            .put(Integer.class, INT)
+            .put(Short.class, INT)
+            .put(Long.class, LONG)
+            .put(Boolean.class, BOOL)
+            .put(Double.class, DOUBLE)
+            .put(Byte.class, BYTE)
+            .put(Float.class, FLOAT)
             .build();
 }

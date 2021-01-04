@@ -1,6 +1,6 @@
 package io.art.generator.constants;
 
-import io.art.communicator.constants.*;
+import io.art.communicator.constants.CommunicatorModuleConstants.*;
 import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
 import io.art.communicator.specification.*;
@@ -20,12 +20,14 @@ import io.art.model.implementation.configurator.*;
 import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
 import io.art.rsocket.communicator.*;
-import io.art.rsocket.constants.*;
+import io.art.rsocket.constants.RsocketModuleConstants.*;
 import io.art.rsocket.model.*;
 import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
-import io.art.value.constants.*;
+import io.art.value.constants.ValueModuleConstants.*;
+import io.art.value.constants.ValueModuleConstants.ValueType.*;
+import io.art.value.immutable.Value;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import io.art.value.mapping.*;
@@ -35,6 +37,26 @@ import java.util.*;
 
 public interface Imports {
     String[] IMPORTING_CLASSES = new String[]{
+            Optional.class.getName(),
+            List.class.getName(),
+            Set.class.getName(),
+            Collection.class.getName(),
+            Queue.class.getName(),
+            Deque.class.getName(),
+            Map.class.getName(),
+            UUID.class.getName(),
+            Duration.class.getName(),
+            LocalDateTime.class.getName(),
+            ZonedDateTime.class.getName(),
+
+            Flux.class.getName(),
+            Mono.class.getName(),
+
+            MethodProcessingMode.class.getName(),
+            LazyValue.class.getName(),
+            SingletonsRegistry.class.getName(),
+            NullityChecker.class.getName(),
+
             ImmutableMap.class.getName(),
             ImmutableArray.class.getName(),
             ImmutableSet.class.getName(),
@@ -51,9 +73,8 @@ public interface Imports {
             Entity.class.getName(),
             Primitive.class.getName(),
             Value.class.getName(),
-            ValueModuleConstants.ValueType.class.getName(),
-            ValueModuleConstants.ValueType.PrimitiveType.class.getName(),
-            Optional.class.getName(),
+            ValueType.class.getName(),
+            PrimitiveType.class.getName(),
 
             ValueToModelMapper.class.getName(),
             ValueFromModelMapper.class.getName(),
@@ -63,11 +84,6 @@ public interface Imports {
             ServiceMethodIdentifier.class.getName(),
             ServiceMethodImplementation.class.getName(),
             ServiceSpecificationRegistry.class.getName(),
-
-            MethodProcessingMode.class.getName(),
-
-            Flux.class.getName(),
-            Mono.class.getName(),
 
             ModuleLauncher.class.getName(),
 
@@ -79,19 +95,6 @@ public interface Imports {
             ModuleCustomizer.class.getName(),
             ValueCustomizer.class.getName(),
             ServerCustomizer.class.getName(),
-            List.class.getName(),
-            Set.class.getName(),
-            Collection.class.getName(),
-            Queue.class.getName(),
-            Deque.class.getName(),
-            Map.class.getName(),
-            UUID.class.getName(),
-            Duration.class.getName(),
-            LocalDateTime.class.getName(),
-            ZonedDateTime.class.getName(),
-            LazyValue.class.getName(),
-            SingletonsRegistry.class.getName(),
-            NullityChecker.class.getName(),
 
             ConfigurationSource.class.getName(),
             CustomConfigurationRegistry.class.getName(),
@@ -104,11 +107,11 @@ public interface Imports {
             CommunicatorCustomizer.class.getName(),
             CommunicatorSpecification.class.getName(),
             CommunicatorProxy.class.getName(),
-            CommunicatorModuleConstants.CommunicationProtocol.class.getName(),
+            CommunicationProtocol.class.getName(),
 
             RsocketCommunicator.class.getName(),
-            RsocketModuleConstants.CommunicationMode.class.getName(),
+            CommunicationMode.class.getName(),
             RsocketSetupPayload.class.getName(),
-            RsocketModuleConstants.RsocketProtocol.class.getName()
+            RsocketProtocol.class.getName()
     };
 }

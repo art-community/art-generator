@@ -3,12 +3,15 @@ package io.art.generator.service;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
+import io.art.core.collection.*;
 import io.art.core.factory.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.Tree.Kind.*;
 import static com.sun.tools.javac.tree.JCTree.*;
+import static io.art.core.collection.ImmutableSet.*;
 import static io.art.core.extensions.CollectionExtensions.*;
+import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.ImportModel.*;
 import static java.util.stream.Collectors.*;
@@ -26,13 +29,13 @@ public class ClassMutationService {
                 definition -> fields.stream().noneMatch(field -> field.name().equals(((JCVariableDecl) definition).name.toString()))
         );
         classDefinitions.addAll(definitions);
-        classDefinitions.addAll(fields.stream().map(NewField::generate).collect(toCollection(ArrayFactory::dynamicArray)));
+        fields.stream().map(NewField::generate).forEach(classDefinitions::add);
         existedClass.getDeclaration().defs = classDefinitions.toList();
-        Set<ImportModel> importModels = fields.stream()
+        ImmutableSet<ImportModel> importModels = fields.stream()
                 .map(NewField::type)
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
                 .map(type -> classImport(type.getFullName()))
-                .collect(toCollection(SetFactory::set));
+                .collect(immutableSetCollector());
         ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, importModels);
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
@@ -48,7 +51,7 @@ public class ClassMutationService {
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
                 .map(type -> classImport(type.getFullName()))
                 .collect(toCollection(SetFactory::set));
-        ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, combine(importModels, method.classImports()));
+        ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, immutableSetOf(combine(importModels, method.classImports())));
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
 
@@ -58,7 +61,7 @@ public class ClassMutationService {
         classDefinitions.addAll(filterDefinitions(existedClass, INTERFACE, definition -> !((JCClassDecl) definition).name.toString().equals(inner.name())));
         classDefinitions.add(inner.generate());
         existedClass.getDeclaration().defs = classDefinitions.toList();
-        ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, inner.imports());
+        ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, immutableSetOf(inner.imports()));
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
 
@@ -68,15 +71,15 @@ public class ClassMutationService {
         classDefinitions.addAll(filterDefinitions(existedClass, CLASS, definition -> !((JCClassDecl) definition).name.toString().equals(inner.name())));
         classDefinitions.add(inner.generate());
         existedClass.getDeclaration().defs = classDefinitions.toList();
-        ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, inner.imports());
+        ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, immutableSetOf(inner.imports()));
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
 
 
-    private ListBuffer<JCTree> addImports(ExistedClass existedClass, Set<ImportModel> newImports) {
+    private ListBuffer<JCTree> addImports(ExistedClass existedClass, ImmutableSet<ImportModel> newImports) {
         ListBuffer<JCTree> newPackageDefinitions = new ListBuffer<>();
         List<JCTree> currentPackageDefinitions = existedClass.getPackageUnit().defs;
-        newPackageDefinitions.addAll(currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).collect(toCollection(ArrayFactory::dynamicArray)));
+        currentPackageDefinitions.stream().filter(definition -> definition.getKind() != CLASS).forEach(newPackageDefinitions::add);
         newImports
                 .stream()
                 .distinct()

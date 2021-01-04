@@ -5,11 +5,9 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
-import io.art.core.factory.*;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.util.List.*;
-import static io.art.core.factory.ArrayFactory.*;
 import static io.art.core.factory.MapFactory.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.Names.*;
@@ -98,16 +96,26 @@ public class NewClass {
         if (fields.entrySet().stream().anyMatch(field -> field.getValue().byConstructor())) {
             generateConstructor();
         }
-        ListBuffer<JCTree> definitions = fields.values().stream().map(NewField::generate).collect(toCollection(ListBuffer::new));
-        methods.stream().map(NewMethod::generate).forEach(definitions::add);
-        innerClasses.stream().map(NewClass::generate).forEach(definitions::add);
-        List<JCExpression> implementations = List.from(interfaceTypes.stream().map(TypeModel::generateFullType).collect(toCollection(ArrayFactory::dynamicArray)));
+        ListBuffer<JCTree> definitions = fields.values()
+                .stream()
+                .map(NewField::generate)
+                .collect(toCollection(ListBuffer::new));
+        methods.stream()
+                .map(NewMethod::generate)
+                .forEach(definitions::add);
+        innerClasses.stream()
+                .map(NewClass::generate)
+                .forEach(definitions::add);
+        List<JCExpression> implementations = interfaceTypes.stream()
+                .map(TypeModel::generateFullType)
+                .collect(toCollection(ListBuffer::new))
+                .toList();
         return maker().ClassDef(modifiers, name, nil(), null, implementations, definitions.toList());
     }
 
     private void generateConstructor() {
         Set<NewParameter> parameters = set();
-        java.util.List<Supplier<JCStatement>> statements = dynamicArray();
+        ListBuffer<Supplier<JCStatement>> statements = new ListBuffer<>();
         for (NewField field : fields.values()) {
             if (!field.byConstructor()) continue;
             if (isNull(field.initializer())) {

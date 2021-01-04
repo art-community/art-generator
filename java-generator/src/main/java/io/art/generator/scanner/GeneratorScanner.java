@@ -5,6 +5,7 @@ import com.sun.source.util.*;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.model.*;
 import com.sun.tools.javac.tree.JCTree.*;
+import com.sun.tools.javac.util.List;
 import io.art.generator.context.GeneratorContextConfiguration.*;
 import io.art.generator.model.*;
 import lombok.*;
