@@ -2,6 +2,7 @@ package io.art.generator.creator.provider;
 
 import io.art.core.collection.*;
 import io.art.generator.caller.*;
+import io.art.generator.implementor.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.module.*;
 import lombok.experimental.*;
@@ -15,6 +16,7 @@ import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.decorate.DecorateMethodCreator.*;
 import static io.art.generator.implementor.CommunicatorModelImplementor.*;
+import static io.art.generator.implementor.ConfiguratorModelImplementor.*;
 import static io.art.generator.implementor.MappersImplementor.*;
 import static io.art.generator.implementor.ServerModelImplementor.*;
 import static io.art.generator.logger.GeneratorLogger.*;
@@ -43,14 +45,20 @@ public class ProviderClassCreator {
         ImmutableArray<NewClass> communicatorProxies = implementCommunicatorProxies(model.getCommunicatorModel());
         success(GENERATED_COMMUNICATOR_PROXIES);
 
+        NewMethod configurationsMethod = implementCustomConfigurationsMethod(model.getConfiguratorModel());
+        ImmutableArray<NewClass> configurationProxies = implementConfigurationProxies(model.getConfiguratorModel());
+        success(GENERATED_CUSTOM_CONFIGURATION_PROXIES);
+
         return providerClass
                 .field(createModelField())
                 .method(createModelMethod())
                 .method(createDecorateMethod())
                 .method(servicesMethod)
                 .method(communicatorsMethod)
+                .method(configurationsMethod)
                 .inners(mappers)
-                .inners(communicatorProxies);
+                .inners(communicatorProxies)
+                .inners(configurationProxies);
     }
 
     private NewMethod createModelMethod() {

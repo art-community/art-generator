@@ -27,6 +27,10 @@ public class DecorateMethodCreator {
                         .type(MODULE_MODEL_TYPE)
                         .initializer(() -> method(CONFIGURATOR_NAME, CONFIGURE_NAME).apply()).generate())
                 .statement(() -> newVariable()
+                        .name(CONFIGURATOR_MODEL_NAME)
+                        .type(CONFIGURATOR_MODULE_MODEL_TYPE)
+                        .initializer(() -> method(MODULE_MODEL_NAME, GET_CONFIGURATOR_MODEL).apply()).generate())
+                .statement(() -> newVariable()
                         .name(SERVER_MODEL_NAME)
                         .type(SERVER_MODEL_TYPE)
                         .initializer(() -> method(MODULE_MODEL_NAME, GET_SERVER_MODEL).apply()).generate())
@@ -47,8 +51,20 @@ public class DecorateMethodCreator {
                 .expression(() ->
                         method(CUSTOMIZER_NAME, SERVER_NAME).addArguments(serverLambda())
                                 .next(COMMUNICATOR_NAME, communicator -> communicator.addArguments(communicatorLambda()))
+                                .next(CONFIGURATOR_NAME, configurator -> configurator.addArguments(configuratorLambda()))
                                 .apply()
                 )
+                .generate();
+    }
+
+    private JCLambda configuratorLambda() {
+        return newLambda()
+                .parameter(newParameter(CONFIGURATOR_CUSTOMIZER_TYPE, CONFIGURATOR_CUSTOMIZER_NAME))
+                .expression(() -> method(CONFIGURATOR_CUSTOMIZER_NAME, REGISTRY_NAME)
+                        .addArguments(method(CUSTOM_CONFIGURATIONS_NAME)
+                                .addArguments(ident(CONFIGURATOR_MODEL_NAME))
+                                .apply())
+                        .apply())
                 .generate();
     }
 

@@ -131,7 +131,6 @@ public class TypeInspector {
         return float.class.equals(type);
     }
 
-
     public boolean isPrimitiveType(Type type) {
         if (String.class.equals(type)) {
             return true;
@@ -169,11 +168,19 @@ public class TypeInspector {
         if (ZonedDateTime.class.equals(type)) {
             return true;
         }
+        if (Duration.class.equals(type)) {
+            return true;
+        }
         return Date.class.equals(type);
     }
 
     public boolean isComplexType(Type type) {
         return !isPrimitiveType(type);
+    }
+
+
+    public boolean isClass(Type type) {
+        return type instanceof Class;
     }
 
 

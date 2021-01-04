@@ -12,6 +12,7 @@ apply(plugin = "kotlin")
 dependencies {
     implementation(project(":java-generator"))
     implementation(project(":core"))
+    implementation(project(":configurator"))
     implementation(project(":server"))
     implementation(project(":communicator"))
     implementation(project(":value"))

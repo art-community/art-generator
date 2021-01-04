@@ -1,3 +1,6 @@
+value: "test"
+nested:
+  value: "nested"
 rsocket:
   server:
     transport:

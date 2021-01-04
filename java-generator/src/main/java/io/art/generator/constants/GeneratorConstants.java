@@ -4,16 +4,20 @@ import io.art.communicator.constants.*;
 import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
 import io.art.communicator.specification.*;
+import io.art.configurator.custom.*;
+import io.art.core.checker.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.core.lazy.*;
 import io.art.core.model.*;
 import io.art.core.singleton.*;
+import io.art.core.source.*;
 import io.art.generator.model.*;
 import io.art.launcher.*;
 import io.art.model.configurator.*;
 import io.art.model.customizer.*;
 import io.art.model.implementation.communicator.*;
+import io.art.model.implementation.configurator.*;
 import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
 import io.art.rsocket.communicator.*;
@@ -86,9 +90,19 @@ public interface GeneratorConstants {
             Queue.class.getName(),
             Deque.class.getName(),
             Map.class.getName(),
-
+            UUID.class.getName(),
+            Duration.class.getName(),
+            LocalDateTime.class.getName(),
+            ZonedDateTime.class.getName(),
             LazyValue.class.getName(),
             SingletonsRegistry.class.getName(),
+            NullityChecker.class.getName(),
+
+            ConfigurationSource.class.getName(),
+            CustomConfigurationRegistry.class.getName(),
+            CustomConfigurationProxy.class.getName(),
+            ConfiguratorCustomizer.class.getName(),
+            ConfiguratorModuleModel.class.getName(),
 
             CommunicatorProxyRegistry.class.getName(),
             CommunicatorModuleModel.class.getName(),
@@ -108,6 +122,7 @@ public interface GeneratorConstants {
         String JAVA_PACKAGE_PREFIX = "java.";
         String CONSTRUCTOR_NAME = "<init>";
         String THIS_NAME = "this";
+        String LET_NAME = "let";
 
         String PROVIDER_CLASS_SUFFIX = "Provider";
         String PROXY_CLASS_SUFFIX = "Proxy";
@@ -130,6 +145,7 @@ public interface GeneratorConstants {
         String PROVIDE_NAME = "provide";
         String MODEL_NAME = "model";
         String CONFIGURATOR_NAME = "configurator";
+        String CONFIGURATOR_MODEL_NAME = "configuratorModel";
         String MODULE_MODEL_NAME = "moduleModel";
         String SERVER_MODEL_NAME = "serverModel";
         String COMMUNICATOR_MODEL_NAME = "communicatorModel";
@@ -148,6 +164,8 @@ public interface GeneratorConstants {
         String INPUT_MAPPER_NAME = "inputMapper";
         String OUTPUT_MAPPER_NAME = "outputMapper";
         String SERVICE_METHOD_NAME = "serviceMethod";
+        String CUSTOM_CONFIGURATIONS_NAME = "customConfigurations";
+        String CONFIGURATOR_CUSTOMIZER_NAME = "configuratorCustomizer";
     }
 
     interface Annotations {
@@ -169,7 +187,8 @@ public interface GeneratorConstants {
         String NOT_FOUND_FACTORY_METHODS = "Not found valid factory methods (builder() method, no-args or all-args constructor) for type: {0}";
         String VALIDATION_EXCEPTION_MESSAGE_FORMAT = "Validation exception for signature: [{0}]\n\t{1}";
         String GENERATION_FAILED_MESSAGE_FORMAT = "Generation failed:\n\t{0}";
-        String RECOMPILATION_FAILED = "Recompilaton failed";
+        String RECOMPILATION_FAILED = "Recompilation failed";
+        String NOT_CONFIGURATION_SOURCE_TYPE = "Type is not valid for configuration value: {0}";
     }
 
     interface LoggingMessages {
@@ -185,6 +204,7 @@ public interface GeneratorConstants {
         String GENERATED_MAPPERS = "All mappers were successfully generated";
         String GENERATED_SERVICE_SPECIFICATIONS = "All service specifications were successfully generated";
         String GENERATED_COMMUNICATOR_PROXIES = "All communicator proxies were successfully generated";
+        String GENERATED_CUSTOM_CONFIGURATION_PROXIES = "All custom configuration proxies were successfully generated";
     }
 
     interface MappersConstants {
@@ -212,6 +232,7 @@ public interface GeneratorConstants {
             String TO_LOCAL_DATE_TIME = "toLocalDateTime";
             String TO_ZONED_DATE_TIME = "toZonedDateTime";
             String TO_DATE = "toDate";
+            String TO_DURATION = "toDuration";
 
             String FROM_UUID = "fromUuid";
             String FROM_STRING = "fromString";
@@ -226,6 +247,7 @@ public interface GeneratorConstants {
             String FROM_LOCAL_DATE_TIME = "fromLocalDateTime";
             String FROM_ZONED_DATE_TIME = "fromZonedDateTime";
             String FROM_DATE = "fromDate";
+            String FROM_DURATION = "fromDuration";
         }
 
         interface ArrayMappingMethods {
@@ -311,6 +333,7 @@ public interface GeneratorConstants {
                 double.class,
                 Double.class,
                 UUID.class,
+                Duration.class,
                 LocalDateTime.class,
                 ZonedDateTime.class,
                 Object.class,
@@ -344,14 +367,53 @@ public interface GeneratorConstants {
     }
 
     interface ModelMethods {
+        String GET_CONFIGURATOR_MODEL = "getConfiguratorModel";
         String GET_SERVER_MODEL = "getServerModel";
         String GET_COMMUNICATOR_MODEL = "getCommunicatorModel";
     }
 
+    interface ConfiguratorMethods {
+        Method CONFIGURE_METHOD = wrapException(() -> CustomConfigurationProxy.class.getDeclaredMethod("configure", ConfigurationSource.class));
+    }
+
+    interface ConfigurationSourceMethods {
+        String GET_BOOL = "getBool";
+        String GET_STRING = "getString";
+        String GET_NESTED = "getNested";
+        String GET_INT = "getInt";
+        String GET_LONG = "getLong";
+        String GET_DOUBLE = "getDouble";
+        String GET_FLOAT = "getFloat";
+        String GET_SHORT = "getShort";
+        String GET_CHAR = "getChar";
+        String GET_BYTE = "getByte";
+        String GET_DURATION = "getDuration";
+
+        String GET_BOOL_LIST = "getBoolList";
+        String GET_STRING_LIST = "getStringList";
+        String GET_NESTED_LIST = "getNestedList";
+        String GET_INT_LIST = "getIntList";
+        String GET_LONG_LIST = "getLongList";
+        String GET_DOUBLE_LIST = "getDoubleList";
+        String GET_SHORT_LIST = "getShortList";
+        String GET_CHAR_LIST = "getCharList";
+        String GET_BYTE_LIST = "getByteList";
+        String GET_DURATION_LIST = "getDurationList";
+
+        String GET_INT_MAP = "getIntMap";
+        String GET_LONG_MAP = "getLongMap";
+        String GET_BOOL_MAP = "getBoolMap";
+        String GET_DOUBLE_MAP = "getDoubleMap";
+        String GET_STRING_MAP = "getStringMap";
+        String GET_DURATION_MAP = "getDurationMap";
+        String GET_NESTED_MAP = "getNestedMap";
+    }
+
     interface TypeModels {
+        TypeModel NULLITY_CHECKER_TYPE =  type(NullityChecker.class);
         TypeModel STRING_ARRAY_TYPE = type(String[].class);
         TypeModel VOID_TYPE = type(void.class);
-        TypeModel SINGLETON_REGISTRY_TYPE = type(SingletonsRegistry .class);
+        TypeModel SINGLETON_REGISTRY_TYPE = type(SingletonsRegistry.class);
 
         TypeModel ENTITY_TYPE = type(Entity.class);
         TypeModel BINARY_MAPPING_TYPE = type(BinaryMapping.class);
@@ -365,11 +427,16 @@ public interface GeneratorConstants {
 
         TypeModel MODULE_CONFIGURATOR_TYPE = type(ModuleModelConfigurator.class);
 
+        TypeModel CONFIGURATOR_CUSTOMIZER_TYPE = type(ConfiguratorCustomizer.class);
         TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerCustomizer.class);
         TypeModel COMMUNICATOR_CUSTOMIZER_TYPE = type(CommunicatorCustomizer.class);
         TypeModel MODULE_CUSTOMIZER_TYPE = type(ModuleCustomizer.class);
 
         TypeModel MODULE_LAUNCHER_TYPE = type(ModuleLauncher.class);
+
+        TypeModel CUSTOM_CONFIGURATION_REGISTRY_TYPE = type(CustomConfigurationRegistry.class);
+        TypeModel CUSTOM_CONFIGURATION_PROXY_TYPE = type(CustomConfigurationProxy.class);
+        TypeModel CONFIGURATOR_MODULE_MODEL_TYPE = type(ConfiguratorModuleModel.class);
 
         TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
         TypeModel SERVICE_METHOD_SPECIFICATION_TYPE = type(ServiceMethodSpecification.class);

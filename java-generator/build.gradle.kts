@@ -8,6 +8,7 @@ dependencies {
     implementation("com.google.auto.service", "auto-service", "1+")
     implementation(project(":launcher"))
     implementation(project(":core"))
+    implementation(project(":configurator"))
     implementation(project(":server"))
     implementation(project(":communicator"))
     implementation(project(":value"))

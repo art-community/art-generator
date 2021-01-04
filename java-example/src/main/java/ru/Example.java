@@ -2,7 +2,7 @@ package ru;
 
 import io.art.model.annotation.*;
 import io.art.model.configurator.*;
-import static io.art.communicator.module.CommunicatorModule.*;
+import static io.art.configurator.module.ConfiguratorModule.*;
 import static io.art.model.configurator.ModuleModelConfigurator.*;
 
 public class Example {
@@ -10,10 +10,10 @@ public class Example {
     public static ModuleModelConfigurator configure() {
         return module(Example.class)
                 .onLoad(() -> {
-                    communicator(MyClient.class).myMethod6(null);
-                    communicator(MyClient.class).myMethod7(null);
-                    communicator(MyClient.class).myMethod8(null);
+                    System.out.println("value: " + configuration(MyConfig.class).getValue());
+                    System.out.println("nested: " + configuration(MyConfig.class).getNested().getValue());
                 })
+                .configure(configurator -> configurator.configuration(MyConfig.class))
                 .serve(server -> server.rsocket(MyService.class, RsocketServiceModelConfigurator::enableLogging))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)));
     }

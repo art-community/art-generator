@@ -79,6 +79,9 @@ public class FromMapperMethodSelector {
         if (Date.class.equals(primitiveClass)) {
             return FROM_DATE;
         }
+        if (Duration.class.equals(primitiveClass)) {
+            return FROM_DURATION;
+        }
         throw new GenerationException(format(NOT_PRIMITIVE_TYPE, primitiveClass));
     }
 

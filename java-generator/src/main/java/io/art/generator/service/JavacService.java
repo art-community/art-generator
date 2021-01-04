@@ -85,6 +85,10 @@ public class JavacService {
         return select(type(owner), CLASS_KEYWORD);
     }
 
+    public JCExpression classReference(String owner) {
+        return select(ident(owner), CLASS_KEYWORD);
+    }
+
 
     public JCExpression select(TypeModel owner, String member) {
         return maker().Select(owner.generateBaseType(), name(member));
@@ -113,6 +117,10 @@ public class JavacService {
 
     public JCMemberReference newReference(TypeModel type) {
         return maker().Reference(NEW, null, type.generateBaseType(), null);
+    }
+
+    public JCMemberReference newReference(String className) {
+        return maker().Reference(NEW, null, ident(className), null);
     }
 
     public JCStatement assign(JCExpression left, JCExpression right) {

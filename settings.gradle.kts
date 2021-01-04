@@ -34,6 +34,7 @@ if (!file(artDirectory).exists()) {
 
 val artModules = listOf(
         "core",
+        "configurator",
         "value",
         "logging",
         "server",
