@@ -13,12 +13,13 @@ import static io.art.core.factory.ArrayFactory.*;
 import static io.art.core.factory.MapFactory.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
-import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
+import static java.util.Arrays.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
 import static lombok.AccessLevel.*;
@@ -35,7 +36,7 @@ public class NewClass {
     private long modifiers;
     private Set<ImportModel> imports = set();
     private Map<String, NewField> fields = map();
-    private Map<String, NewMethod> methods = map();
+    private Set<NewMethod> methods = set();
     private Set<NewClass> innerClasses = set();
     private Set<TypeModel> interfaceTypes = set();
 
@@ -77,7 +78,17 @@ public class NewClass {
     }
 
     public NewClass method(NewMethod method) {
-        methods.put(method.name(), method);
+        methods.add(method);
+        return this;
+    }
+
+    public NewClass constructor(NewMethod constructor) {
+        methods.add(constructor.name(CONSTRUCTOR_NAME).returnType(VOID_TYPE));
+        return this;
+    }
+
+    public NewClass constructors(NewMethod... constructors) {
+        stream(constructors).forEach(this::constructor);
         return this;
     }
 
@@ -88,7 +99,7 @@ public class NewClass {
             generateConstructor();
         }
         ListBuffer<JCTree> definitions = fields.values().stream().map(NewField::generate).collect(toCollection(ListBuffer::new));
-        methods.values().stream().map(NewMethod::generate).forEach(definitions::add);
+        methods.stream().map(NewMethod::generate).forEach(definitions::add);
         innerClasses.stream().map(NewClass::generate).forEach(definitions::add);
         List<JCExpression> implementations = List.from(interfaceTypes.stream().map(TypeModel::generateFullType).collect(toCollection(ArrayFactory::dynamicArray)));
         return maker().ClassDef(modifiers, name, nil(), null, implementations, definitions.toList());
@@ -106,12 +117,7 @@ public class NewClass {
             }
             statements.add(() -> assign(select(THIS_NAME, field.name()), field.initializer().get()));
         }
-        method(newMethod()
-                .returnType(type(void.class))
-                .name(CONSTRUCTOR_NAME)
-                .parameters(parameters)
-                .modifiers(Modifier.PUBLIC)
-                .statements(statements));
+        constructor(newMethod().parameters(parameters).modifiers(Modifier.PUBLIC).statements(statements));
     }
 
     public static NewClass newClass() {

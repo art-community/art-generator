@@ -155,4 +155,16 @@ public class Model {
     LazyValue<Collection<Long[]>> FLazyCALong;
     LazyValue<Collection<Long[]>>[][] FLazyCLAMultiA;
     Map<String, LazyValue<Collection<Long[][]>[]>[]>[] MSLazyMCMLongMultiA;
+
+    Optional<String> FOptionalString;
+    Optional<Long> FOptionalLong;
+    Collection<Optional<Long>> FCOptionalLong;
+    Optional<Collection<Long>> FOptionalCLong;
+    Optional<Collection<Optional<Long>>> FCOptionalCLong;
+    Optional<Long>[] FOptionalLongA;
+    Optional<Long[]> FOptionalALong;
+    Optional<Collection<Long>[]> FOptionalCLongA;
+    Optional<Collection<Long[]>> FOptionalCALong;
+    Optional<Collection<Long[]>>[][] FOptionalCLAMultiA;
+    Map<String, Optional<Collection<Long[][]>[]>[]>[] MSOptionalMCMLongMultiA;
 }

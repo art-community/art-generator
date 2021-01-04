@@ -2,7 +2,6 @@ package io.art.generator.creator.provider;
 
 import io.art.core.collection.*;
 import io.art.generator.caller.*;
-import io.art.generator.implementor.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.module.*;
 import lombok.experimental.*;
@@ -51,7 +50,7 @@ public class ProviderClassCreator {
 
         return providerClass
                 .field(createModelField())
-                .method(createModelMethod())
+                .method(createProvideMethod())
                 .method(createDecorateMethod())
                 .method(servicesMethod)
                 .method(communicatorsMethod)
@@ -61,7 +60,7 @@ public class ProviderClassCreator {
                 .inners(configurationProxies);
     }
 
-    private NewMethod createModelMethod() {
+    private NewMethod createProvideMethod() {
         return newMethod()
                 .name(PROVIDE_NAME)
                 .modifiers(PUBLIC | FINAL | STATIC)

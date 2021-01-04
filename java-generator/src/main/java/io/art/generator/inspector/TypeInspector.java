@@ -66,6 +66,10 @@ public class TypeInspector {
         return LazyValue.class == extractClass(fieldType);
     }
 
+    public boolean isOptional(Type fieldType) {
+        return Optional.class == extractClass(fieldType);
+    }
+
     public boolean isLibraryType(Type type) {
         if (type instanceof ParameterizedType) {
             return isLibraryType(extractClass((ParameterizedType) type));

@@ -51,6 +51,7 @@ public interface GeneratorConstants {
             EntityMapping.class.getName(),
             BinaryMapping.class.getName(),
             LazyValueMapping.class.getName(),
+            OptionalMapping.class.getName(),
 
             ArrayValue.class.getName(),
             BinaryValue.class.getName(),
@@ -59,6 +60,7 @@ public interface GeneratorConstants {
             Value.class.getName(),
             ValueType.class.getName(),
             PrimitiveType.class.getName(),
+            Optional.class.getName(),
 
             ValueToModelMapper.class.getName(),
             ValueFromModelMapper.class.getName(),
@@ -295,9 +297,14 @@ public interface GeneratorConstants {
             String TO_BINARY = "toBinary";
         }
 
-        interface LazyMappingMethods {
+        interface LazyValueMappingMethods {
             String TO_LAZY = "toLazy";
             String FROM_LAZY = "fromLazy";
+        }
+
+        interface OptionalMappingMethods {
+            String TO_OPTIONAL = "toOptional";
+            String FROM_OPTIONAL = "fromOptional";
         }
 
         ImmutableSet<Class<?>> LIBRARY_BASED_TYPES = immutableSetOf(
@@ -337,7 +344,8 @@ public interface GeneratorConstants {
                 LocalDateTime.class,
                 ZonedDateTime.class,
                 Object.class,
-                LazyValue.class
+                LazyValue.class,
+                Optional.class
         );
     }
 
@@ -420,6 +428,9 @@ public interface GeneratorConstants {
         TypeModel ARRAY_MAPPING_TYPE = type(ArrayMapping.class);
         TypeModel PRIMITIVE_MAPPING_TYPE = type(PrimitiveMapping.class);
         TypeModel ENTITY_MAPPING_TYPE = type(EntityMapping.class);
+        TypeModel LAZY_VALUE_MAPPING_TYPE = type(LazyValueMapping.class);
+        TypeModel OPTIONAL_MAPPING_TYPE = type(OptionalMapping.class);
+        TypeModel PRIMITIVE_ENUM_TYPE = type(PrimitiveType.class);
 
         TypeModel MODULE_MODEL_TYPE = type(ModuleModel.class);
         TypeModel SERVER_MODEL_TYPE = type(ServerModuleModel.class);

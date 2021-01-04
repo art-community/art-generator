@@ -1,14 +1,13 @@
 package io.art.generator.creator.mapper;
 
-import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import lombok.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
+import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.inspector.TypeInspector.*;
-import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -22,7 +21,7 @@ public class ToModelPropertyMappingCreator {
         List<JCExpression> arguments = dynamicArray();
         arguments.add(literal(fieldName));
         if (javaPrimitiveType) {
-            arguments.add(select(type(PrimitiveType.class), primitiveTypeFromJava(fieldType).name()));
+            arguments.add(select(PRIMITIVE_ENUM_TYPE, primitiveTypeFromJava(fieldType).name()));
         }
         arguments.add(toModelMapper(fieldType));
         return mapMethodCall(javaPrimitiveType, arguments);

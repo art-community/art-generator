@@ -3,15 +3,15 @@ package io.art.generator.creator.mapper;
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
-import io.art.value.mapping.*;
 import lombok.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.BinaryMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.EntityMappingMethods.*;
-import static io.art.generator.constants.GeneratorConstants.MappersConstants.LazyMappingMethods.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.LazyValueMappingMethods.*;
 import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
+import static io.art.generator.constants.GeneratorConstants.MappersConstants.OptionalMappingMethods.TO_OPTIONAL;
 import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
@@ -97,7 +97,12 @@ public class ToModelMapperCreator {
 
             if (isLazyValue(type)) {
                 Type fieldTypeArgument = typeArguments[0];
-                return method(type(LazyValueMapping.class), TO_LAZY).addArguments(toModelMapper(fieldTypeArgument)).apply();
+                return method(LAZY_VALUE_MAPPING_TYPE, TO_LAZY).addArguments(toModelMapper(fieldTypeArgument)).apply();
+            }
+
+            if (isOptional(type)) {
+                Type fieldTypeArgument = typeArguments[0];
+                return method(OPTIONAL_MAPPING_TYPE, TO_OPTIONAL).addArguments(toModelMapper(fieldTypeArgument)).apply();
             }
 
             if (hasBuilder(type)) {
