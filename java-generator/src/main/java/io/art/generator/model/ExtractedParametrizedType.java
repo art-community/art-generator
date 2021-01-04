@@ -2,8 +2,8 @@ package io.art.generator.model;
 
 import io.art.generator.exception.*;
 import lombok.*;
-import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.UNSUPPORTED_TYPE;
-import static java.text.MessageFormat.format;
+import static io.art.generator.constants.ExceptionMessages.*;
+import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 
 @Getter

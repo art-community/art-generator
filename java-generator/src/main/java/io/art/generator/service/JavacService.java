@@ -1,13 +1,13 @@
 package io.art.generator.service;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.tools.javac.code.TypeTag.*;
-import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.constants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.TypeModel.*;
 import java.util.*;

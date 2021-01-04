@@ -6,7 +6,7 @@ import lombok.*;
 import lombok.experimental.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.core.factory.ListFactory.*;
-import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.constants.Names.*;
 import static java.util.function.UnaryOperator.*;
 import java.util.*;
 import java.util.function.*;

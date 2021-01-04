@@ -9,7 +9,7 @@ import io.art.core.collection.*;
 import io.art.generator.loader.*;
 import io.art.generator.model.*;
 import static io.art.core.factory.MapFactory.*;
-import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.constants.Names.*;
 import java.util.concurrent.atomic.*;
 
 public class GeneratorContext {

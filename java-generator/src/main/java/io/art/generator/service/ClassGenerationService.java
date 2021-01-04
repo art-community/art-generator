@@ -8,7 +8,7 @@ import io.art.generator.model.*;
 import lombok.*;
 import lombok.experimental.*;
 import static io.art.core.constants.StringConstants.*;
-import static io.art.generator.constants.GeneratorConstants.LoggingMessages.*;
+import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.service.JavacService.*;

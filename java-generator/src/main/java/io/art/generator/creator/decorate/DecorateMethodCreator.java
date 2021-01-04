@@ -5,9 +5,8 @@ import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.caller.MethodCaller.*;
-import static io.art.generator.constants.GeneratorConstants.ModelMethods.*;
-import static io.art.generator.constants.GeneratorConstants.Names.*;
-import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
+import static io.art.generator.constants.Names.*;
+import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
@@ -29,15 +28,15 @@ public class DecorateMethodCreator {
                 .statement(() -> newVariable()
                         .name(CONFIGURATOR_MODEL_NAME)
                         .type(CONFIGURATOR_MODULE_MODEL_TYPE)
-                        .initializer(() -> method(MODULE_MODEL_NAME, GET_CONFIGURATOR_MODEL).apply()).generate())
+                        .initializer(() -> method(MODULE_MODEL_NAME, GET_CONFIGURATOR_MODEL_NAME).apply()).generate())
                 .statement(() -> newVariable()
                         .name(SERVER_MODEL_NAME)
                         .type(SERVER_MODEL_TYPE)
-                        .initializer(() -> method(MODULE_MODEL_NAME, GET_SERVER_MODEL).apply()).generate())
+                        .initializer(() -> method(MODULE_MODEL_NAME, GET_SERVER_MODEL_NAME).apply()).generate())
                 .statement(() -> newVariable()
                         .name(COMMUNICATOR_MODEL_NAME)
                         .type(COMMUNICATOR_MODEL_TYPE)
-                        .initializer(() -> method(MODULE_MODEL_NAME, GET_COMMUNICATOR_MODEL).apply()).generate())
+                        .initializer(() -> method(MODULE_MODEL_NAME, GET_COMMUNICATOR_MODEL_NAME).apply()).generate())
                 .statement(() -> returnExpression(customizeMethod()));
     }
 

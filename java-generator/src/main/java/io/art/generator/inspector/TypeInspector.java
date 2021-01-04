@@ -8,25 +8,18 @@ import io.art.generator.model.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import lombok.experimental.*;
 import reactor.core.publisher.*;
+import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
-import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
-import static io.art.generator.constants.GeneratorConstants.MappersConstants.*;
-import static io.art.generator.constants.GeneratorConstants.Names.*;
+import static io.art.generator.constants.ExceptionMessages.*;
+import static io.art.generator.constants.Names.*;
+import static io.art.generator.constants.TypeConstants.*;
 import static io.art.generator.reflection.GenericArrayTypeImplementation.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
-import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.BOOL;
-import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.BYTE;
-import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.DOUBLE;
-import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.FLOAT;
-import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.INT;
-import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.LONG;
-import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.STRING;
 import static java.lang.reflect.Modifier.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
 import static java.util.stream.Collectors.*;
 import java.lang.reflect.*;
-import java.time.*;
 import java.util.*;
 
 @UtilityClass
@@ -70,6 +63,26 @@ public class TypeInspector {
         return Optional.class == extractClass(fieldType);
     }
 
+    public boolean isCollectionType(Class<?> type) {
+        return COLLECTION_TYPES.stream().anyMatch(collection -> collection.isAssignableFrom(type));
+    }
+
+    public boolean isJavaPrimitiveType(Type type) {
+        return JAVA_PRIMITIVE_TYPES.contains(type);
+    }
+
+    public boolean isPrimitiveType(Type type) {
+        return PRIMITIVE_TYPES.contains(type);
+    }
+
+    public boolean isClass(Type type) {
+        return type instanceof Class;
+    }
+
+    public boolean isComplexType(Type type) {
+        return !isPrimitiveType(type);
+    }
+
     public boolean isLibraryType(Type type) {
         if (type instanceof ParameterizedType) {
             return isLibraryType(extractClass((ParameterizedType) type));
@@ -91,100 +104,6 @@ public class TypeInspector {
             return libraryType || libraryBasedType;
         }
         return false;
-    }
-
-
-    public boolean isCollectionType(Class<?> type) {
-        if (List.class.isAssignableFrom(type)) {
-            return true;
-        }
-        if (Queue.class.isAssignableFrom(type)) {
-            return true;
-        }
-        if (Deque.class.isAssignableFrom(type)) {
-            return true;
-        }
-        if (Set.class.isAssignableFrom(type)) {
-            return true;
-        }
-        return Collection.class.isAssignableFrom(type);
-    }
-
-    public boolean isJavaPrimitiveType(Type type) {
-        if (char.class.equals(type)) {
-            return true;
-        }
-        if (int.class.equals(type)) {
-            return true;
-        }
-        if (short.class.equals(type)) {
-            return true;
-        }
-        if (long.class.equals(type)) {
-            return true;
-        }
-        if (boolean.class.equals(type)) {
-            return true;
-        }
-        if (double.class.equals(type)) {
-            return true;
-        }
-        if (byte.class.equals(type)) {
-            return true;
-        }
-        return float.class.equals(type);
-    }
-
-    public boolean isPrimitiveType(Type type) {
-        if (String.class.equals(type)) {
-            return true;
-        }
-        if (char.class.equals(type) || Character.class.equals(type)) {
-            return true;
-        }
-        if (int.class.equals(type) || Integer.class.equals(type)) {
-            return true;
-        }
-        if (short.class.equals(type) || Short.class.equals(type)) {
-            return true;
-        }
-        if (long.class.equals(type) || Long.class.equals(type)) {
-            return true;
-        }
-        if (boolean.class.equals(type) || Boolean.class.equals(type)) {
-            return true;
-        }
-        if (double.class.equals(type) || Double.class.equals(type)) {
-            return true;
-        }
-        if (byte.class.equals(type) || Byte.class.equals(type)) {
-            return true;
-        }
-        if (float.class.equals(type) || Float.class.equals(type)) {
-            return true;
-        }
-        if (UUID.class.equals(type)) {
-            return true;
-        }
-        if (LocalDateTime.class.equals(type)) {
-            return true;
-        }
-        if (ZonedDateTime.class.equals(type)) {
-            return true;
-        }
-        if (Duration.class.equals(type)) {
-            return true;
-        }
-        return Date.class.equals(type);
-    }
-
-    public boolean isComplexType(Type type) {
-        return !isPrimitiveType(type);
-    }
-
-
-    public boolean isClass(Type type) {
-        return type instanceof Class;
     }
 
 
@@ -231,7 +150,8 @@ public class TypeInspector {
 
     public boolean hasConstructorWithAllProperties(Type type) {
         Class<?> rawClass = extractClass(type);
-        return matchConstructorArguments(rawClass, getConstructorProperties(rawClass).stream().map(ExtractedProperty::type).collect(toCollection(ArrayFactory::dynamicArray)));
+        ImmutableArray<ExtractedProperty> properties = getConstructorProperties(rawClass);
+        return matchConstructorArguments(rawClass, properties.stream().map(ExtractedProperty::type).collect(toCollection(ArrayFactory::dynamicArray)));
     }
 
     public boolean matchConstructorArguments(Type type, List<Type> argumentTypes) {
@@ -252,33 +172,8 @@ public class TypeInspector {
 
 
     public PrimitiveType primitiveTypeFromJava(Type type) {
-        if (char.class.equals(type) || Character.class.equals(type)) {
-            return STRING;
-        }
-        if (int.class.equals(type) || Integer.class.equals(type)) {
-            return INT;
-        }
-        if (short.class.equals(type) || Short.class.equals(type)) {
-            return INT;
-        }
-        if (long.class.equals(type) || Long.class.equals(type)) {
-            return LONG;
-        }
-        if (boolean.class.equals(type) || Boolean.class.equals(type)) {
-            return BOOL;
-        }
-        if (double.class.equals(type) || Double.class.equals(type)) {
-            return DOUBLE;
-        }
-        if (byte.class.equals(type) || Byte.class.equals(type)) {
-            return BYTE;
-        }
-        if (float.class.equals(type) || Float.class.equals(type)) {
-            return FLOAT;
-        }
-        throw new GenerationException(format(UNSUPPORTED_TYPE, type));
+        return orThrow(JAVA_TO_PRIMITIVE_TYPE.get(type), () -> new GenerationException(format(UNSUPPORTED_TYPE, type)));
     }
-
 
     public Class<?> extractClass(ParameterizedType parameterizedType) {
         return extractClass(parameterizedType.getRawType());

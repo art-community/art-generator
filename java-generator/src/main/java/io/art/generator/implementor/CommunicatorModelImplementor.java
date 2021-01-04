@@ -18,11 +18,11 @@ import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
 import static io.art.generator.caller.MethodCaller.*;
-import static io.art.generator.constants.GeneratorConstants.CommunicatorProxyMethods.*;
-import static io.art.generator.constants.GeneratorConstants.CommunicatorSpecificationMethods.*;
-import static io.art.generator.constants.GeneratorConstants.ExceptionMessages.*;
-import static io.art.generator.constants.GeneratorConstants.Names.*;
-import static io.art.generator.constants.GeneratorConstants.TypeModels.*;
+import static io.art.generator.constants.CommunicatorConstants.CommunicatorProxyMethods.GET_IMPLEMENTATIONS_METHOD;
+import static io.art.generator.constants.CommunicatorConstants.CommunicatorProxyMethods.GET_PROTOCOL_METHOD;
+import static io.art.generator.constants.ExceptionMessages.*;
+import static io.art.generator.constants.Names.*;
+import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.communicator.RsocketCommunicatorImplementationCreator.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
@@ -148,7 +148,7 @@ public class CommunicatorModelImplementor {
         Type returnType = method.getGenericReturnType();
         MethodProcessingMode inputMode = isEmpty(parameterTypes) ? BLOCKING : calculateProcessingMode(parameterTypes[0]);
         MethodProcessingMode outputMode = calculateProcessingMode(returnType);
-        NewBuilder specificationBuilder = newBuilder(COMMUNICATOR_SPECIFICATION_TYPE).method(COMMUNICATOR_ID, literal(specificationModel.getId()));
+        NewBuilder specificationBuilder = newBuilder(COMMUNICATOR_SPECIFICATION_TYPE).method(COMMUNICATOR_ID_NAME, literal(specificationModel.getId()));
         if (!isEmpty(parameterTypes)) {
             switch (inputMode) {
                 case BLOCKING:
