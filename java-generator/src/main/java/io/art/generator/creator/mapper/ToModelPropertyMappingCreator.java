@@ -24,11 +24,11 @@ public class ToModelPropertyMappingCreator {
             arguments.add(select(PRIMITIVE_ENUM_TYPE, primitiveTypeFromJava(fieldType).name()));
         }
         arguments.add(toModelMapper(fieldType));
-        return mapMethodCall(javaPrimitiveType, arguments.build());
+        return mapMethodCall(javaPrimitiveType, isOptional(fieldType), arguments.build());
     }
 
-    private JCMethodInvocation mapMethodCall(boolean javaPrimitiveType, ImmutableArray<JCExpression> arguments) {
-        String method = javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME;
+    private JCMethodInvocation mapMethodCall(boolean javaPrimitiveType, boolean optional, ImmutableArray<JCExpression> arguments) {
+        String method = optional ? MAP_OPTIONAL : javaPrimitiveType ? MAP_OR_DEFAULT_NAME : MAP_NAME;
         return method(method(entityName, MAPPING_METHOD_NAME).apply(), method).addArguments(arguments).apply();
     }
 }

@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.concurrent.atomic.*;
 
 public class GenerationState {
-    private static final Map<Type, String> GENERATED_MAPPERS = concurrentHashMap();
+    private static final Map<Type, String> GENERATED_MAPPERS = weakMap();
     private static final AtomicBoolean COMPLETED = new AtomicBoolean();
 
     public static void putGeneratedMapper(Type type, String name) {

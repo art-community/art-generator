@@ -1,7 +1,6 @@
 package io.art.generator.inspector;
 
 import io.art.core.collection.*;
-import io.art.core.factory.*;
 import io.art.core.lazy.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
@@ -18,7 +17,6 @@ import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static java.lang.reflect.Modifier.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
-import static java.util.stream.Collectors.*;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -60,7 +58,7 @@ public class TypeInspector {
     }
 
     public boolean isOptional(Type fieldType) {
-        return Optional.class == extractClass(fieldType);
+        return !(fieldType instanceof GenericArrayType) && Optional.class == extractClass(fieldType);
     }
 
     public boolean isCollectionType(Class<?> type) {

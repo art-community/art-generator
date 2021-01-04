@@ -5,6 +5,7 @@ public interface MappersConstants {
     String FROM_MODEL_NAME = "fromModel";
     String MAPPING_METHOD_NAME = "mapping";
     String MAP_OR_DEFAULT_NAME = "mapOrDefault";
+    String MAP_OPTIONAL = "mapOptional";
     String MAPPING_INTERFACE_NAME = "Mapping";
     String ENTITY_NAME = "entity";
     String ENTITY_BUILDER_NAME = "entityBuilder";

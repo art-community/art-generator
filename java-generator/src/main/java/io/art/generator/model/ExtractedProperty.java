@@ -18,7 +18,7 @@ import java.util.*;
 @Builder
 @Accessors(fluent = true)
 public class ExtractedProperty {
-    private static final Map<Type, ImmutableArray<ExtractedProperty>> CACHE = concurrentHashMap();
+    private static final Map<Type, ImmutableArray<ExtractedProperty>> CACHE = weakMap();
 
     private final String name;
     private final Type type;

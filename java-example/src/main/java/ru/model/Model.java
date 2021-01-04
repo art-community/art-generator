@@ -7,7 +7,7 @@ import java.util.*;
 
 @Getter
 @Setter
-@AllArgsConstructor
+@NoArgsConstructor
 public class Model {
     int FInteger;
     char FCharacter;
