@@ -3,6 +3,7 @@ package io.art.generator.model;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
+import io.art.core.collection.*;
 import lombok.*;
 import lombok.experimental.*;
 import static io.art.core.factory.ArrayFactory.*;
@@ -35,14 +36,14 @@ public class NewLambda {
         return this;
     }
 
-    public NewLambda addStatements(Collection<Supplier<JCStatement>> statements) {
-        this.statements.addAll(statements);
+    public NewLambda addStatements(ImmutableArray<Supplier<JCStatement>> statements) {
+        this.statements.addAll(statements.toMutable());
         return this;
     }
 
     @SafeVarargs
     public final NewLambda addStatements(Supplier<JCStatement>... statements) {
-        return addStatements(fixedArrayOf(statements));
+        return addStatements(immutableArrayOf(statements));
     }
 
     public JCLambda generate() {

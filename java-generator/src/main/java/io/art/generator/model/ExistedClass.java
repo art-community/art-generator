@@ -1,11 +1,12 @@
 package io.art.generator.model;
 
 import com.sun.tools.javac.code.*;
+import io.art.core.collection.*;
 import lombok.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.constants.StringConstants.*;
-import static io.art.generator.context.GeneratorContext.classLoader;
-import static java.lang.Class.*;
+import static io.art.core.factory.MapFactory.*;
+import static io.art.generator.context.GeneratorContext.*;
 import java.util.*;
 
 @Getter
@@ -20,6 +21,14 @@ public class ExistedClass {
 
     @Singular("field")
     private final Map<String, ExistedField> fields;
+
+    public ImmutableMap<String, ExistedMethod> getMethods() {
+        return immutableMapOf(methods);
+    }
+
+    public ImmutableMap<String, ExistedField> getFields() {
+        return immutableMapOf(fields);
+    }
 
     public String getPackageName() {
         return packageUnit.getPackageName().toString();

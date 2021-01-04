@@ -22,4 +22,6 @@ public class GeneratorContextConfiguration {
     private final ExistedMethod configureMethod;
     @Singular("exitedClass")
     private final Map<String, ExistedClass> existedClasses;
+
+
 }
