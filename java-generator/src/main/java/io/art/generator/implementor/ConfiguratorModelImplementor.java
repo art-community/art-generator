@@ -9,7 +9,6 @@ import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.collection.ImmutableSet.*;
-import static io.art.core.factory.ArrayFactory.*;
 import static io.art.core.factory.MapFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.LoggingMessages.*;
@@ -97,11 +96,7 @@ public class ConfiguratorModelImplementor {
     }
 
     private static JCTree.JCExpression executeRegisterMethod(Class<?> configurationClass) {
-        String proxyClassName = computeCustomConfiguratorClassName(configurationClass);
-        return method(REGISTRY_NAME, REGISTER_NAME)
-                .addArguments(classReference(configurationClass), method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
-                        .addArguments(classReference(proxyClassName), newReference(proxyClassName))
-                        .apply())
-                .apply();
+        String className = computeCustomConfiguratorClassName(configurationClass);
+        return method(REGISTRY_NAME, REGISTER_NAME).addArguments(classReference(configurationClass), select(className, INSTANCE_FIELD_NAME)).apply();
     }
 }
