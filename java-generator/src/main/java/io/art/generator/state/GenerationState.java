@@ -20,7 +20,7 @@ public class GenerationState {
     }
 
     public static void putGeneratedConfigurationProxy(Type type, String name) {
-        GENERATED_COMMUNICATOR_PROXIES.put(type, name);
+        GENERATED_CONFIGURATION_PROXIES.put(type, name);
     }
 
     public static String getGeneratedConfigurationProxy(Type type) {

@@ -182,7 +182,7 @@ public class CommunicatorModelImplementor {
     private String computeProxyClassName(Class<?> proxyClass) {
         String proxy = getGeneratedCommunicatorProxy(proxyClass);
         if (nonNull(proxy)) return proxy;
-        putGeneratedConfigurationProxy(proxyClass, proxy = sequenceName(proxyClass.getSimpleName() + PROXY_CLASS_SUFFIX));
+        putGeneratedCommunicatorProxy(proxyClass, proxy = sequenceName(proxyClass.getSimpleName() + PROXY_CLASS_SUFFIX));
         return proxy;
     }
 }
