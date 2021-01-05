@@ -28,6 +28,7 @@ public class CompilationService {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(EMPTY_BYTES);
         ImmutableArray.Builder<String> arguments = immutableArrayBuilder();
+        arguments.add(PARAMETERS.getText());
         arguments.add(CLASSPATH.getText());
         arguments.add(options().get(CLASSPATH));
         arguments.add(D.getText());
