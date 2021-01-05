@@ -6,6 +6,7 @@ import lombok.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.factory.MapFactory.*;
+import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
 import java.util.*;
 
@@ -17,13 +18,13 @@ public class ExistedClass {
     private final JCCompilationUnit packageUnit;
 
     @Singular("method")
-    private final Map<String, ExistedMethod> methods;
+    private final Set<ExistedMethod> methods;
 
     @Singular("field")
     private final Map<String, ExistedField> fields;
 
-    public ImmutableMap<String, ExistedMethod> getMethods() {
-        return immutableMapOf(methods);
+    public ImmutableSet<ExistedMethod> getMethods() {
+        return immutableSetOf(methods);
     }
 
     public ImmutableMap<String, ExistedField> getFields() {

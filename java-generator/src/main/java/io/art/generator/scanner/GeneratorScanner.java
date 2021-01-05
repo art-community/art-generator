@@ -11,13 +11,14 @@ import io.art.generator.model.*;
 import lombok.*;
 import static com.sun.source.tree.Tree.Kind.*;
 import static com.sun.tools.javac.code.Symbol.*;
+import static io.art.core.collector.MapCollector.*;
+import static io.art.core.collector.SetCollector.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.Annotations.*;
 import static io.art.generator.constants.Names.*;
 import static java.util.Objects.*;
 import static java.util.function.Function.*;
-import static java.util.stream.Collectors.*;
 import static javax.lang.model.element.Modifier.*;
 import java.util.*;
 
@@ -48,13 +49,13 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                         .filter(member -> member.getKind() == METHOD)
                         .map(member -> (JCMethodDecl) member)
                         .map(member -> ExistedMethod.builder().name(member.name.toString()).declaration(member).build())
-                        .collect(toMap(ExistedMethod::getName, identity())))
+                        .collect(setCollector()))
                 .fields(classDeclaration.getMembers()
                         .stream()
                         .filter(member -> member.getKind() == VARIABLE)
                         .map(member -> (JCVariableDecl) member)
                         .map(member -> ExistedField.builder().name(member.name.toString()).declaration(member).build())
-                        .collect(toMap(ExistedField::getName, identity())))
+                        .collect(mapCollector(ExistedField::getName, identity())))
                 .build();
         String existedClassName = packageUnit.getPackageName().toString() + DOT + classDeclaration.name.toString();
         configurationBuilder.exitedClass(existedClassName, existedClass);
@@ -91,7 +92,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                         .name(mainMethodDeclaration.get().name.toString())
                         .build();
                 configurationBuilder.mainMethod(mainMethod);
-                mainClassBuilder.method(mainMethod.getName(), mainMethod);
+                mainClassBuilder.method(mainMethod);
             }
 
             ExistedMethod modelMethod = ExistedMethod.builder()
@@ -100,7 +101,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                     .build();
 
             configurationBuilder.configureMethod(modelMethod);
-            mainClassBuilder.method(modelMethod.getName(), modelMethod);
+            mainClassBuilder.method(modelMethod);
 
             configurationBuilder.mainClass(this.mainClass = mainClassBuilder.build());
         }

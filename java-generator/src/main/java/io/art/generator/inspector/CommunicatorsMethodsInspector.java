@@ -16,14 +16,14 @@ import java.lang.reflect.*;
 import java.util.*;
 
 @UtilityClass
-public class ServiceMethodsInspector {
-    public static ImmutableArray<Method> getServiceMethods(Class<?> serviceClass) {
+public class CommunicatorsMethodsInspector {
+    public static ImmutableArray<Method> getCommunicatorMethods(Class<?> serviceClass) {
         Set<String> duplicates = duplicates(serviceClass.getDeclaredMethods(), Method::getName);
         if (isNotEmpty(duplicates)) {
             throw new ValidationException(formatSignature(serviceClass), format(OVERRIDDEN_METHODS_NOT_SUPPORTED, toCommaDelimitedString(duplicates)));
         }
         return stream(serviceClass.getDeclaredMethods())
-                .filter(method -> isPublic(method.getModifiers()) && !method.isSynthetic())
+                .filter(method -> isPublic(method.getModifiers()) && !method.isSynthetic() && !method.isDefault())
                 .collect(immutableArrayCollector());
     }
 }

@@ -28,6 +28,7 @@ import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.creator.registry.RegistryVariableCreator.*;
 import static io.art.generator.formater.SignatureFormatter.*;
+import static io.art.generator.inspector.CommunicatorsMethodsInspector.*;
 import static io.art.generator.model.NewBuilder.*;
 import static io.art.generator.model.NewClass.*;
 import static io.art.generator.model.NewField.*;
@@ -84,14 +85,12 @@ public class CommunicatorModelImplementor {
                 .field(createRegistryField(communicatorClass))
                 .method(getImplementations)
                 .method(getProtocol);
-        Method[] declaredMethods = communicatorModel.getProxyClass().getDeclaredMethods();
-        for (int index = 0; index < declaredMethods.length; index++) {
-            Method method = declaredMethods[index];
-            if (method.isDefault() || method.isSynthetic()) continue;
+        int specificationIndex = 0;
+        for (Method method : getCommunicatorMethods(communicatorModel.getProxyClass())) {
             if (method.getParameterCount() > 1) {
                 throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(communicatorModel.getProxyClass(), method));
             }
-            String specificationFieldName = SPECIFICATION_FIELD_PREFIX + index;
+            String specificationFieldName = SPECIFICATION_FIELD_PREFIX + specificationIndex++;
             NewField specificationField = newField()
                     .type(COMMUNICATOR_SPECIFICATION_TYPE)
                     .name(specificationFieldName)

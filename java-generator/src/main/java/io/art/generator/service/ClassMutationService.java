@@ -10,6 +10,7 @@ import lombok.experimental.*;
 import static com.sun.source.tree.Tree.Kind.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.collection.ImmutableSet.*;
+import static io.art.core.collector.SetCollector.setCollector;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
@@ -50,7 +51,7 @@ public class ClassMutationService {
                 .map(NewMethod::returnType)
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
                 .map(type -> classImport(type.getFullName()))
-                .collect(toCollection(SetFactory::set));
+                .collect(setCollector());
         ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, immutableSetOf(combine(importModels, method.classImports())));
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }

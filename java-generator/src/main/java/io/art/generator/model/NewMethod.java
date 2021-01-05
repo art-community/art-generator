@@ -2,12 +2,11 @@ package io.art.generator.model;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
-import io.art.core.factory.*;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.util.List.*;
-import static io.art.core.factory.ArrayFactory.*;
+import static io.art.core.collector.SetCollector.setCollector;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.ImportModel.*;
@@ -16,7 +15,6 @@ import static io.art.generator.model.TypeModel.*;
 import static java.util.Arrays.*;
 import static java.util.stream.Collectors.*;
 import java.lang.reflect.*;
-import java.util.List;
 import java.util.*;
 import java.util.function.*;
 
@@ -73,7 +71,7 @@ public class NewMethod {
     public static NewMethod overrideMethod(Method declaration, TypeModel returnTypeModel) {
         Set<NewParameter> parameters = stream(declaration.getParameters())
                 .map(parameter -> newParameter(type(parameter.getParameterizedType()), parameter.getName()))
-                .collect(toCollection(SetFactory::set));
+                .collect(setCollector());
         NewMethod method = newMethod()
                 .returnType(returnTypeModel)
                 .name(declaration.getName())

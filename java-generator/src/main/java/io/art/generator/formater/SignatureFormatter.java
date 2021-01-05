@@ -21,6 +21,10 @@ public class SignatureFormatter {
         return format("{0} {1}.{2}({3})", method.getReturnType().getName(), type.getTypeName(), method.getName(), toCommaDelimitedString(arguments));
     }
 
+    public String formatSignature(Type type) {
+        return format("{0}",type.getTypeName());
+    }
+
     public String formatSignature(Type type, ExtractedProperty property) {
         return format("{0}: {1} {2}", type.getTypeName(), property.type(), property.name());
     }
