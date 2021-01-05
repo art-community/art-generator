@@ -25,6 +25,10 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.selector.ConfigurationSourceMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
+import static io.art.generator.service.NamingService.*;
+import static io.art.generator.state.GenerationState.*;
+import static java.util.Objects.*;
+import java.lang.reflect.*;
 
 @UtilityClass
 public class ConfiguratorModelImplementor {
@@ -48,7 +52,7 @@ public class ConfiguratorModelImplementor {
                 //throw new ValidationException("");
             }
             TypeModel proxyType = type(parameterizedType(CustomConfigurationProxy.class, arrayOf(configurationClass)));
-            String proxyClassName = configurationClass.getSimpleName() + PROXY_CLASS_SUFFIX;
+            String proxyClassName = computeProxyClassName(configurationClass);
             NewClass proxy = newClass()
                     .name(proxyClassName)
                     .modifiers(PRIVATE | STATIC)
@@ -61,7 +65,7 @@ public class ConfiguratorModelImplementor {
 
 
     private static NewMethod createConfigureMethod(Class<?> configurationClass, ImmutableSet<Class<?>> configurationClasses) {
-        String proxyClassName = configurationClass.getSimpleName() + PROXY_CLASS_SUFFIX;
+        String proxyClassName = computeProxyClassName(configurationClass);
         ImmutableArray<ExtractedProperty> properties = getConstructorProperties(configurationClass);
         NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass));
         ImmutableArray<JCExpression> constructorParameters = getConstructorParameters(configurationClasses, properties, proxyClassName);
@@ -69,7 +73,7 @@ public class ConfiguratorModelImplementor {
     }
 
     private static JCTree.JCExpression executeRegisterMethod(Class<?> configurationClass) {
-        String proxyClassName = configurationClass.getSimpleName() + PROXY_CLASS_SUFFIX;
+        String proxyClassName = computeProxyClassName(configurationClass);
         return method(REGISTRY_NAME, REGISTER_NAME)
                 .addArguments(classReference(configurationClass), method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
                         .addArguments(classReference(proxyClassName), newReference(proxyClassName))
@@ -80,21 +84,31 @@ public class ConfiguratorModelImplementor {
     public ImmutableArray<JCExpression> getConstructorParameters(ImmutableSet<Class<?>> configurationClasses, ImmutableArray<ExtractedProperty> properties, String proxyClassName) {
         ImmutableArray.Builder<JCTree.JCExpression> constructorParameters = immutableArrayBuilder();
         for (ExtractedProperty property : properties) {
-            constructorParameters.add(createConstructorParameter(configurationClasses, property, proxyClassName));
+            constructorParameters.add(createConstructorParameter(configurationClasses, property));
         }
         return constructorParameters.build();
     }
 
-    private JCExpression createConstructorParameter(ImmutableSet<Class<?>> configurationClasses, ExtractedProperty property, String proxyClassName) {
+    private JCExpression createConstructorParameter(ImmutableSet<Class<?>> configurationClasses, ExtractedProperty property) {
         String source = CONFIGURE_METHOD.getParameters()[0].getName();
         if (configurationClasses.contains(property.type())) {
+            JCMethodInvocation proxy = method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
+                    .addArguments(classReference(computeProxyClassName(property.type())), newReference(computeProxyClassName(property.type())))
+                    .apply();
             return method(NULLITY_CHECKER_TYPE, LET_NAME)
                     .addArguments(method(source, GET_NESTED).addArguments(literal(property.name())).apply())
-                    .addArguments(invokeReference(method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME).addArguments(classReference(extractClass(property.type()).getSimpleName() + PROXY_CLASS_SUFFIX), newReference(extractClass(property.type()).getSimpleName() + PROXY_CLASS_SUFFIX)).apply(), CONFIGURE_NAME))
+                    .addArguments(invokeReference(proxy, CONFIGURE_NAME))
                     .apply();
         }
         return method(source, selectConfigurationSourceMethod(property.type()))
                 .addArgument(literal(property.name()))
                 .apply();
+    }
+
+    private String computeProxyClassName(Type proxyClass) {
+        String proxy = getGeneratedConfigurationProxy(proxyClass);
+        if (nonNull(proxy)) return proxy;
+        putGeneratedConfigurationProxy(proxyClass, proxy = sequenceName(extractClass(proxyClass).getSimpleName() + PROXY_CLASS_SUFFIX));
+        return proxy;
     }
 }

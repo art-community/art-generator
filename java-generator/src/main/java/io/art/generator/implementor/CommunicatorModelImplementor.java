@@ -37,6 +37,9 @@ import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.service.JavacService.*;
+import static io.art.generator.service.NamingService.*;
+import static io.art.generator.state.GenerationState.*;
+import static java.util.Objects.*;
 import java.lang.reflect.*;
 import java.util.function.*;
 
@@ -78,7 +81,7 @@ public class CommunicatorModelImplementor {
                         .type(COMMUNICATOR_MODEL_TYPE)
                         .name(COMMUNICATOR_MODEL_NAME)
                         .byConstructor(true))
-                .name(communicatorModel.getProxyClass().getSimpleName() + PROXY_CLASS_SUFFIX)
+                .name(computeProxyClassName(communicatorModel.getProxyClass()))
                 .modifiers(PRIVATE | STATIC)
                 .implement(type(communicatorModel.getProxyClass()))
                 .implement(proxyType)
@@ -129,7 +132,7 @@ public class CommunicatorModelImplementor {
 
     private JCMethodInvocation executeRegisterMethod(CommunicatorModel specificationModel) {
         Class<?> implementationInterface = specificationModel.getProxyClass();
-        String proxyClassName = implementationInterface.getSimpleName() + PROXY_CLASS_SUFFIX;
+        String proxyClassName = computeProxyClassName(implementationInterface);
         return method(REGISTRY_NAME, REGISTER_NAME)
                 .addArguments(literal(implementationInterface.getSimpleName()), newObject(proxyClassName, ident(COMMUNICATOR_MODEL_NAME)))
                 .apply();
@@ -174,5 +177,12 @@ public class CommunicatorModelImplementor {
                 .generate(builder -> method(COMMUNICATOR_MODEL_NAME, IMPLEMENT_NAME)
                         .addArguments(literal(specificationModel.getProxyClass().getSimpleName()), builder)
                         .apply());
+    }
+
+    private String computeProxyClassName(Class<?> proxyClass) {
+        String proxy = getGeneratedCommunicatorProxy(proxyClass);
+        if (nonNull(proxy)) return proxy;
+        putGeneratedConfigurationProxy(proxyClass, proxy = sequenceName(proxyClass.getSimpleName() + PROXY_CLASS_SUFFIX));
+        return proxy;
     }
 }
