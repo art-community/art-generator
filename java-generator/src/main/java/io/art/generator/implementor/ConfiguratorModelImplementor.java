@@ -33,7 +33,6 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.selector.ConfigurationSourceMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
-import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GenerationState.*;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.text.MessageFormat.*;
@@ -51,41 +50,38 @@ public class ConfiguratorModelImplementor {
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
-        ImmutableSet<Class<?>> customConfigurations = model.getCustomConfigurations();
-        customConfigurations.forEach(configuration -> customConfigurationsMethod.statement(() -> maker().Exec(executeRegisterMethod(configuration))));
+        model.getCustomConfigurations().forEach(configuration -> customConfigurationsMethod.statement(() -> maker().Exec(executeRegisterMethod(configuration))));
         return customConfigurationsMethod.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
-    public ImmutableArray<NewClass> implementConfigurationProxies(ConfiguratorModuleModel model) {
-        ImmutableSet<Type> types = model.getCustomConfigurations()
+    public ImmutableArray<NewClass> implementCustomConfigurators(ConfiguratorModuleModel model) {
+        ImmutableSet<Type> configuratorTypes = model.getCustomConfigurations()
                 .stream()
-                .filter(type -> isNull(getGeneratedConfigurationProxy(type)))
+                .filter(type -> isNull(getGeneratedCustomConfigurator(type)))
                 .collect(immutableSetCollector());
-        ImmutableArray.Builder<NewClass> proxyClasses = immutableArrayBuilder();
-        Type[] typesArray = types.toArray(new Type[0]);
-        ImmutableMap<Type, String> typeProxies = computeProxyNames(typesArray);
-        for (Map.Entry<Type, String> entry : typeProxies.entrySet()) {
-            Type configurationType = entry.getKey();
-            if (!hasConstructorWithAllProperties(configurationType)) {
+        ImmutableArray.Builder<NewClass> configuratorClasses = immutableArrayBuilder();
+        for (Map.Entry<Type, String> entry : computeConfiguratorNames(configuratorTypes).entrySet()) {
+            TypeModel configurationType = type(entry.getKey());
+            if (!hasConstructorWithAllProperties(configurationType.getType())) {
                 //throw new ValidationException("");
             }
-            TypeModel proxyType = type(parameterizedType(CustomConfigurator.class, arrayOf(configurationType)));
-            String proxyClassName = computeProxyClassName(configurationType);
-            TypeModel type = type(entry.getKey());
-            NewClass proxy = newClass()
-                    .name(proxyClassName)
+            TypeModel configuratorType = type(parameterizedType(CustomConfigurator.class, arrayOf(configurationType.getType())));
+            String configuratorName = getGeneratedCustomConfigurator(configurationType.getType());
+            NewClass configuratorClass = newClass()
+                    .name(configuratorName)
                     .modifiers(PRIVATE | STATIC)
-                    .implement(proxyType)
-                    .method(createConfigureMethod(configurationType, model.getCustomConfigurations()));
-            if (!type.isJdk()) {
-                proxy.addImport(classImport(type.getFullName()));
+                    .implement(configuratorType)
+                    .method(createConfigureMethod(configurationType.getType(), model.getCustomConfigurations()));
+            if (!configurationType.isJdk()) {
+                configuratorClass.addImport(classImport(configurationType.getFullName()));
             }
-            proxyClasses.add(proxy);
+            configuratorClasses.add(configuratorClass);
+            info(format(GENERATED_CONFIGURATION_PROXY, configurationType.getFullName()));
         }
-        return proxyClasses.build();
+        return configuratorClasses.build();
     }
 
-    private ImmutableMap<Type, String> computeProxyNames(Type[] typesArray) {
+    private ImmutableMap<Type, String> computeConfiguratorNames(ImmutableSet<Type> typesArray) {
         Map<Type, String> typeProxies = map();
         for (Type type : typesArray) {
             Class<?> typeAsClass = extractClass(type);
@@ -95,8 +91,7 @@ public class ConfiguratorModelImplementor {
                     .filter(modelType -> extractClass(modelType).getSimpleName().equals(typeAsClass.getSimpleName()))
                     .count();
             typeProxies.put(type, typeAsClass.getSimpleName() + PROXY_CLASS_SUFFIX + id);
-            putGeneratedConfigurationProxy(type, typeAsClass.getSimpleName() + PROXY_CLASS_SUFFIX + id);
-            info(format(GENERATED_CONFIGURATION_PROXY, type.getTypeName()));
+            putGeneratedCustomConfigurator(type, typeAsClass.getSimpleName() + PROXY_CLASS_SUFFIX + id);
         }
         return immutableMapOf(typeProxies);
     }
@@ -110,7 +105,7 @@ public class ConfiguratorModelImplementor {
     }
 
     private static JCTree.JCExpression executeRegisterMethod(Class<?> configurationClass) {
-        String proxyClassName = computeProxyClassName(configurationClass);
+        String proxyClassName = computeCustomConfiguratorClassName(configurationClass);
         return method(REGISTRY_NAME, REGISTER_NAME)
                 .addArguments(classReference(configurationClass), method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
                         .addArguments(classReference(proxyClassName), newReference(proxyClassName))
@@ -134,7 +129,7 @@ public class ConfiguratorModelImplementor {
                 Type componentType = ((ParameterizedType) type).getActualTypeArguments()[0];
                 if (configurationClasses.contains(componentType)) {
                     JCMethodInvocation proxy = method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
-                            .addArguments(classReference(computeProxyClassName(componentType)), newReference(computeProxyClassName(componentType)))
+                            .addArguments(classReference(computeCustomConfiguratorClassName(componentType)), newReference(computeCustomConfiguratorClassName(componentType)))
                             .apply();
                     MethodCaller propertyProvider = method(source, isListType(type) || isImmutableArrayType(type) ? GET_NESTED_LIST : GET_NESTED_SET)
                             .addArguments(literal(property.name()))
@@ -154,7 +149,7 @@ public class ConfiguratorModelImplementor {
         if (type instanceof Class) {
             if (configurationClasses.contains(type)) {
                 JCMethodInvocation proxy = method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
-                        .addArguments(classReference(computeProxyClassName(type)), newReference(computeProxyClassName(type)))
+                        .addArguments(classReference(computeCustomConfiguratorClassName(type)), newReference(computeCustomConfiguratorClassName(type)))
                         .apply();
                 return method(source, GET_NESTED)
                         .addArguments(literal(property.name())).addArguments(invokeReference(proxy, CONFIGURE_NAME))
@@ -167,10 +162,4 @@ public class ConfiguratorModelImplementor {
         throw new GenerationException(format(NOT_CONFIGURATION_SOURCE_TYPE, type));
     }
 
-    private String computeProxyClassName(Type proxyClass) {
-        String proxy = getGeneratedConfigurationProxy(proxyClass);
-        if (nonNull(proxy)) return proxy;
-        putGeneratedConfigurationProxy(proxyClass, proxy = sequenceName(extractClass(proxyClass).getSimpleName() + PROXY_CLASS_SUFFIX));
-        return proxy;
-    }
 }

@@ -22,7 +22,8 @@ public class ModelLoader {
                     .filter(ModelLoader::hasConfiguratorAnnotation)
                     .findFirst()
                     .orElseThrow(() -> new GenerationException(MODULE_CONFIGURATOR_NOT_FOUND));
-            ModuleModelConfigurator modeler = (ModuleModelConfigurator) configureMethod.invoke(isStatic(configureMethod.getModifiers()) ? null : singleton(mainClass, () -> wrapException(mainClass::newInstance)));
+            Object target = isStatic(configureMethod.getModifiers()) ? null : singleton(mainClass, () -> wrapException(mainClass::newInstance));
+            ModuleModelConfigurator modeler = (ModuleModelConfigurator) configureMethod.invoke(target);
             return modeler.configure();
         } catch (Throwable throwable) {
             throw new GenerationException(throwable);

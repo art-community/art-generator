@@ -45,6 +45,14 @@ public class TypeInspector {
         return fieldType == boolean.class;
     }
 
+    public boolean isVoid(Type fieldType) {
+        return fieldType == void.class;
+    }
+
+    public boolean isNotVoid(Type fieldType) {
+        return fieldType != void.class;
+    }
+
     public boolean isFlux(Type fieldType) {
         return extractClass(fieldType).isAssignableFrom(Flux.class);
     }
@@ -58,7 +66,7 @@ public class TypeInspector {
     }
 
     public boolean isOptional(Type fieldType) {
-        return !(fieldType instanceof GenericArrayType) && Optional.class == extractClass(fieldType);
+        return Optional.class == extractClass(fieldType);
     }
 
     public boolean isCollectionType(Type type) {
@@ -107,18 +115,30 @@ public class TypeInspector {
         return type instanceof Class;
     }
 
+    public boolean isParametrized(Type type) {
+        return type instanceof ParameterizedType;
+    }
+
+    public boolean isGenericArray(Type type) {
+        return type instanceof GenericArrayType;
+    }
+
+    public boolean isVariable(Type type) {
+        return type instanceof TypeVariable;
+    }
+
     public boolean isComplexType(Type type) {
         return !isPrimitiveType(type);
     }
 
     public boolean isLibraryType(Type type) {
-        if (type instanceof ParameterizedType) {
+        if (isParametrized(type)) {
             return isLibraryType(extractClass((ParameterizedType) type));
         }
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             return isLibraryType(extractClass((GenericArrayType) type));
         }
-        if (type instanceof Class) {
+        if (isClass(type)) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {
                 return isLibraryType(typeAsClass.getComponentType());
@@ -132,6 +152,10 @@ public class TypeInspector {
             return libraryType || libraryBasedType;
         }
         return false;
+    }
+
+    public boolean isVoidMethod(Method method) {
+        return method.getGenericReturnType() == void.class;
     }
 
 
@@ -212,13 +236,13 @@ public class TypeInspector {
     }
 
     public Class<?> extractClass(Type type) {
-        if (type instanceof Class) {
+        if (isClass(type)) {
             return (Class<?>) type;
         }
-        if (type instanceof ParameterizedType) {
+        if (isParametrized(type)) {
             return extractClass((ParameterizedType) type);
         }
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             return extractClass((GenericArrayType) type);
         }
         throw new GenerationException(format(UNSUPPORTED_TYPE, type));
@@ -226,14 +250,14 @@ public class TypeInspector {
 
 
     public Type extractGenericPropertyType(ParameterizedType owner, Type type) {
-        if (type instanceof TypeVariable<?>) {
+        if (isVariable(type)) {
             return owner.getActualTypeArguments()[typeVariableIndex((TypeVariable<?>) type)];
         }
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             Type componentType = ((GenericArrayType) type).getGenericComponentType();
             return genericArrayType(extractGenericPropertyType(owner, componentType));
         }
-        if (type instanceof ParameterizedType) {
+        if (isParametrized(type)) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
             Type[] extractedArguments = new Type[actualTypeArguments.length];
@@ -254,5 +278,9 @@ public class TypeInspector {
             if (typeVariable.equals(parameter)) return index;
         }
         throw new GenerationException(format(TYPE_VARIABLE_WAS_NOT_FOUND, typeVariable));
+    }
+
+    public Type extractFirstTypeParameter(ParameterizedType type) {
+        return type.getActualTypeArguments()[0];
     }
 }

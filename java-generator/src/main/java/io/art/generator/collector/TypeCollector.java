@@ -28,17 +28,17 @@ public class TypeCollector {
             return;
         }
 
-        if (type instanceof Class) {
+        if (isClass(type)) {
             collectTypes((Class<?>) type);
             return;
         }
 
-        if (type instanceof ParameterizedType) {
+        if (isParametrized(type)) {
             collectTypes((ParameterizedType) type);
             return;
         }
 
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             collectTypes(((GenericArrayType) type).getGenericComponentType());
             return;
         }
@@ -68,7 +68,7 @@ public class TypeCollector {
                 continue;
             }
 
-            if (propertyType instanceof Class) {
+            if (isClass(propertyType)) {
                 Class<?> propertyTypeAsClass = (Class<?>) propertyType;
                 if (propertyTypeAsClass.isArray()) {
                     Class<?> componentType = propertyTypeAsClass.getComponentType();
@@ -82,12 +82,12 @@ public class TypeCollector {
                 continue;
             }
 
-            if (propertyType instanceof GenericArrayType) {
+            if (isGenericArray(propertyType)) {
                 collectTypes(((GenericArrayType) propertyType).getGenericComponentType());
                 continue;
             }
 
-            if (propertyType instanceof ParameterizedType) {
+            if (isParametrized(propertyType)) {
                 collectTypes((ParameterizedType) propertyType);
             }
         }

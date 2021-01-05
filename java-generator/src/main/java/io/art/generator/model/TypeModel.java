@@ -2,8 +2,8 @@ package io.art.generator.model;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import lombok.*;
@@ -44,17 +44,17 @@ public class TypeModel {
     private boolean array;
 
     private TypeModel(Type type) {
-        if (type instanceof Class) {
+        if (isClass(type)) {
             ofClass((Class<?>) type);
             return;
         }
 
-        if (type instanceof ParameterizedType) {
+        if (isParametrized(type)) {
             ofParametrizedType((ParameterizedType) type);
             return;
         }
 
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             ofGenericArrayType((GenericArrayType) type);
             return;
         }
@@ -73,7 +73,7 @@ public class TypeModel {
         this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
         this.fullName = adoptedTypeClass.getName();
         this.parameters = stream(adoptedTypeClass.getTypeParameters())
-                .filter(type -> !(type instanceof TypeVariable))
+                .filter(type -> !isVariable(type))
                 .map(TypeModel::type)
                 .collect(immutableArrayCollector());
         if (!adoptedTypeClass.isPrimitive()) return;
@@ -134,14 +134,14 @@ public class TypeModel {
     }
 
     private JCExpression generateArrayFullType() {
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             return type(((GenericArrayType) type).getGenericComponentType()).generateFullType();
         }
         return type(((Class<?>) type).getComponentType()).generateFullType();
     }
 
     private JCExpression generateArrayBaseType() {
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             return type(((GenericArrayType) type).getGenericComponentType()).generateBaseType();
         }
         return type(((Class<?>) type).getComponentType()).generateBaseType();

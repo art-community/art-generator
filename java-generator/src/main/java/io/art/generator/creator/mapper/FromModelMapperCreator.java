@@ -47,16 +47,16 @@ public class FromModelMapperCreator {
     public static JCExpression createFromModelMapper(Type type) {
         FromModelMapperCreator creator = new FromModelMapperCreator(sequenceName(MODEL_NAME));
 
-        if (type instanceof Class) {
+        if (isClass(type)) {
             return creator.create((Class<?>) type);
         }
 
-        if (type instanceof ParameterizedType) {
+        if (isParametrized(type)) {
             return creator.create((ParameterizedType) type);
 
         }
 
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             return creator.create((GenericArrayType) type);
         }
 

@@ -2,34 +2,36 @@ package io.art.generator.calculator;
 
 import io.art.core.constants.*;
 import io.art.generator.exception.*;
+import io.art.generator.inspector.*;
 import lombok.experimental.*;
 import reactor.core.publisher.*;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.generator.constants.ExceptionMessages.*;
+import static io.art.generator.inspector.TypeInspector.*;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 
 @UtilityClass
 public class MethodProcessingModeCalculator {
     public MethodProcessingMode calculateProcessingMode(Type parameterType) {
-        if (parameterType instanceof ParameterizedType) {
+        if (isParametrized(parameterType)) {
             ParameterizedType parameterizedType = (ParameterizedType) parameterType;
-            if (parameterizedType.getRawType().equals(Flux.class)) {
+            if (isFlux(parameterizedType.getRawType())) {
                 return FLUX;
             }
-            if (parameterizedType.getRawType().equals(Mono.class)) {
+            if (isMono(parameterizedType.getRawType())) {
                 return MONO;
             }
             return BLOCKING;
         }
-        if (parameterType instanceof GenericArrayType) {
+        if (isGenericArray(parameterType)) {
             return BLOCKING;
         }
-        if (parameterType instanceof Class<?>) {
-            if (parameterType.equals(Flux.class)) {
+        if (isClass(parameterType)) {
+            if (isFlux(parameterType)) {
                 return FLUX;
             }
-            if (parameterType.equals(Mono.class)) {
+            if (isMono(parameterType)) {
                 return MONO;
             }
             return BLOCKING;

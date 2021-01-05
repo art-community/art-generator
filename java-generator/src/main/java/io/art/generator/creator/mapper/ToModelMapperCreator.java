@@ -38,7 +38,7 @@ public class ToModelMapperCreator {
     }
 
     public static JCExpression createToModelMapper(Type type) {
-        if (type instanceof Class) {
+        if (isClass(type)) {
             Class<?> modelClass = (Class<?>) type;
             if (byte[].class.equals(type)) {
                 return select(BINARY_MAPPING_TYPE, TO_BINARY);
@@ -69,7 +69,7 @@ public class ToModelMapperCreator {
             throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
         }
 
-        if (type instanceof ParameterizedType) {
+        if (isParametrized(type)) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             ExtractedParametrizedType extractedType = ExtractedParametrizedType.from(parameterizedType);
             Class<?> rawClass = extractedType.getRawClass();
@@ -120,7 +120,7 @@ public class ToModelMapperCreator {
             throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
         }
 
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             Type genericComponentType = ((GenericArrayType) type).getGenericComponentType();
             return method(ARRAY_MAPPING_TYPE, TO_ARRAY)
                     .addTypeParameters(type(genericComponentType))

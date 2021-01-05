@@ -15,7 +15,7 @@ import java.lang.reflect.*;
 
 @UtilityClass
 public class RsocketCommunicatorImplementationCreator {
-    public NewBuilder createRsocketCommunicatorImplementation(RsocketCommunicatorModel communicatorModel, Method method) {
+    public NewBuilder createRsocketCommunicator(RsocketCommunicatorModel communicatorModel, Method method) {
         NewBuilder builder = newBuilder(RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE)
                 .method(CONNECTOR_ID_NAME, literal(communicatorModel.getProxyClass().getSimpleName()));
         if (isNotEmpty(communicatorModel.getTargetServiceId())) {
@@ -26,7 +26,7 @@ public class RsocketCommunicatorImplementationCreator {
                             .apply())
                     .generate());
         }
-        if (method.getReturnType() == void.class) {
+        if (isVoidMethod(method)) {
             if (method.getParameterCount() == 0) {
                 return builder.method(COMMUNICATION_MODE_NAME, select(RSOCKET_COMMUNICATION_MODE_TYPE, FIRE_AND_FORGET.name()));
             }

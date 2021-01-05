@@ -51,7 +51,7 @@ public class ProviderClassCreator {
         success(GENERATED_COMMUNICATOR_PROXIES);
 
         NewMethod configurationsMethod = implementCustomConfigurationsMethod(model.getConfiguratorModel());
-        ImmutableArray<NewClass> configurationProxies = implementConfigurationProxies(model.getConfiguratorModel());
+        ImmutableArray<NewClass> customConfigurators = implementCustomConfigurators(model.getConfiguratorModel());
         success(GENERATED_CUSTOM_CONFIGURATION_PROXIES);
 
         return providerClass
@@ -63,7 +63,7 @@ public class ProviderClassCreator {
                 .method(configurationsMethod)
                 .inners(mappers)
                 .inners(communicatorProxies)
-                .inners(configurationProxies);
+                .inners(customConfigurators);
     }
 
     private NewMethod createProvideMethod() {

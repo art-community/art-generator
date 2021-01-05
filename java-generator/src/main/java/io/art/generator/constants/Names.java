@@ -8,6 +8,7 @@ public interface Names {
     String LET_NAME = "let";
     String PROVIDER_CLASS_SUFFIX = "Provider";
     String PROXY_CLASS_SUFFIX = "Proxy";
+    String CONFIGURATOR_CLASS_SUFFIX = "Configurator";
     String SPECIFICATION_FIELD_PREFIX = "specification";
     String IMPLEMENT_NAME = "implement";
     String IMPLEMENTATION_NAME = "implementation";

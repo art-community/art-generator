@@ -24,7 +24,7 @@ public class ToModelPropertyMappingCreator {
             arguments.add(select(PRIMITIVE_ENUM_TYPE, primitiveTypeFromJava(fieldType).name()));
         }
         arguments.add(toModelMapper(fieldType));
-        return mapMethodCall(javaPrimitiveType, isOptional(fieldType), arguments.build());
+        return mapMethodCall(javaPrimitiveType, !isGenericArray(fieldType) && isOptional(fieldType), arguments.build());
     }
 
     private JCMethodInvocation mapMethodCall(boolean javaPrimitiveType, boolean optional, ImmutableArray<JCExpression> arguments) {

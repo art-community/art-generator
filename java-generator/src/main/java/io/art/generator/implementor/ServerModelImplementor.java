@@ -24,6 +24,7 @@ import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.creator.registry.RegistryVariableCreator.*;
 import static io.art.generator.formater.SignatureFormatter.*;
 import static io.art.generator.inspector.ServiceMethodsInspector.*;
+import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewBuilder.*;
@@ -79,7 +80,7 @@ public class ServerModelImplementor {
         NewBuilder methodBuilder = newBuilder(SERVICE_METHOD_SPECIFICATION_TYPE)
                 .method(SERVICE_ID_NAME, literal(serviceClass.getSimpleName()))
                 .method(METHOD_ID_NAME, literal(serviceMethod.getName()));
-        if (!isEmpty(parameterTypes)) {
+        if (isNotEmpty(parameterTypes)) {
             TypeModel parameterTypeModel = type(parameterTypes[0]);
             if (!parameterTypeModel.isJdk()) {
                 servicesMethod.addImport(classImport(parameterTypeModel.getFullName()));
@@ -94,7 +95,7 @@ public class ServerModelImplementor {
                     break;
             }
         }
-        if (!void.class.equals(returnType)) {
+        if (isNotVoid(returnType)) {
             TypeModel returnTypeModel = type(returnType);
             if (!returnTypeModel.isJdk()) {
                 servicesMethod.addImport(classImport(returnTypeModel.getName()));
@@ -123,15 +124,16 @@ public class ServerModelImplementor {
         if (isEmpty(serviceMethod.getParameterTypes())) {
             name = PRODUCER_NAME;
         }
-        if (void.class.equals(serviceMethod.getReturnType())) {
+        if (isVoid(serviceMethod.getReturnType())) {
             name = CONSUMER_NAME;
         }
-        if (void.class.equals(serviceMethod.getReturnType()) && isEmpty(serviceMethod.getParameterTypes())) {
+        if (isVoid(serviceMethod.getReturnType()) && isEmpty(serviceMethod.getParameterTypes())) {
             name = RUNNER_NAME;
         }
-        JCExpression owner = isStatic(serviceMethod.getModifiers())
-                ? type(serviceClass).generateBaseType()
-                : method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME).addArguments(classReference(serviceClass)).addArguments(newReference(type(serviceClass))).apply();
+        JCExpression owner = isStatic(serviceMethod.getModifiers()) ? type(serviceClass).generateBaseType() : method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
+                .addArguments(classReference(serviceClass))
+                .addArguments(newReference(type(serviceClass)))
+                .apply();
         JCMemberReference reference = invokeReference(owner, (serviceMethod.getName()));
         JCLiteral serviceName = literal(serviceClass.getSimpleName());
         JCLiteral methodName = literal(serviceMethod.getName());
