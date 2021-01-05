@@ -89,8 +89,13 @@ public class ToModelMapperCreator {
                 JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
                 JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
                 JCExpression valueMapper = toModelMapper(typeArguments[1]);
-                return method(ENTITY_MAPPING_TYPE, isImmutableMapType(rawClass) ? TO_IMMUTABLE_MAP : TO_MAP)
-                        .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
+                if (isImmutableMapType(rawClass)) {
+                    return method(ENTITY_MAPPING_TYPE,  TO_IMMUTABLE_MAP)
+                            .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
+                            .apply();
+                }
+                return method(ENTITY_MAPPING_TYPE,  TO_MUTABLE_MAP)
+                        .addArguments(keyToModelMapper, valueMapper)
                         .apply();
             }
 

@@ -104,6 +104,7 @@ public class FromModelMapperCreator {
                     .addArguments(parameterMapper)
                     .apply();
         }
+
         if (isMapType(rawClass)) {
             if (isComplexType(typeArguments[0])) {
                 throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
@@ -111,7 +112,12 @@ public class FromModelMapperCreator {
             JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
             JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
             JCExpression valueMapper = fromModelMapper(typeArguments[1]);
-            return method(ENTITY_MAPPING_TYPE, isImmutableMapType(rawClass) ? FROM_IMMUTABLE_MAP : FROM_MAP)
+            if (isImmutableMapType(rawClass)) {
+                return method(ENTITY_MAPPING_TYPE, FROM_IMMUTABLE_MAP)
+                        .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
+                        .apply();
+            }
+            return method(ENTITY_MAPPING_TYPE, FROM_MAP)
                     .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
                     .apply();
         }

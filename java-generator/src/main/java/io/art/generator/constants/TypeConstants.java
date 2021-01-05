@@ -97,13 +97,13 @@ public interface TypeConstants {
             .put(ZonedDateTime.class, typeMappings(FROM_ZONED_DATE_TIME, TO_ZONED_DATE_TIME, GET_ZONED_DATE_TIME))
             .put(Date.class, typeMappings(FROM_DATE, TO_DATE, GET_DATE))
             .put(Duration.class, typeMappings(FROM_DURATION, TO_DURATION, GET_DURATION))
-            .put(List.class, typeMappings(FROM_LIST, TO_LIST))
+            .put(List.class, typeMappings(FROM_LIST, TO_MUTABLE_LIST))
+            .put(Set.class, typeMappings(FROM_SET, TO_MUTABLE_SET))
+            .put(Queue.class, typeMappings(FROM_QUEUE, TO_MUTABLE_QUEUE))
+            .put(Deque.class, typeMappings(FROM_DEQUE, TO_MUTABLE_DEQUE))
+            .put(Collection.class, typeMappings(FROM_COLLECTION, TO_MUTABLE_COLLECTION))
             .put(ImmutableArray.class, typeMappings(FROM_IMMUTABLE_ARRAY, TO_IMMUTABLE_ARRAY))
             .put(ImmutableSet.class, typeMappings(FROM_IMMUTABLE_SET, TO_IMMUTABLE_SET))
-            .put(Queue.class, typeMappings(FROM_QUEUE, TO_QUEUE))
-            .put(Deque.class, typeMappings(FROM_DEQUE, TO_DEQUE))
-            .put(Set.class, typeMappings(FROM_SET, TO_SET))
-            .put(Collection.class, typeMappings(FROM_COLLECTION, TO_COLLECTION))
             .build();
 
     ImmutableSet<Type> PRIMITIVE_TYPES = immutableSetOf(
