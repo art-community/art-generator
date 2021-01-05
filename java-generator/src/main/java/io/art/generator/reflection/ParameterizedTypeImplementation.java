@@ -38,7 +38,7 @@ public class ParameterizedTypeImplementation implements ParameterizedType {
         return Arrays.hashCode(actualTypeArguments) ^ Objects.hashCode(ownerType) ^ Objects.hashCode(rawType);
     }
 
-    public static ParameterizedTypeImplementation parameterizedType(Class<?> rawType, Type[] actualTypeArguments) {
+    public static ParameterizedTypeImplementation parameterizedType(Class<?> rawType, Type... actualTypeArguments) {
         return new ParameterizedTypeImplementation(rawType, actualTypeArguments, null);
     }
 }

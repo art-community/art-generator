@@ -103,6 +103,10 @@ public class TypeInspector {
                 || ImmutableArray.class.isAssignableFrom(extractClass(type));
     }
 
+    public boolean isMutableType(Type type) {
+        return !isImmutableType(type);
+    }
+
     public boolean isJavaPrimitiveType(Type type) {
         return JAVA_PRIMITIVE_TYPES.contains(type);
     }

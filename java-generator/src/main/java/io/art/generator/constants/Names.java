@@ -61,7 +61,9 @@ public interface Names {
     String CONNECTOR_ID_NAME = "connectorId";
     String SETUP_PAYLOAD_NAME = "setupPayload";
     String COMMUNICATION_MODE_NAME = "communicationMode";
-    String LIST_SUFFIX = "List";
-    String SET_SUFFIX = "Set";
-    String TO_MUTABLE = "toMutable";
+    String TO_MUTABLE_NAME = "toMutable";
+    String INSTANCE_FIELD_NAME = "INSTANCE";
+    String IMMUTABLE_SET_OF_NAME = "immutableSetOf";
+    String SET_OF_NAME = "setOf";
+    String TO_ARRAY_NAME = "toArray";
 }

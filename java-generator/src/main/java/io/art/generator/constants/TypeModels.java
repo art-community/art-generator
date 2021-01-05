@@ -5,6 +5,7 @@ import io.art.communicator.specification.*;
 import io.art.configurator.custom.*;
 import io.art.core.checker.*;
 import io.art.core.constants.*;
+import io.art.core.factory.*;
 import io.art.core.model.*;
 import io.art.core.singleton.*;
 import io.art.generator.model.*;
@@ -28,6 +29,7 @@ import static io.art.generator.model.TypeModel.*;
 
 public interface TypeModels {
     TypeModel NULLITY_CHECKER_TYPE = type(NullityChecker.class);
+    TypeModel SET_FACTORY_TYPE = type(SetFactory.class);
     TypeModel STRING_ARRAY_TYPE = type(String[].class);
     TypeModel VOID_TYPE = type(void.class);
     TypeModel SINGLETON_REGISTRY_TYPE = type(SingletonsRegistry.class);

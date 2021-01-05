@@ -24,4 +24,5 @@ public class MyConfig {
     private final Set<MyConfig> LSnested;
     private final ImmutableArray<MyConfig> LILnested;
     private final ImmutableSet<MyConfig> LISnested;
+    private final MyConfig[] LIAnested;
 }

@@ -1,20 +1,19 @@
 package io.art.generator.service;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
-import io.art.core.factory.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.tools.javac.code.TypeTag.*;
-import static io.art.core.collection.ImmutableArray.emptyImmutableArray;
-import static io.art.core.factory.ArrayFactory.immutableArrayOf;
+import static io.art.core.collection.ImmutableArray.*;
+import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.TypeModel.*;
-import java.util.*;
+import static java.util.Arrays.*;
+import static java.util.stream.Collectors.*;
 
 @UtilityClass
 public class JavacService {
@@ -36,7 +35,7 @@ public class JavacService {
     }
 
 
-    public JCLiteral literal(String literal) {
+    public JCLiteral literal(Object literal) {
         return maker().Literal(literal);
     }
 
@@ -60,6 +59,14 @@ public class JavacService {
 
     public JCNewClass newObject(TypeModel classType) {
         return newObject(classType, emptyImmutableArray());
+    }
+
+    public JCNewArray newArray(TypeModel classType, Integer... sizes) {
+        List<JCExpression> dimensions = stream(sizes)
+                .map(size -> (JCExpression) literal(size))
+                .collect(toCollection(ListBuffer::new))
+                .toList();
+        return maker().NewArray(classType.generateBaseType(), dimensions, null);
     }
 
     public JCNewClass newObject(String className) {

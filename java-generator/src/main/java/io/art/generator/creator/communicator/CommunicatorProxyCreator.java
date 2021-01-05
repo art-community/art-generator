@@ -41,8 +41,8 @@ import java.util.function.*;
 public class CommunicatorProxyCreator {
     public NewClass createNewProxyClass(CommunicatorModel communicatorModel, Class<?> communicatorClass, Function<Method, NewBuilder> implementationFactory) {
         JCTree.JCExpression protocolExpression = select(type(communicatorModel.getProtocol().getClass()), communicatorModel.getProtocol().name());
-        TypeModel proxyType = type(parameterizedType(CommunicatorProxy.class, arrayOf(communicatorClass)));
-        TypeModel implementationsReturnType = type(parameterizedType(ImmutableArray.class, arrayOf(communicatorClass)));
+        TypeModel proxyType = type(parameterizedType(CommunicatorProxy.class, communicatorClass));
+        TypeModel implementationsReturnType = type(parameterizedType(ImmutableArray.class, communicatorClass));
         NewMethod getImplementations = overrideMethod(GET_IMPLEMENTATIONS_METHOD, implementationsReturnType).statement(() -> returnMethodCall(REGISTRY_NAME, GET_NAME));
         NewMethod getProtocol = overrideMethod(GET_PROTOCOL_METHOD).statement(() -> returnExpression(protocolExpression));
         NewClass proxy = newClass()
@@ -78,10 +78,10 @@ public class CommunicatorProxyCreator {
 
     private NewField createRegistryField(Class<?> communicatorClass) {
         return newField()
-                .type(type(parameterizedType(CommunicatorImplementationRegistry.class, arrayOf(communicatorClass))))
+                .type(type(parameterizedType(CommunicatorImplementationRegistry.class, communicatorClass)))
                 .name(REGISTRY_NAME)
                 .modifiers(PRIVATE | FINAL)
-                .initializer(() -> newObject(type(parameterizedType(CommunicatorImplementationRegistry.class, arrayOf(communicatorClass)))));
+                .initializer(() -> newObject(type(parameterizedType(CommunicatorImplementationRegistry.class, communicatorClass))));
     }
 
     private NewMethod createProxyMethod(Method method, String specificationFieldName) {

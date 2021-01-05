@@ -8,6 +8,7 @@ import io.art.configurator.custom.*;
 import io.art.core.checker.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
+import io.art.core.factory.*;
 import io.art.core.lazy.*;
 import io.art.core.model.*;
 import io.art.core.singleton.*;
@@ -50,6 +51,8 @@ public interface Imports {
             LocalDateTime.class.getName(),
             ZonedDateTime.class.getName(),
             Stream.class.getName(),
+            SetFactory.class.getName(),
+            ArrayFactory.class.getName(),
 
             Flux.class.getName(),
             Mono.class.getName(),
