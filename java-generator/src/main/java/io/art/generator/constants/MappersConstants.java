@@ -52,12 +52,18 @@ public interface MappersConstants {
         String FROM_QUEUE = "fromQueue";
         String FROM_DEQUE = "fromDeque";
 
+        String FROM_IMMUTABLE_ARRAY = "fromImmutableArray";
+        String FROM_IMMUTABLE_SET = "fromImmutableSet";
+
         String TO_COLLECTION = "toCollection";
         String TO_ARRAY = "toArray";
         String TO_LIST = "toList";
         String TO_SET = "toSet";
         String TO_QUEUE = "toQueue";
         String TO_DEQUE = "toDeque";
+
+        String TO_IMMUTABLE_ARRAY = "toImmutableArray";
+        String TO_IMMUTABLE_SET = "toImmutableSet";
 
         String TO_INT_ARRAY = "toIntArray";
         String TO_LONG_ARRAY = "toLongArray";
@@ -82,6 +88,8 @@ public interface MappersConstants {
     interface EntityMappingMethods {
         String TO_MAP = "toMap";
         String FROM_MAP = "fromMap";
+        String TO_IMMUTABLE_MAP = "toImmutableMap";
+        String FROM_IMMUTABLE_MAP = "fromImmutableMap";
     }
 
     interface BinaryMappingMethods {

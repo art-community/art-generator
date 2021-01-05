@@ -31,7 +31,10 @@ public interface TypeConstants {
             Map.class,
             Flux.class,
             Mono.class,
-            Date.class
+            Date.class,
+            ImmutableArray.class,
+            ImmutableSet.class,
+            ImmutableMap.class
     );
 
     ImmutableSet<Class<?>> LIBRARY_TYPES = immutableSetOf(
@@ -95,6 +98,8 @@ public interface TypeConstants {
             .put(Date.class, typeMappings(FROM_DATE, TO_DATE, GET_DATE))
             .put(Duration.class, typeMappings(FROM_DURATION, TO_DURATION, GET_DURATION))
             .put(List.class, typeMappings(FROM_LIST, TO_LIST))
+            .put(ImmutableArray.class, typeMappings(FROM_IMMUTABLE_ARRAY, TO_IMMUTABLE_ARRAY))
+            .put(ImmutableSet.class, typeMappings(FROM_IMMUTABLE_SET, TO_IMMUTABLE_SET))
             .put(Queue.class, typeMappings(FROM_QUEUE, TO_QUEUE))
             .put(Deque.class, typeMappings(FROM_DEQUE, TO_DEQUE))
             .put(Set.class, typeMappings(FROM_SET, TO_SET))
@@ -142,7 +147,9 @@ public interface TypeConstants {
             Queue.class,
             Deque.class,
             Set.class,
-            Collection.class
+            Collection.class,
+            ImmutableArray.class,
+            ImmutableSet.class
     );
 
     ImmutableMap<Type, PrimitiveType> JAVA_TO_PRIMITIVE_TYPE = ImmutableMap.<Type, PrimitiveType>immutableMapBuilder()

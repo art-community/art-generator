@@ -23,7 +23,7 @@ import javax.annotation.processing.*;
 import javax.lang.model.element.*;
 import java.util.*;
 
-@AutoService(javax.annotation.processing.Processor.class)
+@AutoService(Processor.class)
 @SupportedAnnotationTypes(CONFIGURATOR_ANNOTATION_NAME)
 @SupportedSourceVersion(RELEASE_8)
 public class GeneratorProcessor extends AbstractProcessor {

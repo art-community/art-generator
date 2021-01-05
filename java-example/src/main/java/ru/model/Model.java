@@ -1,5 +1,6 @@
 package ru.model;
 
+import io.art.core.collection.*;
 import io.art.core.lazy.*;
 import lombok.*;
 import java.time.*;
@@ -167,4 +168,8 @@ public class Model {
     Optional<Collection<Long[]>> FOptionalCALong;
     Optional<Collection<Long[]>>[][] FOptionalCLAMultiA;
     Map<String, Optional<Collection<Long[][]>[]>[]>[] MSOptionalMCMLongMultiA;
+
+    ImmutableArray<Optional<Collection<Long[][]>[]>[]>[] IASOptionalMCMLongMultiA;
+    ImmutableSet<Optional<Collection<Long[][]>[]>[]>[] ISSOptionalMCMLongMultiA;
+    ImmutableMap<String, Optional<Collection<Long[][]>[]>[]>[] IMSOptionalMCMLongMultiA;
 }

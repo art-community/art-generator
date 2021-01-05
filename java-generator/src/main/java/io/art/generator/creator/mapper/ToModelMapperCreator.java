@@ -23,7 +23,6 @@ import static io.art.generator.state.GenerationState.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
-import java.util.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ToModelMapperCreator {
@@ -83,14 +82,14 @@ public class ToModelMapperCreator {
                         .apply();
             }
 
-            if (Map.class.isAssignableFrom(rawClass)) {
+            if (isMapType(rawClass)) {
                 if (isComplexType(typeArguments[0])) {
                     throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
                 }
                 JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
                 JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
                 JCExpression valueMapper = toModelMapper(typeArguments[1]);
-                return method(ENTITY_MAPPING_TYPE, TO_MAP)
+                return method(ENTITY_MAPPING_TYPE, isImmutableMapType(rawClass) ? TO_IMMUTABLE_MAP : TO_MAP)
                         .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
                         .apply();
             }

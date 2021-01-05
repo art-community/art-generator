@@ -31,7 +31,6 @@ import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import static lombok.AccessLevel.*;
 import java.lang.reflect.*;
-import java.util.*;
 
 @RequiredArgsConstructor(access = PRIVATE)
 public class FromModelMapperCreator {
@@ -105,14 +104,14 @@ public class FromModelMapperCreator {
                     .addArguments(parameterMapper)
                     .apply();
         }
-        if (Map.class.isAssignableFrom(rawClass)) {
+        if (isMapType(rawClass)) {
             if (isComplexType(typeArguments[0])) {
                 throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
             }
             JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
             JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
             JCExpression valueMapper = fromModelMapper(typeArguments[1]);
-            return method(ENTITY_MAPPING_TYPE, FROM_MAP)
+            return method(ENTITY_MAPPING_TYPE, isImmutableMapType(rawClass) ? FROM_IMMUTABLE_MAP : FROM_MAP)
                     .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
                     .apply();
         }

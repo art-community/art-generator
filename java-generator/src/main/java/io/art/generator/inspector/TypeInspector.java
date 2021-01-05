@@ -65,6 +65,14 @@ public class TypeInspector {
         return COLLECTION_TYPES.stream().anyMatch(collection -> collection.isAssignableFrom(type));
     }
 
+    public boolean isMapType(Class<?> type) {
+        return Map.class.isAssignableFrom(type) || ImmutableMap.class.isAssignableFrom(type);
+    }
+
+    public boolean isImmutableMapType(Class<?> type) {
+        return ImmutableMap.class.isAssignableFrom(type);
+    }
+
     public boolean isJavaPrimitiveType(Type type) {
         return JAVA_PRIMITIVE_TYPES.contains(type);
     }
