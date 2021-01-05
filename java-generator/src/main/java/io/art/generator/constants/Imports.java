@@ -34,6 +34,7 @@ import io.art.value.mapping.*;
 import reactor.core.publisher.*;
 import java.time.*;
 import java.util.*;
+import java.util.stream.*;
 
 public interface Imports {
     String[] IMPORTING_CLASSES = new String[]{
@@ -48,6 +49,7 @@ public interface Imports {
             Duration.class.getName(),
             LocalDateTime.class.getName(),
             ZonedDateTime.class.getName(),
+            Stream.class.getName(),
 
             Flux.class.getName(),
             Mono.class.getName(),

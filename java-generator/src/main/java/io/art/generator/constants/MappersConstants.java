@@ -51,25 +51,20 @@ public interface MappersConstants {
         String FROM_SET = "fromSet";
         String FROM_QUEUE = "fromQueue";
         String FROM_DEQUE = "fromDeque";
+        String FROM_STREAM = "fromStream";
 
         String FROM_IMMUTABLE_ARRAY = "fromImmutableArray";
         String FROM_IMMUTABLE_SET = "fromImmutableSet";
-
-        String TO_COLLECTION = "toCollection";
-        String TO_ARRAY = "toArray";
-        String TO_LIST = "toList";
-        String TO_SET = "toSet";
-        String TO_QUEUE = "toQueue";
-        String TO_DEQUE = "toDeque";
-
         String TO_IMMUTABLE_ARRAY = "toImmutableArray";
         String TO_IMMUTABLE_SET = "toImmutableSet";
 
+        String TO_ARRAY = "toArray";
+        String TO_STREAM = "toStream";
         String TO_MUTABLE_COLLECTION = "toMutableCollection";
         String TO_MUTABLE_LIST = "toMutableList";
         String TO_MUTABLE_SET = "toMutableSet";
         String TO_MUTABLE_QUEUE = "toMutableQueue";
-        String TO_MUTABLE_DEQUE = "toMutableDequeue";
+        String TO_MUTABLE_DEQUE = "toMutableDeque";
 
         String TO_INT_ARRAY = "toIntArray";
         String TO_LONG_ARRAY = "toLongArray";

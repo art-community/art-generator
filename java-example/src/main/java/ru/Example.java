@@ -1,6 +1,7 @@
 package ru;
 
 import io.art.communicator.module.*;
+import io.art.core.factory.*;
 import io.art.model.annotation.*;
 import io.art.model.configurator.*;
 import ru.model.*;
@@ -19,6 +20,7 @@ public class Example {
                     logger(Example.class).info("value: " + myConfig.getValue());
                     logger(Example.class).info("nested: " + myConfig.getNested().getNested().getValue());
                     Model model = new Model();
+                    model.setSimpleStream(ArrayFactory.fixedArrayOf("1").stream());
                     CommunicatorModule.communicator(MyClient.class).myMethod2(Request.builder().FModel(model).build());
                 })
                 .configure(configurator -> configurator.configuration(MyConfig.class))

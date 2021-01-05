@@ -20,6 +20,7 @@ import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveTyp
 import java.lang.reflect.*;
 import java.time.*;
 import java.util.*;
+import java.util.stream.*;
 
 public interface TypeConstants {
     ImmutableSet<Class<?>> LIBRARY_BASED_TYPES = immutableSetOf(
@@ -32,6 +33,7 @@ public interface TypeConstants {
             Flux.class,
             Mono.class,
             Date.class,
+            Stream.class,
             ImmutableArray.class,
             ImmutableSet.class,
             ImmutableMap.class
@@ -102,6 +104,7 @@ public interface TypeConstants {
             .put(Queue.class, typeMappings(FROM_QUEUE, TO_MUTABLE_QUEUE))
             .put(Deque.class, typeMappings(FROM_DEQUE, TO_MUTABLE_DEQUE))
             .put(Collection.class, typeMappings(FROM_COLLECTION, TO_MUTABLE_COLLECTION))
+            .put(Stream.class, typeMappings(FROM_STREAM, TO_STREAM))
             .put(ImmutableArray.class, typeMappings(FROM_IMMUTABLE_ARRAY, TO_IMMUTABLE_ARRAY))
             .put(ImmutableSet.class, typeMappings(FROM_IMMUTABLE_SET, TO_IMMUTABLE_SET))
             .build();
@@ -148,6 +151,7 @@ public interface TypeConstants {
             Deque.class,
             Set.class,
             Collection.class,
+            Stream.class,
             ImmutableArray.class,
             ImmutableSet.class
     );

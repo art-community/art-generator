@@ -18,7 +18,7 @@ public class MyService implements MyClient {
     @Override
     public void myMethod2(Request request) {
         logger(MyService.class).info("myMethod2:" + request);
-        logger(MyService.class).info("myMethod2:" + request.getFModel().getFOptionalString());
+        logger(MyService.class).info("myMethod2:" + request.getFModel().getSimpleStream().findFirst().get());
     }
 
     @Override

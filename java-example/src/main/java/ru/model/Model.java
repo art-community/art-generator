@@ -5,6 +5,7 @@ import io.art.core.lazy.*;
 import lombok.*;
 import java.time.*;
 import java.util.*;
+import java.util.stream.*;
 
 @Getter
 @Setter
@@ -169,7 +170,12 @@ public class Model {
     Optional<Collection<Long[]>>[][] FOptionalCLAMultiA;
     Map<String, Optional<Collection<Long[][]>[]>[]>[] MSOptionalMCMLongMultiA;
 
+    Stream<Optional<Collection<Long[][]>[]>[]>[] SASOptionalMCMLongMultiA;
+    Queue<Optional<Collection<Long[][]>[]>[]>[] QASOptionalMCMLongMultiA;
+    Deque<Optional<Collection<Long[][]>[]>[]>[] DSSOptionalMCMLongMultiA;
     ImmutableArray<Optional<Collection<Long[][]>[]>[]>[] IASOptionalMCMLongMultiA;
     ImmutableSet<Optional<Collection<Long[][]>[]>[]>[] ISSOptionalMCMLongMultiA;
     ImmutableMap<String, Optional<Collection<Long[][]>[]>[]>[] IMSOptionalMCMLongMultiA;
+
+    Stream<String> simpleStream;
 }
