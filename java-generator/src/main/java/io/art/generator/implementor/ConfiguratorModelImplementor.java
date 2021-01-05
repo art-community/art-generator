@@ -57,27 +57,19 @@ public class ConfiguratorModelImplementor {
     }
 
     public ImmutableArray<NewClass> implementConfigurationProxies(ConfiguratorModuleModel model) {
-        ImmutableSet<Type> types = model.getCustomConfigurations().stream().filter(type -> isNull(getGeneratedConfigurationProxy(type))).collect(immutableSetCollector());
+        ImmutableSet<Type> types = model.getCustomConfigurations()
+                .stream()
+                .filter(type -> isNull(getGeneratedConfigurationProxy(type)))
+                .collect(immutableSetCollector());
         ImmutableArray.Builder<NewClass> proxyClasses = immutableArrayBuilder();
-        Map<Type, String> typeProxies = map();
         Type[] typesArray = types.toArray(new Type[0]);
-        for (Type type : typesArray) {
-            Class<?> typeAsClass = extractClass(type);
-            long id = typeProxies
-                    .keySet()
-                    .stream()
-                    .filter(modelType -> extractClass(modelType).getSimpleName().equals(typeAsClass.getSimpleName()))
-                    .count();
-            typeProxies.put(type, typeAsClass.getSimpleName() + PROXY_CLASS_SUFFIX + id);
-            putGeneratedConfigurationProxy(type, typeAsClass.getSimpleName() + PROXY_CLASS_SUFFIX + id);
-            info(format(GENERATED_CONFIGURATION_PROXY, type.getTypeName()));
-        }
+        ImmutableMap<Type, String> typeProxies = computeProxyNames(typesArray);
         for (Map.Entry<Type, String> entry : typeProxies.entrySet()) {
             Type configurationType = entry.getKey();
             if (!hasConstructorWithAllProperties(configurationType)) {
                 //throw new ValidationException("");
             }
-            TypeModel proxyType = type(parameterizedType(CustomConfigurationProxy.class, arrayOf(configurationType)));
+            TypeModel proxyType = type(parameterizedType(CustomConfigurator.class, arrayOf(configurationType)));
             String proxyClassName = computeProxyClassName(configurationType);
             TypeModel type = type(entry.getKey());
             NewClass proxy = newClass()
@@ -93,9 +85,24 @@ public class ConfiguratorModelImplementor {
         return proxyClasses.build();
     }
 
+    private ImmutableMap<Type, String> computeProxyNames(Type[] typesArray) {
+        Map<Type, String> typeProxies = map();
+        for (Type type : typesArray) {
+            Class<?> typeAsClass = extractClass(type);
+            long id = typeProxies
+                    .keySet()
+                    .stream()
+                    .filter(modelType -> extractClass(modelType).getSimpleName().equals(typeAsClass.getSimpleName()))
+                    .count();
+            typeProxies.put(type, typeAsClass.getSimpleName() + PROXY_CLASS_SUFFIX + id);
+            putGeneratedConfigurationProxy(type, typeAsClass.getSimpleName() + PROXY_CLASS_SUFFIX + id);
+            info(format(GENERATED_CONFIGURATION_PROXY, type.getTypeName()));
+        }
+        return immutableMapOf(typeProxies);
+    }
+
 
     private static NewMethod createConfigureMethod(Type configurationClass, ImmutableSet<Class<?>> configurationClasses) {
-        String proxyClassName = computeProxyClassName(configurationClass);
         ImmutableArray<ExtractedProperty> properties = getConstructorProperties(extractClass(configurationClass));
         NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass));
         ImmutableArray<JCExpression> constructorParameters = getConstructorParameters(configurationClasses, properties);

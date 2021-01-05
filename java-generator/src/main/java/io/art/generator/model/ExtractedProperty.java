@@ -16,6 +16,7 @@ import java.util.*;
 
 @Getter
 @Builder
+@ToString
 @Accessors(fluent = true)
 public class ExtractedProperty {
     private static final Map<Type, ImmutableArray<ExtractedProperty>> CACHE = weakMap();

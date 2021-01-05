@@ -23,7 +23,7 @@ public class CommunicatorsMethodsInspector {
             throw new ValidationException(formatSignature(serviceClass), format(OVERRIDDEN_METHODS_NOT_SUPPORTED, toCommaDelimitedString(duplicates)));
         }
         return stream(serviceClass.getDeclaredMethods())
-                .filter(method -> isPublic(method.getModifiers()) && !method.isSynthetic() && !method.isDefault())
+                .filter(method -> isPublic(method.getModifiers()) && !method.isSynthetic() && !method.isDefault() && !method.isBridge())
                 .collect(immutableArrayCollector());
     }
 }

@@ -100,7 +100,7 @@ public interface Imports {
 
             ConfigurationSource.class.getName(),
             CustomConfigurationRegistry.class.getName(),
-            CustomConfigurationProxy.class.getName(),
+            CustomConfigurator.class.getName(),
             ConfiguratorCustomizer.class.getName(),
             ConfiguratorModuleModel.class.getName(),
 
