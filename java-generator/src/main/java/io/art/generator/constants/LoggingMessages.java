@@ -7,6 +7,7 @@ public interface LoggingMessages {
     String GENERATION_STARTED = "Generation started";
     String GENERATION_COMPLETED = "Generation completed";
     String GENERATED_MAPPER = "Generated mapper for type: {0}";
+    String GENERATED_CONFIGURATION_PROXY = "Generated configuration proxy for type: {0}";
     String GENERATED_CLASS = "Generated class: {0}";
     String GENERATED_SERVICE_METHOD_SPECIFICATION = "Generated service method specification: {0}";
     String GENERATED_MAIN_METHOD = "Generated main method for existed main class: {0}";

@@ -8,7 +8,6 @@ import ru.model.*;
 import static io.art.configurator.module.ConfiguratorModule.*;
 import static io.art.logging.LoggingModule.*;
 import static io.art.model.configurator.ModuleModelConfigurator.*;
-import java.util.*;
 
 public class Example {
     @Configurator

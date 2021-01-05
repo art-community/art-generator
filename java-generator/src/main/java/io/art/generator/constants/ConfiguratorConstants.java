@@ -13,7 +13,6 @@ public interface ConfiguratorConstants {
     interface ConfigurationSourceMethods {
         String GET_BOOL = "getBool";
         String GET_STRING = "getString";
-        String GET_NESTED = "getNested";
         String GET_INT = "getInt";
         String GET_LONG = "getLong";
         String GET_DOUBLE = "getDouble";
@@ -26,10 +25,9 @@ public interface ConfiguratorConstants {
         String GET_LOCAL_DATE_TIME = "getLocalDateTime";
         String GET_ZONED_DATE_TIME = "getZonedDateTime";
         String GET_DATE = "getDate";
-
+        String GET_NESTED = "getNested";
         String GET_BOOL_LIST = "getBoolList";
         String GET_STRING_LIST = "getStringList";
-        String GET_NESTED_LIST = "getNestedList";
         String GET_INT_LIST = "getIntList";
         String GET_LONG_LIST = "getLongList";
         String GET_DOUBLE_LIST = "getDoubleList";
@@ -37,13 +35,11 @@ public interface ConfiguratorConstants {
         String GET_CHAR_LIST = "getCharList";
         String GET_BYTE_LIST = "getByteList";
         String GET_DURATION_LIST = "getDurationList";
-
-        String GET_INT_MAP = "getIntMap";
-        String GET_LONG_MAP = "getLongMap";
-        String GET_BOOL_MAP = "getBoolMap";
-        String GET_DOUBLE_MAP = "getDoubleMap";
-        String GET_STRING_MAP = "getStringMap";
-        String GET_DURATION_MAP = "getDurationMap";
+        String GET_UUID_LIST = "getUuidList";
+        String GET_LOCAL_DATE_TIME_LIST = "getLocalDateTimeList";
+        String GET_ZONED_DATE_TIME_LIST = "getZonedDateTimeList";
+        String GET_DATE_LIST = "getDateList";
+        String GET_NESTED_LIST = "getNestedList";
         String GET_NESTED_MAP = "getNestedMap";
     }
 }
