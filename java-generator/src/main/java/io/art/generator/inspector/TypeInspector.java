@@ -61,16 +61,38 @@ public class TypeInspector {
         return !(fieldType instanceof GenericArrayType) && Optional.class == extractClass(fieldType);
     }
 
-    public boolean isCollectionType(Class<?> type) {
-        return COLLECTION_TYPES.stream().anyMatch(collection -> collection.isAssignableFrom(type));
+    public boolean isCollectionType(Type type) {
+        return COLLECTION_TYPES.stream().anyMatch(collection -> collection.isAssignableFrom(extractClass(type)));
     }
 
-    public boolean isMapType(Class<?> type) {
-        return Map.class.isAssignableFrom(type) || ImmutableMap.class.isAssignableFrom(type);
+    public boolean isListType(Type type) {
+        return List.class.isAssignableFrom(extractClass(type));
     }
 
-    public boolean isImmutableMapType(Class<?> type) {
-        return ImmutableMap.class.isAssignableFrom(type);
+    public boolean isSetType(Type type) {
+        return Set.class.isAssignableFrom(extractClass(type));
+    }
+
+    public boolean isMapType(Type type) {
+        return Map.class.isAssignableFrom(extractClass(type));
+    }
+
+    public boolean isImmutableArrayType(Type type) {
+        return ImmutableArray.class.isAssignableFrom(extractClass(type));
+    }
+
+    public boolean isImmutableSetType(Type type) {
+        return ImmutableSet.class.isAssignableFrom(extractClass(type));
+    }
+
+    public boolean isImmutableMapType(Type type) {
+        return ImmutableMap.class.isAssignableFrom(extractClass(type));
+    }
+
+    public boolean isImmutableType(Type type) {
+        return ImmutableMap.class.isAssignableFrom(extractClass(type))
+                || ImmutableSet.class.isAssignableFrom(extractClass(type))
+                || ImmutableArray.class.isAssignableFrom(extractClass(type));
     }
 
     public boolean isJavaPrimitiveType(Type type) {

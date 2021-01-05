@@ -1,11 +1,10 @@
-parent:
-  value: "parent"
-value: "test"
-integer: 123
-nested:
-  value: "nested"
-  nested:
-    value: "2level"
+LILnested:
+  - FLString:
+      - "test1"
+      - "test2"
+  - FLString:
+      - "test1"
+      - "test2"
 rsocket:
   server:
     transport:

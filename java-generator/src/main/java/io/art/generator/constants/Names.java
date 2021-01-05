@@ -60,4 +60,7 @@ public interface Names {
     String CONNECTOR_ID_NAME = "connectorId";
     String SETUP_PAYLOAD_NAME = "setupPayload";
     String COMMUNICATION_MODE_NAME = "communicationMode";
+    String LIST_SUFFIX = "List";
+    String SET_SUFFIX = "Set";
+    String TO_MUTABLE = "toMutable";
 }

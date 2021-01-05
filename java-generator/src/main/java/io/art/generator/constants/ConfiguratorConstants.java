@@ -26,6 +26,7 @@ public interface ConfiguratorConstants {
         String GET_ZONED_DATE_TIME = "getZonedDateTime";
         String GET_DATE = "getDate";
         String GET_NESTED = "getNested";
+
         String GET_BOOL_LIST = "getBoolList";
         String GET_STRING_LIST = "getStringList";
         String GET_INT_LIST = "getIntList";
@@ -39,7 +40,9 @@ public interface ConfiguratorConstants {
         String GET_LOCAL_DATE_TIME_LIST = "getLocalDateTimeList";
         String GET_ZONED_DATE_TIME_LIST = "getZonedDateTimeList";
         String GET_DATE_LIST = "getDateList";
+
         String GET_NESTED_LIST = "getNestedList";
+        String GET_NESTED_SET = "getNestedSet";
         String GET_NESTED_MAP = "getNestedMap";
     }
 }

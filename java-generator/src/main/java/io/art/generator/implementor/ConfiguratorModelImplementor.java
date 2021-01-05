@@ -4,6 +4,8 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.configurator.custom.*;
 import io.art.core.collection.*;
+import io.art.generator.caller.*;
+import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.configurator.*;
 import lombok.experimental.*;
@@ -15,6 +17,7 @@ import static io.art.core.factory.MapFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ConfiguratorConstants.ConfigurationSourceMethods.*;
 import static io.art.generator.constants.ConfiguratorConstants.ConfiguratorMethods.*;
+import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
@@ -95,7 +98,7 @@ public class ConfiguratorModelImplementor {
         String proxyClassName = computeProxyClassName(configurationClass);
         ImmutableArray<ExtractedProperty> properties = getConstructorProperties(extractClass(configurationClass));
         NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass));
-        ImmutableArray<JCExpression> constructorParameters = getConstructorParameters(configurationClasses, properties, proxyClassName);
+        ImmutableArray<JCExpression> constructorParameters = getConstructorParameters(configurationClasses, properties);
         return method.statement(() -> returnExpression(newObject(type(configurationClass), constructorParameters)));
     }
 
@@ -108,7 +111,7 @@ public class ConfiguratorModelImplementor {
                 .apply();
     }
 
-    public ImmutableArray<JCExpression> getConstructorParameters(ImmutableSet<Class<?>> configurationClasses, ImmutableArray<ExtractedProperty> properties, String proxyClassName) {
+    public ImmutableArray<JCExpression> getConstructorParameters(ImmutableSet<Class<?>> configurationClasses, ImmutableArray<ExtractedProperty> properties) {
         ImmutableArray.Builder<JCTree.JCExpression> constructorParameters = immutableArrayBuilder();
         for (ExtractedProperty property : properties) {
             constructorParameters.add(createConstructorParameter(configurationClasses, property));
@@ -118,17 +121,43 @@ public class ConfiguratorModelImplementor {
 
     private JCExpression createConstructorParameter(ImmutableSet<Class<?>> configurationClasses, ExtractedProperty property) {
         String source = CONFIGURE_METHOD.getParameters()[0].getName();
-        if (configurationClasses.contains(property.type())) {
-            JCMethodInvocation proxy = method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
-                    .addArguments(classReference(computeProxyClassName(property.type())), newReference(computeProxyClassName(property.type())))
-                    .apply();
-            return method(source, GET_NESTED)
-                    .addArguments(literal(property.name())).addArguments(invokeReference(proxy, CONFIGURE_NAME))
+        Type type = property.type();
+        if (type instanceof ParameterizedType) {
+            if (isCollectionType(type)) {
+                Type componentType = ((ParameterizedType) type).getActualTypeArguments()[0];
+                if (configurationClasses.contains(componentType)) {
+                    JCMethodInvocation proxy = method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
+                            .addArguments(classReference(computeProxyClassName(componentType)), newReference(computeProxyClassName(componentType)))
+                            .apply();
+                    MethodCaller propertyProvider = method(source, isListType(type) || isImmutableArrayType(type) ? GET_NESTED_LIST : GET_NESTED_SET)
+                            .addArguments(literal(property.name()))
+                            .addArguments(invokeReference(proxy, CONFIGURE_NAME));
+                    if (!isImmutableType(type)) {
+                        propertyProvider = method(propertyProvider.apply(), TO_MUTABLE);
+                    }
+                    return propertyProvider.apply();
+                }
+                MethodCaller propertyProvider = method(source, selectConfigurationSourceMethod(type)).addArgument(literal(property.name()));
+                if (!isImmutableType(type)) {
+                    propertyProvider = method(propertyProvider.apply(), TO_MUTABLE);
+                }
+                return propertyProvider.apply();
+            }
+        }
+        if (type instanceof Class) {
+            if (configurationClasses.contains(type)) {
+                JCMethodInvocation proxy = method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
+                        .addArguments(classReference(computeProxyClassName(type)), newReference(computeProxyClassName(type)))
+                        .apply();
+                return method(source, GET_NESTED)
+                        .addArguments(literal(property.name())).addArguments(invokeReference(proxy, CONFIGURE_NAME))
+                        .apply();
+            }
+            return method(source, selectConfigurationSourceMethod(type))
+                    .addArgument(literal(property.name()))
                     .apply();
         }
-        return method(source, selectConfigurationSourceMethod(property.type()))
-                .addArgument(literal(property.name()))
-                .apply();
+        throw new GenerationException(format(NOT_CONFIGURATION_SOURCE_TYPE, type));
     }
 
     private String computeProxyClassName(Type proxyClass) {

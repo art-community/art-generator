@@ -6,7 +6,6 @@ import io.art.model.annotation.*;
 import io.art.model.configurator.*;
 import ru.model.*;
 import static io.art.configurator.module.ConfiguratorModule.*;
-import static io.art.logging.LoggingModule.*;
 import static io.art.model.configurator.ModuleModelConfigurator.*;
 
 public class Example {
@@ -15,9 +14,7 @@ public class Example {
         return module(Example.class)
                 .onLoad(() -> {
                     MyConfig myConfig = configuration(MyConfig.class);
-                    logger(Example.class).info("value: " + myConfig.getInteger());
-                    logger(Example.class).info("value: " + myConfig.getValue());
-                    logger(Example.class).info("nested: " + myConfig.getNested().getNested().getValue());
+                    System.out.println(myConfig);
                     Model model = new Model();
                     model.setSimpleStream(ArrayFactory.fixedArrayOf("1").stream());
                     CommunicatorModule.communicator(MyClient.class).myMethod2(Request.builder().FModel(model).build());

@@ -82,14 +82,14 @@ public class ToModelMapperCreator {
                         .apply();
             }
 
-            if (isMapType(rawClass)) {
+            if (isMapType(rawClass) || isImmutableMapType(rawClass)) {
                 if (isComplexType(typeArguments[0])) {
                     throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
                 }
                 JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
                 JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
                 JCExpression valueMapper = toModelMapper(typeArguments[1]);
-                if (isImmutableMapType(rawClass)) {
+                if (isImmutableType(rawClass)) {
                     return method(ENTITY_MAPPING_TYPE,  TO_IMMUTABLE_MAP)
                             .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
                             .apply();
