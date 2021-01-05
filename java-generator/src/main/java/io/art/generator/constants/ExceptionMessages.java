@@ -11,6 +11,6 @@ public interface ExceptionMessages {
     String VALIDATION_EXCEPTION_MESSAGE_FORMAT = "Validation exception for: [{0}]\n\t{1}";
     String GENERATION_FAILED_MESSAGE_FORMAT = "Generation failed:\n\t{0}";
     String RECOMPILATION_FAILED = "Recompilation failed";
-    String NOT_CONFIGURATION_SOURCE_TYPE = "Type is not valid for configuration value: {0}";
+    String NOT_CONFIGURATION_SOURCE_TYPE = "Type is not valid for configuration property: {0}";
     String OVERRIDDEN_METHODS_NOT_SUPPORTED = "Type has overridden methods (rename them to something else): {0}";
 }

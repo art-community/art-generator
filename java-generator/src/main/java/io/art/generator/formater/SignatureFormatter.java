@@ -25,7 +25,7 @@ public class SignatureFormatter {
         return format("{0}",type.getTypeName());
     }
 
-    public String formatSignature(Type type, ExtractedProperty property) {
-        return format("{0}: {1} {2}", type.getTypeName(), property.type(), property.name());
+    public String formatSignature(ExtractedProperty property) {
+        return format("{0}: {1} {2}", property.owner().getTypeName(), property.type(), property.name());
     }
 }

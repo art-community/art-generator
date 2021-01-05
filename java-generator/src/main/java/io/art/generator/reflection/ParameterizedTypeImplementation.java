@@ -1,6 +1,9 @@
 package io.art.generator.reflection;
 
 import lombok.*;
+import static io.art.core.checker.EmptinessChecker.*;
+import static io.art.core.constants.StringConstants.*;
+import static io.art.generator.inspector.TypeInspector.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -36,6 +39,50 @@ public class ParameterizedTypeImplementation implements ParameterizedType {
     @Override
     public int hashCode() {
         return Arrays.hashCode(actualTypeArguments) ^ Objects.hashCode(ownerType) ^ Objects.hashCode(rawType);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        baseToString(builder);
+
+        if (isEmpty(this.actualTypeArguments)) {
+            return builder.toString();
+        }
+
+        builder.append(LESS);
+        boolean last = true;
+        for (Type argument : this.actualTypeArguments) {
+            if (!last) {
+                builder.append(COMMA).append(SPACE);
+            }
+            builder.append(argument.getTypeName());
+            last = false;
+        }
+
+        builder.append(MORE);
+
+        return builder.toString();
+    }
+
+    private void baseToString(StringBuilder builder) {
+        if (isNull(this.ownerType)) {
+            builder.append(this.rawType.getName());
+            return;
+        }
+
+        if (isClass(this.ownerType)) {
+            builder.append(((Class<?>) this.ownerType).getName());
+            return;
+        }
+
+        builder.append(this.ownerType.toString()).append(DOT);
+        if (isParametrized(this.ownerType)) {
+            builder.append(this.rawType.getName().replace(((ParameterizedType) this.ownerType).getRawType() + DOLLAR, EMPTY_STRING));
+            return;
+        }
+
+        builder.append(this.rawType.getName());
     }
 
     public static ParameterizedTypeImplementation parameterizedType(Class<?> rawType, Type... actualTypeArguments) {

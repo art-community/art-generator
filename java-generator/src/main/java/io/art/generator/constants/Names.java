@@ -66,4 +66,6 @@ public interface Names {
     String IMMUTABLE_SET_OF_NAME = "immutableSetOf";
     String SET_OF_NAME = "setOf";
     String TO_ARRAY_NAME = "toArray";
+    String OF_NULLABLE_NAME = "ofNullable";
+    String UNBOX_NAME = "unbox";
 }

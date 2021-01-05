@@ -144,6 +144,17 @@ public interface TypeConstants {
             float.class
     );
 
+    ImmutableMap<Class<?>, Class<?>> JAVA_PRIMITIVE_MAPPINGS = ImmutableMap.<Class<?>, Class<?>>immutableMapBuilder()
+            .put(char.class, Character.class)
+            .put(int.class, Integer.class)
+            .put(short.class, Short.class)
+            .put(long.class, Long.class)
+            .put(boolean.class, Boolean.class)
+            .put(double.class, Double.class)
+            .put(byte.class, Byte.class)
+            .put(float.class, Float.class)
+            .build();
+
     ImmutableSet<Class<?>> COLLECTION_TYPES = immutableSetOf(
             List.class,
             Queue.class,

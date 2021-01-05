@@ -22,6 +22,7 @@ public class ExtractedProperty {
     private static final Map<Type, ImmutableArray<ExtractedProperty>> CACHE = weakMap();
 
     private final String name;
+    private final Type owner;
     private final Type type;
     private final int index;
     private final boolean hasGetter;
@@ -52,6 +53,7 @@ public class ExtractedProperty {
             if (hasGetter || hasSetter || usedInConstructorArguments) {
                 properties.add(ExtractedProperty.builder()
                         .name(field.getName())
+                        .owner(type)
                         .type(field.getGenericType())
                         .index(lastIndex + index)
                         .hasGetter(hasGetter)

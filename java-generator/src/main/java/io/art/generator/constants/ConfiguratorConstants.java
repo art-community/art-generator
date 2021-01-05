@@ -32,23 +32,23 @@ public interface ConfiguratorConstants {
         String GET_ZONED_DATE_TIME = "getZonedDateTime";
         String GET_DATE = "getDate";
 
-        String GET_BOOL_LIST = "getBoolList";
-        String GET_STRING_LIST = "getStringList";
-        String GET_FLOAT_LIST = "getFloatList";
-        String GET_INT_LIST = "getIntList";
-        String GET_LONG_LIST = "getLongList";
-        String GET_DOUBLE_LIST = "getDoubleList";
-        String GET_SHORT_LIST = "getShortList";
-        String GET_CHAR_LIST = "getCharList";
-        String GET_BYTE_LIST = "getByteList";
-        String GET_DURATION_LIST = "getDurationList";
-        String GET_UUID_LIST = "getUuidList";
-        String GET_LOCAL_DATE_TIME_LIST = "getLocalDateTimeList";
-        String GET_ZONED_DATE_TIME_LIST = "getZonedDateTimeList";
-        String GET_DATE_LIST = "getDateList";
+        String GET_BOOL_ARRAY = "getBoolArray";
+        String GET_STRING_ARRAY = "getStringArray";
+        String GET_FLOAT_ARRAY = "getFloatArray";
+        String GET_INT_ARRAY = "getIntArray";
+        String GET_LONG_ARRAY = "getLongArray";
+        String GET_DOUBLE_ARRAY = "getDoubleArray";
+        String GET_SHORT_ARRAY = "getShortArray";
+        String GET_CHAR_ARRAY = "getCharArray";
+        String GET_BYTE_ARRAY = "getByteArray";
+        String GET_DURATION_ARRAY = "getDurationArray";
+        String GET_UUID_ARRAY = "getUuidArray";
+        String GET_LOCAL_DATE_TIME_ARRAY = "getLocalDateTimeArray";
+        String GET_ZONED_DATE_TIME_ARRAY = "getZonedDateTimeArray";
+        String GET_DATE_ARRAY = "getDateArray";
         String GET_MAP = "getMap";
         String GET_NESTED = "getNested";
-        String GET_NESTED_LIST = "getNestedList";
+        String GET_NESTED_ARRAY = "getNestedArray";
     }
 
     ImmutableMap<Type, String> CONFIGURATOR_PROPERTY_TYPE_METHODS = ImmutableMap.<Type, String>immutableMapBuilder()
@@ -67,20 +67,20 @@ public interface ConfiguratorConstants {
             .put(Date.class, GET_DATE)
             .put(Duration.class, GET_DURATION)
 
-            .put(parameterizedType(ImmutableArray.class, Character.class), GET_CHAR_LIST)
-            .put(parameterizedType(ImmutableArray.class, Short.class), GET_SHORT_LIST)
-            .put(parameterizedType(ImmutableArray.class, Integer.class), GET_INT_LIST)
-            .put(parameterizedType(ImmutableArray.class, Long.class), GET_LONG_LIST)
-            .put(parameterizedType(ImmutableArray.class, Boolean.class), GET_BOOL_LIST)
-            .put(parameterizedType(ImmutableArray.class, Double.class), GET_DOUBLE_LIST)
-            .put(parameterizedType(ImmutableArray.class, Byte.class), GET_BYTE_LIST)
-            .put(parameterizedType(ImmutableArray.class, Float.class), GET_FLOAT_LIST)
-            .put(parameterizedType(ImmutableArray.class, String.class), GET_STRING_LIST)
-            .put(parameterizedType(ImmutableArray.class, UUID.class), GET_UUID_LIST)
-            .put(parameterizedType(ImmutableArray.class, LocalDateTime.class), GET_LOCAL_DATE_TIME_LIST)
-            .put(parameterizedType(ImmutableArray.class, ZonedDateTime.class), GET_ZONED_DATE_TIME_LIST)
-            .put(parameterizedType(ImmutableArray.class, Date.class), GET_DATE_LIST)
-            .put(parameterizedType(ImmutableArray.class, Duration.class), GET_DURATION_LIST)
+            .put(parameterizedType(ImmutableArray.class, Character.class), GET_CHAR_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, Short.class), GET_SHORT_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, Integer.class), GET_INT_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, Long.class), GET_LONG_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, Boolean.class), GET_BOOL_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, Double.class), GET_DOUBLE_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, Byte.class), GET_BYTE_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, Float.class), GET_FLOAT_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, String.class), GET_STRING_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, UUID.class), GET_UUID_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, LocalDateTime.class), GET_LOCAL_DATE_TIME_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, ZonedDateTime.class), GET_ZONED_DATE_TIME_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, Date.class), GET_DATE_ARRAY)
+            .put(parameterizedType(ImmutableArray.class, Duration.class), GET_DURATION_ARRAY)
 
             .put(ImmutableMap.class, GET_MAP)
 

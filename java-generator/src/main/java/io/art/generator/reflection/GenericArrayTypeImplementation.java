@@ -1,6 +1,8 @@
 package io.art.generator.reflection;
 
 import lombok.*;
+import static io.art.core.constants.StringConstants.*;
+import static io.art.generator.inspector.TypeInspector.*;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -25,6 +27,24 @@ public class GenericArrayTypeImplementation implements GenericArrayType {
     public int hashCode() {
         return Objects.hashCode(genericComponentType);
     }
+
+    @Override
+    public String toString() {
+        Type component = this.getGenericComponentType();
+        StringBuilder builder = new StringBuilder();
+        if (isClass(component)) {
+            return builder
+                    .append(((Class<?>) component).getName())
+                    .append(SQUARE_BRACES)
+                    .toString();
+        }
+
+        return builder
+                .append(component.toString())
+                .append(SQUARE_BRACES)
+                .toString();
+    }
+
 
     public static GenericArrayTypeImplementation genericArrayType(Type componentType) {
         return new GenericArrayTypeImplementation(componentType);

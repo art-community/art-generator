@@ -5,6 +5,7 @@ import io.art.communicator.specification.*;
 import io.art.configurator.custom.*;
 import io.art.core.checker.*;
 import io.art.core.constants.*;
+import io.art.core.extensions.*;
 import io.art.core.factory.*;
 import io.art.core.model.*;
 import io.art.core.singleton.*;
@@ -26,8 +27,11 @@ import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import static io.art.generator.model.TypeModel.*;
+import java.util.*;
 
 public interface TypeModels {
+    TypeModel OPTIONAL_TYPE = type(Optional.class);
+    TypeModel ARRAY_EXTENSIONS_TYPE = type(ArrayExtensions.class);
     TypeModel NULLITY_CHECKER_TYPE = type(NullityChecker.class);
     TypeModel SET_FACTORY_TYPE = type(SetFactory.class);
     TypeModel STRING_ARRAY_TYPE = type(String[].class);

@@ -1,3 +1,7 @@
+NestedStrings:
+  - test:
+      test: 123
+
 LILnested:
   - FLString:
       - "test1"
