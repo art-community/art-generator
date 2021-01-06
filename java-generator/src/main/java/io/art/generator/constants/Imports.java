@@ -55,6 +55,7 @@ public interface Imports {
             SetFactory.class.getName(),
             ArrayFactory.class.getName(),
             ArrayExtensions.class.getName(),
+            NestedConfiguration.class.getName(),
 
             Flux.class.getName(),
             Mono.class.getName(),

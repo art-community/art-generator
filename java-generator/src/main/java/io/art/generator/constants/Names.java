@@ -68,4 +68,5 @@ public interface Names {
     String TO_ARRAY_NAME = "toArray";
     String OF_NULLABLE_NAME = "ofNullable";
     String UNBOX_NAME = "unbox";
+    String CONFIGURATION_NAME = "configuration";
 }

@@ -1,14 +1,19 @@
-NestedStrings:
-  - test:
-      test: 123
+FBInteger: 123
+config:
+  - values:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - "test"
+      - "test"
+      - "test"
+      - "test"
+      - "test"
+  - value: [["test"], ["test"]]
+  - value: [["test"], ["test"]]
 
-LILnested:
-  - FLString:
-      - "test1"
-      - "test2"
-  - FLString:
-      - "test1"
-      - "test2"
 rsocket:
   server:
     transport:

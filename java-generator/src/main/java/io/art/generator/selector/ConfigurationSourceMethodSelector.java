@@ -12,13 +12,13 @@ import java.lang.reflect.*;
 
 @UtilityClass
 public class ConfigurationSourceMethodSelector {
-    public String selectConfigurationSourceMethod(ExtractedProperty property, Type propertyType) {
+    public String selectConfigurationSourceMethod(Type propertyType) {
 
         String name;
         if (nonNull(name = CONFIGURATOR_PROPERTY_TYPE_METHODS.get(propertyType))) {
             return name;
         }
 
-        throw new ValidationException(SignatureFormatter.formatSignature(property), format(NOT_CONFIGURATION_SOURCE_TYPE, propertyType));
+        throw new ValidationException(SignatureFormatter.formatSignature(propertyType), format(NOT_CONFIGURATION_SOURCE_TYPE, propertyType));
     }
 }

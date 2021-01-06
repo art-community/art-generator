@@ -15,7 +15,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @ToString
 @Accessors(fluent = true)
 public class ExtractedProperty {

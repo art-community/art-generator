@@ -1,7 +1,11 @@
 package ru;
 
+import io.art.core.caster.*;
+import io.art.core.collection.*;
+import io.art.core.source.*;
 import lombok.*;
 import ru.model.*;
+import static java.util.Optional.ofNullable;
 import java.time.*;
 import java.util.*;
 
@@ -61,7 +65,22 @@ public class MyConfig {
     private final Set<Float> FSFloat;
 
     private final MyConfig FModel;
+    private final List<MyConfig> FModelL;
+    private final Set<MyConfig> FModelS;
     private final MyConfig[] FAModel;
 
     private final Optional<String> test;
+
+    private final Optional<String>[] testA;
+
+    private final List<String>[] FModelLA;
+    private final Set<String>[] FModelSA;
+
+    private final ImmutableArray<String>[] FAModeSA;
+    private final ImmutableSet<String>[] FAModelSA;
+
+    public static void main(String[] args) {
+        ConfigurationSource s = null;
+        Optional<String>[] testAS = Caster.cast(s.getNested("testA").asArray(testA -> ofNullable(testA.asString())).toArray(new Optional[0]));
+    }
 }
