@@ -1,11 +1,7 @@
 package ru;
 
-import io.art.core.caster.*;
 import io.art.core.collection.*;
-import io.art.core.source.*;
 import lombok.*;
-import ru.model.*;
-import static java.util.Optional.ofNullable;
 import java.time.*;
 import java.util.*;
 
@@ -54,6 +50,7 @@ public class MyConfig {
     private final List<String> FLString;
     private final List<Double> FLDouble;
     private final List<Float> FLFloat;
+
     private final Set<Integer> FSInteger;
     private final Set<Character> FSCharacter;
     private final Set<Short> FSShort;
@@ -65,24 +62,37 @@ public class MyConfig {
     private final Set<Float> FSFloat;
 
     private final MyConfig FModel;
-    private final List<MyConfig[]> FModelL;
+    private final List<MyConfig> FModelL;
     private final Set<MyConfig> FModelS;
-    private final MyConfig[] FAModel;
+    private final MyConfig FAModel;
 
-    private final Optional<String> test;
+    private final MyConfig[] FModelA;
 
-    private final Optional<String>[] testA;
+    private final List<MyConfig[]> FModelLA;
+    private final List<MyConfig>[] FModelAL;
+    private final List<MyConfig[]>[] FModeALA;
 
-    private final List<String>[] FModelLA;
-    private final Set<String>[] FModelSA;
+    private final Set<MyConfig[]> FModelSA;
+    private final Set<MyConfig>[] FModelAS;
+    private final Set<MyConfig[]>[] FModelSAA;
 
-    private final ImmutableArray<String>[] FAModeSA;
-    private final ImmutableSet<String>[] FAModelSA;
-    private final ImmutableSet<ImmutableSet<String>>[] FAModelSAS;
-    private final ImmutableSet<ImmutableSet<String>[]>[] FAModelSASA;
+    private final ImmutableArray<MyConfig[]> FModelAA;
+    private final ImmutableArray<MyConfig>[] FModelAAA;
+    private final ImmutableArray<MyConfig[]>[] FModelAAAA;
 
-    public static void main(String[] args) {
-        ConfigurationSource source = null;
-        List<MyConfig[]> fModelL = source.getNestedArray("FModelL", FModelL -> FModelL.asArray().toArray(new MyConfig[0])).toMutable();
-    }
+    private final ImmutableSet<MyConfig[]> FModelSAAAAA;
+    private final ImmutableSet<MyConfig>[] FModelSAAAAAA;
+    private final ImmutableSet<MyConfig[]>[] FModelLSAA;
+
+    private final List<ImmutableArray<MyConfig>> FModelLAAAAA;
+    private final List<ImmutableArray<MyConfig>[]> FModelLAA;
+
+    private final List<ImmutableSet<MyConfig>> FModelLS;
+    private final List<ImmutableSet<MyConfig>[]> FModelLSA;
+
+    private final ImmutableArray<List<MyConfig>> FModelLL;
+    private final ImmutableArray<List<MyConfig>[]> FModelLLLA;
+
+    private final ImmutableSet<List<MyConfig>> FModelLSL;
+    private final ImmutableSet<List<MyConfig>[]> FModelLSLA;
 }

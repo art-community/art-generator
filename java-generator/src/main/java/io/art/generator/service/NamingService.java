@@ -7,7 +7,7 @@ import java.util.*;
 
 public class NamingService {
     private static final Random RANDOM = new Random();
-    private static final Map<String, Integer> COUNTER = weakMap();
+    private static final Map<String, Integer> COUNTER = map();
 
     public static String randomName(String prefix) {
         return prefix + abs(RANDOM.nextInt());
