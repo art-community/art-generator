@@ -50,61 +50,39 @@ public class CustomConfigurationCreator {
             if (isJavaPrimitiveType(type)) {
                 throw new ValidationException(formatSignature(property), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
             }
-            constructorParameters.add(createConstructorParameter(property));
+            constructorParameters.add(createPropertyProvider(property));
         }
         return constructorParameters.build();
     }
 
-    private JCExpression createConstructorParameter(ExtractedProperty property) {
+    private JCExpression createPropertyProvider(ExtractedProperty property) {
         Type type = property.type();
         return method(CONFIGURE_METHOD_INPUT, GET_NESTED)
                 .addArguments(literal(property.name()))
                 .addArguments(newLambda()
                         .parameter(newParameter(type(NestedConfiguration.class), property.name()))
-                        .expression(() -> createConstructorParameter(property, type))
+                        .expression(() -> createPropertyProvider(property, type))
                         .generate())
                 .apply();
     }
 
-    private JCMethodInvocation createConstructorParameter(ExtractedProperty property, Type type) {
+    private JCMethodInvocation createPropertyProvider(ExtractedProperty property, Type type) {
         if (isClass(type)) {
-            return createConstructorParameter(property, (Class<?>) type);
+            return createPropertyProvider(property, (Class<?>) type);
         }
         if (isParametrized(type)) {
-            return createConstructorParameter(property, (ParameterizedType) type);
+            return createPropertyProvider(property, (ParameterizedType) type);
         }
         if (isGenericArray(type)) {
-            return createConstructorParameter(property, (GenericArrayType) type);
+            return createPropertyProvider(property, (GenericArrayType) type);
         }
         throw new ValidationException(formatSignature(type), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
 
     }
 
-    private JCMethodInvocation createConstructorParameter(ExtractedProperty property, Class<?> type) {
+    private JCMethodInvocation createPropertyProvider(ExtractedProperty property, Class<?> type) {
         if (type.isArray()) {
-            Class<?> componentType = type.getComponentType();
-            if (configurationClasses.contains(componentType)) {
-                String configuratorName = computeCustomConfiguratorClassName(componentType);
-                Class<?> resultComponentType = componentType;
-                return method(property.name(), GET_NESTED_ARRAY)
-                        .addArguments(literal(property.name()))
-                        .addArguments(invokeReference(select(configuratorName, INSTANCE_FIELD_NAME), CONFIGURE_NAME))
-                        .next(TO_ARRAY_NAME, toArray -> toArray.addArguments(newArray(type(resultComponentType), 0)))
-                        .apply();
-            }
-            boolean primitiveType = isJavaPrimitiveType(componentType);
-            if (primitiveType) componentType = JAVA_PRIMITIVE_MAPPINGS.get(componentType);
-            ParameterizedTypeImplementation immutableArrayType = parameterizedType(ImmutableArray.class, componentType);
-            Class<?> resultComponentType = componentType;
-            JCMethodInvocation asArray = method(property.name(), selectConfigurationSourceMethod(immutableArrayType))
-                    .next(TO_ARRAY_NAME, toArray -> toArray.addArguments(newArray(type(resultComponentType), 0)))
-                    .apply();
-            if (primitiveType) {
-                return method(ARRAY_EXTENSIONS_TYPE, UNBOX_NAME)
-                        .addArguments(asArray)
-                        .apply();
-            }
-            return asArray;
+            return createArrayPropertyProvider(property, type);
         }
 
         String configuratorName = computeCustomConfiguratorClassName(type);
@@ -119,10 +97,10 @@ public class CustomConfigurationCreator {
         return method(property.name(), selectConfigurationSourceMethod(type)).apply();
     }
 
-    private JCMethodInvocation createConstructorParameter(ExtractedProperty property, ParameterizedType type) {
+    private JCMethodInvocation createPropertyProvider(ExtractedProperty property, ParameterizedType type) {
         if (isOptional(type)) {
             return method(OPTIONAL_TYPE, OF_NULLABLE_NAME)
-                    .addArguments(createConstructorParameter(property, extractFirstTypeParameter(type)))
+                    .addArguments(createPropertyProvider(property, extractFirstTypeParameter(type)))
                     .apply();
         }
 
@@ -130,22 +108,7 @@ public class CustomConfigurationCreator {
             throw new ValidationException(formatSignature(property), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
         }
 
-        Type parameterType = extractFirstTypeParameter(type);
-
-        String parameter = sequenceName(property.name());
-        MethodCaller propertyProvider = method(property.name(), AS_ARRAY)
-                .addArguments(newLambda()
-                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, parameter))
-                        .expression(() -> createConstructorParameter(property.toBuilder().name(parameter).type(parameterType).build(), parameterType))
-                        .generate());
-
-        if (isClass(parameterType)) {
-            if (configurationClasses.contains(parameterType)) {
-                propertyProvider = method(property.name(), AS_ARRAY).addArguments(invokeReference(select(computeCustomConfiguratorClassName(parameterType), INSTANCE_FIELD_NAME), CONFIGURE_NAME));
-            } else {
-                propertyProvider = method(property.name(), selectConfigurationSourceMethod(parameterizedType(ImmutableArray.class, parameterType)));
-            }
-        }
+        MethodCaller propertyProvider = computeParameterizedPropertyProvider(property, extractFirstTypeParameter(type));
 
         if (isSetType(type) || isImmutableSetType(type)) {
             if (isMutableType(type)) {
@@ -168,17 +131,64 @@ public class CustomConfigurationCreator {
         throw new ValidationException(formatSignature(property), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
     }
 
-    private JCMethodInvocation createConstructorParameter(ExtractedProperty property, GenericArrayType type) {
+    private JCMethodInvocation createPropertyProvider(ExtractedProperty property, GenericArrayType type) {
         Type componentType = type.getGenericComponentType();
         String parameter = sequenceName(property.name());
+        ExtractedProperty newProperty = property.toBuilder().name(parameter).type(componentType).build();
         return method(property.name(), AS_ARRAY)
                 .addTypeParameter(type(componentType))
                 .addArguments(newLambda()
                         .parameter(newParameter(NESTED_CONFIGURATION_TYPE, parameter))
-                        .expression(() -> createConstructorParameter(property.toBuilder().name(parameter).type(componentType).build(), componentType))
+                        .expression(() -> createPropertyProvider(newProperty, componentType))
                         .generate())
                 .next(TO_ARRAY_NAME, toArray -> toArray.addTypeParameter(type(componentType)).addArguments(newReference(type(type))))
                 .apply();
 
+    }
+
+    private MethodCaller computeParameterizedPropertyProvider(ExtractedProperty property, Type parameterType) {
+        String parameter = sequenceName(property.name());
+        JCLambda lambda = newLambda()
+                .parameter(newParameter(NESTED_CONFIGURATION_TYPE, parameter))
+                .expression(() -> createPropertyProvider(property.toBuilder().name(parameter).type(parameterType).build(), parameterType))
+                .generate();
+        if (isClass(parameterType)) {
+            if (configurationClasses.contains(parameterType)) {
+                String configuratorName = computeCustomConfiguratorClassName(parameterType);
+                return method(property.name(), AS_ARRAY).addArguments(invokeReference(select(configuratorName, INSTANCE_FIELD_NAME), CONFIGURE_NAME));
+            }
+            return method(property.name(), selectConfigurationSourceMethod(parameterizedType(ImmutableArray.class, parameterType)));
+        }
+
+        return method(property.name(), AS_ARRAY).addArguments(lambda);
+    }
+
+    private JCMethodInvocation createArrayPropertyProvider(ExtractedProperty property, Class<?> type) {
+        boolean primitiveType = isJavaPrimitiveType(type.getComponentType());
+        Class<?> componentType = primitiveType
+                ? JAVA_PRIMITIVE_MAPPINGS.get(type.getComponentType())
+                : type.getComponentType();
+
+        if (configurationClasses.contains(componentType)) {
+            String configuratorName = computeCustomConfiguratorClassName(componentType);
+            return method(property.name(), GET_NESTED_ARRAY)
+                    .addArguments(literal(property.name()))
+                    .addArguments(invokeReference(select(configuratorName, INSTANCE_FIELD_NAME), CONFIGURE_NAME))
+                    .next(TO_ARRAY_NAME, toArray -> toArray.addArguments(newArray(type(componentType), 0)))
+                    .apply();
+        }
+
+        ParameterizedTypeImplementation immutableArrayType = parameterizedType(ImmutableArray.class, componentType);
+        JCMethodInvocation asArray = method(property.name(), selectConfigurationSourceMethod(immutableArrayType))
+                .next(TO_ARRAY_NAME, toArray -> toArray.addArguments(newArray(type(componentType), 0)))
+                .apply();
+
+        if (primitiveType) {
+            return method(ARRAY_EXTENSIONS_TYPE, UNBOX_NAME)
+                    .addArguments(asArray)
+                    .apply();
+        }
+
+        return asArray;
     }
 }

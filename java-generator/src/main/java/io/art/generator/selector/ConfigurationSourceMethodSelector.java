@@ -13,7 +13,6 @@ import java.lang.reflect.*;
 @UtilityClass
 public class ConfigurationSourceMethodSelector {
     public String selectConfigurationSourceMethod(Type propertyType) {
-
         String name;
         if (nonNull(name = CONFIGURATOR_PROPERTY_TYPE_METHODS.get(propertyType))) {
             return name;
