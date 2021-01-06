@@ -65,7 +65,7 @@ public class MyConfig {
     private final Set<Float> FSFloat;
 
     private final MyConfig FModel;
-    private final List<MyConfig> FModelL;
+    private final List<MyConfig[]> FModelL;
     private final Set<MyConfig> FModelS;
     private final MyConfig[] FAModel;
 
@@ -80,4 +80,9 @@ public class MyConfig {
     private final ImmutableSet<String>[] FAModelSA;
     private final ImmutableSet<ImmutableSet<String>>[] FAModelSAS;
     private final ImmutableSet<ImmutableSet<String>[]>[] FAModelSASA;
+
+    public static void main(String[] args) {
+        ConfigurationSource source = null;
+        List<MyConfig[]> fModelL = source.getNestedArray("FModelL", FModelL -> FModelL.asArray().toArray(new MyConfig[0])).toMutable();
+    }
 }

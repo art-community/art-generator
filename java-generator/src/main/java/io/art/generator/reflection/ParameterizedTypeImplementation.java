@@ -53,6 +53,7 @@ public class ParameterizedTypeImplementation implements ParameterizedType {
         builder.append(LESS);
         boolean last = true;
         for (Type argument : this.actualTypeArguments) {
+            if (Objects.isNull(argument)) continue;
             if (!last) {
                 builder.append(COMMA).append(SPACE);
             }
