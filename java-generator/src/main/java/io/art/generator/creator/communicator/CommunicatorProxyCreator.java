@@ -51,7 +51,7 @@ public class CommunicatorProxyCreator {
                         .type(COMMUNICATOR_MODEL_TYPE)
                         .name(COMMUNICATOR_MODEL_NAME)
                         .byConstructor(true))
-                .name(computeCommunicatorProxyClassName(communicatorModel.getProxyClass()))
+                .name(communicatorName(communicatorModel.getProxyClass()))
                 .modifiers(PRIVATE | STATIC)
                 .implement(type(communicatorModel.getProxyClass()))
                 .implement(proxyType)

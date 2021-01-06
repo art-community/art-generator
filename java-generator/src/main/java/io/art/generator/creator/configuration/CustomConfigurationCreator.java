@@ -33,9 +33,9 @@ import java.lang.reflect.*;
 
 @RequiredArgsConstructor
 public class CustomConfigurationCreator {
-    private final ImmutableSet<Class<?>> configurationClasses;
+    private final ImmutableMap<Class<?>, String> configurationClasses;
 
-    public static NewMethod createConfigureMethod(Type configurationClass, ImmutableSet<Class<?>> configurationClasses) {
+    public static NewMethod createConfigureMethod(Type configurationClass, ImmutableMap<Class<?>, String> configurationClasses) {
         ImmutableArray<ExtractedProperty> properties = getConstructorProperties(extractClass(configurationClass));
         NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass));
         CustomConfigurationCreator creator = new CustomConfigurationCreator(configurationClasses);
@@ -60,7 +60,7 @@ public class CustomConfigurationCreator {
         return method(CONFIGURE_METHOD_INPUT, GET_NESTED)
                 .addArguments(literal(property.name()))
                 .addArguments(newLambda()
-                        .parameter(newParameter(type(NestedConfiguration.class), property.name()))
+                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, property.name()))
                         .expression(() -> createPropertyProvider(property, type))
                         .generate())
                 .apply();
@@ -85,9 +85,9 @@ public class CustomConfigurationCreator {
             return createArrayPropertyProvider(property, type);
         }
 
-        String configuratorName = computeCustomConfiguratorClassName(type);
+        String configuratorName = configurationName(type);
 
-        if (configurationClasses.contains(type)) {
+        if (configurationClasses.containsKey(type)) {
             return method(property.name(), GET_NESTED)
                     .addArguments(literal(property.name()))
                     .addArguments(invokeReference(select(configuratorName, INSTANCE_FIELD_NAME), CONFIGURE_NAME))
@@ -153,8 +153,8 @@ public class CustomConfigurationCreator {
                 .expression(() -> createPropertyProvider(property.toBuilder().name(parameter).type(parameterType).build(), parameterType))
                 .generate();
         if (isClass(parameterType)) {
-            if (configurationClasses.contains(parameterType)) {
-                String configuratorName = computeCustomConfiguratorClassName(parameterType);
+            if (configurationClasses.containsKey(parameterType)) {
+                String configuratorName = configurationName(parameterType);
                 return method(property.name(), AS_ARRAY).addArguments(invokeReference(select(configuratorName, INSTANCE_FIELD_NAME), CONFIGURE_NAME));
             }
             return method(property.name(), selectConfigurationSourceMethod(parameterizedType(ImmutableArray.class, parameterType)));
@@ -169,8 +169,8 @@ public class CustomConfigurationCreator {
                 ? JAVA_PRIMITIVE_MAPPINGS.get(type.getComponentType())
                 : type.getComponentType();
 
-        if (configurationClasses.contains(componentType)) {
-            String configuratorName = computeCustomConfiguratorClassName(componentType);
+        if (configurationClasses.containsKey(componentType)) {
+            String configuratorName = configurationName(componentType);
             return method(property.name(), GET_NESTED_ARRAY)
                     .addArguments(literal(property.name()))
                     .addArguments(invokeReference(select(configuratorName, INSTANCE_FIELD_NAME), CONFIGURE_NAME))

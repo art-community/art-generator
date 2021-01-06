@@ -37,7 +37,7 @@ public class FromModelMapperCreator {
     private final String modelName;
 
     public static JCExpression fromModelMapper(Type type) {
-        String generatedMapping = getGeneratedMapper(type);
+        String generatedMapping = mappers().get(type);
         if (nonNull(generatedMapping)) {
             return select(select(providerClassName(), generatedMapping), FROM_MODEL_NAME);
         }
@@ -124,12 +124,16 @@ public class FromModelMapperCreator {
 
         if (isLazyValue(parameterizedType)) {
             Type fieldTypeArgument = typeArguments[0];
-            return method(LAZY_VALUE_MAPPING_TYPE, FROM_LAZY).addArguments(fromModelMapper(fieldTypeArgument)).apply();
+            return method(LAZY_VALUE_MAPPING_TYPE, FROM_LAZY)
+                    .addArguments(fromModelMapper(fieldTypeArgument))
+                    .apply();
         }
 
         if (isOptional(parameterizedType)) {
             Type fieldTypeArgument = typeArguments[0];
-            return method(OPTIONAL_MAPPING_TYPE, FROM_OPTIONAL).addArguments(fromModelMapper(fieldTypeArgument)).apply();
+            return method(OPTIONAL_MAPPING_TYPE, FROM_OPTIONAL)
+                    .addArguments(fromModelMapper(fieldTypeArgument))
+                    .apply();
         }
 
         JCMethodInvocation builderInvocation = method(ENTITY_TYPE, ENTITY_BUILDER_NAME).apply();
@@ -151,6 +155,8 @@ public class FromModelMapperCreator {
         JCMethodInvocation getter = method(modelName, method).apply();
         arguments.add(newLambda().expression(() -> getter).generate());
         arguments.add(fromModelMapper(propertyType));
-        return method(builderInvocation, LAZY_PUT_NAME).addArguments(arguments.build()).apply();
+        return method(builderInvocation, LAZY_PUT_NAME)
+                .addArguments(arguments.build())
+                .apply();
     }
 }

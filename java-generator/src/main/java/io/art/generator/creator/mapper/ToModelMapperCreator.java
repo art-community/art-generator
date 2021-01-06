@@ -30,7 +30,7 @@ public class ToModelMapperCreator {
     private static final ToModelMapperByInitializerCreator initializerCreator = new ToModelMapperByInitializerCreator();
 
     public static JCExpression toModelMapper(Type type) {
-        String generatedMapper = getGeneratedMapper(type);
+        String generatedMapper = mappers().get(type);
         if (nonNull(generatedMapper)) {
             return select(select(providerClassName(), generatedMapper), TO_MODEL_NAME);
         }
@@ -90,11 +90,11 @@ public class ToModelMapperCreator {
                 JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
                 JCExpression valueMapper = toModelMapper(typeArguments[1]);
                 if (isImmutableType(rawClass)) {
-                    return method(ENTITY_MAPPING_TYPE,  TO_IMMUTABLE_MAP)
+                    return method(ENTITY_MAPPING_TYPE, TO_IMMUTABLE_MAP)
                             .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
                             .apply();
                 }
-                return method(ENTITY_MAPPING_TYPE,  TO_MUTABLE_MAP)
+                return method(ENTITY_MAPPING_TYPE, TO_MUTABLE_MAP)
                         .addArguments(keyToModelMapper, valueMapper)
                         .apply();
             }

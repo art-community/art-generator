@@ -49,7 +49,7 @@ public class CommunicatorModelImplementor {
 
     private JCTree.JCMethodInvocation executeRegisterMethod(CommunicatorModel specificationModel) {
         Class<?> implementationInterface = specificationModel.getProxyClass();
-        String proxyClassName = computeCommunicatorProxyClassName(implementationInterface);
+        String proxyClassName = communicatorName(implementationInterface);
         return method(REGISTRY_NAME, REGISTER_NAME)
                 .addArguments(literal(implementationInterface.getSimpleName()), newObject(proxyClassName, ident(COMMUNICATOR_MODEL_NAME)))
                 .apply();

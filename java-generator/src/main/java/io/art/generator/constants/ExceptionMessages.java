@@ -13,4 +13,5 @@ public interface ExceptionMessages {
     String RECOMPILATION_FAILED = "Recompilation failed";
     String NOT_CONFIGURATION_SOURCE_TYPE = "Type is not valid for configuration property: {0}";
     String OVERRIDDEN_METHODS_NOT_SUPPORTED = "Type has overridden methods (rename them to something else): {0}";
+    String NOT_FOUND_ALL_ARGS_CONSTRUCTOR = "Not found all-args constructor for type: {0}";
 }
