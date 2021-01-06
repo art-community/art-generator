@@ -51,7 +51,8 @@ public class ConfiguratorModelImplementor {
 
     public ImmutableArray<NewClass> implementCustomConfigurators(ConfiguratorModuleModel model) {
         ImmutableArray.Builder<NewClass> configuratorClasses = immutableArrayBuilder();
-        for (Type type : model.getCustomConfigurations().keySet()) {
+        ImmutableMap<Class<?>, String> customConfigurations = model.getCustomConfigurations();
+        for (Type type : customConfigurations.keySet()) {
             TypeModel configurationType = type(type);
             if (!hasConstructorWithAllProperties(configurationType.getType())) {
                 String signature = formatSignature(configurationType.getType());
@@ -68,7 +69,7 @@ public class ConfiguratorModelImplementor {
                             .type(configuratorType)
                             .modifiers(PRIVATE | STATIC)
                             .initializer(() -> newObject(configuratorName)))
-                    .method(createConfigureMethod(configurationType.getType(), model.getCustomConfigurations()));
+                    .method(createConfigureMethod(configurationType.getType(), customConfigurations));
             if (!configurationType.isJdk()) {
                 configuratorClass.addImport(classImport(configurationType.getFullName()));
             }
@@ -80,6 +81,8 @@ public class ConfiguratorModelImplementor {
 
     private static JCTree.JCExpression executeRegisterMethod(Class<?> configurationClass) {
         String className = configurationName(configurationClass);
-        return method(REGISTRY_NAME, REGISTER_NAME).addArguments(classReference(configurationClass), select(className, INSTANCE_FIELD_NAME)).apply();
+        return method(REGISTRY_NAME, REGISTER_NAME)
+                .addArguments(classReference(configurationClass), select(className, INSTANCE_FIELD_NAME))
+                .apply();
     }
 }
