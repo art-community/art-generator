@@ -25,6 +25,7 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.selector.ConfigurationSourceMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
+import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GenerationState.*;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
@@ -104,10 +105,12 @@ public class CustomConfigurationCreator {
             throw new ValidationException(formatSignature(type), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
         }
 
-        MethodCaller propertyProvider = method(parameter, AS_ARRAY).addArguments(newLambda()
-                .parameter(newParameter(NESTED_CONFIGURATION_TYPE, parameter))
-                .expression(() -> createPropertyProvider(parameter, extractFirstTypeParameter(type)))
-                .generate());
+        String lambdaParameter = sequenceName(parameter);
+        MethodCaller propertyProvider = method(parameter, AS_ARRAY)
+                .addArguments(newLambda()
+                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
+                        .expression(() -> createPropertyProvider(lambdaParameter, extractFirstTypeParameter(type)))
+                        .generate());
 
         if (isSetType(type) || isImmutableSetType(type)) {
             if (isMutableType(type)) {
@@ -132,11 +135,12 @@ public class CustomConfigurationCreator {
 
     private JCMethodInvocation createPropertyProvider(String parameter, GenericArrayType type) {
         Type componentType = type.getGenericComponentType();
+        String lambdaParameter = sequenceName(parameter);
         return method(parameter, AS_ARRAY)
                 .addTypeParameter(type(componentType))
                 .addArguments(newLambda()
-                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, parameter))
-                        .expression(() -> createPropertyProvider(parameter, componentType))
+                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
+                        .expression(() -> createPropertyProvider(lambdaParameter, componentType))
                         .generate())
                 .next(TO_ARRAY_NAME, toArray -> toArray
                         .addTypeParameter(type(componentType))
