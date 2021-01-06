@@ -9,7 +9,9 @@ import io.art.model.implementation.configurator.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.collection.ImmutableArray.*;
+import static io.art.core.collection.ImmutableSet.*;
 import static io.art.generator.caller.MethodCaller.*;
+import static io.art.generator.collector.TypeCollector.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
@@ -50,16 +52,22 @@ public class ConfiguratorModelImplementor {
     }
 
     public ImmutableArray<NewClass> implementCustomConfigurators(ConfiguratorModuleModel model) {
+        ImmutableSet<Type> types = model.getCustomConfigurations()
+                .keySet()
+                .stream()
+                .flatMap(type -> collectModelTypes(type).stream())
+                .filter(type -> !configurations().contains(type))
+                .peek(type -> configurations().compute(type))
+                .collect(immutableSetCollector());
         ImmutableArray.Builder<NewClass> configuratorClasses = immutableArrayBuilder();
-        ImmutableMap<Class<?>, String> customConfigurations = model.getCustomConfigurations();
-        for (Type type : customConfigurations.keySet()) {
+        for (Type type : types) {
             TypeModel configurationType = type(type);
             if (!hasConstructorWithAllProperties(configurationType.getType())) {
                 String signature = formatSignature(configurationType.getType());
                 throw new ValidationException(signature, format(NOT_FOUND_ALL_ARGS_CONSTRUCTOR, configurationType.getType()));
             }
             TypeModel configuratorType = type(parameterizedType(CustomConfigurator.class, configurationType.getType()));
-            String configuratorName = configurationName(configurationType.getType());
+            String configuratorName = configurations().get(configurationType.getType());
             NewClass configuratorClass = newClass()
                     .name(configuratorName)
                     .modifiers(PRIVATE | STATIC)
@@ -69,7 +77,7 @@ public class ConfiguratorModelImplementor {
                             .type(configuratorType)
                             .modifiers(PRIVATE | STATIC)
                             .initializer(() -> newObject(configuratorName)))
-                    .method(createConfigureMethod(configurationType.getType(), customConfigurations));
+                    .method(createConfigureMethod(configurationType.getType()));
             if (!configurationType.isJdk()) {
                 configuratorClass.addImport(classImport(configurationType.getFullName()));
             }
@@ -80,7 +88,7 @@ public class ConfiguratorModelImplementor {
     }
 
     private static JCTree.JCExpression executeRegisterMethod(Class<?> configurationClass) {
-        String className = configurationName(configurationClass);
+        String className = configurations().get(configurationClass);
         return method(REGISTRY_NAME, REGISTER_NAME)
                 .addArguments(classReference(configurationClass), select(className, INSTANCE_FIELD_NAME))
                 .apply();

@@ -32,12 +32,10 @@ import java.lang.reflect.*;
 
 @RequiredArgsConstructor
 public class CustomConfigurationCreator {
-    private final ImmutableMap<Class<?>, String> configurationClasses;
-
-    public static NewMethod createConfigureMethod(Type configurationClass, ImmutableMap<Class<?>, String> configurationClasses) {
+    public static NewMethod createConfigureMethod(Type configurationClass) {
         ImmutableArray<ExtractedProperty> properties = getConstructorProperties(extractClass(configurationClass));
         NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass));
-        CustomConfigurationCreator creator = new CustomConfigurationCreator(configurationClasses);
+        CustomConfigurationCreator creator = new CustomConfigurationCreator();
         ImmutableArray<JCExpression> constructorParameters = creator.createConstructorParameters(properties);
         return method.statement(() -> returnExpression(newObject(type(configurationClass), constructorParameters)));
     }
@@ -82,9 +80,9 @@ public class CustomConfigurationCreator {
             return createArrayPropertyProvider(parameter, type);
         }
 
-        String configuratorName = configurationName(type);
+        String configuratorName = configurations().get(type);
 
-        if (configurationClasses.containsKey(type)) {
+        if (configurations().contains(type)) {
             return method(parameter, GET_NESTED)
                     .addArguments(literal(parameter))
                     .addArguments(invokeReference(select(configuratorName, INSTANCE_FIELD_NAME), CONFIGURE_NAME))
@@ -155,8 +153,8 @@ public class CustomConfigurationCreator {
                 ? JAVA_PRIMITIVE_MAPPINGS.get(type.getComponentType())
                 : type.getComponentType();
 
-        if (configurationClasses.containsKey(componentType)) {
-            String configuratorName = configurationName(componentType);
+        if (configurations().contains(componentType)) {
+            String configuratorName = configurations().get(componentType);
             return method(parameter, GET_NESTED_ARRAY)
                     .addArguments(literal(parameter))
                     .addArguments(invokeReference(select(configuratorName, INSTANCE_FIELD_NAME), CONFIGURE_NAME))

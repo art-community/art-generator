@@ -24,10 +24,6 @@ public class TypeCollector {
             return;
         }
 
-        if (isLibraryType(type)) {
-            return;
-        }
-
         if (isClass(type)) {
             collectTypes((Class<?>) type);
             return;
@@ -39,7 +35,7 @@ public class TypeCollector {
         }
 
         if (isGenericArray(type)) {
-            collectTypes(((GenericArrayType) type).getGenericComponentType());
+            collectTypes(((GenericArrayType) type));
             return;
         }
 
@@ -56,6 +52,7 @@ public class TypeCollector {
         }
 
         if (type.isArray()) {
+            collectTypes(type.getComponentType());
             return;
         }
 
@@ -83,7 +80,7 @@ public class TypeCollector {
             }
 
             if (isGenericArray(propertyType)) {
-                collectTypes(((GenericArrayType) propertyType).getGenericComponentType());
+                collectTypes(((GenericArrayType) propertyType));
                 continue;
             }
 
@@ -94,15 +91,13 @@ public class TypeCollector {
     }
 
     private void collectTypes(ParameterizedType type) {
-        if (isLibraryType(type)) {
-            return;
-        }
-
         if (types.contains(type)) {
             return;
         }
 
-        types.add(type);
+        if (!isLibraryType(type)) {
+            types.add(type);
+        }
 
         Type[] arguments = type.getActualTypeArguments();
         for (Type argumentType : arguments) {
@@ -111,5 +106,13 @@ public class TypeCollector {
             }
             collectTypes(argumentType);
         }
+    }
+
+    private void collectTypes(GenericArrayType type) {
+        if (types.contains(type)) {
+            return;
+        }
+
+        collectTypes(type.getGenericComponentType());
     }
 }
