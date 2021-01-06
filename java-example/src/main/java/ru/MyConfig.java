@@ -80,9 +80,4 @@ public class MyConfig {
     private final ImmutableSet<String>[] FAModelSA;
     private final ImmutableSet<ImmutableSet<String>>[] FAModelSAS;
     private final ImmutableSet<ImmutableSet<String>[]>[] FAModelSASA;
-
-    public static void main(String[] args) {
-        ConfigurationSource s = null;
-        Optional<String>[] testAS = Caster.cast(s.getNested("testA").asArray(testA -> ofNullable(testA.asString())).toArray(new Optional[0]));
-    }
 }

@@ -26,6 +26,7 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.selector.ConfigurationSourceMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
+import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GenerationState.*;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
@@ -131,10 +132,11 @@ public class CustomConfigurationCreator {
 
         Type parameterType = extractFirstTypeParameter(type);
 
+        String parameter = sequenceName(property.name());
         MethodCaller propertyProvider = method(property.name(), AS_ARRAY)
                 .addArguments(newLambda()
-                        .parameter(newParameter(type(NestedConfiguration.class), property.name() + "Array"))
-                        .expression(() -> createConstructorParameter(property.toBuilder().name(property.name() + "Array").type(parameterType).build(), parameterType))
+                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, parameter))
+                        .expression(() -> createConstructorParameter(property.toBuilder().name(parameter).type(parameterType).build(), parameterType))
                         .generate());
 
         if (isClass(parameterType)) {
@@ -168,12 +170,14 @@ public class CustomConfigurationCreator {
 
     private JCMethodInvocation createConstructorParameter(ExtractedProperty property, GenericArrayType type) {
         Type componentType = type.getGenericComponentType();
+        String parameter = sequenceName(property.name());
         return method(property.name(), AS_ARRAY)
+                .addTypeParameter(type(componentType))
                 .addArguments(newLambda()
-                        .parameter(newParameter(type(NestedConfiguration.class), property.name() + "Array"))
-                        .expression(() -> createConstructorParameter(property.toBuilder().name(property.name() + "Array").type(componentType).build(), (ParameterizedType) componentType))
+                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, parameter))
+                        .expression(() -> createConstructorParameter(property.toBuilder().name(parameter).type(componentType).build(), componentType))
                         .generate())
-                .next(TO_ARRAY_NAME, toArray -> toArray.addArguments(newArray(type(componentType), 0)))
+                .next(TO_ARRAY_NAME, toArray -> toArray.addTypeParameter(type(componentType)).addArguments(newReference(type(type))))
                 .apply();
 
     }

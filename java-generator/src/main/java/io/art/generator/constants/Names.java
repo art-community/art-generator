@@ -69,4 +69,5 @@ public interface Names {
     String OF_NULLABLE_NAME = "ofNullable";
     String UNBOX_NAME = "unbox";
     String CONFIGURATION_NAME = "configuration";
+    String ARRAY_SUFFIX = "Array";
 }

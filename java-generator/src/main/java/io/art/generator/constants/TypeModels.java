@@ -9,6 +9,7 @@ import io.art.core.extensions.*;
 import io.art.core.factory.*;
 import io.art.core.model.*;
 import io.art.core.singleton.*;
+import io.art.core.source.*;
 import io.art.generator.model.*;
 import io.art.launcher.*;
 import io.art.model.configurator.*;
@@ -32,6 +33,7 @@ import java.util.*;
 public interface TypeModels {
     TypeModel OPTIONAL_TYPE = type(Optional.class);
     TypeModel ARRAY_EXTENSIONS_TYPE = type(ArrayExtensions.class);
+    TypeModel NESTED_CONFIGURATION_TYPE = type(NestedConfiguration.class);
     TypeModel NULLITY_CHECKER_TYPE = type(NullityChecker.class);
     TypeModel SET_FACTORY_TYPE = type(SetFactory.class);
     TypeModel STRING_ARRAY_TYPE = type(String[].class);
