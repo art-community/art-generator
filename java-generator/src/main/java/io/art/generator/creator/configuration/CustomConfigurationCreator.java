@@ -131,11 +131,19 @@ public class CustomConfigurationCreator {
 
         Type parameterType = extractFirstTypeParameter(type);
 
-        MethodCaller propertyProvider = configurationClasses.contains(parameterType)
-                ? method(property.name(), AS_ARRAY)
-                .addArguments(invokeReference(select(computeCustomConfiguratorClassName(parameterType), INSTANCE_FIELD_NAME), CONFIGURE_NAME))
+        MethodCaller propertyProvider = method(property.name(), AS_ARRAY)
+                .addArguments(newLambda()
+                        .parameter(newParameter(type(NestedConfiguration.class), property.name() + "Array"))
+                        .expression(() -> createConstructorParameter(property.toBuilder().name(property.name() + "Array").type(parameterType).build(), parameterType))
+                        .generate());
 
-                : method(property.name(), selectConfigurationSourceMethod(parameterizedType(ImmutableArray.class, parameterType)));
+        if (isClass(parameterType)) {
+            if (configurationClasses.contains(parameterType)) {
+                propertyProvider = method(property.name(), AS_ARRAY).addArguments(invokeReference(select(computeCustomConfiguratorClassName(parameterType), INSTANCE_FIELD_NAME), CONFIGURE_NAME));
+            } else {
+                propertyProvider = method(property.name(), selectConfigurationSourceMethod(parameterizedType(ImmutableArray.class, parameterType)));
+            }
+        }
 
         if (isSetType(type) || isImmutableSetType(type)) {
             if (isMutableType(type)) {
