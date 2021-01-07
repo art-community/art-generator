@@ -105,4 +105,8 @@ public class MyService implements MyClient {
         request.subscribe(data -> logger(MyService.class).info("myMethod16:" + data));
         return Flux.interval(Duration.ofSeconds(1), Schedulers.newParallel("myMethod16")).map(index -> Response.builder().FFloat(new Random().nextFloat()).build());
     }
+
+    public Flux<Response> myMethod17(Optional<Request> request) {
+        return Flux.interval(Duration.ofSeconds(1), Schedulers.newParallel("myMethod16")).map(index -> Response.builder().FFloat(new Random().nextFloat()).build());
+    }
 }

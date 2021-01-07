@@ -8,6 +8,7 @@ import io.art.generator.model.*;
 import io.art.generator.reflection.*;
 import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
+import static io.art.core.factory.SetFactory.setOf;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ConfiguratorConstants.ConfigurationSourceMethods.*;
 import static io.art.generator.constants.ConfiguratorConstants.ConfiguratorMethods.*;
@@ -34,7 +35,7 @@ import java.lang.reflect.*;
 public class CustomConfigurationCreator {
     public NewMethod createConfigureMethod(Class<?> configurationClass) {
         ImmutableArray<ExtractedProperty> properties = getConstructorProperties(extractClass(configurationClass));
-        NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass));
+        NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass)).parameters(setOf(newParameter(CONFIGURATION_SOURCE_TYPE, SOURCE_NAME)));
         ImmutableArray<JCExpression> constructorParameters = createConstructorParameters(properties);
         return method.statement(() -> returnExpression(newObject(type(configurationClass), constructorParameters)));
     }
@@ -53,7 +54,7 @@ public class CustomConfigurationCreator {
 
     private JCExpression createPropertyProvider(ExtractedProperty property) {
         Type type = property.type();
-        JCMethodInvocation getNested = method(CONFIGURE_METHOD_INPUT, GET_NESTED)
+        JCMethodInvocation getNested = method(SOURCE_NAME, GET_NESTED)
                 .addArguments(literal(property.name()))
                 .addArguments(newLambda()
                         .parameter(newParameter(NESTED_CONFIGURATION_TYPE, property.name()))
@@ -62,7 +63,7 @@ public class CustomConfigurationCreator {
                 .apply();
         if (isOptional(type)) {
             return method(OPTIONAL_TYPE, OF_NULLABLE_NAME)
-                    .addArguments(method(CONFIGURE_METHOD_INPUT, GET_NESTED)
+                    .addArguments(method(SOURCE_NAME, GET_NESTED)
                             .addArguments(literal(property.name()))
                             .addArguments(newLambda()
                                     .parameter(newParameter(NESTED_CONFIGURATION_TYPE, property.name()))

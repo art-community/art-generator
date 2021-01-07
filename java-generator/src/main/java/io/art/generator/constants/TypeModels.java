@@ -77,4 +77,7 @@ public interface TypeModels {
     TypeModel RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE = type(RsocketCommunicator.class);
     TypeModel RSOCKET_COMMUNICATION_MODE_TYPE = type(CommunicationMode.class);
     TypeModel RSOCKET_SETUP_PAYLOAD_TYPE = type(RsocketSetupPayload.class);
+
+    TypeModel CONFIGURATION_SOURCE_TYPE = type(ConfigurationSource.class);
+
 }

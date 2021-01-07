@@ -71,4 +71,5 @@ public interface Names {
     String CONFIGURATION_NAME = "configuration";
     String ARRAY_SUFFIX = "Array";
     String BY_CLASS_NAME = "byClass";
+    String SOURCE_NAME = "source";
 }

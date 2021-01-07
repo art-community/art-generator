@@ -178,4 +178,6 @@ public class Model {
     ImmutableMap<String, Optional<Collection<Long[][]>[]>[]>[] IMSOptionalMCMLongMultiA;
 
     Stream<String> simpleStream;
+
+    Optional<String> simpleoptional;
 }

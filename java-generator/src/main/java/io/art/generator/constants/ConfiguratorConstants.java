@@ -13,12 +13,10 @@ import java.util.*;
 public interface ConfiguratorConstants {
     interface ConfiguratorMethods {
         Method CONFIGURE_METHOD = wrapException(() -> CustomConfigurator.class.getDeclaredMethod("configure", ConfigurationSource.class));
-        String CONFIGURE_METHOD_INPUT = CONFIGURE_METHOD.getParameters()[0].getName();
     }
 
     interface ConfigurationSourceMethods {
         String GET_NESTED = "getNested";
-        String GET_NESTED_ARRAY = "getNestedArray";
     }
 
     interface NestedConfigurationMethods {
