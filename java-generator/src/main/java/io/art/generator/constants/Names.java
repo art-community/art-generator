@@ -70,4 +70,5 @@ public interface Names {
     String UNBOX_NAME = "unbox";
     String CONFIGURATION_NAME = "configuration";
     String ARRAY_SUFFIX = "Array";
+    String BY_CLASS_NAME = "byClass";
 }

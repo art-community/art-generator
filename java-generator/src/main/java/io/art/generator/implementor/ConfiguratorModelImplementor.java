@@ -1,7 +1,9 @@
 package io.art.generator.implementor;
 
 import com.sun.tools.javac.tree.*;
+import com.sun.tools.javac.tree.JCTree.*;
 import io.art.configurator.custom.*;
+import io.art.configurator.model.*;
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
@@ -9,7 +11,7 @@ import io.art.model.implementation.configurator.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.collection.ImmutableArray.*;
-import static io.art.core.collection.ImmutableSet.*;
+import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.collector.TypeCollector.*;
 import static io.art.generator.constants.ExceptionMessages.*;
@@ -34,6 +36,7 @@ import static io.art.generator.state.GenerationState.*;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
+import java.util.*;
 
 @UtilityClass
 public class ConfiguratorModelImplementor {
@@ -45,22 +48,23 @@ public class ConfiguratorModelImplementor {
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
-        model.getCustomConfigurations()
-                .keySet()
-                .forEach(configuration -> customConfigurationsMethod.statement(() -> maker().Exec(executeRegisterMethod(configuration))));
+        for (CustomConfigurationModel configuration : model.getCustomConfigurations()) {
+            customConfigurationsMethod.statement(() -> maker().Exec(executeRegisterMethod(configuration.getConfigurationClass())));
+        }
         return customConfigurationsMethod.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
     public ImmutableArray<NewClass> implementCustomConfigurators(ConfiguratorModuleModel model) {
-        ImmutableSet<Type> types = model.getCustomConfigurations()
-                .keySet()
-                .stream()
-                .flatMap(type -> collectModelTypes(type).stream())
-                .filter(type -> !configurations().contains(type))
-                .peek(type -> configurations().compute(type))
-                .collect(immutableSetCollector());
+        Set<Class<?>> types = set();
+        for (CustomConfigurationModel configurationModel : model.getCustomConfigurations()) {
+            for (Type type : collectModelTypes(configurationModel.getConfigurationClass())) {
+                if (!isClass(type) || configurations().contains(type)) continue;
+                configurations().compute(type);
+                types.add((Class<?>) type);
+            }
+        }
         ImmutableArray.Builder<NewClass> configuratorClasses = immutableArrayBuilder();
-        for (Type type : types) {
+        for (Class<?> type : types) {
             TypeModel configurationType = type(type);
             if (!hasConstructorWithAllProperties(configurationType.getType())) {
                 String signature = formatSignature(configurationType.getType());
@@ -77,7 +81,7 @@ public class ConfiguratorModelImplementor {
                             .type(configuratorType)
                             .modifiers(PRIVATE | STATIC)
                             .initializer(() -> newObject(configuratorName)))
-                    .method(createConfigureMethod(configurationType.getType()));
+                    .method(createConfigureMethod(type));
             if (!configurationType.isJdk()) {
                 configuratorClass.addImport(classImport(configurationType.getFullName()));
             }
@@ -89,8 +93,9 @@ public class ConfiguratorModelImplementor {
 
     private static JCTree.JCExpression executeRegisterMethod(Class<?> configurationClass) {
         String className = configurations().get(configurationClass);
+        JCMethodInvocation byClass = method(CONFIGURATOR_MODEL_NAME, BY_CLASS_NAME).addArguments(classReference(configurationClass)).apply();
         return method(REGISTRY_NAME, REGISTER_NAME)
-                .addArguments(classReference(configurationClass), select(className, INSTANCE_FIELD_NAME))
+                .addArguments(byClass, select(className, INSTANCE_FIELD_NAME))
                 .apply();
     }
 }

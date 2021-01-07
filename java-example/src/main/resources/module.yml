@@ -1,18 +1,8 @@
 FBInteger: 123
+parent:
+  FBInteger: 123
 config:
-  - values:
-      - 1
-      - 2
-      - 3
-      - 4
-      - 5
-      - "test"
-      - "test"
-      - "test"
-      - "test"
-      - "test"
-  - value: [["test"], ["test"]]
-  - value: [["test"], ["test"]]
+  FBInteger: 123
 
 rsocket:
   server:
