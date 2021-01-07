@@ -11,6 +11,7 @@ import io.art.model.implementation.configurator.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.collection.ImmutableArray.*;
+import static io.art.core.collection.ImmutableSet.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.collector.TypeCollector.*;
@@ -48,9 +49,11 @@ public class ConfiguratorModelImplementor {
                 .returnType(registryType)
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
-        for (CustomConfigurationModel configuration : model.getCustomConfigurations()) {
-            customConfigurationsMethod.statement(() -> maker().Exec(executeRegisterMethod(configuration.getConfigurationClass())));
-        }
+        model.getCustomConfigurations()
+                .stream()
+                .map(CustomConfigurationModel::getConfigurationClass)
+                .collect(immutableSetCollector())
+                .forEach(type -> customConfigurationsMethod.statement(() -> maker().Exec(executeRegisterMethod(type))));
         return customConfigurationsMethod.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
