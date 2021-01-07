@@ -5,10 +5,8 @@ public interface Names {
     String JAVA_PACKAGE_PREFIX = "java.";
     String CONSTRUCTOR_NAME = "<init>";
     String THIS_NAME = "this";
-    String LET_NAME = "let";
     String PROVIDER_CLASS_SUFFIX = "Provider";
     String PROXY_CLASS_SUFFIX = "Proxy";
-    String CONFIGURATOR_CLASS_SUFFIX = "Configurator";
     String SPECIFICATION_FIELD_PREFIX = "specification";
     String IMPLEMENT_NAME = "implement";
     String IMPLEMENTATION_NAME = "implementation";
@@ -68,8 +66,7 @@ public interface Names {
     String TO_ARRAY_NAME = "toArray";
     String OF_NULLABLE_NAME = "ofNullable";
     String UNBOX_NAME = "unbox";
-    String CONFIGURATION_NAME = "configuration";
-    String ARRAY_SUFFIX = "Array";
     String BY_CLASS_NAME = "byClass";
     String SOURCE_NAME = "source";
+    String PARAMETER_NAME = "parameter";
 }

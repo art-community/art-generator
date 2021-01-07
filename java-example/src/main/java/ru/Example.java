@@ -14,9 +14,9 @@ public class Example {
                 .serve(server -> server.rsocket(MyService.class, RsocketServiceModelConfigurator::enableLogging))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
                 .onLoad(() -> {
-                    MyConfig config = configuration("config", MyConfig.class).get();
+                    MyConfig config = configuration("config", MyConfig.class);
                     System.out.println(config);
-                    System.out.println(configuration("config").get().getNested("SIM").asMap(sim -> sim.asArray(NestedConfiguration::asString)));
+                    System.out.println(configuration("config").getNested("SIM").asMap(sim -> sim.asArray(NestedConfiguration::asString)));
                 })
                 .onLoad(() -> System.out.println(configuration(MyConfigParent.class)))
                 .onLoad(() -> System.out.println(configuration(MyConfig.class)));
