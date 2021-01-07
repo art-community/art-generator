@@ -19,7 +19,7 @@ import java.util.*;
 @ToString
 @Accessors(fluent = true)
 public class ExtractedProperty {
-    private static final Map<Type, ImmutableArray<ExtractedProperty>> CACHE = weakMap();
+    private static final Map<Type, ImmutableArray<ExtractedProperty>> CACHE = map();
 
     private final String name;
     private final Type owner;

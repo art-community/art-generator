@@ -29,7 +29,7 @@ import java.util.*;
 @Getter
 @EqualsAndHashCode
 public class TypeModel {
-    private static final Map<Type, TypeModel> CACHE = weakMap();
+    private static final Map<Type, TypeModel> CACHE = map();
 
     private Type type;
     private ImmutableArray<TypeModel> parameters;
