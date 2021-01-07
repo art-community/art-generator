@@ -36,4 +36,5 @@ public interface MyClient {
     Flux<Response> myMethod15(Mono<Request> request);
 
     Flux<Response> myMethod16(Flux<Request> request);
+
 }
