@@ -100,7 +100,7 @@ public class MyConfig {
     private final ImmutableMap<String, List<MyConfigParent>[]> FPModelLSLAIM;
     private final Map<String, List<MyConfigParent>[]> FPModelLSLAM;
 
-    private final Optional<ImmutableMap<String, String>> SIM;
+    private final Optional<ImmutableMap<String, Set<String>>> SIM;
     private final Optional<Map<String, String>> SM;
 
 }

@@ -3,8 +3,18 @@ parent:
   FBInteger: 123
 config:
   SIM:
-    test: "test"
-    test2: "test"
+    test:
+      - "test"
+      - "test1"
+      - "test2"
+      - "test3"
+      - "test4"
+    test2:
+      - "test"
+      - "test1"
+      - "test2"
+      - "test3"
+      - "test4"
   FBInteger: 123
 
 rsocket:
