@@ -285,6 +285,10 @@ public class TypeInspector {
     }
 
     public Type extractFirstTypeParameter(ParameterizedType type) {
-        return type.getActualTypeArguments()[0];
+        return extractTypeParameter(type, 0);
+    }
+
+    public Type extractTypeParameter(ParameterizedType type, int index) {
+        return type.getActualTypeArguments()[index];
     }
 }

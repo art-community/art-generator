@@ -96,4 +96,7 @@ public class MyConfig {
     private final ImmutableSet<List<MyConfig>> FModelLSL;
     private final ImmutableSet<List<MyConfig>[]> FModelLSLA;
     private final ImmutableSet<List<MyConfigParent>[]> FPModelLSLA;
+
+    private final ImmutableMap<String, List<MyConfigParent>[]> FPModelLSLAIM;
+    private final Map<String, List<MyConfigParent>[]> FPModelLSLAM;
 }

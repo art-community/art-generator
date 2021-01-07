@@ -98,6 +98,22 @@ public class CustomConfigurationCreator {
                     .apply();
         }
 
+        if (isMapType(type) || isImmutableMapType(type)) {
+            if (extractFirstTypeParameter(type) != String.class) {
+                throw new ValidationException(formatSignature(type), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
+            }
+            String lambdaParameter = sequenceName(property);
+            MethodCaller propertyProvider = method(property, AS_MAP)
+                    .addArguments(newLambda()
+                            .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
+                            .expression(() -> createPropertyProvider(lambdaParameter, extractTypeParameter(type, 1)))
+                            .generate());
+            if (isMapType(type)) {
+                propertyProvider = method(propertyProvider.apply(), TO_MUTABLE_NAME);
+            }
+            return propertyProvider.apply();
+        }
+
         if (!isCollectionType(type)) {
             throw new ValidationException(formatSignature(type), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
         }
