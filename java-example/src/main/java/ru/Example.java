@@ -1,5 +1,6 @@
 package ru;
 
+import io.art.core.source.*;
 import io.art.model.annotation.*;
 import io.art.model.configurator.*;
 import static io.art.configurator.module.ConfiguratorModule.*;
@@ -15,6 +16,7 @@ public class Example {
                 .onLoad(() -> {
                     MyConfig config = configuration("config", MyConfig.class);
                     System.out.println(config);
+                    System.out.println(configuration("config").getNested("SIM").asMap(sim -> sim.asArray(NestedConfiguration::asString)));
                 })
                 .onLoad(() -> System.out.println(configuration(MyConfigParent.class)))
                 .onLoad(() -> System.out.println(configuration(MyConfig.class)));
