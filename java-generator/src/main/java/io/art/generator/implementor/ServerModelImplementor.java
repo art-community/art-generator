@@ -47,7 +47,11 @@ public class ServerModelImplementor {
                 .modifiers(PRIVATE | STATIC)
                 .statement(() -> createRegistryVariable(registryType));
         ImmutableMap<String, ServiceModel> services = serverModel.getServices();
-        services.values().forEach(serviceModel -> servicesMethod.statement(() -> maker().Exec(executeRegisterMethod(servicesMethod, serviceModel))));
+        services.values()
+                .stream()
+                .filter(serviceModel -> !type(serviceModel.getServiceClass()).isJdk())
+                .peek(serviceModel -> servicesMethod.addImport(classImport(serviceModel.getServiceClass().getName())))
+                .forEach(serviceModel -> servicesMethod.statement(() -> maker().Exec(executeRegisterMethod(servicesMethod, serviceModel))));
         return servicesMethod.statement(() -> returnVariable(REGISTRY_NAME));
     }
 
@@ -91,7 +95,7 @@ public class ServerModelImplementor {
                     break;
                 case MONO:
                 case FLUX:
-                    methodBuilder.method(INPUT_MAPPER_NAME, toModelMapper(((ParameterizedType) parameterTypes[0]).getActualTypeArguments()[0]));
+                    methodBuilder.method(INPUT_MAPPER_NAME, toModelMapper((extractFirstTypeParameter((ParameterizedType) parameterTypes[0]))));
                     break;
             }
         }
@@ -106,7 +110,7 @@ public class ServerModelImplementor {
                     break;
                 case MONO:
                 case FLUX:
-                    methodBuilder.method(OUTPUT_MAPPER_NAME, fromModelMapper(((ParameterizedType) returnType).getActualTypeArguments()[0]));
+                    methodBuilder.method(OUTPUT_MAPPER_NAME, fromModelMapper((extractFirstTypeParameter((ParameterizedType) returnType))));
                     break;
             }
         }

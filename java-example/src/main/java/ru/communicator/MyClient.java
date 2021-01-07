@@ -1,4 +1,4 @@
-package ru;
+package ru.communicator;
 
 import reactor.core.publisher.*;
 import ru.model.*;

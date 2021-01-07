@@ -1,4 +1,4 @@
-package ru;
+package ru.configuration;
 
 import io.art.core.collection.*;
 import lombok.*;

@@ -4,6 +4,7 @@ import lombok.*;
 import static io.art.core.constants.StringConstants.*;
 
 @Getter
+@ToString
 @EqualsAndHashCode
 public class ImportModel {
     private final String packagePart;

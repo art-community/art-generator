@@ -1,7 +1,8 @@
-package ru;
+package ru.service;
 
 import reactor.core.publisher.*;
 import reactor.core.scheduler.*;
+import ru.communicator.*;
 import ru.model.*;
 import static io.art.communicator.module.CommunicatorModule.*;
 import static io.art.logging.LoggingModule.*;

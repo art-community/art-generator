@@ -77,11 +77,13 @@ public class NewClass {
 
     public NewClass method(NewMethod method) {
         methods.add(method);
+        imports.addAll(method.classImports());
         return this;
     }
 
     public NewClass constructor(NewMethod constructor) {
         methods.add(constructor.name(CONSTRUCTOR_NAME).returnType(VOID_TYPE));
+        imports.addAll(constructor.classImports());
         return this;
     }
 

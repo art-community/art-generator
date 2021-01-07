@@ -70,7 +70,7 @@ public class TypeModel {
         this.ownerName = let(adoptedTypeClass.getDeclaringClass(), Class::getSimpleName);
         this.name = adoptedTypeClass.getSimpleName();
         this.packageName = emptyIfNull(let(adoptedTypeClass.getPackage(), Package::getName));
-        this.jdk = this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
+        this.jdk = adoptedTypeClass.isPrimitive() || this.packageName.startsWith(JAVA_PACKAGE_PREFIX);
         this.fullName = adoptedTypeClass.getName();
         this.parameters = stream(adoptedTypeClass.getTypeParameters())
                 .filter(type -> !isVariable(type))
