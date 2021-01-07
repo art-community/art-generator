@@ -2,6 +2,9 @@ FBInteger: 123
 parent:
   FBInteger: 123
 config:
+  SIM:
+    test: "test"
+    test2: "test"
   FBInteger: 123
 
 rsocket:

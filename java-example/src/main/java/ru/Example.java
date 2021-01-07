@@ -12,7 +12,10 @@ public class Example {
                 .configure(configurator -> configurator.configuration("config", MyConfig.class).configuration(MyConfig.class).configuration(MyConfigParent.class))
                 .serve(server -> server.rsocket(MyService.class, RsocketServiceModelConfigurator::enableLogging))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
-                .onLoad(() -> System.out.println(configuration("config", MyConfig.class)))
+                .onLoad(() -> {
+                    MyConfig config = configuration("config", MyConfig.class);
+                    System.out.println(config);
+                })
                 .onLoad(() -> System.out.println(configuration(MyConfigParent.class)))
                 .onLoad(() -> System.out.println(configuration(MyConfig.class)));
     }

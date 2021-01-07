@@ -53,13 +53,25 @@ public class CustomConfigurationCreator {
 
     private JCExpression createPropertyProvider(ExtractedProperty property) {
         Type type = property.type();
-        return method(CONFIGURE_METHOD_INPUT, GET_NESTED)
+        JCMethodInvocation getNested = method(CONFIGURE_METHOD_INPUT, GET_NESTED)
                 .addArguments(literal(property.name()))
                 .addArguments(newLambda()
                         .parameter(newParameter(NESTED_CONFIGURATION_TYPE, property.name()))
                         .expression(() -> createPropertyProvider(property.name(), type))
                         .generate())
                 .apply();
+        if (isOptional(type)) {
+            return method(OPTIONAL_TYPE, OF_NULLABLE_NAME)
+                    .addArguments(method(CONFIGURE_METHOD_INPUT, GET_NESTED)
+                            .addArguments(literal(property.name()))
+                            .addArguments(newLambda()
+                                    .parameter(newParameter(NESTED_CONFIGURATION_TYPE, property.name()))
+                                    .expression(() -> createPropertyProvider(property.name(), extractFirstTypeParameter((ParameterizedType) type)))
+                                    .generate())
+                            .apply())
+                    .apply();
+        }
+        return getNested;
     }
 
     private JCExpression createPropertyProvider(String property, Type type) {
