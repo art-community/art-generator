@@ -49,6 +49,7 @@ val artModules = listOf(
         "communicator",
         "yaml-configuration",
         "xml",
+        "yaml",
         "tarantool",
         "template-engine"
 )

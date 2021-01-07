@@ -1,12 +1,13 @@
 package io.art.generator.creator.communicator;
 
-import com.sun.tools.javac.tree.*;
+import com.sun.tools.javac.tree.JCTree.*;
 import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
+import io.art.generator.reflection.*;
 import io.art.generator.service.*;
 import io.art.model.implementation.communicator.*;
 import lombok.experimental.*;
@@ -14,7 +15,6 @@ import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.constants.MethodProcessingMode.*;
-import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.CommunicatorConstants.CommunicatorProxyMethods.*;
@@ -40,7 +40,7 @@ import java.util.function.*;
 @UtilityClass
 public class CommunicatorProxyCreator {
     public NewClass createNewProxyClass(CommunicatorModel communicatorModel, Class<?> communicatorClass, Function<Method, NewBuilder> implementationFactory) {
-        JCTree.JCExpression protocolExpression = select(type(communicatorModel.getProtocol().getClass()), communicatorModel.getProtocol().name());
+        JCExpression protocolExpression = select(type(communicatorModel.getProtocol().getClass()), communicatorModel.getProtocol().name());
         TypeModel proxyType = type(parameterizedType(CommunicatorProxy.class, communicatorClass));
         TypeModel implementationsReturnType = type(parameterizedType(ImmutableArray.class, communicatorClass));
         NewMethod getImplementations = overrideMethod(GET_IMPLEMENTATIONS_METHOD, implementationsReturnType).statement(() -> returnMethodCall(REGISTRY_NAME, GET_NAME));
@@ -77,17 +77,18 @@ public class CommunicatorProxyCreator {
     }
 
     private NewField createRegistryField(Class<?> communicatorClass) {
+        ParameterizedTypeImplementation registryType = parameterizedType(CommunicatorImplementationRegistry.class, communicatorClass);
         return newField()
-                .type(type(parameterizedType(CommunicatorImplementationRegistry.class, communicatorClass)))
+                .type(type(registryType))
                 .name(REGISTRY_NAME)
                 .modifiers(PRIVATE | FINAL)
-                .initializer(() -> newObject(type(parameterizedType(CommunicatorImplementationRegistry.class, communicatorClass))));
+                .initializer(() -> newObject(type(registryType)));
     }
 
     private NewMethod createProxyMethod(Method method, String specificationFieldName) {
         NewMethod methodImplementation = overrideMethod(method);
 
-        ImmutableArray<JCTree.JCExpression> arguments = methodImplementation.parameters()
+        ImmutableArray<JCExpression> arguments = methodImplementation.parameters()
                 .stream()
                 .map(NewParameter::getName)
                 .map(JavacService::ident)
@@ -100,7 +101,7 @@ public class CommunicatorProxyCreator {
         return methodImplementation.statement(() -> returnExpression(method(specificationFieldName, COMMUNICATE_METHOD_NAME).addArguments(arguments).apply()));
     }
 
-    private JCTree.JCExpression executeSpecificationBuilder(CommunicatorModel specificationModel, Method method, NewBuilder implementationBuilder) {
+    private JCExpression executeSpecificationBuilder(CommunicatorModel specificationModel, Method method, NewBuilder implementationBuilder) {
         TypeModel methodProcessingModeType = METHOD_PROCESSING_MODE_TYPE;
         Type[] parameterTypes = method.getGenericParameterTypes();
         if (parameterTypes.length > 1) {
