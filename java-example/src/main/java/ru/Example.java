@@ -1,11 +1,13 @@
 package ru;
 
+import io.art.communicator.module.*;
 import io.art.core.source.*;
 import io.art.model.annotation.*;
 import io.art.model.configurator.*;
 import ru.communicator.*;
 import ru.configuration.*;
 import ru.service.*;
+import static io.art.communicator.module.CommunicatorModule.*;
 import static io.art.configurator.module.ConfiguratorModule.*;
 import static io.art.core.magic.MagicRunner.*;
 import static io.art.model.configurator.ModuleModelConfigurator.*;
@@ -26,7 +28,7 @@ public class Example {
                     MyConfig config = configuration("config", MyConfig.class);
                     System.out.println(config);
                     System.out.println(configuration("config").getNested("SIM").asMap(sim -> sim.asArray(NestedConfiguration::asString)));
-
+                    communicator(MyClient.class).myMethod1();
                 })
                 .onLoad(() -> System.out.println(configuration(MyConfigParent.class)))
                 .onLoad(() -> System.out.println(configuration(MyConfig.class)));

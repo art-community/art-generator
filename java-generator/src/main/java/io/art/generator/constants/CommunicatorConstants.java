@@ -6,7 +6,7 @@ import java.lang.reflect.*;
 
 public interface CommunicatorConstants {
     interface CommunicatorProxyMethods {
-        Method GET_IMPLEMENTATIONS_METHOD = wrapException(() -> CommunicatorProxy.class.getDeclaredMethod("getImplementations"));
+        Method GET_SPECIFICATIONS_METHOD = wrapException(() -> CommunicatorProxy.class.getDeclaredMethod("getSpecifications"));
         Method GET_PROTOCOL_METHOD = wrapException(() -> CommunicatorProxy.class.getDeclaredMethod("getProtocol"));
     }
 }

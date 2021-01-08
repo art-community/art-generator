@@ -38,4 +38,4 @@ logging:
   test: "тест"
 configurator:
   refresh:
-    duration: "100ms"
+    duration: "30s"

@@ -1,8 +1,8 @@
 package io.art.generator.creator.communicator;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
+import io.art.communicator.specification.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.generator.exception.*;
@@ -41,9 +41,8 @@ import java.util.function.*;
 public class CommunicatorProxyCreator {
     public NewClass createNewProxyClass(CommunicatorModel communicatorModel, Class<?> communicatorClass, Function<Method, NewBuilder> implementationFactory) {
         JCExpression protocolExpression = select(type(communicatorModel.getProtocol().getClass()), communicatorModel.getProtocol().name());
-        TypeModel proxyType = type(parameterizedType(CommunicatorProxy.class, communicatorClass));
-        TypeModel implementationsReturnType = type(parameterizedType(ImmutableArray.class, communicatorClass));
-        NewMethod getImplementations = overrideMethod(GET_IMPLEMENTATIONS_METHOD, implementationsReturnType).statement(() -> returnMethodCall(REGISTRY_NAME, GET_NAME));
+        TypeModel implementationsReturnType = type(parameterizedType(ImmutableArray.class, CommunicatorSpecification.class));
+        NewMethod getSpecifications = overrideMethod(GET_SPECIFICATIONS_METHOD, implementationsReturnType).statement(() -> returnMethodCall(REGISTRY_NAME, GET_NAME));
         NewMethod getProtocol = overrideMethod(GET_PROTOCOL_METHOD).statement(() -> returnExpression(protocolExpression));
         NewClass proxy = newClass()
                 .field(newField()
@@ -54,9 +53,9 @@ public class CommunicatorProxyCreator {
                 .name(communicatorName(communicatorModel.getProxyClass()))
                 .modifiers(PRIVATE | STATIC)
                 .implement(type(communicatorModel.getProxyClass()))
-                .implement(proxyType)
-                .field(createRegistryField(communicatorClass))
-                .method(getImplementations)
+                .implement(COMMUNICATOR_PROXY_TYPE)
+                .field(createRegistryField())
+                .method(getSpecifications)
                 .method(getProtocol);
         int specificationIndex = 0;
         for (Method method : getCommunicatorMethods(communicatorModel.getProxyClass())) {
@@ -76,13 +75,12 @@ public class CommunicatorProxyCreator {
         return proxy;
     }
 
-    private NewField createRegistryField(Class<?> communicatorClass) {
-        ParameterizedTypeImplementation registryType = parameterizedType(CommunicatorImplementationRegistry.class, communicatorClass);
+    private NewField createRegistryField() {
         return newField()
-                .type(type(registryType))
+                .type(COMMUNICATOR_SPECIFICATION_REGISTRY_TYPE)
                 .name(REGISTRY_NAME)
                 .modifiers(PRIVATE | FINAL)
-                .initializer(() -> newObject(type(registryType)));
+                .initializer(() -> newObject(COMMUNICATOR_SPECIFICATION_REGISTRY_TYPE));
     }
 
     private NewMethod createProxyMethod(Method method, String specificationFieldName) {
@@ -133,12 +131,14 @@ public class CommunicatorProxyCreator {
                     break;
             }
         }
-        return specificationBuilder
-                .method(INPUT_MODE_NAME, select(methodProcessingModeType, inputMode.name()))
-                .method(OUTPUT_MODE_NAME, select(methodProcessingModeType, outputMode.name()))
-                .method(IMPLEMENTATION_NAME, method(REGISTRY_NAME, REGISTER_NAME).addArguments(implementationBuilder.generate()).apply())
-                .generate(builder -> method(COMMUNICATOR_MODEL_NAME, IMPLEMENT_NAME)
-                        .addArguments(literal(specificationModel.getProxyClass().getSimpleName()), builder)
-                        .apply());
+        return method(REGISTRY_NAME, REGISTER_NAME)
+                .addArguments(specificationBuilder
+                        .method(INPUT_MODE_NAME, select(methodProcessingModeType, inputMode.name()))
+                        .method(OUTPUT_MODE_NAME, select(methodProcessingModeType, outputMode.name()))
+                        .method(IMPLEMENTATION_NAME, implementationBuilder.generate())
+                        .generate(builder -> method(COMMUNICATOR_MODEL_NAME, IMPLEMENT_NAME)
+                                .addArguments(literal(specificationModel.getProxyClass().getSimpleName()), builder)
+                                .apply()))
+                .apply();
     }
 }

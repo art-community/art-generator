@@ -1,5 +1,6 @@
 package io.art.generator.constants;
 
+import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
 import io.art.communicator.specification.*;
 import io.art.configurator.custom.*;
@@ -72,8 +73,10 @@ public interface TypeModels {
     TypeModel SERVICE_SPECIFICATION_REGISTRY_TYPE = type(ServiceSpecificationRegistry.class);
     TypeModel METHOD_PROCESSING_MODE_TYPE = type(MethodProcessingMode.class);
 
+    TypeModel COMMUNICATOR_PROXY_TYPE = type(CommunicatorProxy.class);
     TypeModel COMMUNICATOR_PROXY_REGISTRY_TYPE = type(CommunicatorProxyRegistry.class);
     TypeModel COMMUNICATOR_SPECIFICATION_TYPE = type(CommunicatorSpecification.class);
+    TypeModel COMMUNICATOR_SPECIFICATION_REGISTRY_TYPE = type(CommunicatorSpecificationRegistry.class);
     TypeModel RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE = type(RsocketCommunicator.class);
     TypeModel RSOCKET_COMMUNICATION_MODE_TYPE = type(CommunicationMode.class);
     TypeModel RSOCKET_SETUP_PAYLOAD_TYPE = type(RsocketSetupPayload.class);
