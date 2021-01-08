@@ -36,6 +36,7 @@ val artModules = listOf(
         "core",
         "configurator",
         "value",
+        "scheduler",
         "logging",
         "server",
         "resilience",

@@ -19,6 +19,7 @@ config:
 
 rsocket:
   server:
+    logging: true
     transport:
       port: 5678
       mode: tcp
@@ -26,10 +27,15 @@ rsocket:
     connectors:
       MyClient:
         defaults:
-          dataFormat: protobuf
-          metaDataFormat: protobuf
+          dataFormat: json
+          metaDataFormat: json
         transport:
           mode: tcp
           tcp:
             host: 127.0.0.1
             port: 5678
+logging:
+  test: "тест"
+configurator:
+  refresh:
+    duration: "100ms"
