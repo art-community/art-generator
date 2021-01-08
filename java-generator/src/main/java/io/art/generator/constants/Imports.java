@@ -62,6 +62,7 @@ public interface Imports {
 
             MethodProcessingMode.class.getName(),
             LazyValue.class.getName(),
+            ManagedValue.class.getName(),
             SingletonsRegistry.class.getName(),
             NullityChecker.class.getName(),
 
