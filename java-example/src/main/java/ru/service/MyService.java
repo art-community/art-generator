@@ -1,13 +1,11 @@
 package ru.service;
 
-import io.art.logging.*;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.*;
 import ru.communicator.*;
 import ru.model.*;
 import static io.art.communicator.module.CommunicatorModule.*;
 import static io.art.logging.LoggingModule.*;
-import static io.art.server.module.ServerModule.*;
 import java.time.*;
 import java.util.*;
 
@@ -20,8 +18,7 @@ public class MyService implements MyClient {
 
     @Override
     public void myMethod2(Request request) {
-        System.out.println(serverModule().state().localState().getSpecification().getMethodId());
-        logger(MyService.class).info("myMethod2:" + request);
+        logger(MyService.class).info("myMethod2");
     }
 
     @Override
