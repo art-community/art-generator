@@ -27,15 +27,10 @@ rsocket:
     connectors:
       MyClient:
         defaults:
-          dataFormat: json
-          metaDataFormat: json
+          dataFormat: yaml
+          metaDataFormat: yaml
         transport:
           mode: tcp
           tcp:
             host: 127.0.0.1
             port: 5678
-logging:
-  test: "тест"
-configurator:
-  refresh:
-    duration: "30s"
