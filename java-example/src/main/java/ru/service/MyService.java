@@ -8,6 +8,7 @@ import static io.art.communicator.module.CommunicatorModule.*;
 import static io.art.logging.LoggingModule.*;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.atomic.*;
 
 public class MyService implements MyClient {
     @Override
@@ -17,8 +18,16 @@ public class MyService implements MyClient {
     }
 
     @Override
+    public Mono<Void> myMethod100(String request) {
+        System.out.println(counter.incrementAndGet());
+        return Mono.empty();
+    }
+
+    AtomicLong counter = new AtomicLong();
+
+    @Override
     public void myMethod2(Request request) {
-        logger(MyService.class).info("myMethod2");
+        //logger(MyService.class).info("myMethod2");
     }
 
     @Override

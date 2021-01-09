@@ -119,14 +119,17 @@ public class CommunicatorProxyCreator {
                             .apply());
         }
 
-        if (isNotEmpty(parameterTypes)) {
+        if (isNotEmpty(parameterTypes) && isNotVoid(parameterTypes[0])) {
             switch (inputMode) {
                 case BLOCKING:
                     actionBuilder.method(INPUT_MAPPER_NAME, fromModelMapper(parameterTypes[0]));
                     break;
                 case MONO:
                 case FLUX:
-                    actionBuilder.method(INPUT_MAPPER_NAME, fromModelMapper(extractFirstTypeParameter((ParameterizedType) parameterTypes[0])));
+                    Type firstTypeParameter = extractFirstTypeParameter((ParameterizedType) parameterTypes[0]);
+                    if (isNotVoid(firstTypeParameter)) {
+                        actionBuilder.method(INPUT_MAPPER_NAME, fromModelMapper(firstTypeParameter));
+                    }
                     break;
             }
         }
@@ -137,7 +140,10 @@ public class CommunicatorProxyCreator {
                     break;
                 case MONO:
                 case FLUX:
-                    actionBuilder.method(OUTPUT_MAPPER_NAME, toModelMapper(extractFirstTypeParameter((ParameterizedType) returnType)));
+                    Type firstTypeParameter = extractFirstTypeParameter((ParameterizedType) returnType);
+                    if (isNotVoid(firstTypeParameter)) {
+                        actionBuilder.method(OUTPUT_MAPPER_NAME, toModelMapper(firstTypeParameter));
+                    }
                     break;
             }
         }

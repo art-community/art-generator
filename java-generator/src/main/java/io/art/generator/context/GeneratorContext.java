@@ -9,7 +9,6 @@ import io.art.core.collection.*;
 import io.art.generator.loader.*;
 import io.art.generator.model.*;
 import static io.art.core.factory.MapFactory.*;
-import static io.art.generator.constants.Names.*;
 import java.util.concurrent.atomic.*;
 
 public class GeneratorContext {
@@ -25,18 +24,18 @@ public class GeneratorContext {
 
     private static final AtomicReference<JavacElements> elements = new AtomicReference<>();
 
-    private static final AtomicReference<ExistedClass> mainClass = new AtomicReference<>();
-
-    private static final AtomicReference<ExistedMethod> mainMethod = new AtomicReference<>();
-
-    private static final AtomicReference<ExistedMethod> configureMethod = new AtomicReference<>();
-
     private static final AtomicReference<GeneratorClassLoader> classLoader = new AtomicReference<>();
 
     private static ImmutableMap<String, ExistedClass> existedClasses;
 
+    private static ImmutableMap<String, ExistedClass> moduleClasses;
+
     public static ImmutableMap<String, ExistedClass> existedClasses() {
         return existedClasses;
+    }
+
+    public static ImmutableMap<String, ExistedClass> moduleClasses() {
+        return moduleClasses;
     }
 
     public static ExistedClass existedClass(String name) {
@@ -63,26 +62,6 @@ public class GeneratorContext {
         return elements.get();
     }
 
-    public static ExistedClass mainClass() {
-        return mainClass.get();
-    }
-
-    public static String providerClassName() {
-        return mainClass.get().getName() + PROVIDER_CLASS_SUFFIX;
-    }
-
-    public static String providerClassFullName() {
-        return mainClass.get().getFullName() + PROVIDER_CLASS_SUFFIX;
-    }
-
-    public static ExistedMethod mainMethod() {
-        return mainMethod.get();
-    }
-
-    public static ExistedMethod configureMethod() {
-        return configureMethod.get();
-    }
-
     public static GeneratorClassLoader classLoader() {
         return classLoader.get();
     }
@@ -94,14 +73,12 @@ public class GeneratorContext {
     public static void initialize(GeneratorContextConfiguration configuration) {
         if (initialized.compareAndSet(false, true)) {
             GeneratorContext.existedClasses = immutableMapOf(configuration.getExistedClasses());
+            GeneratorContext.moduleClasses = immutableMapOf(configuration.getModuleClasses());
             GeneratorContext.processingEnvironment.set(configuration.getProcessingEnvironment());
             GeneratorContext.options.set(configuration.getOptions());
             GeneratorContext.compiler.set(configuration.getCompiler());
             GeneratorContext.maker.set(configuration.getMaker());
             GeneratorContext.elements.set(configuration.getElements());
-            GeneratorContext.mainClass.set(configuration.getMainClass());
-            GeneratorContext.mainMethod.set(configuration.getMainMethod());
-            GeneratorContext.configureMethod.set(configuration.getConfigureMethod());
             GeneratorContext.classLoader.set(new GeneratorClassLoader());
         }
     }

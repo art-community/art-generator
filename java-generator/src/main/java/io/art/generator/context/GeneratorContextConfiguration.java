@@ -17,11 +17,8 @@ public class GeneratorContextConfiguration {
     private final JavaCompiler compiler;
     private final TreeMaker maker;
     private final JavacElements elements;
-    private final ExistedClass mainClass;
-    private final ExistedMethod mainMethod;
-    private final ExistedMethod configureMethod;
     @Singular("exitedClass")
     private final Map<String, ExistedClass> existedClasses;
-
-
+    @Singular("moduleClass")
+    private final Map<String, ExistedClass> moduleClasses;
 }

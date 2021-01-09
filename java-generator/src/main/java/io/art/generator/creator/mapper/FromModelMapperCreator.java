@@ -37,9 +37,9 @@ public class FromModelMapperCreator {
     private final String modelName;
 
     public static JCExpression fromModelMapper(Type type) {
-        String generatedMapping = mappers().get(type);
-        if (nonNull(generatedMapping)) {
-            return select(select(providerClassName(), generatedMapping), FROM_MODEL_NAME);
+        String generatedMapper = mappers().get(type);
+        if (nonNull(generatedMapper)) {
+            return select(generatedMapper, FROM_MODEL_NAME);
         }
         return createFromModelMapper(type);
     }

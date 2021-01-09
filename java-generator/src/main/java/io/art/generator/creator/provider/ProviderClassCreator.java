@@ -3,6 +3,7 @@ package io.art.generator.creator.provider;
 import io.art.core.collection.*;
 import io.art.generator.caller.*;
 import io.art.generator.model.*;
+import io.art.generator.state.*;
 import io.art.model.implementation.module.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
@@ -17,8 +18,8 @@ import static io.art.generator.constants.Imports.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
-import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.decorate.DecorateMethodCreator.*;
+import static io.art.generator.finder.ConfigureMethodFinder.*;
 import static io.art.generator.implementor.CommunicatorModelImplementor.*;
 import static io.art.generator.implementor.ConfiguratorModelImplementor.*;
 import static io.art.generator.implementor.MappersImplementor.*;
@@ -29,6 +30,7 @@ import static io.art.generator.model.NewField.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
+import static io.art.generator.state.GenerationState.*;
 import static java.util.Arrays.*;
 import javax.lang.model.element.Modifier;
 import java.lang.reflect.*;
@@ -37,7 +39,8 @@ import java.util.*;
 @UtilityClass
 public class ProviderClassCreator {
     public NewClass createProviderClass(ModuleModel model) {
-        NewClass providerClass = newClass().modifiers(PUBLIC).name(providerClassName());
+        ExistedClass moduleClass = moduleClass();
+        NewClass providerClass = newClass().modifiers(PUBLIC).name(moduleClass.getName() + PROVIDER_CLASS_SUFFIX);
 
         stream(IMPORTING_CLASSES).map(ImportModel::classImport).forEach(providerClass::addImport);
 
@@ -84,19 +87,21 @@ public class ProviderClassCreator {
     }
 
     private NewField createModelField() {
-        MethodCaller configureStatic = method(type(mainClass().asClass()), configureMethod().getName());
+        ExistedClass moduleClass = moduleClass();
+        ExistedMethod configureMethod = findConfigureAnnotatedMethod(moduleClass);
+        MethodCaller configureStatic = method(type(moduleClass.asClass()), configureMethod.getName());
 
         MethodCaller singletonMethod = method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
-                .addArgument(classReference(mainClass().asClass()))
-                .addArgument(newReference(type(mainClass().asClass())));
-        MethodCaller configureSingleton = method(singletonMethod.apply(), configureMethod().getName());
+                .addArgument(classReference(moduleClass.asClass()))
+                .addArgument(newReference(type(moduleClass.asClass())));
+        MethodCaller configureSingleton = method(singletonMethod.apply(), configureMethod.getName());
 
         return newField()
                 .name(MODEL_STATIC_NAME)
                 .modifiers(PRIVATE | FINAL | STATIC)
                 .type(MODULE_MODEL_TYPE)
                 .initializer(() -> method(DECORATE_NAME)
-                        .addArguments(configureMethod().getDeclaration().getModifiers().getFlags().contains(Modifier.STATIC)
+                        .addArguments(configureMethod.getDeclaration().getModifiers().getFlags().contains(Modifier.STATIC)
                                 ? configureStatic.apply()
                                 : configureSingleton.apply())
                         .apply());

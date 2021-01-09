@@ -83,7 +83,7 @@ public class ServerModelImplementor {
         NewBuilder methodBuilder = newBuilder(SERVICE_METHOD_SPECIFICATION_TYPE)
                 .method(SERVICE_ID_NAME, literal(serviceClass.getSimpleName()))
                 .method(METHOD_ID_NAME, literal(serviceMethod.getName()));
-        if (isNotEmpty(parameterTypes)) {
+        if (isNotEmpty(parameterTypes) && isNotVoid(parameterTypes[0])) {
             TypeModel parameterTypeModel = type(parameterTypes[0]);
             if (!parameterTypeModel.isJdk()) {
                 servicesMethod.addImport(classImport(parameterTypeModel.getFullName()));
@@ -94,7 +94,10 @@ public class ServerModelImplementor {
                     break;
                 case MONO:
                 case FLUX:
-                    methodBuilder.method(INPUT_MAPPER_NAME, toModelMapper((extractFirstTypeParameter((ParameterizedType) parameterTypes[0]))));
+                    Type firstTypeParameter = extractFirstTypeParameter((ParameterizedType) parameterTypes[0]);
+                    if (isNotVoid(firstTypeParameter)) {
+                        methodBuilder.method(INPUT_MAPPER_NAME, toModelMapper(firstTypeParameter));
+                    }
                     break;
             }
         }
@@ -109,7 +112,10 @@ public class ServerModelImplementor {
                     break;
                 case MONO:
                 case FLUX:
-                    methodBuilder.method(OUTPUT_MAPPER_NAME, fromModelMapper((extractFirstTypeParameter((ParameterizedType) returnType))));
+                    Type firstTypeParameter = extractFirstTypeParameter((ParameterizedType) returnType);
+                    if (isNotVoid(firstTypeParameter)) {
+                        methodBuilder.method(OUTPUT_MAPPER_NAME, fromModelMapper((extractFirstTypeParameter((ParameterizedType) returnType))));
+                    }
                     break;
             }
         }

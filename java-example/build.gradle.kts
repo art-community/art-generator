@@ -25,6 +25,7 @@ dependencies {
     implementation(project(":json"))
     implementation(project(":protobuf"))
     implementation(project(":message-pack"))
+    implementation(project(":yaml"))
     annotationProcessor(project(":java-generator"))
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:+")

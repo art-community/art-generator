@@ -19,17 +19,15 @@ config:
 
 rsocket:
   server:
-    logging: true
     transport:
       port: 5678
       mode: tcp
   communicator:
     connectors:
       MyClient:
-        logging: true
         defaults:
-          dataFormat: yaml
-          metaDataFormat: yaml
+          dataFormat: messagePack
+          metaDataFormat: messagePack
         transport:
           mode: tcp
           tcp:

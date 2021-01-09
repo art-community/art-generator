@@ -3,6 +3,7 @@ package io.art.generator.implementor;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
+import static io.art.core.constants.StringConstants.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
@@ -16,12 +17,21 @@ import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.service.ClassGenerationService.*;
 import static io.art.generator.service.ClassMutationService.*;
+import static io.art.generator.state.GenerationState.*;
 import static java.text.MessageFormat.*;
 
 @UtilityClass
 public class ModuleModelImplementor {
     public void implementModuleModel() {
-        generateClass(createProviderClass(loadModel()), mainClass().getPackageName());
+        for (ExistedClass existedClass : moduleClasses().values()) {
+            implementModuleModel(existedClass);
+        }
+        clearState();
+    }
+
+    private void implementModuleModel(ExistedClass moduleClass) {
+        updateState(moduleClass);
+        generateClass(createProviderClass(loadModel()), moduleClass.getPackageName());
 
         NewMethod mainMethod = newMethod()
                 .modifiers(PUBLIC | STATIC)
@@ -29,10 +39,10 @@ public class ModuleModelImplementor {
                 .returnType(VOID_TYPE)
                 .parameter(newParameter(STRING_ARRAY_TYPE, MAIN_METHOD_ARGUMENTS_NAME))
                 .addImport(classImport(MODULE_LAUNCHER_TYPE.getFullName()))
-                .addImport(classImport(providerClassFullName()))
-                .statement(() -> method(MODULE_LAUNCHER_TYPE, LAUNCH_NAME).addArguments(method(providerClassName(), PROVIDE_NAME).apply()).execute());
+                .addImport(classImport(moduleClass.getPackageName() + DOT + moduleClass.getName() + PROVIDER_CLASS_SUFFIX))
+                .statement(() -> method(MODULE_LAUNCHER_TYPE, LAUNCH_NAME).addArguments(method(moduleClass.getName() + PROVIDER_CLASS_SUFFIX, PROVIDE_NAME).apply()).execute());
 
-        replaceMethod(mainClass(), mainMethod);
-        success(format(GENERATED_MAIN_METHOD, mainClass().getFullName()));
+        replaceMethod(moduleClass, mainMethod);
+        success(format(GENERATED_MAIN_METHOD, moduleClass.getFullName()));
     }
 }

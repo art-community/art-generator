@@ -46,11 +46,11 @@ public class TypeInspector {
     }
 
     public boolean isVoid(Type fieldType) {
-        return fieldType == void.class;
+        return fieldType == void.class || fieldType == Void.class;
     }
 
     public boolean isNotVoid(Type fieldType) {
-        return fieldType != void.class;
+        return !isVoid(fieldType);
     }
 
     public boolean isFlux(Type fieldType) {
