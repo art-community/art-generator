@@ -4,7 +4,6 @@ import com.sun.tools.javac.tree.JCTree.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.generator.exception.*;
-import io.art.generator.formater.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.server.*;
 import lombok.experimental.*;
@@ -63,11 +62,11 @@ public class ServerModelImplementor {
     }
 
     private JCMethodInvocation executeServiceSpecificationBuilder(NewMethod servicesMethod, Class<?> serviceClass) {
-        NewBuilder builder = newBuilder(SERVICE_SPECIFICATION_TYPE).method(SERVICE_ID_NAME, literal(serviceClass.getSimpleName()));
+        NewBuilder builder = newBuilder(SERVICE_SPECIFICATION_TYPE);
         for (Method method : getServiceMethods(serviceClass)) {
             JCMethodInvocation methodSpecificationBuilder = executeMethodSpecificationBuilder(servicesMethod, serviceClass, method);
             builder.method(METHOD_NAME, literal(method.getName()), methodSpecificationBuilder);
-            info(format(GENERATED_SERVICE_METHOD_SPECIFICATION, SignatureFormatter.formatSignature(serviceClass, method)));
+            info(format(GENERATED_SERVICE_METHOD_SPECIFICATION, formatSignature(serviceClass, method)));
         }
         return builder.generate();
     }

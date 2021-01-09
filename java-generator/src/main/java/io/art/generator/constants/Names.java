@@ -7,7 +7,7 @@ public interface Names {
     String THIS_NAME = "this";
     String PROVIDER_CLASS_SUFFIX = "Provider";
     String PROXY_CLASS_SUFFIX = "Proxy";
-    String SPECIFICATION_FIELD_PREFIX = "specification";
+    String ACTION_FIELD_PREFIX = "action";
     String IMPLEMENT_NAME = "implement";
     String IMPLEMENTATION_NAME = "implementation";
     String COMMUNICATE_METHOD_NAME = "communicate";
@@ -21,10 +21,12 @@ public interface Names {
     String CONFIGURE_NAME = "configure";
     String SERVER_NAME = "server";
     String COMMUNICATOR_NAME = "communicator";
+    String VALUE_NAME = "value";
     String PROVIDE_NAME = "provide";
     String MODEL_NAME = "model";
     String CONFIGURATOR_NAME = "configurator";
     String CONFIGURATOR_MODEL_NAME = "configuratorModel";
+    String VALUE_MODEL_NAME = "valueModel";
     String MODULE_MODEL_NAME = "moduleModel";
     String SERVER_MODEL_NAME = "serverModel";
     String COMMUNICATOR_MODEL_NAME = "communicatorModel";
@@ -42,10 +44,12 @@ public interface Names {
     String OUTPUT_MODE_NAME = "outputMode";
     String INPUT_MAPPER_NAME = "inputMapper";
     String OUTPUT_MAPPER_NAME = "outputMapper";
-    String SERVICE_METHOD_NAME = "serviceMethod";
     String CUSTOM_CONFIGURATIONS_NAME = "customConfigurations";
+    String MAPPERS_NAME = "mappers";
     String CONFIGURATOR_CUSTOMIZER_NAME = "configuratorCustomizer";
+    String VALUE_CUSTOMIZER_NAME = "valueCustomizer";
     String GET_CONFIGURATOR_MODEL_NAME = "getConfiguratorModel";
+    String GET_VALUE_MODEL_NAME = "getValueModel";
     String GET_SERVER_MODEL_NAME = "getServerModel";
     String GET_COMMUNICATOR_MODEL_NAME = "getCommunicatorModel";
     String SERVICE_ID_NAME = "serviceId";
@@ -56,9 +60,9 @@ public interface Names {
     String PRODUCER_NAME = "producer";
     String CONSUMER_NAME = "consumer";
     String COMMUNICATOR_ID_NAME = "communicatorId";
-    String CONNECTOR_ID_NAME = "connectorId";
-    String SETUP_PAYLOAD_NAME = "setupPayload";
-    String COMMUNICATION_MODE_NAME = "communicationMode";
+    String ACTION_ID_NAME = "actionId";
+    String COMMUNICATOR_ACTION_NAME = "communicatorAction";
+    String COMMUNICATOR_ACTION_ID_NAME = "communicatorActionId";
     String TO_MUTABLE_NAME = "toMutable";
     String INSTANCE_FIELD_NAME = "INSTANCE";
     String IMMUTABLE_SET_OF_NAME = "immutableSetOf";
@@ -68,5 +72,8 @@ public interface Names {
     String UNBOX_NAME = "unbox";
     String BY_CLASS_NAME = "byClass";
     String SOURCE_NAME = "source";
-    String PARAMETER_NAME = "parameter";
+    String TARGET_SERVICE_ID_NAME = "targetServiceId";
+    String TARGET_METHOD_ID_NAME = "targetMethodId";
+    String TARGET_SERVICe_METHOD_NAME = "targetServiceMethod";
+    String SERVICE_METHOD_NAME = "serviceMethod";
 }

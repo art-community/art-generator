@@ -5,26 +5,57 @@ import io.art.generator.model.*;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import lombok.experimental.*;
+import static com.sun.tools.javac.code.Flags.PRIVATE;
+import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.collection.ImmutableSet.*;
+import static io.art.core.reflection.ParameterizedTypeImplementation.*;
+import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.MappersConstants.*;
+import static io.art.generator.constants.MappersConstants.ValueCustomizerMethods.*;
+import static io.art.generator.constants.Names.*;
+import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
+import static io.art.generator.creator.registry.RegistryVariableCreator.*;
+import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewClass.*;
 import static io.art.generator.model.NewField.*;
+import static io.art.generator.model.NewMethod.*;
+import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
-import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
+import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GenerationState.*;
-import static java.lang.reflect.Modifier.*;
+import static java.lang.reflect.Modifier.INTERFACE;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
 
 @UtilityClass
 public class MappersImplementor {
+    public NewMethod implementMappersMethod(ImmutableSet<Type> types) {
+        TypeModel registryType = VALUE_MAPPER_REGISTRY_TYPE;
+        NewMethod mappersMethod = newMethod()
+                .name(MAPPERS_NAME)
+                .parameter(newParameter(VALUE_MODULE_MODEL_TYPE, VALUE_MODEL_NAME))
+                .returnType(registryType)
+                .modifiers(PRIVATE | STATIC)
+                .statement(() -> createRegistryVariable(registryType));
+        types.stream().forEach(type -> mappersMethod
+                .statement(() -> method(REGISTRY_NAME, REGISTER_TO_MODEL)
+                        .addArguments(classReference(extractClass(type)))
+                        .addArguments(select(mappers().get(type), TO_MODEL_NAME))
+                        .execute())
+                .statement(() -> method(REGISTRY_NAME, REGISTER_FROM_MODEL)
+                        .addArguments(classReference(extractClass(type)))
+                        .addArguments(select(mappers().get(type), FROM_MODEL_NAME))
+                        .execute()));
+        return mappersMethod.statement(() -> returnVariable(REGISTRY_NAME));
+    }
+
     public ImmutableArray<NewClass> implementTypeMappers(ImmutableSet<Type> types) {
         types = types
                 .stream()

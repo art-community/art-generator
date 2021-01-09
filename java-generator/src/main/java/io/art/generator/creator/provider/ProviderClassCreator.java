@@ -6,11 +6,13 @@ import io.art.generator.model.*;
 import io.art.model.implementation.module.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
+import static io.art.core.collector.SetCollector.*;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.collector.CommunicatorTypesCollector.*;
 import static io.art.generator.collector.ServiceTypesCollector.*;
+import static io.art.generator.collector.TypeCollector.*;
 import static io.art.generator.constants.Imports.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
@@ -39,7 +41,13 @@ public class ProviderClassCreator {
 
         stream(IMPORTING_CLASSES).map(ImportModel::classImport).forEach(providerClass::addImport);
 
-        Set<Type> types = combine(collectServerTypes(model.getServerModel()).toMutable(), collectCommunicatorTypes(model.getCommunicatorModel()).toMutable());
+        Set<Type> types = combineToSet(
+                model.getValueModel().getCustomTypes().stream().flatMap(type -> collectModelTypes(type).stream()).collect(setCollector()),
+                collectServerTypes(model.getServerModel()).toMutable(),
+                collectCommunicatorTypes(model.getCommunicatorModel()).toMutable()
+        );
+
+        NewMethod mappersMethod = implementMappersMethod(immutableSetOf(types));
         ImmutableArray<NewClass> mappers = implementTypeMappers(immutableSetOf(types));
         success(GENERATED_MAPPERS);
 
@@ -58,6 +66,7 @@ public class ProviderClassCreator {
                 .field(createModelField())
                 .method(createProvideMethod())
                 .method(createDecorateMethod())
+                .method(mappersMethod)
                 .method(servicesMethod)
                 .method(communicatorsMethod)
                 .method(configurationsMethod)

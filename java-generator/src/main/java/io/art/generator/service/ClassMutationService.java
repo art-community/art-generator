@@ -4,7 +4,6 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
-import io.art.core.factory.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 import static com.sun.source.tree.Tree.Kind.*;
@@ -52,7 +51,7 @@ public class ClassMutationService {
                 .filter(type -> !type.getPackageName().isEmpty() && !type.isJdk())
                 .map(type -> classImport(type.getFullName()))
                 .collect(setCollector());
-        ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, immutableSetOf(combine(importModels, method.classImports())));
+        ListBuffer<JCTree> newPackageDefinitions = addImports(existedClass, immutableSetOf(combineToSet(importModels, method.classImports())));
         existedClass.getPackageUnit().defs = newPackageDefinitions.toList();
     }
 

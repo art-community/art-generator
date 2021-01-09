@@ -31,7 +31,7 @@ import static io.art.generator.model.NewField.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
-import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
+import static io.art.core.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GenerationState.*;
 import static java.lang.reflect.Modifier.PRIVATE;
