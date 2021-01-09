@@ -8,17 +8,26 @@ import static io.art.communicator.module.CommunicatorModule.*;
 import static io.art.logging.LoggingModule.*;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.atomic.*;
 
 public class MyService implements MyClient {
     @Override
     public void myMethod1() {
         logger(MyService.class).info("myMethod1");
-        communicator(MyClient.class).myMethod2(Request.builder().FBString("test").build());
+        communicator(MyClient.class).myMethod2(Request.builder().build());
     }
 
     @Override
+    public Mono<Void> myMethod100(String request) {
+        System.out.println(counter.incrementAndGet());
+        return Mono.empty();
+    }
+
+    AtomicLong counter = new AtomicLong();
+
+    @Override
     public void myMethod2(Request request) {
-        logger(MyService.class).info("myMethod2:" + request);
+        //logger(MyService.class).info("myMethod2");
     }
 
     @Override
@@ -104,10 +113,6 @@ public class MyService implements MyClient {
     @Override
     public Flux<Response> myMethod16(Flux<Request> request) {
         request.subscribe(data -> logger(MyService.class).info("myMethod16:" + data));
-        return Flux.interval(Duration.ofSeconds(1), Schedulers.newParallel("myMethod16")).map(index -> Response.builder().FFloat(new Random().nextFloat()).build());
-    }
-
-    public Flux<Response> myMethod17(Optional<Request> request) {
-        return Flux.interval(Duration.ofSeconds(1), Schedulers.newParallel("myMethod16")).map(index -> Response.builder().FFloat(new Random().nextFloat()).build());
+        return Flux.interval(Duration.ofSeconds(1), Schedulers.newParallel("myMethod16-output")).map(index -> Response.builder().FFloat(new Random().nextFloat()).build());
     }
 }

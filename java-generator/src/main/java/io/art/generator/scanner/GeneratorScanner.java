@@ -24,7 +24,6 @@ import java.util.*;
 
 @RequiredArgsConstructor
 public class GeneratorScanner extends TreePathScanner<Object, Trees> {
-    private ExistedClass mainClass;
     private final JavacElements elements;
     @Getter
     private final GeneratorContextConfigurationBuilder configurationBuilder;
@@ -68,7 +67,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                 .filter(method -> method.getModifiers().getFlags().containsAll(setOf(PUBLIC)))
                 .findFirst();
 
-        if (isNull(mainClass) && modelMethodDeclaration.isPresent()) {
+        if (modelMethodDeclaration.isPresent()) {
             Optional<JCMethodDecl> mainMethodDeclaration = classDeclaration.getMembers()
                     .stream()
                     .filter(member -> member.getKind() == METHOD)
@@ -81,7 +80,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                     .filter(method -> method.getReturnType().type.getTag().equals(TypeTag.VOID))
                     .findFirst();
 
-            ExistedClass.ExistedClassBuilder mainClassBuilder = ExistedClass.builder()
+            ExistedClass.ExistedClassBuilder moduleClassBuilder = ExistedClass.builder()
                     .name(classDeclaration.name.toString())
                     .declaration(classDeclaration)
                     .packageUnit(packageUnit);
@@ -91,8 +90,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                         .declaration(mainMethodDeclaration.get())
                         .name(mainMethodDeclaration.get().name.toString())
                         .build();
-                configurationBuilder.mainMethod(mainMethod);
-                mainClassBuilder.method(mainMethod);
+                moduleClassBuilder.method(mainMethod);
             }
 
             ExistedMethod modelMethod = ExistedMethod.builder()
@@ -100,10 +98,9 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                     .name(modelMethodDeclaration.get().name.toString())
                     .build();
 
-            configurationBuilder.configureMethod(modelMethod);
-            mainClassBuilder.method(modelMethod);
+            moduleClassBuilder.method(modelMethod);
 
-            configurationBuilder.mainClass(this.mainClass = mainClassBuilder.build());
+            configurationBuilder.moduleClass(classDeclaration.name.toString(), moduleClassBuilder.build());
         }
         return result;
     }
@@ -121,5 +118,4 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                 .filter(Objects::nonNull)
                 .anyMatch(name -> name.toString().equals(CONFIGURATOR_ANNOTATION_NAME));
     }
-
 }

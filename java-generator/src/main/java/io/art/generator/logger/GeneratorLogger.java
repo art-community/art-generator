@@ -1,16 +1,20 @@
 package io.art.generator.logger;
 
 import io.art.core.colorizer.*;
+import io.art.generator.model.*;
 import lombok.experimental.*;
+import static io.art.core.checker.NullityChecker.let;
 import static io.art.core.constants.DateTimeConstants.*;
+import static io.art.core.extensions.StringExtensions.emptyIfNull;
 import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.state.GenerationState.*;
 import static java.text.MessageFormat.*;
 import java.time.*;
 
 @UtilityClass
 public class GeneratorLogger {
     public void message(Object message) {
-        System.out.println(format("[{0}]: {1}", now(), message));
+        System.out.println(format("[{0}] {1}: {2}", now(), emptyIfNull(let(moduleClass(), ExistedClass::getName)), message));
     }
 
     public void info(Object message) {
@@ -34,7 +38,7 @@ public class GeneratorLogger {
     }
 
     public void error(Object message) {
-        System.err.println(AnsiColorizer.error(format("[{0}]: {1}", now(), message)));
+        System.err.println(AnsiColorizer.error(format("[{0}] {1}: {2}", now(), emptyIfNull(let(moduleClass(), ExistedClass::getName)), message)));
     }
 
     private String now() {

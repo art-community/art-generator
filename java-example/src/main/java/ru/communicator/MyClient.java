@@ -7,6 +7,8 @@ import java.util.stream.*;
 public interface MyClient {
     void myMethod1();
 
+    Mono<Void> myMethod100(String request);
+
     void myMethod2(Request request);
 
     void myMethod3(Mono<Request> request);

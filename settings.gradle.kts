@@ -36,6 +36,7 @@ val artModules = listOf(
         "core",
         "configurator",
         "value",
+        "scheduler",
         "logging",
         "server",
         "resilience",
@@ -49,6 +50,7 @@ val artModules = listOf(
         "communicator",
         "yaml-configuration",
         "xml",
+        "yaml",
         "tarantool",
         "template-engine"
 )

@@ -110,4 +110,9 @@ public interface MappersConstants {
         String TO_OPTIONAL = "toOptional";
         String FROM_OPTIONAL = "fromOptional";
     }
+
+    interface ValueCustomizerMethods {
+        String REGISTER_TO_MODEL = "registerToModel";
+        String REGISTER_FROM_MODEL = "registerFromModel";
+    }
 }

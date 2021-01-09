@@ -4,9 +4,9 @@ import com.sun.tools.javac.tree.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.communicator.*;
-import io.art.rsocket.communicator.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
+import static io.art.core.collection.ImmutableArray.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
@@ -37,21 +37,21 @@ public class CommunicatorModelImplementor {
     }
 
     public ImmutableArray<NewClass> implementCommunicatorProxies(CommunicatorModuleModel communicatorModel) {
-        ImmutableArray.Builder<NewClass> proxies = ImmutableArray.immutableArrayBuilder();
+        ImmutableArray.Builder<NewClass> proxies = immutableArrayBuilder();
         communicatorModel.getRsocketCommunicators().values().forEach(model -> proxies.add(createRsocketProxy(model)));
         return proxies.build();
     }
 
     private NewClass createRsocketProxy(RsocketCommunicatorModel communicatorModel) {
         Function<Method, NewBuilder> implementationBuilder = (Method method) -> createRsocketCommunicator(communicatorModel, method);
-        return createNewProxyClass(communicatorModel, RsocketCommunicator.class, implementationBuilder);
+        return createNewProxyClass(communicatorModel, implementationBuilder);
     }
 
-    private JCTree.JCMethodInvocation executeRegisterMethod(CommunicatorModel specificationModel) {
-        Class<?> implementationInterface = specificationModel.getProxyClass();
+    private JCTree.JCMethodInvocation executeRegisterMethod(CommunicatorModel communicatorModel) {
+        Class<?> implementationInterface = communicatorModel.getProxyClass();
         String proxyClassName = communicatorName(implementationInterface);
         return method(REGISTRY_NAME, REGISTER_NAME)
-                .addArguments(literal(implementationInterface.getSimpleName()), newObject(proxyClassName, ident(COMMUNICATOR_MODEL_NAME)))
+                .addArguments(literal(communicatorModel.getId()), newObject(proxyClassName, ident(COMMUNICATOR_MODEL_NAME)))
                 .apply();
     }
 }

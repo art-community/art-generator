@@ -5,7 +5,7 @@ import io.art.core.collection.*;
 import io.art.core.source.*;
 import static io.art.core.wrapper.ExceptionWrapper.*;
 import static io.art.generator.constants.ConfiguratorConstants.NestedConfigurationMethods.*;
-import static io.art.generator.reflection.ParameterizedTypeImplementation.*;
+import static io.art.core.reflection.ParameterizedTypeImplementation.*;
 import java.lang.reflect.*;
 import java.time.*;
 import java.util.*;

@@ -1,7 +1,8 @@
 package io.art.generator.constants;
 
+import io.art.communicator.action.*;
+import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
-import io.art.communicator.specification.*;
 import io.art.configurator.custom.*;
 import io.art.core.checker.*;
 import io.art.core.constants.*;
@@ -18,15 +19,15 @@ import io.art.model.implementation.communicator.*;
 import io.art.model.implementation.configurator.*;
 import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
+import io.art.model.implementation.value.*;
 import io.art.rsocket.communicator.*;
-import io.art.rsocket.constants.RsocketModuleConstants.*;
-import io.art.rsocket.model.*;
 import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import io.art.value.immutable.*;
 import io.art.value.mapping.*;
+import io.art.value.registry.*;
 import static io.art.generator.model.TypeModel.*;
 import java.util.*;
 
@@ -56,6 +57,7 @@ public interface TypeModels {
     TypeModel MODULE_CONFIGURATOR_TYPE = type(ModuleModelConfigurator.class);
 
     TypeModel CONFIGURATOR_CUSTOMIZER_TYPE = type(ConfiguratorCustomizer.class);
+    TypeModel VALUE_CUSTOMIZER_TYPE = type(ValueCustomizer.class);
     TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerCustomizer.class);
     TypeModel COMMUNICATOR_CUSTOMIZER_TYPE = type(CommunicatorCustomizer.class);
     TypeModel MODULE_CUSTOMIZER_TYPE = type(ModuleCustomizer.class);
@@ -65,6 +67,9 @@ public interface TypeModels {
     TypeModel CUSTOM_CONFIGURATION_REGISTRY_TYPE = type(CustomConfigurationRegistry.class);
     TypeModel CONFIGURATOR_MODULE_MODEL_TYPE = type(ConfiguratorModuleModel.class);
 
+    TypeModel VALUE_MODULE_MODEL_TYPE = type(ValueModuleModel.class);
+    TypeModel VALUE_MAPPER_REGISTRY_TYPE = type(ValueMapperRegistry.class);
+
     TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
     TypeModel SERVICE_METHOD_SPECIFICATION_TYPE = type(ServiceMethodSpecification.class);
     TypeModel SERVICE_METHOD_IDENTIFIER_TYPE = type(ServiceMethodIdentifier.class);
@@ -72,11 +77,12 @@ public interface TypeModels {
     TypeModel SERVICE_SPECIFICATION_REGISTRY_TYPE = type(ServiceSpecificationRegistry.class);
     TypeModel METHOD_PROCESSING_MODE_TYPE = type(MethodProcessingMode.class);
 
+    TypeModel COMMUNICATOR_PROXY_TYPE = type(CommunicatorProxy.class);
     TypeModel COMMUNICATOR_PROXY_REGISTRY_TYPE = type(CommunicatorProxyRegistry.class);
-    TypeModel COMMUNICATOR_SPECIFICATION_TYPE = type(CommunicatorSpecification.class);
+    TypeModel COMMUNICATOR_ACTION_TYPE = type(CommunicatorAction.class);
+    TypeModel COMMUNICATOR_ACTION_REGISTRY_TYPE = type(CommunicatorActionRegistry.class);
     TypeModel RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE = type(RsocketCommunicator.class);
-    TypeModel RSOCKET_COMMUNICATION_MODE_TYPE = type(CommunicationMode.class);
-    TypeModel RSOCKET_SETUP_PAYLOAD_TYPE = type(RsocketSetupPayload.class);
+    TypeModel COMMUNICATOR_ACTION_IDENTIFIER_TYPE = type(CommunicatorActionIdentifier.class);
 
     TypeModel CONFIGURATION_SOURCE_TYPE = type(ConfigurationSource.class);
 

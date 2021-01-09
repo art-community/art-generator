@@ -32,7 +32,7 @@ public class ToModelMapperCreator {
     public static JCExpression toModelMapper(Type type) {
         String generatedMapper = mappers().get(type);
         if (nonNull(generatedMapper)) {
-            return select(select(providerClassName(), generatedMapper), TO_MODEL_NAME);
+            return select(generatedMapper, TO_MODEL_NAME);
         }
         return createToModelMapper(type);
     }

@@ -26,8 +26,8 @@ rsocket:
     connectors:
       MyClient:
         defaults:
-          dataFormat: protobuf
-          metaDataFormat: protobuf
+          dataFormat: messagePack
+          metaDataFormat: messagePack
         transport:
           mode: tcp
           tcp:

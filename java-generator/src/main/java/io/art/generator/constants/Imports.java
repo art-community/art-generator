@@ -1,9 +1,9 @@
 package io.art.generator.constants;
 
+import io.art.communicator.action.*;
 import io.art.communicator.constants.CommunicatorModuleConstants.*;
 import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
-import io.art.communicator.specification.*;
 import io.art.configurator.custom.*;
 import io.art.core.checker.*;
 import io.art.core.collection.*;
@@ -21,6 +21,7 @@ import io.art.model.implementation.communicator.*;
 import io.art.model.implementation.configurator.*;
 import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
+import io.art.model.implementation.value.*;
 import io.art.rsocket.communicator.*;
 import io.art.rsocket.constants.RsocketModuleConstants.*;
 import io.art.rsocket.model.*;
@@ -33,6 +34,7 @@ import io.art.value.immutable.Value;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import io.art.value.mapping.*;
+import io.art.value.registry.*;
 import reactor.core.publisher.*;
 import java.time.*;
 import java.util.*;
@@ -62,6 +64,7 @@ public interface Imports {
 
             MethodProcessingMode.class.getName(),
             LazyValue.class.getName(),
+            ManagedValue.class.getName(),
             SingletonsRegistry.class.getName(),
             NullityChecker.class.getName(),
 
@@ -86,6 +89,8 @@ public interface Imports {
 
             ValueToModelMapper.class.getName(),
             ValueFromModelMapper.class.getName(),
+            ValueModuleModel.class.getName(),
+            ValueMapperRegistry.class.getName(),
 
             ServiceSpecification.class.getName(),
             ServiceMethodSpecification.class.getName(),
@@ -113,9 +118,10 @@ public interface Imports {
             CommunicatorProxyRegistry.class.getName(),
             CommunicatorModuleModel.class.getName(),
             CommunicatorCustomizer.class.getName(),
-            CommunicatorSpecification.class.getName(),
+            CommunicatorAction.class.getName(),
             CommunicatorProxy.class.getName(),
-            CommunicationProtocol.class.getName(),
+            CommunicatorProtocol.class.getName(),
+            CommunicatorActionIdentifier.class.getName(),
 
             RsocketCommunicator.class.getName(),
             CommunicationMode.class.getName(),
