@@ -11,6 +11,7 @@ import io.art.generator.model.*;
 import lombok.*;
 import static com.sun.source.tree.Tree.Kind.*;
 import static com.sun.tools.javac.code.Symbol.*;
+import static io.art.core.checker.NullityChecker.let;
 import static io.art.core.collector.MapCollector.*;
 import static io.art.core.collector.SetCollector.*;
 import static io.art.core.constants.StringConstants.*;
@@ -56,7 +57,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                         .map(member -> ExistedField.builder().name(member.name.toString()).declaration(member).build())
                         .collect(mapCollector(ExistedField::getName, identity())))
                 .build();
-        String existedClassName = packageUnit.getPackageName().toString() + DOT + classDeclaration.name.toString();
+        String existedClassName = let(packageUnit.getPackageName(), name -> name.toString() + DOT, EMPTY_STRING) + classDeclaration.name.toString();
         configurationBuilder.exitedClass(existedClassName, existedClass);
 
         Optional<JCMethodDecl> modelMethodDeclaration = classDeclaration.getMembers()

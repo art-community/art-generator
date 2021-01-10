@@ -19,10 +19,12 @@ config:
 
 rsocket:
   server:
+    logging: true
     transport:
       port: 5678
       mode: tcp
   communicator:
+    logging: true
     connectors:
       MyClient:
         defaults:

@@ -16,8 +16,12 @@ public class Example {
     @Configurator
     public static ModuleModelConfigurator configure() {
         return module(Example.class)
-                .serve(server -> server.rsocket(MyService.class))
+                .serve(server -> server.rsocket(MyService.class, RsocketServiceModelConfigurator::logging))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
-                .onLoad(() -> communicator(MyClient.class).myMethod100("test").block());
+                .onLoad(() -> {
+                    for (int i = 0; i < 100000; i++) {
+                        communicator(MyClient.class).myMethod100("test");
+                    }
+                });
     }
 }

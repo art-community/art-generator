@@ -18,9 +18,9 @@ public class MyService implements MyClient {
     }
 
     @Override
-    public Mono<Void> myMethod100(String request) {
+    public String myMethod100(String request) {
         System.out.println(counter.incrementAndGet());
-        return Mono.empty();
+        return "Mono.empty()";
     }
 
     AtomicLong counter = new AtomicLong();
