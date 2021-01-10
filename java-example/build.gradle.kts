@@ -65,7 +65,6 @@ graal {
     option("-H:+TraceClassInitialization")
     option("-H:+ReportExceptionStackTraces")
     option("--no-fallback")
-    option("--no-server")
     option("--report-unsupported-elements-at-runtime")
     option("--allow-incomplete-classpath")
     option("--enable-all-security-services")
