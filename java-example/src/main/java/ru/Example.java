@@ -16,12 +16,14 @@ public class Example {
     @Configurator
     public static ModuleModelConfigurator configure() {
         return module(Example.class)
-                .serve(server -> server.rsocket(MyService.class, RsocketServiceModelConfigurator::logging))
+                .serve(server -> server.rsocket(MyService.class))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
                 .onLoad(() -> {
+                    long currentTimeMillis = System.currentTimeMillis();
                     for (int i = 0; i < 100000; i++) {
                         communicator(MyClient.class).myMethod100("test");
                     }
+                    System.out.println("Result: " + (System.currentTimeMillis() - currentTimeMillis));
                 });
     }
 }
