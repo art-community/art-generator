@@ -42,6 +42,13 @@ val compileJava: JavaCompile = tasks["compileJava"] as JavaCompile
 val processResources: Task = tasks["processResources"]
 val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
 
+compileJava.options.compilerArgs.addAll(arrayOf(
+        "-Aart.generator.destination=${compileJava.destinationDir.absolutePath}",
+        "-Aart.generator.classpath=${compileJava.classpath.asPath}",
+        "-verbose",
+        "-Xlint:unchecked"
+))
+
 compileJava.dependsOn("clean").dependsOn(project(":java-generator").tasks["build"])
 
 tasks.register("executableJar", Jar::class) {

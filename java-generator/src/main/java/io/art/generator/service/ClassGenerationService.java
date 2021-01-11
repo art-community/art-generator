@@ -24,16 +24,19 @@ public class ClassGenerationService {
     @SneakyThrows
     public void generateClass(NewClass newClass, String packageName) {
         ListBuffer<JCTree> definitions = new ListBuffer<>();
+        definitions.add(new JCPackageDecl(List.nil(), ident(packageName)));
         definitions.addAll(createImports(immutableSetOf(newClass.imports())));
         definitions.add(newClass.generate());
-        JCCompilationUnit compilationUnit = maker().TopLevel(List.nil(), ident(packageName), definitions.toList());
+        JCCompilationUnit compilationUnit = new JCCompilationUnit(definitions.toList()) {
+        };
+        compilationUnit.pos = maker().pos;
         String className = packageName + DOT + newClass.name();
         JavaFileObject classFile = processingEnvironment().getFiler().createSourceFile(className);
         StringWriter stringWriter = new StringWriter();
         new PrettyWriter(stringWriter).printExpr(compilationUnit);
         try (Writer writer = classFile.openWriter()) {
             Formatter formatter = new Formatter();
-            writer.write(formatter.formatSourceAndFixImports(formatter.formatSource(stringWriter.toString())));
+            writer.write(formatter.formatSourceAndFixImports(stringWriter.toString()));
         }
         success(format(GENERATED_CLASS, className));
     }

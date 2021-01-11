@@ -1,7 +1,7 @@
 package io.art.generator.loader;
 
 import io.art.generator.exception.*;
-import static com.sun.tools.javac.main.Option.*;
+import static io.art.generator.constants.ProcessorOptions.DIRECTORY_PROCESSOR_OPTION;
 import static io.art.generator.context.GeneratorContext.*;
 import java.io.*;
 import java.net.*;
@@ -11,7 +11,7 @@ public class GeneratorClassLoader {
 
     public GeneratorClassLoader() {
         try {
-            URL[] urls = new URL[]{new File(options().get(D)).toURI().toURL()};
+            URL[] urls = new URL[]{new File(processingEnvironment().getOptions().get(DIRECTORY_PROCESSOR_OPTION)).toURI().toURL()};
             loader = new URLClassLoader(urls, GeneratorClassLoader.class.getClassLoader());
         } catch (Throwable throwable) {
             throw new GenerationException(throwable);
