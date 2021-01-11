@@ -1,0 +1,35 @@
+FBInteger: 123
+parent:
+  FBInteger: 123
+config:
+  SIM:
+    test:
+      - "test"
+      - "test1"
+      - "test2"
+      - "test3"
+      - "test4"
+    test2:
+      - "test"
+      - "test1"
+      - "test2"
+      - "test3"
+      - "test4"
+  FBInteger: 123
+
+rsocket:
+  server:
+    transport:
+      port: 5678
+      mode: tcp
+  communicator:
+    connectors:
+      MyClient:
+        defaults:
+          dataFormat: messagePack
+          metaDataFormat: messagePack
+        transport:
+          mode: tcp
+          tcp:
+            host: 127.0.0.1
+            port: 5678

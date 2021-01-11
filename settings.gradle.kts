@@ -21,8 +21,11 @@ plugins {
 }
 
 rootProject.name = "art-generator"
-include("java-generator")
-include("java-example")
+
+include("language.kotlin")
+include("language.java")
+include("example.java")
+include("example.kotlin")
 
 val artDirectory: String? by settings
 val artGitUrl: String by settings
