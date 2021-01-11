@@ -17,7 +17,7 @@ import java.util.function.UnaryOperator
 
 object Example {
     @JvmStatic
-    fun main(args: Array<String>) = launch(provide())
+    fun main(args: Array<String>) = launch()
 
     @JvmStatic
     @Configurator
