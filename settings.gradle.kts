@@ -24,9 +24,9 @@ rootProject.name = "art-generator"
 include("java-generator")
 include("java-example")
 
-val artDirectoryFromSettings: String? by settings
+val artDirectory: String? by settings
 val artGitUrl: String by settings
-var artDirectory = artDirectoryFromSettings
+var computedArtDirectory = artDirectory
 
 if (file("local.properties").exists()) {
     file("local.properties").readLines().forEach { line ->
@@ -34,15 +34,15 @@ if (file("local.properties").exists()) {
         if (!trimmed.startsWith("#")) {
             val name = line.split("=").getOrNull(0)
             val value = line.split("=").getOrNull(1)
-            if (name == "artDirectory") artDirectory = value
+            if (name == "artDirectory") computedArtDirectory = value
         }
     }
 }
 
-artDirectory ?: error("Configuring error. 'artDirectory' not declared")
-if (!file(artDirectory!!).exists()) {
-    ProcessBuilder("git", "clone", artGitUrl, file(artDirectory!!).absolutePath).start().waitFor()
-    ProcessBuilder("git", "checkout", "1.3.0").directory(file(artDirectory!!)).start().waitFor()
+computedArtDirectory ?: error("Configuring error. 'artDirectory' not declared in gradle.properties or local.properties")
+if (!file(computedArtDirectory!!).exists()) {
+    ProcessBuilder("git", "clone", artGitUrl, file(computedArtDirectory!!).absolutePath).start().waitFor()
+    ProcessBuilder("git", "checkout", "1.3.0").directory(file(computedArtDirectory!!)).start().waitFor()
 }
 
 val artModules = listOf(
