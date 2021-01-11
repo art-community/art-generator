@@ -3,6 +3,7 @@ package ru;
 import io.art.model.annotation.*;
 import io.art.model.configurator.*;
 import ru.communicator.*;
+import ru.configuration.*;
 import ru.model.*;
 import ru.service.*;
 import static io.art.communicator.module.CommunicatorModule.*;
@@ -17,6 +18,7 @@ public class Example {
     @Configurator
     public static ModuleModelConfigurator configure() {
         return module(Example.class)
+                .configure(configurator -> configurator.configuration(MyConfig.class))
                 .serve(server -> server.rsocket(MyService.class, RsocketServiceModelConfigurator::logging))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
                 .onLoad(() -> communicator(MyClient.class).myMethod2(Request.builder().build()));
