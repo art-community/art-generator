@@ -11,7 +11,7 @@ import io.art.model.implementation.communicator.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;
-import static io.art.core.checker.NullityChecker.orElse;
+import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.core.reflection.ParameterizedTypeImplementation.*;
@@ -21,6 +21,7 @@ import static io.art.generator.constants.CommunicatorConstants.CommunicatorProxy
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
+import static io.art.generator.creator.communicator.CommunicatorImplementationCreator.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.formater.SignatureFormatter.*;
@@ -35,11 +36,10 @@ import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GenerationState.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
-import java.util.function.*;
 
 @UtilityClass
 public class CommunicatorProxyCreator {
-    public NewClass createNewProxyClass(CommunicatorModel communicatorModel, Function<Method, NewBuilder> implementationFactory) {
+    public NewClass createNewProxyClass(TypeModel implementationType, CommunicatorModel communicatorModel) {
         JCExpression protocolExpression = select(type(communicatorModel.getProtocol().getClass()), communicatorModel.getProtocol().name());
         TypeModel implementationsReturnType = type(parameterizedType(ImmutableMap.class, String.class, CommunicatorAction.class));
         NewMethod getActions = overrideMethod(GET_ACTIONS_METHOD, implementationsReturnType).statement(() -> returnMethodCall(REGISTRY_NAME, GET_NAME));
@@ -63,12 +63,13 @@ public class CommunicatorProxyCreator {
                 throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(communicatorModel.getProxyClass(), method));
             }
             String actionFieldName = ACTION_FIELD_PREFIX + actionIndex++;
+            NewBuilder implementation = createCommunicatorImplementation(implementationType, communicatorModel, method);
             NewField actionField = newField()
                     .type(COMMUNICATOR_ACTION_TYPE)
                     .name(actionFieldName)
                     .modifiers(PRIVATE)
                     .byConstructor(true)
-                    .initializer(() -> executeActionBuilder(communicatorModel, method, implementationFactory.apply(method)));
+                    .initializer(() -> executeActionBuilder(communicatorModel, method, implementation));
             NewMethod proxyMethod = createProxyMethod(method, actionFieldName);
             proxy.field(actionField).method(proxyMethod);
         }
@@ -114,9 +115,9 @@ public class CommunicatorProxyCreator {
 
         if (nonNull(communicatorModel.getTargetServiceId())) {
             actionBuilder.method(TARGET_SERVICe_METHOD_NAME, method(SERVICE_METHOD_IDENTIFIER_TYPE, SERVICE_METHOD_NAME)
-                            .addArgument(literal(communicatorModel.getTargetServiceId()))
-                            .addArgument(literal(orElse(communicatorModel.getTargetMethodId(), proxyMethod.getName())))
-                            .apply());
+                    .addArgument(literal(communicatorModel.getTargetServiceId()))
+                    .addArgument(literal(orElse(communicatorModel.getTargetMethodId(), proxyMethod.getName())))
+                    .apply());
         }
 
         if (isNotEmpty(parameterTypes) && isNotVoid(parameterTypes[0])) {
