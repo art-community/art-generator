@@ -22,8 +22,8 @@ plugins {
 
 rootProject.name = "art-generator"
 
-include("generator.kotlin")
-include("generator.java")
+include("language.kotlin")
+include("language.java")
 include("example.java")
 include("example.kotlin")
 

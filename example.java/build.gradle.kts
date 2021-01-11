@@ -3,8 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":generator.java"))
-    implementation(project(":generator.kotlin"))
     implementation(project(":core"))
     implementation(project(":scheduler"))
     implementation(project(":configurator"))
@@ -21,7 +19,7 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
-    annotationProcessor(project(":generator.java"))
+    annotationProcessor(project(":language.java"))
 }
 
 val compileJava: JavaCompile = tasks["compileJava"] as JavaCompile
@@ -33,7 +31,7 @@ compileJava.options.compilerArgs.addAll(arrayOf(
         "-Aart.generator.sources=${compileJava.source.asPath}"
 ))
 
-compileJava.dependsOn("clean").dependsOn(project(":generator.java").tasks["build"])
+compileJava.dependsOn("clean").dependsOn(project(":language.java").tasks["build"])
 
 tasks.register("executableJar", Jar::class) {
     group = "build"

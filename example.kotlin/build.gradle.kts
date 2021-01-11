@@ -7,7 +7,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":generator.kotlin"))
     implementation(project(":core"))
     implementation(project(":scheduler"))
     implementation(project(":configurator"))
@@ -24,7 +23,7 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
-    kapt(project(":generator.kotlin"))
+    kapt(project(":language.kotlin"))
 }
 
 val processResources: Task = tasks["processResources"]
@@ -42,7 +41,7 @@ kapt {
 }
 
 
-compileKotlin.dependsOn("clean").dependsOn(project(":generator.kotlin").tasks["build"])
+compileKotlin.dependsOn("clean").dependsOn(project(":language.kotlin").tasks["build"])
 
 tasks.register("executableJar", Jar::class) {
     group = "build"

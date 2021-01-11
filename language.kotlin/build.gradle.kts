@@ -9,6 +9,6 @@ kapt {
 }
 
 dependencies {
-    implementation(project(":generator.java"))
+    implementation(project(":language.java"))
     api("org.jetbrains.kotlin","kotlin-compiler-embeddable", "1.+")
 }
