@@ -1,11 +1,13 @@
 package ru.model;
 
+import io.art.server.validation.*;
 import lombok.*;
+import static io.art.server.validation.Validators.*;
 import java.util.*;
 
 @Value
 @Builder
-public class Request {
+public class Request implements Validatable {
     int FInteger;
     char FCharacter;
     short FShort;
@@ -128,4 +130,9 @@ public class Request {
     Collection<Set<Map<String, Model>>[]> FCSMAModel;
     Collection<Collection<Map<String, Model>>[]> FCCMAModel;
     Collection<Map<String, Model>[]> FCMAModel;
+
+    @Override
+    public void onValidating(Validator validator) {
+        validator.validate("FModel", FModel, notNull());
+    }
 }

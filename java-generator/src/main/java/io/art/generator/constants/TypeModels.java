@@ -21,6 +21,7 @@ import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
 import io.art.model.implementation.value.*;
 import io.art.rsocket.communicator.*;
+import io.art.server.decorator.*;
 import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
@@ -71,7 +72,8 @@ public interface TypeModels {
     TypeModel VALUE_MODULE_MODEL_TYPE = type(ValueModuleModel.class);
     TypeModel VALUE_MAPPER_REGISTRY_TYPE = type(ValueMapperRegistry.class);
 
-    TypeModel VALIDITABLE_TYPE = type(Validatable.class);
+    TypeModel VALIDATABLE_TYPE = type(Validatable.class);
+    TypeModel SERVICE_VALIDATION_DECORATOR_TYPE = type(ServiceValidationDecorator.class);
     TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
     TypeModel SERVICE_METHOD_SPECIFICATION_TYPE = type(ServiceMethodSpecification.class);
     TypeModel SERVICE_METHOD_IDENTIFIER_TYPE = type(ServiceMethodIdentifier.class);

@@ -25,7 +25,7 @@ import io.art.model.implementation.value.*;
 import io.art.rsocket.communicator.*;
 import io.art.rsocket.constants.RsocketModuleConstants.*;
 import io.art.rsocket.model.*;
-import io.art.server.constants.*;
+import io.art.server.decorator.*;
 import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
@@ -38,7 +38,6 @@ import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import io.art.value.registry.*;
 import reactor.core.publisher.*;
-import static io.art.server.constants.ServerModuleConstants.*;
 import java.time.*;
 import java.util.*;
 import java.util.stream.*;
@@ -96,12 +95,12 @@ public interface Imports {
             ValueMapperRegistry.class.getName(),
 
             Validatable.class.getName(),
-            RequestValidationPolicy.class.getName(),
             ServiceSpecification.class.getName(),
             ServiceMethodSpecification.class.getName(),
             ServiceMethodIdentifier.class.getName(),
             ServiceMethodImplementation.class.getName(),
             ServiceSpecificationRegistry.class.getName(),
+            ServiceValidationDecorator.class.getName(),
 
             ModuleLauncher.class.getName(),
 

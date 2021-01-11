@@ -4,6 +4,7 @@ import io.art.core.collection.*;
 import io.art.core.lazy.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
+import io.art.server.validation.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import lombok.experimental.*;
 import reactor.core.publisher.*;
@@ -162,6 +163,9 @@ public class TypeInspector {
         return method.getGenericReturnType() == void.class;
     }
 
+    public boolean isValidatable(Type type) {
+        return stream(extractClass(type).getInterfaces()).anyMatch(interfaceType -> interfaceType == Validatable.class);
+    }
 
     public boolean hasBuilder(Type type) {
         Class<?> rawClass = extractClass(type);

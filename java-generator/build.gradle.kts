@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":value"))
     implementation(project(":model"))
     implementation(project(":rsocket"))
+    implementation("com.google.googlejavaformat:google-java-format:1.7")
 }
 
 
