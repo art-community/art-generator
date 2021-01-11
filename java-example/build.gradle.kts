@@ -44,9 +44,7 @@ val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
 
 compileJava.options.compilerArgs.addAll(arrayOf(
         "-Aart.generator.destination=${compileJava.destinationDir.absolutePath}",
-        "-Aart.generator.classpath=${compileJava.classpath.asPath}",
-        "-verbose",
-        "-Xlint:unchecked"
+        "-Aart.generator.classpath=${compileJava.classpath.asPath}"
 ))
 
 compileJava.dependsOn("clean").dependsOn(project(":java-generator").tasks["build"])
