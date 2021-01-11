@@ -20,12 +20,12 @@ import static io.art.generator.state.GenerationState.*;
 import static java.util.Objects.*;
 import static javax.lang.model.SourceVersion.*;
 import javax.annotation.processing.*;
+import javax.lang.model.*;
 import javax.lang.model.element.*;
 import java.util.*;
 
 @AutoService(Processor.class)
 @SupportedAnnotationTypes(CONFIGURATOR_ANNOTATION_NAME)
-@SupportedSourceVersion(RELEASE_8)
 public class GeneratorProcessor extends AbstractProcessor {
     private JavacTrees trees;
     private JavacProcessingEnvironment processingEnvironment;
@@ -39,8 +39,13 @@ public class GeneratorProcessor extends AbstractProcessor {
     }
 
     @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return latest();
+    }
+
+    @Override
     public Set<String> getSupportedOptions() {
-        return addToSet(DISABLE_OPTION, super.getSupportedOptions());
+        return addToSet(super.getSupportedOptions(), DIRECTORY_PROCESSOR_OPTION, CLASS_PATH_PROCESSOR_OPTION, DISABLE_OPTION);
     }
 
     @Override

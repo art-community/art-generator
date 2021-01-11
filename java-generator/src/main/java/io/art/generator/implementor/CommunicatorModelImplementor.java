@@ -12,14 +12,11 @@ import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.communicator.CommunicatorProxyCreator.*;
-import static io.art.generator.creator.communicator.RsocketCommunicatorImplementationCreator.*;
 import static io.art.generator.creator.registry.RegistryVariableCreator.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GenerationState.*;
-import java.lang.reflect.*;
-import java.util.function.*;
 
 @UtilityClass
 public class CommunicatorModelImplementor {
@@ -38,13 +35,12 @@ public class CommunicatorModelImplementor {
 
     public ImmutableArray<NewClass> implementCommunicatorProxies(CommunicatorModuleModel communicatorModel) {
         ImmutableArray.Builder<NewClass> proxies = immutableArrayBuilder();
-        communicatorModel.getRsocketCommunicators().values().forEach(model -> proxies.add(createRsocketProxy(model)));
+        communicatorModel.getRsocketCommunicators()
+                .values()
+                .stream()
+                .map(model -> createNewProxyClass(RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE, model))
+                .forEach(proxies::add);
         return proxies.build();
-    }
-
-    private NewClass createRsocketProxy(RsocketCommunicatorModel communicatorModel) {
-        Function<Method, NewBuilder> implementationBuilder = (Method method) -> createRsocketCommunicator(communicatorModel, method);
-        return createNewProxyClass(communicatorModel, implementationBuilder);
     }
 
     private JCTree.JCMethodInvocation executeRegisterMethod(CommunicatorModel communicatorModel) {

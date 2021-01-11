@@ -100,6 +100,11 @@ public class ServerModelImplementor {
                     }
                     break;
             }
+            if (isValidatable(parameterTypes[0])) {
+                JCNewClass serviceMethodIdentifier = newObject(SERVICE_METHOD_IDENTIFIER_TYPE, literal(serviceClass.getSimpleName()), literal(serviceMethod.getName()));
+                JCNewClass decorator = newObject(SERVICE_VALIDATION_DECORATOR_TYPE, serviceMethodIdentifier);
+                methodBuilder.method(INPUT_DECORATOR_NAME, decorator);
+            }
         }
         if (isNotVoid(returnType)) {
             TypeModel returnTypeModel = type(returnType);

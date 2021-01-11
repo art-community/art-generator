@@ -24,12 +24,26 @@ rootProject.name = "art-generator"
 include("java-generator")
 include("java-example")
 
-val artDirectory: String by settings
+val artDirectory: String? by settings
 val artGitUrl: String by settings
+var computedArtDirectory = artDirectory
 
-if (!file(artDirectory).exists()) {
-    ProcessBuilder("git", "clone", artGitUrl, file(artDirectory).absolutePath).start().waitFor()
-    ProcessBuilder("git", "checkout", "1.3.0").directory(file(artDirectory)).start().waitFor()
+if (file("local.properties").exists()) {
+    file("local.properties").readLines().forEach { line ->
+        val trimmed = line.trim()
+        if (!trimmed.startsWith("#")) {
+            val split = line.split("=")
+            val name = split.getOrNull(0)
+            val value = split.getOrNull(1)
+            if (name == "artDirectory") computedArtDirectory = value
+        }
+    }
+}
+
+computedArtDirectory ?: error("Configuring error. 'artDirectory' not declared in gradle.properties or local.properties")
+if (!file(computedArtDirectory!!).exists()) {
+    ProcessBuilder("git", "clone", artGitUrl, file(computedArtDirectory!!).absolutePath).start().waitFor()
+    ProcessBuilder("git", "checkout", "1.3.0").directory(file(computedArtDirectory!!)).start().waitFor()
 }
 
 val artModules = listOf(
@@ -52,10 +66,11 @@ val artModules = listOf(
         "xml",
         "yaml",
         "tarantool",
-        "template-engine"
+        "template-engine",
+        "graal"
 )
 
 artModules.forEach { module ->
     include(module)
-    project(":$module").projectDir = file("${artDirectory}/$module")
+    project(":$module").projectDir = file("${computedArtDirectory!!}/$module")
 }

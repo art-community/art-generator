@@ -68,3 +68,4 @@ kafka/
 zookeeper/
 tarantool/lua
 local/
+local.properties

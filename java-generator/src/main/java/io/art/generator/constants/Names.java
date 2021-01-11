@@ -44,6 +44,8 @@ public interface Names {
     String OUTPUT_MODE_NAME = "outputMode";
     String INPUT_MAPPER_NAME = "inputMapper";
     String OUTPUT_MAPPER_NAME = "outputMapper";
+    String INPUT_DECORATOR_NAME = "inputDecorator";
+    String OUTPUT_DECORATOR_NAME = "outputDecorator";
     String CUSTOM_CONFIGURATIONS_NAME = "customConfigurations";
     String MAPPERS_NAME = "mappers";
     String CONFIGURATOR_CUSTOMIZER_NAME = "configuratorCustomizer";

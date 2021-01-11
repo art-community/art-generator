@@ -25,9 +25,11 @@ import io.art.model.implementation.value.*;
 import io.art.rsocket.communicator.*;
 import io.art.rsocket.constants.RsocketModuleConstants.*;
 import io.art.rsocket.model.*;
+import io.art.server.decorator.*;
 import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
+import io.art.server.validation.*;
 import io.art.value.constants.ValueModuleConstants.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import io.art.value.immutable.Value;
@@ -92,11 +94,13 @@ public interface Imports {
             ValueModuleModel.class.getName(),
             ValueMapperRegistry.class.getName(),
 
+            Validatable.class.getName(),
             ServiceSpecification.class.getName(),
             ServiceMethodSpecification.class.getName(),
             ServiceMethodIdentifier.class.getName(),
             ServiceMethodImplementation.class.getName(),
             ServiceSpecificationRegistry.class.getName(),
+            ServiceValidationDecorator.class.getName(),
 
             ModuleLauncher.class.getName(),
 

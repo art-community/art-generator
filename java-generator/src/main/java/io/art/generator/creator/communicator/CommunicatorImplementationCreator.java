@@ -11,11 +11,11 @@ import static io.art.generator.service.JavacService.*;
 import java.lang.reflect.*;
 
 @UtilityClass
-public class RsocketCommunicatorImplementationCreator {
-    public NewBuilder createRsocketCommunicator(RsocketCommunicatorModel communicatorModel, Method method) {
-        return newBuilder(RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE)
+public class CommunicatorImplementationCreator {
+    public NewBuilder createCommunicatorImplementation(TypeModel type, CommunicatorModel model, Method method) {
+        return newBuilder(type)
                 .method(COMMUNICATOR_ACTION_ID_NAME, method(COMMUNICATOR_ACTION_IDENTIFIER_TYPE, COMMUNICATOR_ACTION_NAME)
-                        .addArgument(literal(communicatorModel.getId()))
+                        .addArgument(literal(model.getId()))
                         .addArgument(literal(method.getName()))
                         .apply());
     }

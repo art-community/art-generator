@@ -17,7 +17,7 @@ plugins {
 }
 
 tasks.withType(Wrapper::class.java) {
-    gradleVersion = "6.0"
+    gradleVersion = "6.5.1"
 }
 
 group = "io.art"

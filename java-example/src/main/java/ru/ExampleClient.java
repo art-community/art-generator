@@ -17,6 +17,6 @@ public class ExampleClient {
     public static ModuleModelConfigurator configure() {
         return module(ExampleClient.class)
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
-                .onLoad(() -> communicator(MyClient.class).myMethod100("test").block());
+                .onLoad(() -> communicator(MyClient.class).myMethod100("test"));
     }
 }
