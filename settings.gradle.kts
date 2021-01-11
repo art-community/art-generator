@@ -32,8 +32,9 @@ if (file("local.properties").exists()) {
     file("local.properties").readLines().forEach { line ->
         val trimmed = line.trim()
         if (!trimmed.startsWith("#")) {
-            val name = line.split("=").getOrNull(0)
-            val value = line.split("=").getOrNull(1)
+            val split = line.split("=")
+            val name = split.getOrNull(0)
+            val value = split.getOrNull(1)
             if (name == "artDirectory") computedArtDirectory = value
         }
     }
@@ -71,5 +72,5 @@ val artModules = listOf(
 
 artModules.forEach { module ->
     include(module)
-    project(":$module").projectDir = file("${artDirectory}/$module")
+    project(":$module").projectDir = file("${computedArtDirectory!!}/$module")
 }
