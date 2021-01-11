@@ -1,6 +1,5 @@
 package ru;
 
-import io.art.launcher.*;
 import io.art.model.annotation.*;
 import io.art.model.configurator.*;
 import ru.communicator.*;
@@ -8,7 +7,6 @@ import ru.configuration.*;
 import ru.model.*;
 import ru.service.*;
 import static io.art.communicator.module.CommunicatorModule.*;
-import static io.art.core.magic.MagicRunner.*;
 import static io.art.launcher.ModuleLauncher.*;
 import static io.art.model.configurator.ModuleModelConfigurator.*;
 
