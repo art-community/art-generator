@@ -31,6 +31,7 @@ val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
 
 kapt {
     includeCompileClasspath = false
+    correctErrorTypes = true
     javacOptions {
         arguments {
             arg("art.generator.destination", compileKotlin.destinationDir.absolutePath)

@@ -3,7 +3,7 @@ package io.art.generator.creator.provider;
 import io.art.core.collection.*;
 import io.art.generator.caller.*;
 import io.art.generator.model.*;
-import io.art.generator.state.*;
+import io.art.launcher.*;
 import io.art.model.implementation.module.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
@@ -25,6 +25,7 @@ import static io.art.generator.implementor.ConfiguratorModelImplementor.*;
 import static io.art.generator.implementor.MappersImplementor.*;
 import static io.art.generator.implementor.ServerModelImplementor.*;
 import static io.art.generator.logger.GeneratorLogger.*;
+import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewClass.*;
 import static io.art.generator.model.NewField.*;
 import static io.art.generator.model.NewMethod.*;
@@ -39,8 +40,7 @@ import java.util.*;
 @UtilityClass
 public class ProviderClassCreator {
     public NewClass createProviderClass(ModuleModel model) {
-        ExistedClass moduleClass = moduleClass();
-        NewClass providerClass = newClass().modifiers(PUBLIC).name(moduleClass.getName() + PROVIDER_CLASS_SUFFIX);
+        NewClass providerClass = newClass().modifiers(PUBLIC).addImport(classImport(moduleClass().getFullName())).name(ModuleModelProvider.class.getSimpleName());
 
         stream(IMPORTING_CLASSES).map(ImportModel::classImport).forEach(providerClass::addImport);
 

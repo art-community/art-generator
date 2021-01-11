@@ -1,6 +1,7 @@
 package io.art.generator.implementor;
 
 import io.art.generator.model.*;
+import io.art.launcher.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.constants.StringConstants.*;
@@ -31,6 +32,6 @@ public class ModuleModelImplementor {
 
     private void implementModuleModel(ExistedClass moduleClass) {
         updateState(moduleClass);
-        generateClass(createProviderClass(loadModel()), moduleClass.getPackageName());
+        generateClass(createProviderClass(loadModel()), ModuleModelProvider.class.getPackage().getName());
     }
 }

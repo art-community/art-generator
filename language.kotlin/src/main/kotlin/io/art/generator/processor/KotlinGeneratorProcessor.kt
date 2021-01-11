@@ -13,17 +13,19 @@ import io.art.generator.constants.Annotations.CONFIGURATOR_ANNOTATION_NAME
 import io.art.generator.constants.Language.KOTLIN
 import io.art.generator.constants.ProcessorOptions.*
 import io.art.generator.context.GeneratorContext
+import io.art.generator.context.GeneratorContext.initialize
 import io.art.generator.context.GeneratorContextConfiguration
 import io.art.generator.scanner.GeneratorScanner
 import io.art.generator.service.GenerationService.generate
-import io.art.generator.state.GenerationState
-import io.art.generator.state.GenerationState.*
+import io.art.generator.state.GenerationState.complete
+import io.art.generator.state.GenerationState.completed
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.annotation.processing.SupportedAnnotationTypes
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
+
 
 @SupportedAnnotationTypes(CONFIGURATOR_ANNOTATION_NAME)
 class KotlinGeneratorProcessor : AbstractProcessor() {
@@ -76,7 +78,7 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
         for (rootElement in roundEnvironment.rootElements) {
             scanner.scan(trees!!.getPath(rootElement), trees)
         }
-        GeneratorContext.initialize(configurationBuilder.build())
+        initialize(configurationBuilder.build())
         return true
     }
 }
