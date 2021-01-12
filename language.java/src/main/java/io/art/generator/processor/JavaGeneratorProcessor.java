@@ -18,7 +18,6 @@ import static io.art.generator.constants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.GenerationService.*;
 import static io.art.generator.state.GenerationState.*;
-import static java.util.Objects.*;
 import static javax.lang.model.SourceVersion.*;
 import javax.annotation.processing.*;
 import javax.lang.model.*;
@@ -45,25 +44,24 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedOptions() {
-        return addToSet(
-                super.getSupportedOptions(),
-                DIRECTORY_PROCESSOR_OPTION,
-                CLASS_PATH_PROCESSOR_OPTION,
-                SOURCES_PROCESSOR_OPTION,
-                DISABLE_OPTION
-        );
+        return addToSet(super.getSupportedOptions(), PROCESSOR_OPTIONS);
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        if (nonNull(this.processingEnvironment.getOptions().get(DISABLE_OPTION))) {
+        if (processingEnvironment.getOptions().containsKey(DISABLE_OPTION)) {
             return true;
         }
         if (GeneratorContext.isInitialized()) {
             if (completed()) {
                 return true;
             }
-            generate();
+            if (processingEnvironment.getOptions().containsKey(PROCESSOR_STUB_OPTION)) {
+                generateStubs();
+                complete();
+                return true;
+            }
+            generateClasses();
             complete();
             return true;
         }

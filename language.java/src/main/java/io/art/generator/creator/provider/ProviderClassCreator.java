@@ -1,9 +1,9 @@
 package io.art.generator.creator.provider;
 
 import io.art.core.collection.*;
+import io.art.core.exception.*;
 import io.art.generator.caller.*;
 import io.art.generator.model.*;
-import io.art.launcher.*;
 import io.art.model.implementation.module.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
@@ -18,6 +18,7 @@ import static io.art.generator.constants.Imports.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
+import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.decorate.DecorateMethodCreator.*;
 import static io.art.generator.finder.ConfigureMethodFinder.*;
 import static io.art.generator.implementor.CommunicatorModelImplementor.*;
@@ -40,7 +41,9 @@ import java.util.*;
 @UtilityClass
 public class ProviderClassCreator {
     public NewClass createProviderClass(ModuleModel model) {
-        NewClass providerClass = newClass().modifiers(PUBLIC).addImport(classImport(moduleClass().getFullName())).name(ModuleModelProvider.class.getSimpleName());
+        NewClass providerClass = newClass().modifiers(PUBLIC)
+                .addImport(classImport(moduleClass().getFullName()))
+                .name(moduleClass().getName() + PROVIDER_CLASS_SUFFIX);
 
         stream(IMPORTING_CLASSES).map(ImportModel::classImport).forEach(providerClass::addImport);
 
@@ -76,6 +79,19 @@ public class ProviderClassCreator {
                 .inners(mappers)
                 .inners(communicatorProxies)
                 .inners(customConfigurators);
+    }
+
+
+    public NewClass createProviderStub(ExistedClass moduleClass) {
+        return newClass().modifiers(PUBLIC)
+                .addImports(stream(IMPORTING_CLASSES).map(ImportModel::classImport).collect(setCollector()))
+                .addImport(classImport(moduleClass.getFullName()))
+                .name(moduleClass.getName() + PROVIDER_CLASS_SUFFIX)
+                .method(newMethod()
+                        .name(PROVIDE_NAME)
+                        .modifiers(PUBLIC | FINAL | STATIC)
+                        .returnType(MODULE_MODEL_TYPE)
+                        .statement(() -> throwException(type(NotImplementedException.class), literal(PROVIDE_NAME))));
     }
 
     private NewMethod createProvideMethod() {

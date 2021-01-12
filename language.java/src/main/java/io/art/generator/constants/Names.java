@@ -3,6 +3,7 @@ package io.art.generator.constants;
 public interface Names {
     String CLASS_KEYWORD = "class";
     String JAVA_PACKAGE_PREFIX = "java.";
+    String JAVA_FILE_SUFFIX = ".java";
     String CONSTRUCTOR_NAME = "<init>";
     String THIS_NAME = "this";
     String PROVIDER_CLASS_SUFFIX = "Provider";
