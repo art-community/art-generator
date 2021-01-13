@@ -8,6 +8,7 @@ import io.art.configurator.custom.*;
 import io.art.core.checker.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
+import io.art.core.exception.*;
 import io.art.core.extensions.*;
 import io.art.core.factory.*;
 import io.art.core.lazy.*;
@@ -44,6 +45,7 @@ import java.util.stream.*;
 
 public interface Imports {
     String[] IMPORTING_CLASSES = new String[]{
+            NotImplementedException.class.getName(),
             Optional.class.getName(),
             List.class.getName(),
             Set.class.getName(),

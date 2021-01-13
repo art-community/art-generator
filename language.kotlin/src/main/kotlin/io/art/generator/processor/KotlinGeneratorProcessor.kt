@@ -1,6 +1,5 @@
 package io.art.generator.processor
 
-import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.sun.source.util.Trees.instance
 import com.sun.tools.javac.api.JavacTrees
 import com.sun.tools.javac.main.JavaCompiler
@@ -16,7 +15,8 @@ import io.art.generator.context.GeneratorContext
 import io.art.generator.context.GeneratorContext.initialize
 import io.art.generator.context.GeneratorContextConfiguration
 import io.art.generator.scanner.GeneratorScanner
-import io.art.generator.service.GenerationService.generate
+import io.art.generator.service.GenerationService.generateClasses
+import io.art.generator.service.GenerationService.generateStubs
 import io.art.generator.state.GenerationState.complete
 import io.art.generator.state.GenerationState.completed
 import javax.annotation.processing.AbstractProcessor
@@ -25,7 +25,6 @@ import javax.annotation.processing.RoundEnvironment
 import javax.annotation.processing.SupportedAnnotationTypes
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
-
 
 @SupportedAnnotationTypes(CONFIGURATOR_ANNOTATION_NAME)
 class KotlinGeneratorProcessor : AbstractProcessor() {
@@ -54,14 +53,18 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
         )
     }
 
-    @KotlinPoetMetadataPreview
     override fun process(annotations: Set<TypeElement?>, roundEnvironment: RoundEnvironment): Boolean {
         if (processingEnvironment?.options?.containsKey(DISABLE_OPTION) == true && processingEnvironment!!.options[DISABLE_OPTION].toBoolean()) return true
         if (GeneratorContext.isInitialized()) {
             if (completed()) {
                 return true
             }
-            generate()
+            if (processingEnvironment!!.options.containsKey(PROCESSOR_STUB_OPTION)) {
+                generateStubs()
+                complete()
+                return true
+            }
+            generateClasses()
             complete()
             return true
         }

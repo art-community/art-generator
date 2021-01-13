@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("com.palantir.graal") version "0.7.2"
     kotlin("jvm") version "1.4.20"
-    kotlin("kapt") version "1.4.30-M1"
+//    kotlin("kapt") version "1.4.30-M1"
 }
 
 dependencies {
@@ -23,26 +23,22 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
-    kapt(project(":language.kotlin"))
+            //  kapt(project(":language.kotlin"))
 }
 
 val processResources: Task = tasks["processResources"]
 val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
 
-kapt {
-    includeCompileClasspath = false
-    correctErrorTypes = true
-    javacOptions {
-        arguments {
-            arg("art.generator.destination", compileKotlin.destinationDir.absolutePath)
-            arg("art.generator.classpath", compileKotlin.classpath.asPath)
-            arg("art.generator.sources", compileKotlin.source.asPath)
-        }
+
+
+
+with(compileKotlin) {
+    dependsOn("clean")
+    dependsOn(project(":language.kotlin").tasks["build"])
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xplugin=C:\\Development\\Projects\\art\\art-generator\\language.kotlin\\build\\libs\\language.kotlin-1.1.0-SNAPSHOT.jar","-P", "plugin:test:TEST=test")
     }
 }
-
-
-compileKotlin.dependsOn("clean").dependsOn(project(":language.kotlin").tasks["build"])
 
 tasks.register("executableJar", Jar::class) {
     group = "build"
@@ -71,3 +67,4 @@ graal {
     option("--initialize-at-run-time=reactor.netty,io.netty,io.rsocket,org.apache.logging.log4j.core.pattern.JAnsiTextRenderer")
     option("-Dio.netty.noUnsafe=true")
 }
+
