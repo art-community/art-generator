@@ -2,6 +2,11 @@
   {
     "name": "com.fasterxml.jackson.core.JsonParser"
   },
+
+  {
+    "name": "ru.ExampleProvider",
+    "allPublicMethods": true
+  },
   {
     "name": "com.fasterxml.jackson.databind.JsonNode"
   },

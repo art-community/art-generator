@@ -4,17 +4,18 @@ import reactor.core.publisher.*;
 import reactor.core.scheduler.*;
 import ru.communicator.*;
 import ru.model.*;
-import static io.art.communicator.module.CommunicatorModule.*;
 import static io.art.logging.LoggingModule.*;
+import static ru.communicator.Communicators.*;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 
 public class MyService implements MyClient {
+    AtomicLong counter = new AtomicLong();
+
     @Override
     public void myMethod1() {
         logger(MyService.class).info("myMethod1");
-        communicator(MyClient.class).myMethod2(Request.builder().build());
     }
 
     @Override
@@ -23,11 +24,10 @@ public class MyService implements MyClient {
         return "Mono.empty()";
     }
 
-    AtomicLong counter = new AtomicLong();
 
     @Override
     public void myMethod2(Request request) {
-        //logger(MyService.class).info("myMethod2");
+        myClient().myMethod1();
     }
 
     @Override

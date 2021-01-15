@@ -43,6 +43,11 @@ public class NewClass {
         return this;
     }
 
+    public NewClass addImports(Set<ImportModel> importModels) {
+        imports.addAll(importModels);
+        return this;
+    }
+
     public NewClass inner(NewClass newClass) {
         imports.addAll(newClass.imports);
         innerClasses.add(newClass);

@@ -10,6 +10,7 @@ public interface ExceptionMessages {
     String NOT_FOUND_FACTORY_METHODS = "Not found valid factory methods (builder() method, no-args or all-args constructor) for type: {0}";
     String VALIDATION_EXCEPTION_MESSAGE_FORMAT = "Validation exception for: [{0}]\n\t{1}";
     String GENERATION_FAILED_MESSAGE_FORMAT = "Generation failed:\n\t{0}";
+    String REPROCESSING_FAILED = "Reprocessing failed";
     String RECOMPILATION_FAILED = "Recompilation failed";
     String NOT_CONFIGURATION_SOURCE_TYPE = "Type is not valid for configuration property: {0}";
     String OVERRIDDEN_METHODS_NOT_SUPPORTED = "Type has overridden methods (rename them to something else): {0}";

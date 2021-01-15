@@ -18,9 +18,7 @@ public class GeneratorLogger {
     }
 
     public void info(Object message) {
-        if (compiler().verbose) {
-            message(message.toString());
-        }
+        message(message.toString());
     }
 
     public void debug(Object message) {

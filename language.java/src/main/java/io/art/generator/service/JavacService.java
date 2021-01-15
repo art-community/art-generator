@@ -118,6 +118,10 @@ public class JavacService {
         return maker().Return(ident(reference));
     }
 
+    public JCThrow throwException(TypeModel type, JCExpression... arguments) {
+        return maker().Throw(newObject(type, arguments));
+    }
+
     public JCMemberReference invokeReference(TypeModel type, String name) {
         return maker().Reference(INVOKE, name(name), type.generateBaseType(), null);
     }

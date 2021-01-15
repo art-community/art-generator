@@ -7,7 +7,7 @@ import java.util.*;
 
 @Value
 @Builder
-public class Request implements Validatable {
+public class Request {
     int FInteger;
     char FCharacter;
     short FShort;
@@ -130,9 +130,4 @@ public class Request implements Validatable {
     Collection<Set<Map<String, Model>>[]> FCSMAModel;
     Collection<Collection<Map<String, Model>>[]> FCCMAModel;
     Collection<Map<String, Model>[]> FCMAModel;
-
-    @Override
-    public void onValidating(Validator validator) {
-        validator.validate("FModel", FModel, notNull());
-    }
 }
