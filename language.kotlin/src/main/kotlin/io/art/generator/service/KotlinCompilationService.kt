@@ -11,9 +11,10 @@ import io.art.generator.constants.ProcessorOptions.*
 import io.art.generator.context.GeneratorContext.processingEnvironment
 import io.art.generator.logger.GeneratorLogger.info
 import io.art.generator.logger.GeneratorLogger.success
+import io.art.generator.state.GenerationState.generatedClasses
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
-import java.lang.System.setProperty
 import java.text.MessageFormat.format
+import javax.tools.FileObject
 
 
 class KotlinCompilationService : CompilationService {
@@ -29,6 +30,7 @@ class KotlinCompilationService : CompilationService {
             add(DIRECTORY_OPTION)
             add(processingEnvironment().options[DIRECTORY_PROCESSOR_OPTION].toString())
             addAll(processingEnvironment().options[SOURCES_PROCESSOR_OPTION].toString().split(SEMICOLON))
+            addAll(generatedClasses().values().map(FileObject::getName).toSet())
             toTypedArray()
         }
         info(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(arguments)))
