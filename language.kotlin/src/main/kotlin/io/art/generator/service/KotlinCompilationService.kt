@@ -15,6 +15,7 @@ import io.art.generator.logger.GeneratorLogger.success
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import java.text.MessageFormat.format
 
+
 class KotlinCompilationService : CompilationService {
     override fun recompile() {
         success(RECOMPILATION_STARTED)
@@ -32,5 +33,8 @@ class KotlinCompilationService : CompilationService {
         info(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(arguments)))
         K2JVMCompiler.main(arguments)
         success(RECOMPILATION_COMPLETED)
+
     }
+
+
 }

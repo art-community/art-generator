@@ -2,6 +2,7 @@ package ru
 
 import io.art.communicator.module.CommunicatorModule.communicator
 import io.art.kotlin.module
+import io.art.launcher.ModuleLauncher
 import io.art.model.annotation.Configurator
 import io.art.model.configurator.RsocketServiceModelConfigurator
 import ru.communicator.MyClient
@@ -10,7 +11,7 @@ import ru.service.MyService
 
 
 fun main(vararg args: String) {
-    //ExampleProvider.
+    ModuleLauncher.launch(ExampleProvider.provide())
 }
 
 object Example {
