@@ -1,10 +1,12 @@
 package io.art.generator.registrar
 
 import io.art.generator.context.KotlinGeneratorContext
+import io.art.generator.extension.KotlinGeneratorExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.CONTENT_ROOTS
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
 import org.jetbrains.kotlin.cli.jvm.config.JavaSourceRoot
 import org.jetbrains.kotlin.cli.jvm.config.JvmClasspathRoot
+import org.jetbrains.kotlin.codegen.extensions.ClassBuilderInterceptorExtension.Companion.registerExtension
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
@@ -19,5 +21,6 @@ class KotlinGeneratorComponentRegistrar : ComponentRegistrar {
                 messageCollector = configuration.get(MESSAGE_COLLECTOR_KEY)!!,
                 compileClasspath = contentRoots.filterIsInstance<JvmClasspathRoot>().map(JvmClasspathRoot::file),
                 javaSourceRoots = contentRoots.filterIsInstance<JavaSourceRoot>().map(JavaSourceRoot::file)))
+        //registerExtension(project, KotlinGeneratorExtension())
     }
 }

@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin.Companion.isIncrementalKapt
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -33,9 +34,14 @@ val languageJar = project(":language.kotlin").tasks["jar"] as Jar
 with(compileKotlin) {
     dependsOn("clean")
     dependsOn(languageJar)
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xplugin=${languageJar.archiveFile.get().asFile.absolutePath}", "-P", "plugin:test:TEST=test")
+    }
 }
 
 kapt {
+    includeCompileClasspath = false
+    useBuildCache = false
     javacOptions {
         arguments {
             arg("art.generator.destination", compileKotlin.destinationDir.absolutePath)

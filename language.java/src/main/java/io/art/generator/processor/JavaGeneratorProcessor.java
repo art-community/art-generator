@@ -15,7 +15,7 @@ import io.art.generator.service.*;
 import lombok.*;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.generator.constants.Annotations.*;
-import static io.art.generator.constants.Language.*;
+import static io.art.generator.constants.JavaDialect.*;
 import static io.art.generator.constants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.GenerationService.*;
@@ -58,7 +58,7 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
         }
         JavacElements elements = JavacElements.instance(processingEnvironment.getContext());
         configurationBuilder
-                .language(JAVA)
+                .dialect(JAVA)
                 .compilationService(new JavaCompilationService())
                 .options(Options.instance(processingEnvironment.getContext()))
                 .processingEnvironment(processingEnvironment)

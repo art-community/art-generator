@@ -1,6 +1,6 @@
 package io.art.generator.constants;
 
-public enum Language {
+public enum JavaDialect {
     JAVA,
     KOTLIN
 }

@@ -29,7 +29,7 @@ public class GeneratorContext {
 
     private static GeneratorClassLoader classLoader;
 
-    private static Language language;
+    private static JavaDialect language;
 
     private static CompilationService compilationService;
 
@@ -79,7 +79,7 @@ public class GeneratorContext {
         return GeneratorContext.classLoader;
     }
 
-    public static Language language() {
+    public static JavaDialect language() {
         return GeneratorContext.language;
     }
 
@@ -99,7 +99,7 @@ public class GeneratorContext {
             maker = configuration.getMaker();
             elements = configuration.getElements();
             compilationService = configuration.getCompilationService();
-            language = configuration.getLanguage();
+            language = configuration.getDialect();
             logger = configuration.getLogger();
             classLoader = new GeneratorClassLoader();
             existedClasses = immutableMapOf(configuration.getExistedClasses());

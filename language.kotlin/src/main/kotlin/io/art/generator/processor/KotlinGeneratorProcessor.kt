@@ -10,7 +10,7 @@ import com.sun.tools.javac.util.Options
 import io.art.core.extensions.CollectionExtensions.addToSet
 import io.art.generator.constants.Annotations.CONFIGURATOR_ANNOTATION_NAME
 import io.art.generator.constants.KAPT_KOTLIN_GENERATED
-import io.art.generator.constants.Language.KOTLIN
+import io.art.generator.constants.JavaDialect.KOTLIN
 import io.art.generator.constants.ProcessorOptions.*
 import io.art.generator.context.GeneratorContext
 import io.art.generator.context.GeneratorContext.initialize
@@ -64,14 +64,14 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
         }
         val elements = JavacElements.instance(processingEnvironment!!.context)
         val scanner = with(configurationBuilder) {
-            language(KOTLIN)
+            dialect(KOTLIN)
             compilationService(KotlinCompilationService())
             options(Options.instance(processingEnvironment!!.context))
             processingEnvironment(processingEnvironment)
             compiler(JavaCompiler.instance(processingEnvironment!!.context))
             elements(elements)
             maker(TreeMaker.instance(processingEnvironment!!.context))
-            logger(GeneratorLogger(System.err::println, System.out::println))
+            logger(GeneratorLogger(System.out::println, System.err::println))
             GeneratorScanner(elements, this)
         }
         for (rootElement in roundEnvironment.rootElements) {

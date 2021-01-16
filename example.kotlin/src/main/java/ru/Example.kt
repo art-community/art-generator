@@ -10,7 +10,7 @@ import ru.service.MyService
 
 
 fun main(vararg args: String) {
-
+    //ExampleProvider.
 }
 
 object Example {

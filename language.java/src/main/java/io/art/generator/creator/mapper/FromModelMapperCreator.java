@@ -9,7 +9,7 @@ import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ExceptionMessages.*;
-import static io.art.generator.constants.Language.*;
+import static io.art.generator.constants.JavaDialect.*;
 import static io.art.generator.constants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.MappersConstants.BinaryMappingMethods.*;
 import static io.art.generator.constants.MappersConstants.*;

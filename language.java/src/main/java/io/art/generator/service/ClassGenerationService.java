@@ -1,6 +1,7 @@
 package io.art.generator.service;
 
 import com.google.googlejavaformat.java.*;
+import com.sun.tools.javac.processing.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
@@ -15,25 +16,34 @@ import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.factory.CompilationUnitFactory.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static java.text.MessageFormat.*;
+import static javax.tools.JavaFileObject.Kind.*;
 import javax.tools.*;
 import java.io.*;
 
 @UtilityClass
 public class ClassGenerationService {
-    @SneakyThrows
     public void generateClass(NewClass newClass, String packageName) {
         ListBuffer<JCTree> definitions = new ListBuffer<>();
         definitions.addAll(createImports(immutableSetOf(newClass.imports())));
         definitions.add(newClass.generate());
         String className = packageName + DOT + newClass.name();
-        JavaFileObject classFile = processingEnvironment().getFiler().createSourceFile(className);
+        JavacFiler filer = (JavacFiler) processingEnvironment().getFiler();
+        filer.getGeneratedSourceFileObjects()
+                .stream()
+                .filter(fileObject -> fileObject.isNameCompatible(className, SOURCE))
+                .findFirst()
+                .ifPresent(fileObject -> writeSource(packageName, definitions, fileObject));
+        success(format(GENERATED_CLASS, className));
+    }
+
+    @SneakyThrows
+    private void writeSource(String packageName, ListBuffer<JCTree> definitions, JavaFileObject classFile) {
         StringWriter stringWriter = new StringWriter();
         new PrettyWriter(stringWriter).printExpr(createCompilationUnit(packageName, definitions.toList()));
         try (Writer writer = classFile.openWriter()) {
             Formatter formatter = new Formatter();
             writer.write(formatter.formatSourceAndFixImports(stringWriter.toString()));
         }
-        success(format(GENERATED_CLASS, className));
     }
 
     private ListBuffer<JCTree> createImports(ImmutableSet<ImportModel> newImports) {

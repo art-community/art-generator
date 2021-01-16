@@ -18,29 +18,29 @@ public class GeneratorLogger {
     private final Consumer<String> message;
     private final Consumer<String> error;
 
-    public static void print(Object message) {
+    public static void message(Object message) {
         logger().message.accept(format("[{0}] {1}: {2}", now(), emptyIfNull(let(moduleClass(), ExistedClass::getName)), message));
     }
 
     public static void info(Object message) {
-        print(message.toString());
+        message(message.toString());
     }
 
     public static void debug(Object message) {
         if (compiler().verbose) {
-            print(AnsiColorizer.additional(message.toString()));
+            message(AnsiColorizer.additional(message.toString()));
         }
     }
 
     public static void success(Object message) {
-        print(AnsiColorizer.success(message.toString()));
+        message(AnsiColorizer.success(message.toString()));
     }
 
     public static void warning(Object message) {
-        print(AnsiColorizer.warning(message.toString()));
+        message(AnsiColorizer.warning(message.toString()));
     }
 
-    public static void printError(Object message) {
+    public static void error(Object message) {
         logger().error.accept(AnsiColorizer.error(format("[{0}] {1}: {2}", now(), emptyIfNull(let(moduleClass(), ExistedClass::getName)), message)));
     }
 

@@ -25,6 +25,6 @@ public class GeneratorContextConfiguration {
     @Singular("moduleClass")
     private final Map<String, ExistedClass> moduleClasses;
     private final CompilationService compilationService;
-    private final Language language;
+    private final JavaDialect dialect;
     private final GeneratorLogger logger;
 }

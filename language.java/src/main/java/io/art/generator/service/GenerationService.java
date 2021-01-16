@@ -21,10 +21,10 @@ public class GenerationService {
             implementMainMethods();
             classLoader().close();
         } catch (ValidationException validationException) {
-            printError(validationException.write());
+            error(validationException.write());
             throw validationException;
         } catch (GenerationException generationException) {
-            printError(generationException.write());
+            error(generationException.write());
             throw generationException;
         }
         success(GENERATION_COMPLETED);
