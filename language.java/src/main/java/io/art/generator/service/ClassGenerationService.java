@@ -41,7 +41,7 @@ public class ClassGenerationService {
     }
 
     @SneakyThrows
-    public void closePendingSources() {
+    public synchronized void closePendingSources() {
         for (FileObject fileObject : generatedClasses().values()) {
             String content = readFile(fileObject.getName());
             try (Writer writer = fileObject.openWriter()) {
