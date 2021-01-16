@@ -91,7 +91,7 @@ public class ProviderClassCreator {
                         .name(PROVIDE_NAME)
                         .modifiers(PUBLIC | FINAL | STATIC)
                         .returnType(MODULE_MODEL_TYPE)
-                        .statement(() -> throwException(type(NotImplementedException.class), literal(PROVIDE_NAME))));
+                        .statement(() -> throwException(NOT_IMPLEMENTED_EXCEPTION_TYPE, literal(PROVIDE_NAME))));
     }
 
     private NewMethod createProvideMethod() {

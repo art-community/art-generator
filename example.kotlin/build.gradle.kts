@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("com.palantir.graal") version "0.7.2"
     kotlin("jvm") version "1.4.20"
-//    kotlin("kapt") version "1.4.30-M1"
+    kotlin("kapt") version "1.4.20"
 }
 
 dependencies {
@@ -23,20 +23,17 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
-            //  kapt(project(":language.kotlin"))
 }
 
 val processResources: Task = tasks["processResources"]
 val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
-
-
-
+val languageJar = project(":language.kotlin").tasks["jar"] as Jar
 
 with(compileKotlin) {
     dependsOn("clean")
-    dependsOn(project(":language.kotlin").tasks["build"])
+    dependsOn(languageJar)
     kotlinOptions {
-        freeCompilerArgs = listOf("-Xplugin=C:\\Development\\Projects\\art\\art-generator\\language.kotlin\\build\\libs\\language.kotlin-1.1.0-SNAPSHOT.jar","-P", "plugin:test:TEST=test")
+        freeCompilerArgs = listOf("-Xplugin=${languageJar.archiveFile.get().asFile.absolutePath}", "-P", "plugin:io.art.generator:baseDirectory=${projectDir.absolutePath}")
     }
 }
 

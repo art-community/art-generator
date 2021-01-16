@@ -16,6 +16,7 @@ public class MyService implements MyClient {
     @Override
     public void myMethod1() {
         logger(MyService.class).info("myMethod1");
+        myClient().myMethod2(Request.builder().FBString("test").build());
     }
 
     @Override

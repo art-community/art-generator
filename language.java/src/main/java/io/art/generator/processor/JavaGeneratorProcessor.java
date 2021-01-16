@@ -11,6 +11,7 @@ import io.art.generator.context.*;
 import io.art.generator.context.GeneratorContextConfiguration.*;
 import io.art.generator.scanner.*;
 import io.art.generator.service.*;
+import lombok.*;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.generator.constants.Annotations.*;
 import static io.art.generator.constants.Language.*;
@@ -24,11 +25,14 @@ import javax.lang.model.*;
 import javax.lang.model.element.*;
 import java.util.*;
 
+@Getter
 @SupportedAnnotationTypes(CONFIGURATOR_ANNOTATION_NAME)
 public class JavaGeneratorProcessor extends AbstractProcessor {
     private JavacTrees trees;
     private JavacProcessingEnvironment processingEnvironment;
     private final GeneratorContextConfigurationBuilder configurationBuilder = GeneratorContextConfiguration.builder();
+    private final SourceVersion supportedSourceVersion = latest();
+    private final Set<String> supportedOptions = addToSet(super.getSupportedOptions(), PROCESSOR_OPTIONS);
 
     @Override
     public void init(ProcessingEnvironment processingEnvironment) {
@@ -37,15 +41,6 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
         trees = (JavacTrees) Trees.instance(processingEnvironment);
     }
 
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return latest();
-    }
-
-    @Override
-    public Set<String> getSupportedOptions() {
-        return addToSet(super.getSupportedOptions(), PROCESSOR_OPTIONS);
-    }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {

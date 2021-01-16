@@ -1,5 +1,3 @@
-@file:JvmName("ru.Example")
-
 package ru
 
 import io.art.communicator.module.CommunicatorModule.communicator
@@ -11,11 +9,11 @@ import ru.model.Request
 import ru.service.MyService
 
 
-object Example {
-    @JvmStatic
-    fun main(vararg args: String) {
-    }
+fun main(vararg args: String) {
 
+}
+
+object Example {
     @JvmStatic
     @Configurator
     fun configure() = module(Example::class) { value {} }

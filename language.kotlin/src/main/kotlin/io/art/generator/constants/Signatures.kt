@@ -1,4 +1,4 @@
-package io.art.generator.processor
+package io.art.generator.constants
 
 const val RETURNING_MODULE_MODEL_SIGNATURE = "()Lio/art/model/implementation/module/ModuleModel;"
 const val PARAMETER_MODULE_MODEL_SIGNATURE = "(Lio/art/model/implementation/module/ModuleModel;)V"
