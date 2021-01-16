@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
+    kapt(project(":language.kotlin"))
 }
 
 val processResources: Task = tasks["processResources"]
@@ -32,8 +33,15 @@ val languageJar = project(":language.kotlin").tasks["jar"] as Jar
 with(compileKotlin) {
     dependsOn("clean")
     dependsOn(languageJar)
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xplugin=${languageJar.archiveFile.get().asFile.absolutePath}", "-P", "plugin:io.art.generator:baseDirectory=${projectDir.absolutePath}")
+}
+
+kapt {
+    javacOptions {
+        arguments {
+            arg("art.generator.destination", compileKotlin.destinationDir.absolutePath)
+            arg("art.generator.classpath", compileKotlin.classpath.files.joinToString(";"))
+            arg("art.generator.sources", compileKotlin.source.files.joinToString(";"))
+        }
     }
 }
 

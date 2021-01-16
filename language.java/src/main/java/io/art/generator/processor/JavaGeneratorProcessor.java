@@ -9,6 +9,7 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.context.*;
 import io.art.generator.context.GeneratorContextConfiguration.*;
+import io.art.generator.logger.*;
 import io.art.generator.scanner.*;
 import io.art.generator.service.*;
 import lombok.*;
@@ -25,14 +26,15 @@ import javax.lang.model.*;
 import javax.lang.model.element.*;
 import java.util.*;
 
-@Getter
 @SupportedAnnotationTypes(CONFIGURATOR_ANNOTATION_NAME)
 public class JavaGeneratorProcessor extends AbstractProcessor {
     private JavacTrees trees;
     private JavacProcessingEnvironment processingEnvironment;
-    private final GeneratorContextConfigurationBuilder configurationBuilder = GeneratorContextConfiguration.builder();
+    @Getter
     private final SourceVersion supportedSourceVersion = latest();
+    @Getter
     private final Set<String> supportedOptions = addToSet(super.getSupportedOptions(), PROCESSOR_OPTIONS);
+    private final GeneratorContextConfigurationBuilder configurationBuilder = GeneratorContextConfiguration.builder();
 
     @Override
     public void init(ProcessingEnvironment processingEnvironment) {
@@ -41,7 +43,6 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
         trees = (JavacTrees) Trees.instance(processingEnvironment);
     }
 
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
         if (processingEnvironment.getOptions().containsKey(DISABLE_OPTION)) {
@@ -49,11 +50,6 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
         }
         if (GeneratorContext.isInitialized()) {
             if (completed()) {
-                return true;
-            }
-            if (processingEnvironment.getOptions().containsKey(PROCESSOR_STUB_OPTION)) {
-                generateStubs();
-                complete();
                 return true;
             }
             generateClasses();
@@ -68,6 +64,7 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
                 .processingEnvironment(processingEnvironment)
                 .compiler(JavaCompiler.instance(processingEnvironment.getContext()))
                 .elements(elements)
+                .logger(new GeneratorLogger(System.err::println, System.out::println))
                 .maker(TreeMaker.instance(processingEnvironment.getContext()));
         GeneratorScanner scanner = new GeneratorScanner(elements, configurationBuilder);
         for (Element rootElement : roundEnvironment.getRootElements()) {

@@ -15,9 +15,9 @@ import io.art.generator.constants.ProcessorOptions.*
 import io.art.generator.context.GeneratorContext
 import io.art.generator.context.GeneratorContext.initialize
 import io.art.generator.context.GeneratorContextConfiguration
+import io.art.generator.logger.GeneratorLogger
 import io.art.generator.scanner.GeneratorScanner
 import io.art.generator.service.GenerationService.generateClasses
-import io.art.generator.service.GenerationService.generateStubs
 import io.art.generator.service.KotlinCompilationService
 import io.art.generator.state.GenerationState.complete
 import io.art.generator.state.GenerationState.completed
@@ -58,25 +58,22 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
             if (completed()) {
                 return true
             }
-            if (processingEnvironment!!.options.containsKey(PROCESSOR_STUB_OPTION)) {
-                generateStubs()
-                complete()
-                return true
-            }
             generateClasses()
             complete()
             return true
         }
         val elements = JavacElements.instance(processingEnvironment!!.context)
-        configurationBuilder
-                .language(KOTLIN)
-                .compilationService(KotlinCompilationService())
-                .options(Options.instance(processingEnvironment!!.context))
-                .processingEnvironment(processingEnvironment)
-                .compiler(JavaCompiler.instance(processingEnvironment!!.context))
-                .elements(elements)
-                .maker(TreeMaker.instance(processingEnvironment!!.context))
-        val scanner = GeneratorScanner(elements, configurationBuilder)
+        val scanner = with(configurationBuilder) {
+            language(KOTLIN)
+            compilationService(KotlinCompilationService())
+            options(Options.instance(processingEnvironment!!.context))
+            processingEnvironment(processingEnvironment)
+            compiler(JavaCompiler.instance(processingEnvironment!!.context))
+            elements(elements)
+            maker(TreeMaker.instance(processingEnvironment!!.context))
+            logger(GeneratorLogger(System.err::println, System.out::println))
+            GeneratorScanner(elements, this)
+        }
         for (rootElement in roundEnvironment.rootElements) {
             scanner.scan(trees!!.getPath(rootElement), trees)
         }
