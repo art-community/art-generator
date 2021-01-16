@@ -13,13 +13,17 @@ import io.art.generator.logger.*;
 import io.art.generator.scanner.*;
 import io.art.generator.service.*;
 import lombok.*;
+import static com.google.common.base.Throwables.*;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.generator.constants.Annotations.*;
+import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.JavaDialect.*;
 import static io.art.generator.constants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.service.GenerationService.*;
 import static io.art.generator.state.GenerationState.*;
+import static java.text.MessageFormat.*;
 import static javax.lang.model.SourceVersion.*;
 import javax.annotation.processing.*;
 import javax.lang.model.*;
@@ -49,9 +53,13 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
             if (completed()) {
                 return true;
             }
-            generate();
-            complete();
-            return true;
+            try {
+                generate();
+                complete();
+                return true;
+            } catch (Throwable exception) {
+                error(format(GENERATION_FAILED_MESSAGE_FORMAT, getStackTraceAsString(exception)));
+            }
         }
         JavacElements elements = JavacElements.instance(processingEnvironment.getContext());
         configurationBuilder

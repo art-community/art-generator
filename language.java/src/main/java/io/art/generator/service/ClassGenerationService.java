@@ -1,7 +1,6 @@
 package io.art.generator.service;
 
 import com.google.googlejavaformat.java.*;
-import com.sun.tools.javac.processing.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
@@ -17,7 +16,7 @@ import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.factory.CompilationUnitFactory.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.state.GenerationState.*;
-import static java.text.MessageFormat.format;
+import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import javax.tools.*;
 import java.io.*;
