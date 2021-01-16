@@ -8,6 +8,7 @@ import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.generator.constants.*;
 import io.art.generator.loader.*;
+import io.art.generator.logger.*;
 import io.art.generator.model.*;
 import io.art.generator.service.*;
 import static io.art.core.factory.MapFactory.*;
@@ -16,21 +17,23 @@ import java.util.concurrent.atomic.*;
 public class GeneratorContext {
     private static final AtomicBoolean initialized = new AtomicBoolean(false);
 
-    private static final AtomicReference<JavaCompiler> compiler = new AtomicReference<>();
+    private static JavaCompiler compiler;
 
-    private static final AtomicReference<JavacProcessingEnvironment> processingEnvironment = new AtomicReference<>();
+    private static JavacProcessingEnvironment processingEnvironment;
 
-    private static final AtomicReference<Options> options = new AtomicReference<>();
+    private static Options options;
 
-    private static final AtomicReference<TreeMaker> maker = new AtomicReference<>();
+    private static TreeMaker maker;
 
-    private static final AtomicReference<JavacElements> elements = new AtomicReference<>();
+    private static JavacElements elements;
 
-    private static final AtomicReference<GeneratorClassLoader> classLoader = new AtomicReference<>();
+    private static GeneratorClassLoader classLoader;
 
-    private static final AtomicReference<Language> language = new AtomicReference<>();
+    private static JavaDialect dialect;
 
-    private static AtomicReference<CompilationService> compilationService = new AtomicReference<>();
+    private static CompilationService compilationService;
+
+    private static GeneratorLogger logger;
 
     private static ImmutableMap<String, ExistedClass> existedClasses;
 
@@ -48,54 +51,59 @@ public class GeneratorContext {
         return existedClasses.get(name);
     }
 
-    public static JavaCompiler compiler() {
-        return compiler.get();
-    }
-
-    public static Language language() {
-        return language.get();
-    }
-
-    public static CompilationService compilationService() {
-        return compilationService.get();
-    }
-
-    public static Options options() {
-        return options.get();
-    }
-
-    public static JavacProcessingEnvironment processingEnvironment() {
-        return processingEnvironment.get();
-    }
-
-    public static TreeMaker maker() {
-        return maker.get();
-    }
-
-    public static JavacElements elements() {
-        return elements.get();
-    }
-
-    public static GeneratorClassLoader classLoader() {
-        return classLoader.get();
-    }
-
     public static boolean isInitialized() {
         return initialized.get();
     }
 
+    public static JavaCompiler compiler() {
+        return GeneratorContext.compiler;
+    }
+
+    public static JavacProcessingEnvironment processingEnvironment() {
+        return GeneratorContext.processingEnvironment;
+    }
+
+    public static Options options() {
+        return GeneratorContext.options;
+    }
+
+    public static TreeMaker maker() {
+        return GeneratorContext.maker;
+    }
+
+    public static JavacElements elements() {
+        return GeneratorContext.elements;
+    }
+
+    public static GeneratorClassLoader classLoader() {
+        return GeneratorContext.classLoader;
+    }
+
+    public static JavaDialect dialect() {
+        return GeneratorContext.dialect;
+    }
+
+    public static CompilationService compilationService() {
+        return GeneratorContext.compilationService;
+    }
+
+    public static GeneratorLogger logger() {
+        return GeneratorContext.logger;
+    }
+
     public static void initialize(GeneratorContextConfiguration configuration) {
         if (initialized.compareAndSet(false, true)) {
-            GeneratorContext.existedClasses = immutableMapOf(configuration.getExistedClasses());
-            GeneratorContext.moduleClasses = immutableMapOf(configuration.getModuleClasses());
-            GeneratorContext.processingEnvironment.set(configuration.getProcessingEnvironment());
-            GeneratorContext.options.set(configuration.getOptions());
-            GeneratorContext.compiler.set(configuration.getCompiler());
-            GeneratorContext.maker.set(configuration.getMaker());
-            GeneratorContext.elements.set(configuration.getElements());
-            GeneratorContext.compilationService.set(configuration.getCompilationService());
-            GeneratorContext.language.set(configuration.getLanguage());
-            GeneratorContext.classLoader.set(new GeneratorClassLoader());
+            processingEnvironment = configuration.getProcessingEnvironment();
+            options = configuration.getOptions();
+            compiler = configuration.getCompiler();
+            maker = configuration.getMaker();
+            elements = configuration.getElements();
+            compilationService = configuration.getCompilationService();
+            dialect = configuration.getDialect();
+            logger = configuration.getLogger();
+            classLoader = new GeneratorClassLoader();
+            existedClasses = immutableMapOf(configuration.getExistedClasses());
+            moduleClasses = immutableMapOf(configuration.getModuleClasses());
         }
     }
 }

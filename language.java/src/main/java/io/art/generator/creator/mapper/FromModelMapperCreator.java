@@ -9,7 +9,7 @@ import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ExceptionMessages.*;
-import static io.art.generator.constants.Language.*;
+import static io.art.generator.constants.JavaDialect.*;
 import static io.art.generator.constants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.MappersConstants.BinaryMappingMethods.*;
 import static io.art.generator.constants.MappersConstants.*;
@@ -157,7 +157,7 @@ public class FromModelMapperCreator {
     private JCMethodInvocation forProperty(JCMethodInvocation builderInvocation, String propertyName, Type propertyType) {
         ImmutableArray.Builder<JCExpression> arguments = immutableArrayBuilder();
         arguments.add(literal(propertyName));
-        String method = (isBoolean(propertyType) && language() == JAVA ? IS_NAME : GET_NAME) + capitalize(propertyName);
+        String method = (isBoolean(propertyType) && dialect() == JAVA ? IS_NAME : GET_NAME) + capitalize(propertyName);
         JCMethodInvocation getter = method(modelName, method).apply();
         arguments.add(newLambda().expression(() -> getter).generate());
         arguments.add(fromModelMapper(propertyType));

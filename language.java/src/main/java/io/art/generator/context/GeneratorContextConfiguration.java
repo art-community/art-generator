@@ -6,6 +6,7 @@ import com.sun.tools.javac.processing.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.constants.*;
+import io.art.generator.logger.*;
 import io.art.generator.model.*;
 import io.art.generator.service.*;
 import lombok.*;
@@ -24,5 +25,6 @@ public class GeneratorContextConfiguration {
     @Singular("moduleClass")
     private final Map<String, ExistedClass> moduleClasses;
     private final CompilationService compilationService;
-    private final Language language;
+    private final JavaDialect dialect;
+    private final GeneratorLogger logger;
 }

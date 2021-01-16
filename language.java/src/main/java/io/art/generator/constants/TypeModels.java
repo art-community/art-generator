@@ -6,6 +6,7 @@ import io.art.communicator.registry.*;
 import io.art.configurator.custom.*;
 import io.art.core.checker.*;
 import io.art.core.constants.*;
+import io.art.core.exception.*;
 import io.art.core.extensions.*;
 import io.art.core.factory.*;
 import io.art.core.model.*;
@@ -90,4 +91,5 @@ public interface TypeModels {
 
     TypeModel CONFIGURATION_SOURCE_TYPE = type(ConfigurationSource.class);
 
+    TypeModel NOT_IMPLEMENTED_EXCEPTION_TYPE = type(NotImplementedException.class);
 }

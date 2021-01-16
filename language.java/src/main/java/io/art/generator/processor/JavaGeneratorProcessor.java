@@ -9,11 +9,13 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.generator.context.*;
 import io.art.generator.context.GeneratorContextConfiguration.*;
+import io.art.generator.logger.*;
 import io.art.generator.scanner.*;
 import io.art.generator.service.*;
+import lombok.*;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.generator.constants.Annotations.*;
-import static io.art.generator.constants.Language.*;
+import static io.art.generator.constants.JavaDialect.*;
 import static io.art.generator.constants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.GenerationService.*;
@@ -28,6 +30,10 @@ import java.util.*;
 public class JavaGeneratorProcessor extends AbstractProcessor {
     private JavacTrees trees;
     private JavacProcessingEnvironment processingEnvironment;
+    @Getter
+    private final SourceVersion supportedSourceVersion = latest();
+    @Getter
+    private final Set<String> supportedOptions = addToSet(super.getSupportedOptions(), PROCESSOR_OPTIONS);
     private final GeneratorContextConfigurationBuilder configurationBuilder = GeneratorContextConfiguration.builder();
 
     @Override
@@ -38,47 +44,30 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
     }
 
     @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return latest();
-    }
-
-    @Override
-    public Set<String> getSupportedOptions() {
-        return addToSet(super.getSupportedOptions(), PROCESSOR_OPTIONS);
-    }
-
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        if (processingEnvironment.getOptions().containsKey(DISABLE_OPTION)) {
-            return true;
-        }
+    public synchronized boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
         if (GeneratorContext.isInitialized()) {
             if (completed()) {
                 return true;
             }
-            if (processingEnvironment.getOptions().containsKey(PROCESSOR_STUB_OPTION)) {
-                generateStubs();
-                complete();
-                return true;
-            }
-            generateClasses();
+            generate();
             complete();
             return true;
         }
         JavacElements elements = JavacElements.instance(processingEnvironment.getContext());
         configurationBuilder
-                .language(JAVA)
+                .dialect(JAVA)
                 .compilationService(new JavaCompilationService())
                 .options(Options.instance(processingEnvironment.getContext()))
                 .processingEnvironment(processingEnvironment)
                 .compiler(JavaCompiler.instance(processingEnvironment.getContext()))
                 .elements(elements)
+                .logger(new GeneratorLogger(System.out::println, System.err::println))
                 .maker(TreeMaker.instance(processingEnvironment.getContext()));
         GeneratorScanner scanner = new GeneratorScanner(elements, configurationBuilder);
         for (Element rootElement : roundEnvironment.getRootElements()) {
             scanner.scan(trees.getPath(rootElement), trees);
         }
         initialize(configurationBuilder.build());
-        return true;
+        return false;
     }
 }

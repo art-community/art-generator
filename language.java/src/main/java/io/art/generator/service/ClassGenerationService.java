@@ -1,6 +1,7 @@
 package io.art.generator.service;
 
 import com.google.googlejavaformat.java.*;
+import com.sun.tools.javac.processing.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
@@ -9,12 +10,15 @@ import io.art.generator.writer.*;
 import lombok.*;
 import lombok.experimental.*;
 import static io.art.core.constants.StringConstants.*;
+import static io.art.core.extensions.FileExtensions.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.factory.CompilationUnitFactory.*;
 import static io.art.generator.logger.GeneratorLogger.*;
-import static java.text.MessageFormat.*;
+import static io.art.generator.state.GenerationState.*;
+import static java.text.MessageFormat.format;
+import static java.util.Objects.*;
 import javax.tools.*;
 import java.io.*;
 
@@ -26,14 +30,33 @@ public class ClassGenerationService {
         definitions.addAll(createImports(immutableSetOf(newClass.imports())));
         definitions.add(newClass.generate());
         String className = packageName + DOT + newClass.name();
-        JavaFileObject classFile = processingEnvironment().getFiler().createSourceFile(className);
+        FileObject file = generatedClasses().get(className);
+        if (nonNull(file)) {
+            writeSource(packageName, definitions, file.getName());
+            return;
+        }
+        file = processingEnvironment().getFiler().createSourceFile(className);
+        putGeneratedClass(className, file);
+        writeSource(packageName, definitions, file.getName());
+    }
+
+    @SneakyThrows
+    public void closePendingSources() {
+        for (FileObject fileObject : generatedClasses().values()) {
+            String content = readFile(fileObject.getName());
+            try (Writer writer = fileObject.openWriter()) {
+                writer.write(content);
+            }
+        }
+        clearGeneratedClasses();
+    }
+
+    @SneakyThrows
+    private void writeSource(String packageName, ListBuffer<JCTree> definitions, String path) {
         StringWriter stringWriter = new StringWriter();
         new PrettyWriter(stringWriter).printExpr(createCompilationUnit(packageName, definitions.toList()));
-        try (Writer writer = classFile.openWriter()) {
-            Formatter formatter = new Formatter();
-            writer.write(formatter.formatSourceAndFixImports(stringWriter.toString()));
-        }
-        success(format(GENERATED_CLASS, className));
+        writeFile(path, new Formatter().formatSourceAndFixImports(stringWriter.toString()));
+        success(format(GENERATED_CLASS, path));
     }
 
     private ListBuffer<JCTree> createImports(ImmutableSet<ImportModel> newImports) {
