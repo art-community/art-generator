@@ -34,9 +34,6 @@ val languageJar = project(":language.kotlin").tasks["jar"] as Jar
 with(compileKotlin) {
     dependsOn("clean")
     dependsOn(languageJar)
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xplugin=${languageJar.archiveFile.get().asFile.absolutePath}", "-P", "plugin:test:TEST=test")
-    }
 }
 
 kapt {

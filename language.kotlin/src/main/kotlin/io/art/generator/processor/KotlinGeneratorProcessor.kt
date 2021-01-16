@@ -1,3 +1,5 @@
+@file:Suppress(JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE)
+
 package io.art.generator.processor
 
 import com.google.common.base.Throwables.getStackTraceAsString
@@ -11,6 +13,7 @@ import com.sun.tools.javac.util.Options
 import io.art.core.extensions.CollectionExtensions.addToSet
 import io.art.generator.constants.Annotations.CONFIGURATOR_ANNOTATION_NAME
 import io.art.generator.constants.ExceptionMessages.GENERATION_FAILED_MESSAGE_FORMAT
+import io.art.generator.constants.JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE
 import io.art.generator.constants.JavaDialect.KOTLIN
 import io.art.generator.constants.ProcessorOptions.PROCESSOR_OPTIONS
 import io.art.generator.context.GeneratorContext

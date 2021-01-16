@@ -30,6 +30,7 @@ import javax.lang.model.*;
 import javax.lang.model.element.*;
 import java.util.*;
 
+
 @SupportedAnnotationTypes(CONFIGURATOR_ANNOTATION_NAME)
 public class JavaGeneratorProcessor extends AbstractProcessor {
     private JavacTrees trees;
