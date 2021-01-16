@@ -44,7 +44,7 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
+    public synchronized boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
         if (GeneratorContext.isInitialized()) {
             if (completed()) {
                 return true;

@@ -48,6 +48,7 @@ public class ClassGenerationService {
                 writer.write(content);
             }
         }
+        clearGeneratedClasses();
     }
 
     @SneakyThrows

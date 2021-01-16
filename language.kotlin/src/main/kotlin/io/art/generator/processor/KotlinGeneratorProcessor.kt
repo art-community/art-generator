@@ -44,6 +44,7 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
 
     override fun getSupportedOptions(): Set<String> = addToSet(super.getSupportedOptions(), *PROCESSOR_OPTIONS)
 
+    @Synchronized
     override fun process(annotations: Set<TypeElement?>, roundEnvironment: RoundEnvironment): Boolean {
         if (GeneratorContext.isInitialized()) {
             if (completed()) {

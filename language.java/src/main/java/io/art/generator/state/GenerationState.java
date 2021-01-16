@@ -4,12 +4,10 @@ import io.art.generator.model.*;
 import io.art.generator.registry.*;
 import lombok.*;
 import static io.art.core.checker.NullityChecker.*;
-import static io.art.core.factory.MapFactory.map;
-import static io.art.core.factory.SetFactory.*;
+import static io.art.core.factory.MapFactory.*;
 import static io.art.generator.constants.MappersConstants.*;
 import static io.art.generator.constants.Names.*;
 import javax.tools.*;
-import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -58,6 +56,10 @@ public class GenerationState {
 
     public static Map<String, FileObject> generatedClasses() {
         return GENERATED_CLASSES;
+    }
+
+    public static void clearGeneratedClasses() {
+        GENERATED_CLASSES.clear();
     }
 
     public static void putGeneratedClass(String name, FileObject file) {
