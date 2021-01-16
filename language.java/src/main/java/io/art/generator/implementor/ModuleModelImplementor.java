@@ -12,9 +12,9 @@ import static io.art.generator.state.GenerationState.*;
 public class ModuleModelImplementor {
     public void implementModuleModel() {
         for (ExistedClass existedClass : moduleClasses().values()) {
-            updateState(existedClass);
+            updateLocalState(existedClass);
             generateClass(createProviderClass(loadModel()), moduleClass().getPackageName());
         }
-        clearState();
+        clearLocalState();
     }
 }

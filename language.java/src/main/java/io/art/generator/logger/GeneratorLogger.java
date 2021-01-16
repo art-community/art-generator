@@ -23,7 +23,9 @@ public class GeneratorLogger {
     }
 
     public static void info(Object message) {
-        message(message.toString());
+        if (compiler().verbose) {
+            message(message.toString());
+        }
     }
 
     public static void debug(Object message) {

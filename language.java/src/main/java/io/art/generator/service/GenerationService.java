@@ -1,24 +1,25 @@
 package io.art.generator.service;
 
 import io.art.generator.exception.*;
+import lombok.*;
+import lombok.experimental.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.provider.ProviderClassCreator.*;
-import static io.art.generator.implementor.MainMethodImplementor.*;
 import static io.art.generator.implementor.ModuleModelImplementor.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.service.ClassGenerationService.*;
 
+@UtilityClass
 public class GenerationService {
-    public static void generateClasses() {
+    @SneakyThrows
+    public void generate() {
         success(GENERATION_STARTED);
         try {
-            moduleClasses()
-                    .values()
-                    .forEach(moduleClass -> generateClass(createProviderStub(moduleClass), moduleClass.getPackageName()));
+            generateStubs();
             compilationService().recompile();
             implementModuleModel();
-            implementMainMethods();
+            closePendingSources();
             classLoader().close();
         } catch (ValidationException validationException) {
             error(validationException.write());
@@ -28,6 +29,12 @@ public class GenerationService {
             throw generationException;
         }
         success(GENERATION_COMPLETED);
+    }
+
+    private static void generateStubs() {
+        moduleClasses()
+                .values()
+                .forEach(moduleClass -> generateClass(createProviderStub(moduleClass), moduleClass.getPackageName()));
     }
 
 }

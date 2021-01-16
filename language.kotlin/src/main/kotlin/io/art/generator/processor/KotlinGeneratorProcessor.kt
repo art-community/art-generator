@@ -9,15 +9,14 @@ import com.sun.tools.javac.tree.TreeMaker
 import com.sun.tools.javac.util.Options
 import io.art.core.extensions.CollectionExtensions.addToSet
 import io.art.generator.constants.Annotations.CONFIGURATOR_ANNOTATION_NAME
-import io.art.generator.constants.KAPT_KOTLIN_GENERATED
 import io.art.generator.constants.JavaDialect.KOTLIN
-import io.art.generator.constants.ProcessorOptions.*
+import io.art.generator.constants.ProcessorOptions.PROCESSOR_OPTIONS
 import io.art.generator.context.GeneratorContext
 import io.art.generator.context.GeneratorContext.initialize
 import io.art.generator.context.GeneratorContextConfiguration
 import io.art.generator.logger.GeneratorLogger
 import io.art.generator.scanner.GeneratorScanner
-import io.art.generator.service.GenerationService.generateClasses
+import io.art.generator.service.GenerationService.generate
 import io.art.generator.service.KotlinCompilationService
 import io.art.generator.state.GenerationState.complete
 import io.art.generator.state.GenerationState.completed
@@ -43,22 +42,14 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
 
     override fun getSupportedSourceVersion(): SourceVersion = latest()
 
-    override fun getSupportedOptions(): Set<String> = addToSet(
-            super.getSupportedOptions(),
-            DIRECTORY_PROCESSOR_OPTION,
-            CLASS_PATH_PROCESSOR_OPTION,
-            SOURCES_PROCESSOR_OPTION,
-            DISABLE_OPTION,
-            KAPT_KOTLIN_GENERATED
-    )
+    override fun getSupportedOptions(): Set<String> = addToSet(super.getSupportedOptions(), *PROCESSOR_OPTIONS)
 
     override fun process(annotations: Set<TypeElement?>, roundEnvironment: RoundEnvironment): Boolean {
-        if (processingEnvironment?.options?.containsKey(DISABLE_OPTION) == true && processingEnvironment!!.options[DISABLE_OPTION].toBoolean()) return true
         if (GeneratorContext.isInitialized()) {
             if (completed()) {
                 return true
             }
-            generateClasses()
+            generate()
             complete()
             return true
         }
@@ -78,6 +69,6 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
             scanner.scan(trees!!.getPath(rootElement), trees)
         }
         initialize(configurationBuilder.build())
-        return true
+        return false
     }
 }

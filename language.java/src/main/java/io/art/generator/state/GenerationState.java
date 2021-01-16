@@ -3,44 +3,49 @@ package io.art.generator.state;
 import io.art.generator.model.*;
 import io.art.generator.registry.*;
 import lombok.*;
-import static io.art.core.checker.NullityChecker.let;
+import static io.art.core.checker.NullityChecker.*;
+import static io.art.core.factory.MapFactory.map;
+import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.MappersConstants.*;
 import static io.art.generator.constants.Names.*;
+import javax.tools.*;
+import java.io.*;
 import java.lang.reflect.*;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class GenerationState {
-    private final static ThreadLocal<GenerationState> STATE = new ThreadLocal<>();
-
+    private final static ThreadLocal<GenerationState> LOCAL_STATE = new ThreadLocal<>();
+    private final static Map<String, FileObject> GENERATED_CLASSES = map();
     private final ExistedClass currentModuleClass;
     private final GeneratedTypesRegistry mappersRegistry = new GeneratedTypesRegistry(MAPPING_INTERFACE_NAME);
     private final GeneratedTypesRegistry configurationsRegistry = new GeneratedTypesRegistry(PROXY_CLASS_SUFFIX);
     private final GeneratedTypesRegistry communicatorsRegistry = new GeneratedTypesRegistry(PROXY_CLASS_SUFFIX);
 
-    public static void updateState(ExistedClass existedClass) {
-        STATE.set(new GenerationState(existedClass));
+    public static void updateLocalState(ExistedClass moduleClass) {
+        LOCAL_STATE.set(new GenerationState(moduleClass));
     }
 
-    public static void clearState() {
-        STATE.remove();
+    public static void clearLocalState() {
+        LOCAL_STATE.remove();
     }
 
     private static boolean COMPLETED = false;
 
     public static ExistedClass moduleClass() {
-        return let(STATE.get(), state -> state.currentModuleClass);
+        return let(LOCAL_STATE.get(), state -> state.currentModuleClass);
     }
 
     public static GeneratedTypesRegistry mappers() {
-        return STATE.get().mappersRegistry;
+        return LOCAL_STATE.get().mappersRegistry;
     }
 
     public static GeneratedTypesRegistry configurations() {
-        return STATE.get().configurationsRegistry;
+        return LOCAL_STATE.get().configurationsRegistry;
     }
 
     public static String communicatorName(Type type) {
-        return STATE.get().communicatorsRegistry.compute(type);
+        return LOCAL_STATE.get().communicatorsRegistry.compute(type);
     }
 
     public static boolean completed() {
@@ -49,5 +54,13 @@ public class GenerationState {
 
     public static void complete() {
         COMPLETED = true;
+    }
+
+    public static Map<String, FileObject> generatedClasses() {
+        return GENERATED_CLASSES;
+    }
+
+    public static void putGeneratedClass(String name, FileObject file) {
+        GENERATED_CLASSES.put(name, file);
     }
 }

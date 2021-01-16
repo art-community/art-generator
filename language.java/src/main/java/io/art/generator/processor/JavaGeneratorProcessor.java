@@ -45,14 +45,11 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        if (processingEnvironment.getOptions().containsKey(DISABLE_OPTION)) {
-            return true;
-        }
         if (GeneratorContext.isInitialized()) {
             if (completed()) {
                 return true;
             }
-            generateClasses();
+            generate();
             complete();
             return true;
         }
@@ -64,13 +61,13 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
                 .processingEnvironment(processingEnvironment)
                 .compiler(JavaCompiler.instance(processingEnvironment.getContext()))
                 .elements(elements)
-                .logger(new GeneratorLogger(System.err::println, System.out::println))
+                .logger(new GeneratorLogger(System.out::println, System.err::println))
                 .maker(TreeMaker.instance(processingEnvironment.getContext()));
         GeneratorScanner scanner = new GeneratorScanner(elements, configurationBuilder);
         for (Element rootElement : roundEnvironment.getRootElements()) {
             scanner.scan(trees.getPath(rootElement), trees);
         }
         initialize(configurationBuilder.build());
-        return true;
+        return false;
     }
 }

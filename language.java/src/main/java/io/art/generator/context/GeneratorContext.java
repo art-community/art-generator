@@ -11,9 +11,7 @@ import io.art.generator.loader.*;
 import io.art.generator.logger.*;
 import io.art.generator.model.*;
 import io.art.generator.service.*;
-import static io.art.core.collection.ImmutableSet.*;
 import static io.art.core.factory.MapFactory.*;
-import static io.art.generator.constants.Names.*;
 import java.util.concurrent.atomic.*;
 
 public class GeneratorContext {
@@ -31,7 +29,7 @@ public class GeneratorContext {
 
     private static GeneratorClassLoader classLoader;
 
-    private static JavaDialect language;
+    private static JavaDialect dialect;
 
     private static CompilationService compilationService;
 
@@ -81,8 +79,8 @@ public class GeneratorContext {
         return GeneratorContext.classLoader;
     }
 
-    public static JavaDialect language() {
-        return GeneratorContext.language;
+    public static JavaDialect dialect() {
+        return GeneratorContext.dialect;
     }
 
     public static CompilationService compilationService() {
@@ -101,7 +99,7 @@ public class GeneratorContext {
             maker = configuration.getMaker();
             elements = configuration.getElements();
             compilationService = configuration.getCompilationService();
-            language = configuration.getDialect();
+            dialect = configuration.getDialect();
             logger = configuration.getLogger();
             classLoader = new GeneratorClassLoader();
             existedClasses = immutableMapOf(configuration.getExistedClasses());

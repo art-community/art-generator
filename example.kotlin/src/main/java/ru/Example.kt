@@ -2,17 +2,16 @@ package ru
 
 import io.art.communicator.module.CommunicatorModule.communicator
 import io.art.kotlin.module
-import io.art.launcher.ModuleLauncher
+import io.art.launcher.ModuleLauncher.launch
 import io.art.model.annotation.Configurator
 import io.art.model.configurator.RsocketServiceModelConfigurator
+import ru.ExampleProvider.provide
 import ru.communicator.MyClient
 import ru.model.Request
 import ru.service.MyService
 
 
-fun main(vararg args: String) {
-    ModuleLauncher.launch(ExampleProvider.provide())
-}
+fun main() = launch(provide())
 
 object Example {
     @JvmStatic

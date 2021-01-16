@@ -157,7 +157,7 @@ public class FromModelMapperCreator {
     private JCMethodInvocation forProperty(JCMethodInvocation builderInvocation, String propertyName, Type propertyType) {
         ImmutableArray.Builder<JCExpression> arguments = immutableArrayBuilder();
         arguments.add(literal(propertyName));
-        String method = (isBoolean(propertyType) && language() == JAVA ? IS_NAME : GET_NAME) + capitalize(propertyName);
+        String method = (isBoolean(propertyType) && dialect() == JAVA ? IS_NAME : GET_NAME) + capitalize(propertyName);
         JCMethodInvocation getter = method(modelName, method).apply();
         arguments.add(newLambda().expression(() -> getter).generate());
         arguments.add(fromModelMapper(propertyType));
