@@ -9,7 +9,7 @@ import static io.art.generator.creator.provider.ProviderClassCreator.*;
 import static io.art.generator.implementor.ModuleModelImplementor.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.service.ClassGenerationService.*;
-import static io.art.generator.state.GenerationState.*;
+import static io.art.generator.state.GeneratorState.*;
 
 @UtilityClass
 public class GenerationService {

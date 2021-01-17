@@ -15,7 +15,7 @@ import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.factory.CompilationUnitFactory.*;
 import static io.art.generator.logger.GeneratorLogger.*;
-import static io.art.generator.state.GenerationState.*;
+import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import javax.tools.*;

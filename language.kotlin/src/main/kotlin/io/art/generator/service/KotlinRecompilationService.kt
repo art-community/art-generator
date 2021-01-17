@@ -12,7 +12,7 @@ import io.art.generator.context.GeneratorContext.processingEnvironment
 import io.art.generator.logger.GeneratorLogger.info
 import io.art.generator.logger.GeneratorLogger.success
 import io.art.generator.normalizer.ClassPathNormalizer.normalizeClassPath
-import io.art.generator.state.GenerationState.generatedClasses
+import io.art.generator.state.GeneratorState.generatedClasses
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import java.text.MessageFormat.format
 

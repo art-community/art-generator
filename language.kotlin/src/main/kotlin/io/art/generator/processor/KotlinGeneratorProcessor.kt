@@ -21,8 +21,8 @@ import io.art.generator.logger.GeneratorLogger
 import io.art.generator.scanner.GeneratorScanner
 import io.art.generator.service.GenerationService.generate
 import io.art.generator.service.KotlinRecompilationService
-import io.art.generator.state.GenerationState.complete
-import io.art.generator.state.GenerationState.completed
+import io.art.generator.state.GeneratorState.complete
+import io.art.generator.state.GeneratorState.completed
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment

@@ -33,7 +33,7 @@ import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
-import static io.art.generator.state.GenerationState.*;
+import static io.art.generator.state.GeneratorState.*;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;

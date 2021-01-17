@@ -17,7 +17,7 @@ import static io.art.generator.constants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.normalizer.ClassPathNormalizer.*;
-import static io.art.generator.state.GenerationState.*;
+import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
 import javax.tools.*;
 import java.io.*;
