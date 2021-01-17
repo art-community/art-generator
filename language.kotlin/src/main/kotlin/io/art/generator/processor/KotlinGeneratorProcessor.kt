@@ -73,7 +73,7 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
             GeneratorScanner(elements, this)
         }
         for (rootElement in roundEnvironment.rootElements) {
-            scanner.scan(trees!!.getPath(rootElement), trees)
+            scanner.scan(trees.getPath(rootElement), trees)
         }
         initialize(configurationBuilder.build())
         return false
