@@ -41,9 +41,9 @@ kapt {
     useBuildCache = false
     javacOptions {
         arguments {
-            arg("art.generator.destination", compileKotlin.destinationDir.absolutePath)
-            arg("art.generator.classpath", compileKotlin.classpath.files.joinToString(";"))
-            arg("art.generator.sources", compileKotlin.source.files.joinToString(";"))
+            arg("art.generator.recompilation.destination", compileKotlin.destinationDir.absolutePath)
+            arg("art.generator.recompilation.classpath", compileKotlin.classpath.files.joinToString(","))
+            arg("art.generator.recompilation.sources", compileKotlin.source.files.joinToString(","))
         }
     }
 }

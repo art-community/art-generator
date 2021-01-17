@@ -40,7 +40,7 @@ public class ClassGenerationService {
     }
 
     @SneakyThrows
-    public void closePendingSources() {
+    public void flushPendingSources() {
         for (FileObject fileObject : generatedClasses().values()) {
             String content = readFile(fileObject.getName());
             try (Writer writer = fileObject.openWriter()) {

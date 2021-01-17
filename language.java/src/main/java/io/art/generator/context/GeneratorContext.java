@@ -31,7 +31,7 @@ public class GeneratorContext {
 
     private static JavaDialect dialect;
 
-    private static CompilationService compilationService;
+    private static RecompilationService recompilationService;
 
     private static GeneratorLogger logger;
 
@@ -51,7 +51,7 @@ public class GeneratorContext {
         return existedClasses.get(name);
     }
 
-    public static boolean isInitialized() {
+    public static boolean initialized() {
         return initialized.get();
     }
 
@@ -83,8 +83,8 @@ public class GeneratorContext {
         return GeneratorContext.dialect;
     }
 
-    public static CompilationService compilationService() {
-        return GeneratorContext.compilationService;
+    public static RecompilationService compilationService() {
+        return GeneratorContext.recompilationService;
     }
 
     public static GeneratorLogger logger() {
@@ -98,7 +98,7 @@ public class GeneratorContext {
             compiler = configuration.getCompiler();
             maker = configuration.getMaker();
             elements = configuration.getElements();
-            compilationService = configuration.getCompilationService();
+            recompilationService = configuration.getRecompilationService();
             dialect = configuration.getDialect();
             logger = configuration.getLogger();
             classLoader = new GeneratorClassLoader();

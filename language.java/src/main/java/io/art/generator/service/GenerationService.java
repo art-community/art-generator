@@ -21,7 +21,7 @@ public class GenerationService {
             generateStubs();
             compilationService().recompile();
             implementModuleModel();
-            closePendingSources();
+            flushPendingSources();
             classLoader().close();
             clearLocalState();
         } catch (ValidationException validationException) {

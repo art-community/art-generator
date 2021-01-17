@@ -3,7 +3,6 @@ package io.art.generator.constants;
 public interface Names {
     String CLASS_KEYWORD = "class";
     String JAVA_PACKAGE_PREFIX = "java.";
-    String JAVA_FILE_SUFFIX = ".java";
     String CONSTRUCTOR_NAME = "<init>";
     String THIS_NAME = "this";
     String PROVIDER_CLASS_SUFFIX = "Provider";
@@ -78,6 +77,6 @@ public interface Names {
     String SOURCE_NAME = "source";
     String TARGET_SERVICE_ID_NAME = "targetServiceId";
     String TARGET_METHOD_ID_NAME = "targetMethodId";
-    String TARGET_SERVICe_METHOD_NAME = "targetServiceMethod";
+    String TARGET_SERVICE_METHOD_NAME = "targetServiceMethod";
     String SERVICE_METHOD_NAME = "serviceMethod";
 }

@@ -114,7 +114,7 @@ public class CommunicatorProxyCreator {
                 .method(ACTION_ID_NAME, literal(proxyMethod.getName()));
 
         if (nonNull(communicatorModel.getTargetServiceId())) {
-            actionBuilder.method(TARGET_SERVICe_METHOD_NAME, method(SERVICE_METHOD_IDENTIFIER_TYPE, SERVICE_METHOD_NAME)
+            actionBuilder.method(TARGET_SERVICE_METHOD_NAME, method(SERVICE_METHOD_IDENTIFIER_TYPE, SERVICE_METHOD_NAME)
                     .addArgument(literal(communicatorModel.getTargetServiceId()))
                     .addArgument(literal(orElse(communicatorModel.getTargetMethodId(), proxyMethod.getName())))
                     .apply());
