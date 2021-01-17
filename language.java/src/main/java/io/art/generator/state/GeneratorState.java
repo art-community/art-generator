@@ -16,6 +16,7 @@ public class GeneratorState {
     private final static ThreadLocal<GeneratorState> LOCAL_STATE = new ThreadLocal<>();
     private final ThreadLocal<ClassState> CLASS_STATE = new ThreadLocal<>();
     private final Map<String, FileObject> GENERATED_CLASSES = map();
+    private static volatile boolean COMPLETED = false;
 
     public static void useModuleClass(ExistedClass currentModuleClass) {
         getLocalState().CLASS_STATE.set(new ClassState(currentModuleClass));
@@ -29,8 +30,6 @@ public class GeneratorState {
         LOCAL_STATE.get().CLASS_STATE.remove();
         LOCAL_STATE.remove();
     }
-
-    private static boolean COMPLETED = false;
 
     public static ExistedClass moduleClass() {
         return let(getClassState(), state -> state.currentModuleClass);
@@ -67,6 +66,7 @@ public class GeneratorState {
     public static void putGeneratedClass(String name, FileObject file) {
         getLocalState().GENERATED_CLASSES.put(name, file);
     }
+
 
     private static GeneratorState getLocalState() {
         return LOCAL_STATE.get();
