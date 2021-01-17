@@ -69,7 +69,6 @@ public interface Names {
     String INSTANCE_FIELD_NAME = "INSTANCE";
     String IMMUTABLE_SET_OF_NAME = "immutableSetOf";
     String SET_OF_NAME = "setOf";
-    String TO_ARRAY_NAME = "toArray";
     String TO_ARRAY_RAW_NAME = "toArrayRaw";
     String OF_NULLABLE_NAME = "ofNullable";
     String UNBOX_NAME = "unbox";

@@ -48,7 +48,7 @@ public class ToModelMapperCreator {
                     return select(ARRAY_MAPPING_TYPE, selectToArrayJavaPrimitiveMethod(modelClass));
                 }
                 JCExpression parameterMapper = toModelMapper(modelClass.getComponentType());
-                return method(ARRAY_MAPPING_TYPE, TO_ARRAY)
+                return method(ARRAY_MAPPING_TYPE, TO_ARRAY_RAW)
                         .addArguments(newReference(type(modelClass)), parameterMapper)
                         .apply();
             }
@@ -121,7 +121,7 @@ public class ToModelMapperCreator {
 
         if (isGenericArray(type)) {
             Type genericComponentType = ((GenericArrayType) type).getGenericComponentType();
-            return method(ARRAY_MAPPING_TYPE, TO_ARRAY)
+            return method(ARRAY_MAPPING_TYPE, TO_ARRAY_RAW)
                     .addTypeParameters(type(genericComponentType))
                     .addArguments(newReference(type(type)), toModelMapper(genericComponentType))
                     .apply();

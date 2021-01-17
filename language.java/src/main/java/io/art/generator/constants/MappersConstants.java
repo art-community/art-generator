@@ -58,7 +58,7 @@ public interface MappersConstants {
         String TO_IMMUTABLE_ARRAY = "toImmutableArray";
         String TO_IMMUTABLE_SET = "toImmutableSet";
 
-        String TO_ARRAY = "toArray";
+        String TO_ARRAY_RAW = "toArrayRaw";
         String TO_STREAM = "toStream";
         String TO_MUTABLE_COLLECTION = "toMutableCollection";
         String TO_MUTABLE_LIST = "toMutableList";
