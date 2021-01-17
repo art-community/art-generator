@@ -18,11 +18,22 @@ public class GeneratorState {
     private final Map<String, FileObject> GENERATED_CLASSES = map();
     private static volatile boolean COMPLETED = false;
 
+
+    public static boolean completed() {
+        return COMPLETED;
+    }
+
+    public static void complete() {
+        COMPLETED = true;
+    }
+
+
     public static void useModuleClass(ExistedClass currentModuleClass) {
         getLocalState().CLASS_STATE.set(new ClassState(currentModuleClass));
     }
 
-    public static void updateLocalState() {
+
+    public static void refreshLocalState() {
         LOCAL_STATE.set(new GeneratorState());
     }
 
@@ -30,6 +41,7 @@ public class GeneratorState {
         LOCAL_STATE.get().CLASS_STATE.remove();
         LOCAL_STATE.remove();
     }
+
 
     public static ExistedClass moduleClass() {
         return let(getClassState(), state -> state.currentModuleClass);
@@ -47,13 +59,6 @@ public class GeneratorState {
         return getClassState().communicatorsRegistry.compute(type);
     }
 
-    public static boolean completed() {
-        return COMPLETED;
-    }
-
-    public static void complete() {
-        COMPLETED = true;
-    }
 
     public static ImmutableMap<String, FileObject> generatedClasses() {
         return immutableMapOf(getLocalState().GENERATED_CLASSES);

@@ -17,7 +17,7 @@ public class GenerationService {
     public void generate() {
         success(GENERATION_STARTED);
         try {
-            updateLocalState();
+            refreshLocalState();
             generateStubs();
             compilationService().recompile();
             implementModuleModel();
