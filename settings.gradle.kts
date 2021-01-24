@@ -70,7 +70,8 @@ val artModules = listOf(
         "yaml",
         "tarantool",
         "template-engine",
-        "graal"
+        "graal",
+        "storage"
 )
 
 artModules.forEach { module ->
