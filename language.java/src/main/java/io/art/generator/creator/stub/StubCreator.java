@@ -1,33 +1,23 @@
 package io.art.generator.creator.stub;
 
-import com.sun.tools.javac.tree.JCTree;
-import io.art.core.collection.ImmutableSet;
-import io.art.core.exception.NotImplementedException;
-import io.art.generator.model.ExistedClass;
-import io.art.generator.model.ImportModel;
-import io.art.generator.model.NewClass;
-import lombok.experimental.UtilityClass;
-
-
-import java.util.Set;
-
+import com.sun.tools.javac.tree.*;
+import io.art.core.collection.*;
+import io.art.core.exception.*;
+import io.art.generator.model.*;
 import static com.sun.tools.javac.code.Flags.*;
-import static io.art.core.collector.SetCollector.setCollector;
-import static io.art.core.factory.SetFactory.setOf;
-import static io.art.generator.constants.Imports.IMPORTING_CLASSES;
-import static io.art.generator.constants.Names.PROVIDER_CLASS_SUFFIX;
-import static io.art.generator.constants.Names.PROVIDE_NAME;
-import static io.art.generator.constants.TypeModels.MODULE_MODEL_TYPE;
-import static io.art.generator.constants.TypeModels.NOT_IMPLEMENTED_EXCEPTION_TYPE;
-import static io.art.generator.context.GeneratorContext.processingEnvironment;
-import static io.art.generator.model.ImportModel.classImport;
-import static io.art.generator.model.NewClass.newClass;
-import static io.art.generator.model.NewMethod.newMethod;
-import static io.art.generator.service.JavacService.literal;
-import static io.art.generator.service.JavacService.throwException;
-import static java.util.Arrays.stream;
+import static io.art.core.collector.SetCollector.*;
+import static io.art.core.factory.SetFactory.*;
+import static io.art.generator.constants.Imports.*;
+import static io.art.generator.constants.Names.*;
+import static io.art.generator.constants.TypeModels.*;
+import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.model.ImportModel.*;
+import static io.art.generator.model.NewClass.*;
+import static io.art.generator.model.NewMethod.*;
+import static io.art.generator.service.JavacService.*;
+import static java.util.Arrays.*;
+import java.util.*;
 
-@UtilityClass
 public class StubCreator {
     public NewClass createProviderStub(ExistedClass moduleClass) {
         return newClass().modifiers(PUBLIC)

@@ -22,15 +22,15 @@ public class StorageSpaceInterfaceCreator {
                 .name(space.getId() + STORAGE_SPACE_SUFFIX)
                 .modifiers(PUBLIC | INTERFACE);
 
-        for(Method method: space.getBasicSpaceClass().getMethods()){
-            NewMethod newMethod = newMethod()
-                    .name(method.getName())
-                    .returnType(updateType(method.getGenericReturnType(), space));
-            for(Type arg: method.getGenericParameterTypes()){
-                newMethod.parameter(newParameter(updateType(arg, space), sequenceName(arg.getTypeName())));
-            }
-            spaceInterface.method(newMethod);
-        }
+//        for(Method method: space.getBasicSpaceClass().getMethods()){
+//            NewMethod newMethod = newMethod()
+//                    .name(method.getName())
+//                    .returnType(updateType(method.getGenericReturnType(), space));
+//            for(Type arg: method.getGenericParameterTypes()){
+//                newMethod.parameter(newParameter(updateType(arg, space), sequenceName(arg.getTypeName())));
+//            }
+//            spaceInterface.method(newMethod);
+//        }
         return spaceInterface;
     }
 
