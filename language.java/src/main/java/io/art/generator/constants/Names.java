@@ -6,6 +6,7 @@ public interface Names {
     String CONSTRUCTOR_NAME = "<init>";
     String THIS_NAME = "this";
     String PROVIDER_CLASS_SUFFIX = "Provider";
+    String STORAGE_SPACE_SUFFIX = "Space";
     String PROXY_CLASS_SUFFIX = "Proxy";
     String ACTION_FIELD_PREFIX = "action";
     String IMPLEMENT_NAME = "implement";
