@@ -15,6 +15,7 @@ dependencies {
     api(project(":value"))
     api(project(":model"))
     api(project(":rsocket"))
+    api(project(":storage"))
 }
 
 tasks.withType<JavaCompile> {
