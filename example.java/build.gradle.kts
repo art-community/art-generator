@@ -26,9 +26,9 @@ val compileJava: JavaCompile = tasks["compileJava"] as JavaCompile
 val processResources: Task = tasks["processResources"]
 
 compileJava.options.compilerArgs.addAll(arrayOf(
-        "-Aart.generator.destination=${compileJava.destinationDir.absolutePath}",
-        "-Aart.generator.classpath=${compileJava.classpath.files.joinToString(";")}",
-        "-Aart.generator.sources=${compileJava.source.files.joinToString(";")}"
+        "-Aart.generator.recompilation.destination=${compileJava.destinationDir.absolutePath}",
+        "-Aart.generator.recompilation.classpath=${compileJava.classpath.files.joinToString(",")}",
+        "-Aart.generator.recompilation.sources=${compileJava.source.files.joinToString(",")}"
 ))
 
 compileJava.dependsOn("clean").dependsOn(project(":language.java").tasks["build"])

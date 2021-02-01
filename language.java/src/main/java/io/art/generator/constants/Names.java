@@ -3,7 +3,6 @@ package io.art.generator.constants;
 public interface Names {
     String CLASS_KEYWORD = "class";
     String JAVA_PACKAGE_PREFIX = "java.";
-    String JAVA_FILE_SUFFIX = ".java";
     String CONSTRUCTOR_NAME = "<init>";
     String THIS_NAME = "this";
     String PROVIDER_CLASS_SUFFIX = "Provider";
@@ -71,12 +70,13 @@ public interface Names {
     String IMMUTABLE_SET_OF_NAME = "immutableSetOf";
     String SET_OF_NAME = "setOf";
     String TO_ARRAY_NAME = "toArray";
+    String TO_ARRAY_RAW_NAME = "toArrayRaw";
     String OF_NULLABLE_NAME = "ofNullable";
     String UNBOX_NAME = "unbox";
     String BY_CLASS_NAME = "byClass";
     String SOURCE_NAME = "source";
     String TARGET_SERVICE_ID_NAME = "targetServiceId";
     String TARGET_METHOD_ID_NAME = "targetMethodId";
-    String TARGET_SERVICe_METHOD_NAME = "targetServiceMethod";
+    String TARGET_SERVICE_METHOD_NAME = "targetServiceMethod";
     String SERVICE_METHOD_NAME = "serviceMethod";
 }

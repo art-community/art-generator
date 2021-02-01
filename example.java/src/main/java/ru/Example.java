@@ -1,6 +1,5 @@
 package ru;
 
-import io.art.launcher.*;
 import io.art.model.annotation.*;
 import io.art.model.configurator.*;
 import io.art.model.implementation.storage.TarantoolSortMethodModel;
@@ -10,11 +9,14 @@ import ru.configuration.*;
 import ru.model.*;
 import ru.service.*;
 import static io.art.communicator.module.CommunicatorModule.*;
+import static io.art.launcher.ModuleLauncher.*;
 import static io.art.core.constants.EmptyFunctions.emptyFunction;
 import static io.art.model.configurator.ModuleModelConfigurator.*;
+import static ru.ExampleProvider.*;
 
 public class Example {
     public static void main(String[] args) {
+        launch(provide());
     }
 
     @Configurator
