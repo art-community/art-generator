@@ -84,7 +84,7 @@ public class ProviderClassCreator {
 
 
     public NewClass createProviderStub(ExistedClass moduleClass) {
-        NewClass provider = newClass().modifiers(PUBLIC)
+        return newClass().modifiers(PUBLIC)
                 .addImports(stream(IMPORTING_CLASSES).map(ImportModel::classImport).collect(setCollector()))
                 .addImport(classImport(moduleClass.getFullName()))
                 .name(moduleClass.getName() + PROVIDER_CLASS_SUFFIX)
@@ -93,10 +93,6 @@ public class ProviderClassCreator {
                         .modifiers(PUBLIC | FINAL | STATIC)
                         .returnType(MODULE_MODEL_TYPE)
                         .statement(() -> throwException(NOT_IMPLEMENTED_EXCEPTION_TYPE, literal(PROVIDE_NAME))));
-        for(SpaceModel space: loadModel().getStorageModel().getStorages().values()){
-            provider.inner(createSpaceInterface(space));
-        }
-        return provider;
     }
 
     private NewMethod createProvideMethod() {
