@@ -18,7 +18,7 @@ import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.selector.ToMapperMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
-import static io.art.generator.state.GenerationState.*;
+import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;

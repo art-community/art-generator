@@ -9,6 +9,7 @@ import static io.art.generator.creator.provider.ProviderClassCreator.*;
 import static io.art.generator.implementor.ModuleModelImplementor.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.service.ClassGenerationService.*;
+import static io.art.generator.state.GeneratorState.*;
 
 @UtilityClass
 public class GenerationService {
@@ -16,11 +17,13 @@ public class GenerationService {
     public void generate() {
         success(GENERATION_STARTED);
         try {
+            refreshLocalState();
             generateStubs();
             compilationService().recompile();
             implementModuleModel();
-            closePendingSources();
+            flushPendingSources();
             classLoader().close();
+            clearLocalState();
         } catch (ValidationException validationException) {
             error(validationException.write());
             throw validationException;

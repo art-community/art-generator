@@ -7,7 +7,7 @@ import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.constants.DateTimeConstants.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.context.GeneratorContext.*;
-import static io.art.generator.state.GenerationState.*;
+import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
 import java.time.*;
 import java.util.function.*;

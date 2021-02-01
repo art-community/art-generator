@@ -6,6 +6,8 @@ import kotlin.reflect.KClass
 
 fun module(mainClass: KClass<*>, configurator: ModuleModelConfiguratorExtension.() -> ModuleModelConfiguratorExtension) = configurator(ModuleModelConfiguratorExtension(mainClass.simpleName!!))
 
+fun module(mainClass: String, configurator: ModuleModelConfiguratorExtension.() -> ModuleModelConfiguratorExtension) = configurator(ModuleModelConfiguratorExtension(mainClass))
+
 class ModuleModelConfiguratorExtension(id: String) : ModuleModelConfigurator(id) {
     fun value(configurator: ValueModelConfiguratorExtension.() -> Unit): ModuleModelConfiguratorExtension {
         super.value {

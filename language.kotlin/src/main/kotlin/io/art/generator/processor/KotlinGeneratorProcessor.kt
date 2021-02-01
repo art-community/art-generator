@@ -1,3 +1,5 @@
+@file:Suppress(JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE)
+
 package io.art.generator.processor
 
 import com.sun.source.util.Trees.instance
@@ -9,17 +11,18 @@ import com.sun.tools.javac.tree.TreeMaker
 import com.sun.tools.javac.util.Options
 import io.art.core.extensions.CollectionExtensions.addToSet
 import io.art.generator.constants.Annotations.CONFIGURATOR_ANNOTATION_NAME
+import io.art.generator.constants.JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE
 import io.art.generator.constants.JavaDialect.KOTLIN
 import io.art.generator.constants.ProcessorOptions.PROCESSOR_OPTIONS
-import io.art.generator.context.GeneratorContext
 import io.art.generator.context.GeneratorContext.initialize
+import io.art.generator.context.GeneratorContext.initialized
 import io.art.generator.context.GeneratorContextConfiguration
 import io.art.generator.logger.GeneratorLogger
 import io.art.generator.scanner.GeneratorScanner
 import io.art.generator.service.GenerationService.generate
-import io.art.generator.service.KotlinCompilationService
-import io.art.generator.state.GenerationState.complete
-import io.art.generator.state.GenerationState.completed
+import io.art.generator.service.KotlinRecompilationService
+import io.art.generator.state.GeneratorState.complete
+import io.art.generator.state.GeneratorState.completed
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
@@ -46,22 +49,25 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
 
     @Synchronized
     override fun process(annotations: Set<TypeElement?>, roundEnvironment: RoundEnvironment): Boolean {
-        if (GeneratorContext.isInitialized()) {
+        if (initialized()) {
             if (completed()) {
                 return true
             }
-            generate()
-            complete()
+            try {
+                generate()
+            } finally {
+                complete()
+            }
             return true
         }
         val elements = JavacElements.instance(processingEnvironment!!.context)
         val scanner = with(configurationBuilder) {
             dialect(KOTLIN)
-            compilationService(KotlinCompilationService())
-            options(Options.instance(processingEnvironment!!.context))
+            recompilationService(KotlinRecompilationService())
             processingEnvironment(processingEnvironment)
-            compiler(JavaCompiler.instance(processingEnvironment!!.context))
             elements(elements)
+            options(Options.instance(processingEnvironment!!.context))
+            compiler(JavaCompiler.instance(processingEnvironment!!.context))
             maker(TreeMaker.instance(processingEnvironment!!.context))
             logger(GeneratorLogger(System.out::println, System.err::println))
             GeneratorScanner(elements, this)

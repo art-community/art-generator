@@ -19,12 +19,13 @@ import static io.art.generator.constants.JavaDialect.*;
 import static io.art.generator.constants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.GenerationService.*;
-import static io.art.generator.state.GenerationState.*;
+import static io.art.generator.state.GeneratorState.*;
 import static javax.lang.model.SourceVersion.*;
 import javax.annotation.processing.*;
 import javax.lang.model.*;
 import javax.lang.model.element.*;
 import java.util.*;
+
 
 @SupportedAnnotationTypes(CONFIGURATOR_ANNOTATION_NAME)
 public class JavaGeneratorProcessor extends AbstractProcessor {
@@ -44,23 +45,26 @@ public class JavaGeneratorProcessor extends AbstractProcessor {
     }
 
     @Override
-    public synchronized boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        if (GeneratorContext.isInitialized()) {
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
+        if (initialized()) {
             if (completed()) {
                 return true;
             }
-            generate();
-            complete();
+            try {
+                generate();
+            } finally {
+                complete();
+            }
             return true;
         }
         JavacElements elements = JavacElements.instance(processingEnvironment.getContext());
         configurationBuilder
                 .dialect(JAVA)
-                .compilationService(new JavaCompilationService())
-                .options(Options.instance(processingEnvironment.getContext()))
+                .recompilationService(new JavaRecompilationService())
                 .processingEnvironment(processingEnvironment)
-                .compiler(JavaCompiler.instance(processingEnvironment.getContext()))
                 .elements(elements)
+                .options(Options.instance(processingEnvironment.getContext()))
+                .compiler(JavaCompiler.instance(processingEnvironment.getContext()))
                 .logger(new GeneratorLogger(System.out::println, System.err::println))
                 .maker(TreeMaker.instance(processingEnvironment.getContext()));
         GeneratorScanner scanner = new GeneratorScanner(elements, configurationBuilder);

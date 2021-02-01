@@ -2,13 +2,14 @@ package io.art.generator.creator.configuration;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.core.collection.*;
+import io.art.core.reflection.*;
 import io.art.generator.caller.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
-import io.art.core.reflection.*;
 import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
-import static io.art.core.factory.SetFactory.setOf;
+import static io.art.core.factory.SetFactory.*;
+import static io.art.core.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ConfiguratorConstants.ConfigurationSourceMethods.*;
 import static io.art.generator.constants.ConfiguratorConstants.ConfiguratorMethods.*;
@@ -23,11 +24,10 @@ import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
-import static io.art.core.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.selector.ConfigurationSourceMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.NamingService.*;
-import static io.art.generator.state.GenerationState.*;
+import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 
@@ -160,17 +160,13 @@ public class CustomConfigurationCreator {
     }
 
     private JCExpression createPropertyProvider(String property, GenericArrayType type) {
-        Type componentType = type.getGenericComponentType();
         String lambdaParameter = sequenceName(property);
         return method(property, AS_ARRAY)
-                .addTypeParameter(type(componentType))
                 .addArguments(newLambda()
                         .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
                         .expression(() -> createPropertyProvider(lambdaParameter, type.getGenericComponentType()))
                         .generate())
-                .next(TO_ARRAY_NAME, toArray -> toArray
-                        .addTypeParameter(type(componentType))
-                        .addArguments(newReference(type(type))))
+                .next(TO_ARRAY_RAW_NAME, toArray -> toArray.addArguments(newReference(type(type))))
                 .apply();
 
     }
@@ -188,13 +184,13 @@ public class CustomConfigurationCreator {
                             .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
                             .expression(() -> createPropertyProvider(lambdaParameter, componentType))
                             .generate())
-                    .next(TO_ARRAY_NAME, toArray -> toArray.addArguments(newArray(type(componentType), 0)))
+                    .next(TO_ARRAY_RAW_NAME, toArray -> toArray.addArguments(newReference(type(type))))
                     .apply();
         }
 
         ParameterizedTypeImplementation immutableArrayType = parameterizedType(ImmutableArray.class, componentType);
         JCMethodInvocation asArray = method(property, selectConfigurationSourceMethod(immutableArrayType))
-                .next(TO_ARRAY_NAME, toArray -> toArray.addArguments(newArray(type(componentType), 0)))
+                .next(TO_ARRAY_RAW_NAME, toArray -> toArray.addArguments(newReference(type(type))))
                 .apply();
 
         if (primitiveType) {

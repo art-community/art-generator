@@ -16,7 +16,7 @@ import static io.art.generator.creator.registry.RegistryVariableCreator.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.service.JavacService.*;
-import static io.art.generator.state.GenerationState.*;
+import static io.art.generator.state.GeneratorState.*;
 
 @UtilityClass
 public class CommunicatorModelImplementor {
