@@ -4,6 +4,7 @@ import io.art.core.collection.*;
 import io.art.generator.caller.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.module.*;
+import io.art.model.implementation.storage.SpaceModel;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.collector.SetCollector.*;
@@ -18,6 +19,7 @@ import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.creator.decorate.DecorateMethodCreator.*;
+import static io.art.generator.creator.storage.StorageSpaceInterfaceCreator.createSpaceInterface;
 import static io.art.generator.finder.ConfigureMethodFinder.*;
 import static io.art.generator.implementor.CommunicatorModelImplementor.*;
 import static io.art.generator.implementor.ConfiguratorModelImplementor.*;
@@ -29,6 +31,7 @@ import static io.art.generator.model.NewClass.*;
 import static io.art.generator.model.NewField.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.TypeModel.*;
+import static io.art.generator.loader.ModelLoader.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.util.Arrays.*;
@@ -81,7 +84,7 @@ public class ProviderClassCreator {
 
 
     public NewClass createProviderStub(ExistedClass moduleClass) {
-        return newClass().modifiers(PUBLIC)
+        NewClass provider = newClass().modifiers(PUBLIC)
                 .addImports(stream(IMPORTING_CLASSES).map(ImportModel::classImport).collect(setCollector()))
                 .addImport(classImport(moduleClass.getFullName()))
                 .name(moduleClass.getName() + PROVIDER_CLASS_SUFFIX)
@@ -90,6 +93,10 @@ public class ProviderClassCreator {
                         .modifiers(PUBLIC | FINAL | STATIC)
                         .returnType(MODULE_MODEL_TYPE)
                         .statement(() -> throwException(NOT_IMPLEMENTED_EXCEPTION_TYPE, literal(PROVIDE_NAME))));
+        for(SpaceModel space: loadModel().getStorageModel().getStorages().values()){
+            provider.inner(createSpaceInterface(space));
+        }
+        return provider;
     }
 
     private NewMethod createProvideMethod() {
