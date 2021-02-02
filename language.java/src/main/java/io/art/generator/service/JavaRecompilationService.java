@@ -25,14 +25,18 @@ import java.io.*;
 public class JavaRecompilationService implements RecompilationService {
     @Override
     public void recompile() {
-        success(RECOMPILATION_STARTED);
-        JavacTool javacTool = JavacTool.create();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(EMPTY_BYTES);
         ImmutableSet<String> sources = ImmutableSet.<String>immutableSetBuilder()
                 .addAll(immutableArrayOf(processingEnvironment().getOptions().get(SOURCES_PROCESSOR_OPTION).split(COMMA)))
                 .addAll(generatedClasses().values().stream().map(FileObject::getName).collect(setCollector()))
                 .build();
+        recompile(sources);
+    }
+
+    public void recompile(ImmutableSet<String> sources){
+        success(RECOMPILATION_STARTED);
+        JavacTool javacTool = JavacTool.create();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(EMPTY_BYTES);
         String[] recompileArguments = immutableArrayBuilder()
                 .add(NO_WARN_OPTION)
                 .add(PARAMETERS_OPTION)
