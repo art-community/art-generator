@@ -1,9 +1,8 @@
 package io.art.generator.loader;
 
-import io.art.core.lazy.*;
+import io.art.core.managed.*;
 import io.art.generator.exception.*;
-import io.vavr.*;
-import static io.art.core.lazy.LazyValue.lazy;
+import static io.art.core.managed.LazyValue.lazy;
 import static io.art.generator.constants.ProcessorOptions.DIRECTORY_PROCESSOR_OPTION;
 import static io.art.generator.context.GeneratorContext.*;
 import java.io.*;

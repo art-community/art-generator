@@ -11,7 +11,7 @@ import io.art.core.constants.*;
 import io.art.core.exception.*;
 import io.art.core.extensions.*;
 import io.art.core.factory.*;
-import io.art.core.lazy.*;
+import io.art.core.managed.*;
 import io.art.core.model.*;
 import io.art.core.singleton.*;
 import io.art.core.source.*;
@@ -68,7 +68,7 @@ public interface Imports {
 
             MethodProcessingMode.class.getName(),
             LazyValue.class.getName(),
-            ManagedValue.class.getName(),
+            DisposableValue.class.getName(),
             SingletonsRegistry.class.getName(),
             NullityChecker.class.getName(),
 

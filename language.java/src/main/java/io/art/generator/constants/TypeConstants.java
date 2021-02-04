@@ -1,7 +1,7 @@
 package io.art.generator.constants;
 
 import io.art.core.collection.*;
-import io.art.core.lazy.*;
+import io.art.core.managed.*;
 import io.art.generator.model.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import reactor.core.publisher.*;

@@ -1,7 +1,7 @@
 package io.art.generator.inspector;
 
 import io.art.core.collection.*;
-import io.art.core.lazy.*;
+import io.art.core.managed.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.server.validation.*;
