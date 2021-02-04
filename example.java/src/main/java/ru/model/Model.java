@@ -1,7 +1,7 @@
 package ru.model;
 
 import io.art.core.collection.*;
-import io.art.core.lazy.*;
+import io.art.core.managed.*;
 import lombok.*;
 import java.time.*;
 import java.util.*;

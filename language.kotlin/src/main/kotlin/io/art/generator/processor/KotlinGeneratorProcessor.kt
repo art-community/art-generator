@@ -33,8 +33,8 @@ import javax.lang.model.element.TypeElement
 
 @SupportedAnnotationTypes(CONFIGURATOR_ANNOTATION_NAME)
 class KotlinGeneratorProcessor : AbstractProcessor() {
-    private var trees: JavacTrees? = null
-    private var processingEnvironment: JavacProcessingEnvironment? = null
+    private lateinit var trees: JavacTrees
+    private lateinit var processingEnvironment: JavacProcessingEnvironment
     private val configurationBuilder = GeneratorContextConfiguration.builder()
 
     override fun init(processingEnvironment: ProcessingEnvironment) {
@@ -60,20 +60,20 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
             }
             return true
         }
-        val elements = JavacElements.instance(processingEnvironment!!.context)
+        val elements = JavacElements.instance(processingEnvironment.context)
         val scanner = with(configurationBuilder) {
             dialect(KOTLIN)
             recompilationService(KotlinRecompilationService())
             processingEnvironment(processingEnvironment)
             elements(elements)
-            options(Options.instance(processingEnvironment!!.context))
-            compiler(JavaCompiler.instance(processingEnvironment!!.context))
-            maker(TreeMaker.instance(processingEnvironment!!.context))
+            options(Options.instance(processingEnvironment.context))
+            compiler(JavaCompiler.instance(processingEnvironment.context))
+            maker(TreeMaker.instance(processingEnvironment.context))
             logger(GeneratorLogger(System.out::println, System.err::println))
             GeneratorScanner(elements, this)
         }
         for (rootElement in roundEnvironment.rootElements) {
-            scanner.scan(trees!!.getPath(rootElement), trees)
+            scanner.scan(trees.getPath(rootElement), trees)
         }
         initialize(configurationBuilder.build())
         return false
