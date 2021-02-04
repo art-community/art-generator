@@ -29,7 +29,7 @@ import java.util.function.*;
 @Setter
 @Accessors(fluent = true)
 @NoArgsConstructor(access = PRIVATE)
-public class NewClass {
+public class NewClass implements GeneratedClass{
     private String name;
     private long modifiers;
     private Set<ImportModel> imports = set();

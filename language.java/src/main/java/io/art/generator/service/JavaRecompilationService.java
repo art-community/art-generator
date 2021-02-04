@@ -32,7 +32,7 @@ public class JavaRecompilationService implements RecompilationService {
         recompile(sources);
     }
 
-    public void recompile(ImmutableSet<String> sources){
+    public void recompile(Iterable<String> sources){
         success(RECOMPILATION_STARTED);
         JavacTool javacTool = JavacTool.create();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

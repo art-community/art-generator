@@ -215,20 +215,21 @@ public class TypeInspector {
     public boolean hasConstructorWithAllProperties(Type type) {
         Class<?> rawClass = extractClass(type);
         ImmutableArray<ExtractedProperty> properties = getConstructorProperties(rawClass);
-        return matchConstructorArguments(rawClass, properties.stream().map(ExtractedProperty::type).collect(immutableArrayCollector()));
+        ImmutableArray<Type> argumentTypes = properties.stream().map(ExtractedProperty::type).collect(immutableArrayCollector());
+        for (Constructor<?> constructor : rawClass.getConstructors()) {
+            if (matchConstructorArguments(constructor, argumentTypes)) return true;
+        }
+        return false;
     }
 
-    public boolean matchConstructorArguments(Type type, ImmutableArray<Type> argumentTypes) {
-        Class<?> rawClass = extractClass(type);
-        for (Constructor<?> constructor : rawClass.getConstructors()) {
-            if (!isPublic(constructor.getModifiers())) continue;
-            Parameter[] parameters = constructor.getParameters();
-            if (argumentTypes.size() != parameters.length) return false;
-            for (int i = 0; i < parameters.length; i++) {
-                Parameter parameter = parameters[i];
-                if (!parameter.getParameterizedType().equals(argumentTypes.get(i))) {
-                    return false;
-                }
+    private boolean matchConstructorArguments(Constructor<?> constructor, ImmutableArray<Type> argumentTypes){
+        if (!isPublic(constructor.getModifiers())) return false;
+        Parameter[] parameters = constructor.getParameters();
+        if (argumentTypes.size() != parameters.length) return false;
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            if (!parameter.getParameterizedType().equals(argumentTypes.get(i))) {
+                return false;
             }
         }
         return true;

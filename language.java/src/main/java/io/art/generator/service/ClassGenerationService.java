@@ -24,11 +24,11 @@ import java.io.*;
 @UtilityClass
 public class ClassGenerationService {
     @SneakyThrows
-    public void generateClass(NewClass newClass, String packageName) {
+    public void generateClass(GeneratedClass generatedClass, String packageName) {
         ListBuffer<JCTree> definitions = new ListBuffer<>();
-        definitions.addAll(createImports(immutableSetOf(newClass.imports())));
-        definitions.add(newClass.generate());
-        String className = packageName + DOT + newClass.name();
+        definitions.addAll(createImports(immutableSetOf(generatedClass.imports())));
+        definitions.add(generatedClass.generate());
+        String className = packageName + DOT + generatedClass.name();
         FileObject file = generatedClasses().get(className);
         if (nonNull(file)) {
             writeSource(packageName, definitions, file.getName());

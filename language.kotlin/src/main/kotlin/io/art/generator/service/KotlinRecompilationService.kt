@@ -19,11 +19,15 @@ import java.text.MessageFormat.format
 
 class KotlinRecompilationService : RecompilationService {
     override fun recompile() {
-        success(RECOMPILATION_STARTED)
         val sources = mutableListOf<String>().apply {
             addAll(processingEnvironment().options[SOURCES_PROCESSOR_OPTION]!!.split(COMMA))
             addAll(generatedClasses().values().map { file -> file.name })
         }
+        recompile(sources)
+    }
+
+    override fun recompile(sources: Iterable<String>) {
+        success(RECOMPILATION_STARTED)
         val arguments = with(mutableListOf<String>()) {
             add(KOTLIN_NO_STD_LIB)
             add(KOTLIN_NO_REFLECT)

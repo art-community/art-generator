@@ -15,6 +15,7 @@ import io.art.core.lazy.*;
 import io.art.core.model.*;
 import io.art.core.singleton.*;
 import io.art.core.source.*;
+import io.art.generator.model.ImportModel;
 import io.art.launcher.*;
 import io.art.model.configurator.*;
 import io.art.model.customizer.*;
@@ -44,6 +45,8 @@ import java.util.*;
 import java.util.stream.*;
 
 public interface Imports {
+    ImportModel NOT_IMPLEMENTED_EXCEPTION_MODEL = new ImportModel("io.art.core.exception.NotImplementedException", false, false);
+
     String[] IMPORTING_CLASSES = new String[]{
             NotImplementedException.class.getName(),
             Optional.class.getName(),

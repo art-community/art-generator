@@ -2,7 +2,6 @@ package ru.communicator;
 
 import reactor.core.publisher.*;
 import ru.model.*;
-import java.util.stream.*;
 
 public interface MyClient {
     void myMethod1();

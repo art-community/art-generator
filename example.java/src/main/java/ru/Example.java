@@ -2,7 +2,6 @@ package ru;
 
 import io.art.model.annotation.*;
 import io.art.model.configurator.*;
-import io.art.model.implementation.storage.TarantoolSortMethodModel;
 import io.art.value.immutable.Value;
 import ru.communicator.*;
 import ru.configuration.*;
