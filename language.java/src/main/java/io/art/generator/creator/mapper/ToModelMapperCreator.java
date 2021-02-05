@@ -100,7 +100,7 @@ public class ToModelMapperCreator {
 
             if (isLazyValue(type)) {
                 Type fieldTypeArgument = typeArguments[0];
-                return method(LAZY_VALUE_MAPPING_TYPE, TO_LAZY).addArguments(toModelMapper(fieldTypeArgument)).apply();
+                return method(LAZY_MAPPING_TYPE, TO_LAZY).addArguments(toModelMapper(fieldTypeArgument)).apply();
             }
 
             if (isOptional(type)) {

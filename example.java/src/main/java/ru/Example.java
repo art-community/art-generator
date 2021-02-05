@@ -9,6 +9,8 @@ import ru.service.*;
 import static io.art.communicator.module.CommunicatorModule.*;
 import static io.art.launcher.ModuleLauncher.*;
 import static io.art.model.configurator.ModuleModelConfigurator.*;
+import static io.art.scheduler.manager.SchedulersManager.*;
+import static java.time.Duration.*;
 import static ru.ExampleProvider.*;
 
 public class Example {
@@ -23,6 +25,6 @@ public class Example {
                 .configure(configurator -> configurator.configuration(MyConfig.class))
                 .serve(server -> server.rsocket(MyService.class, RsocketServiceModelConfigurator::logging))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
-                .onLoad(() -> communicator(MyClient.class).myMethod2(Request.builder().build()));
+                .onLoad(() -> scheduleFixedRate(() -> communicator(MyClient.class).myMethod2(Request.builder().build()), ofSeconds(30)));
     }
 }

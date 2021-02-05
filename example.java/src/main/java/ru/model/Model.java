@@ -1,7 +1,7 @@
 package ru.model;
 
 import io.art.core.collection.*;
-import io.art.core.managed.*;
+import io.art.core.property.*;
 import lombok.*;
 import java.time.*;
 import java.util.*;
@@ -146,17 +146,17 @@ public class Model {
     Collection<GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FCGModel;
     Map<String, GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FMGMModel;
 
-    LazyValue<String> FLazyString;
-    LazyValue<Long> FLazyLong;
-    Collection<LazyValue<Long>> FCLazyLong;
-    LazyValue<Collection<Long>> FLazyCLong;
-    LazyValue<Collection<LazyValue<Long>>> FCLazyCLong;
-    LazyValue<Long>[] FLazyLongA;
-    LazyValue<Long[]> FLazyALong;
-    LazyValue<Collection<Long>[]> FLazyCLongA;
-    LazyValue<Collection<Long[]>> FLazyCALong;
-    LazyValue<Collection<Long[]>>[][] FLazyCLAMultiA;
-    Map<String, LazyValue<Collection<Long[][]>[]>[]>[] MSLazyMCMLongMultiA;
+    LazyProperty<String> FLazyString;
+    LazyProperty<Long> FLazyLong;
+    Collection<LazyProperty<Long>> FCLazyLong;
+    LazyProperty<Collection<Long>> FLazyCLong;
+    LazyProperty<Collection<LazyProperty<Long>>> FCLazyCLong;
+    LazyProperty<Long>[] FLazyLongA;
+    LazyProperty<Long[]> FLazyALong;
+    LazyProperty<Collection<Long>[]> FLazyCLongA;
+    LazyProperty<Collection<Long[]>> FLazyCALong;
+    LazyProperty<Collection<Long[]>>[][] FLazyCLAMultiA;
+    Map<String, LazyProperty<Collection<Long[][]>[]>[]>[] MSLazyMCMLongMultiA;
 
     Optional<String> FOptionalString;
     Optional<Long> FOptionalLong;

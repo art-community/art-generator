@@ -49,7 +49,7 @@ public interface TypeModels {
     TypeModel ARRAY_MAPPING_TYPE = type(ArrayMapping.class);
     TypeModel PRIMITIVE_MAPPING_TYPE = type(PrimitiveMapping.class);
     TypeModel ENTITY_MAPPING_TYPE = type(EntityMapping.class);
-    TypeModel LAZY_VALUE_MAPPING_TYPE = type(LazyValueMapping.class);
+    TypeModel LAZY_MAPPING_TYPE = type(LazyMapping.class);
     TypeModel OPTIONAL_MAPPING_TYPE = type(OptionalMapping.class);
     TypeModel PRIMITIVE_ENUM_TYPE = type(PrimitiveType.class);
 
