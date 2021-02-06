@@ -38,7 +38,7 @@ public class CommunicatorModelImplementor {
         communicatorModel.getRsocketCommunicators()
                 .values()
                 .stream()
-                .map(model -> createNewProxyClass(RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE, model))
+                .map(model -> createNewProxyClass(RSOCKET_COMMUNICATOR_ACTION_TYPE, model))
                 .forEach(proxies::add);
         return proxies.build();
     }
