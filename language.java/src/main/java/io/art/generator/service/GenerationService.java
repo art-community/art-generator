@@ -21,7 +21,7 @@ public class GenerationService {
             refreshLocalState();
             generateStubs();
             recompileWithStubs();
-            deleteExistedClassesStubs();
+            deleteStubSources();
             implementModuleModel();
             flushPendingSources();
             classLoader().close();

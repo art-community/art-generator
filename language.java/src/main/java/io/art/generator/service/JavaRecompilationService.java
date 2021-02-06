@@ -39,7 +39,7 @@ public class JavaRecompilationService implements RecompilationService {
         javacTool = JavacTool.create();
         stubFileManager = lazy( () -> {
         JavacFileManager manager = javacTool.getStandardFileManager(new DiagnosticCollector<>(), null, null);
-        Set<File> generatedSourcesRoot = setOf(new File(processingEnvironment().getOptions().get(GENERATED_SOURCES_ROOT_DIRECTORY)));
+        Set<File> generatedSourcesRoot = setOf(new File(processingEnvironment().getOptions().get(GENERATED_SOURCES_ROOT_PROCESSOR_OPTION)));
         try {
             manager.setLocation(StandardLocation.SOURCE_OUTPUT, generatedSourcesRoot);
         } catch (IOException e){
@@ -61,7 +61,6 @@ public class JavaRecompilationService implements RecompilationService {
     @Override
     public void recompile(Iterable<String> sources){
         success(RECOMPILATION_STARTED);
-        stubFileManager.get().close();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(EMPTY_BYTES);
         String[] recompileArguments = immutableArrayBuilder()

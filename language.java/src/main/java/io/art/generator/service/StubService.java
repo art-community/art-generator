@@ -53,7 +53,7 @@ public class StubService {
         compilationService().recompile(sources);
     }
 
-    public static void deleteExistedClassesStubs(){
+    public static void deleteStubSources(){
         Set<String> moduleClassNames = moduleClasses().values().stream()
                 .map(ExistedClass::getFullName)
                 .collect(setCollector());
@@ -74,12 +74,12 @@ public class StubService {
     }
 
     private static Set<String> projectClasses(){
-        String sourcesRoot = processingEnvironment().getOptions().get(SOURCES_ROOT_DIRECTORY);
+        String sourcesRoot = processingEnvironment().getOptions().get(SOURCES_ROOT_PROCESSOR_OPTION);
         return stream(processingEnvironment().getOptions().get(SOURCES_PROCESSOR_OPTION).split(","))
                 .filter(path -> path.startsWith(sourcesRoot))
                 .map(path -> path.substring(sourcesRoot.length() + 1)
                         .replace(File.separatorChar, DOT)
-                        .replace(JAVA_FILE_EXTENSION, EMPTY_STRING))
+                        .replace(JAVA_SOURCE_FILE_EXTENSION, EMPTY_STRING))
                 .collect(Collectors.toSet());
     }
 }
