@@ -19,6 +19,8 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
+    implementation(project(":tarantool"))
+    implementation(project(":storage"))
     annotationProcessor(project(":language.java"))
 }
 

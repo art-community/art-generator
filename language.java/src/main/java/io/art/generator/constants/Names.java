@@ -6,7 +6,6 @@ public interface Names {
     String CONSTRUCTOR_NAME = "<init>";
     String THIS_NAME = "this";
     String PROVIDER_CLASS_SUFFIX = "Provider";
-    String STORAGE_SPACE_SUFFIX = "Space";
     String PROXY_CLASS_SUFFIX = "Proxy";
     String ACTION_FIELD_PREFIX = "action";
     String IMPLEMENT_NAME = "implement";
@@ -80,4 +79,9 @@ public interface Names {
     String TARGET_METHOD_ID_NAME = "targetMethodId";
     String TARGET_SERVICE_METHOD_NAME = "targetServiceMethod";
     String SERVICE_METHOD_NAME = "serviceMethod";
+
+    String STORAGE_SPACE_SUFFIX = "Space";
+    String STORAGE_INTERFACES_SUFFIX = "StorageInterfaces";
+    String STORAGE_GET_BY_PREFIX = "getBy";
+    String STORAGE_SELECT_BY_PREFIX = "selectBy";
 }
