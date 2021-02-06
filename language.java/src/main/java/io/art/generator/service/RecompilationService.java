@@ -1,6 +1,6 @@
 package io.art.generator.service;
 
-import javax.tools.FileObject;
+import javax.tools.*;
 
 public interface RecompilationService {
     void recompile();

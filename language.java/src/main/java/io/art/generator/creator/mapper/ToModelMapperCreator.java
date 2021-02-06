@@ -4,6 +4,9 @@ import com.sun.tools.javac.tree.JCTree.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import lombok.*;
+
+import java.lang.reflect.*;
+
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.MappersConstants.ArrayMappingMethods.*;
@@ -21,7 +24,6 @@ import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
-import java.lang.reflect.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ToModelMapperCreator {

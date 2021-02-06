@@ -2,9 +2,8 @@ package io.art.generator.model;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import lombok.*;
+
 import static java.util.Objects.*;
-import java.lang.reflect.*;
-import java.util.*;
 
 @Getter
 @Builder

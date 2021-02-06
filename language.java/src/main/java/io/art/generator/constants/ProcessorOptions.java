@@ -10,7 +10,9 @@ public interface ProcessorOptions {
     String[] PROCESSOR_OPTIONS = new String[]{
             CLASS_PATH_PROCESSOR_OPTION,
             DIRECTORY_PROCESSOR_OPTION,
-            SOURCES_PROCESSOR_OPTION
+            SOURCES_PROCESSOR_OPTION,
+            SOURCES_ROOT_DIRECTORY,
+            GENERATED_SOURCES_ROOT_DIRECTORY
     };
 }
 

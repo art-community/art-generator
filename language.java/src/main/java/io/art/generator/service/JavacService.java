@@ -5,6 +5,7 @@ import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
+
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.tools.javac.code.TypeTag.*;
 import static io.art.core.collection.ImmutableArray.*;

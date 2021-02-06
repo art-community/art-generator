@@ -11,8 +11,10 @@ import io.art.generator.loader.*;
 import io.art.generator.logger.*;
 import io.art.generator.model.*;
 import io.art.generator.service.*;
-import static io.art.core.factory.MapFactory.*;
+
 import java.util.concurrent.atomic.*;
+
+import static io.art.core.factory.MapFactory.*;
 
 public class GeneratorContext {
     private static final AtomicBoolean initialized = new AtomicBoolean(false);

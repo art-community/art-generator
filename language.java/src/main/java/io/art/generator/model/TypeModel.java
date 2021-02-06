@@ -7,6 +7,11 @@ import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import lombok.*;
+
+import java.lang.reflect.Type;
+import java.lang.reflect.*;
+import java.util.*;
+
 import static com.sun.tools.javac.util.List.*;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.checker.NullityChecker.*;
@@ -22,9 +27,6 @@ import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
-import java.lang.reflect.Type;
-import java.lang.reflect.*;
-import java.util.*;
 
 @Getter
 @EqualsAndHashCode

@@ -2,11 +2,13 @@ package io.art.generator.loader;
 
 import io.art.core.managed.*;
 import io.art.generator.exception.*;
-import static io.art.core.managed.LazyValue.lazy;
-import static io.art.generator.constants.ProcessorOptions.DIRECTORY_PROCESSOR_OPTION;
-import static io.art.generator.context.GeneratorContext.*;
+
 import java.io.*;
 import java.net.*;
+
+import static io.art.core.managed.LazyValue.*;
+import static io.art.generator.constants.ProcessorOptions.*;
+import static io.art.generator.context.GeneratorContext.*;
 
 public class GeneratorClassLoader {
     private final LazyValue<URLClassLoader> loader = lazy(this::createLoader);

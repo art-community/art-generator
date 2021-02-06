@@ -7,6 +7,11 @@ import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import lombok.*;
 import lombok.experimental.*;
+
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.function.*;
+
 import static com.sun.tools.javac.util.List.*;
 import static io.art.core.factory.MapFactory.*;
 import static io.art.core.factory.SetFactory.*;
@@ -21,9 +26,6 @@ import static java.util.Arrays.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
 import static lombok.AccessLevel.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.function.*;
 
 @Getter
 @Setter

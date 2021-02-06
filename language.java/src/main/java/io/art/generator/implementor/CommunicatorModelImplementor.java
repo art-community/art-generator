@@ -5,6 +5,7 @@ import io.art.core.collection.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.communicator.*;
 import lombok.experimental.*;
+
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.generator.caller.MethodCaller.*;

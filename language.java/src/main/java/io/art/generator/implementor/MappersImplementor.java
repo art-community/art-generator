@@ -5,6 +5,9 @@ import io.art.generator.model.*;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import lombok.experimental.*;
+
+import java.lang.reflect.*;
+
 import static com.sun.tools.javac.code.Flags.PRIVATE;
 import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.collection.ImmutableArray.*;
@@ -32,7 +35,6 @@ import static io.art.generator.state.GeneratorState.*;
 import static java.lang.reflect.Modifier.INTERFACE;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
-import java.lang.reflect.*;
 
 @UtilityClass
 public class MappersImplementor {

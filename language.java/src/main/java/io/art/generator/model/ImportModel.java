@@ -1,6 +1,7 @@
 package io.art.generator.model;
 
 import lombok.*;
+
 import static io.art.core.constants.StringConstants.*;
 
 @Getter

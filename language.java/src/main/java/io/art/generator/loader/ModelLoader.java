@@ -5,15 +5,17 @@ import io.art.generator.model.*;
 import io.art.model.configurator.*;
 import io.art.model.implementation.module.*;
 import lombok.experimental.*;
+
+import java.lang.reflect.*;
+
 import static io.art.core.singleton.SingletonsRegistry.*;
 import static io.art.core.wrapper.ExceptionWrapper.*;
 import static io.art.generator.constants.Annotations.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.context.GeneratorContext.*;
-import static io.art.generator.state.GeneratorState.moduleClass;
+import static io.art.generator.state.GeneratorState.*;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.*;
-import java.lang.reflect.*;
 
 @UtilityClass
 public class ModelLoader {

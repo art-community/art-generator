@@ -1,19 +1,12 @@
 package io.art.generator.creator.storage;
 
-import io.art.core.exception.NotImplementedException;
-import io.art.generator.model.NewClass;
-import io.art.generator.model.NewMethod;
-import io.art.generator.model.TypeModel;
-import io.art.model.implementation.storage.SpaceModel;
+import io.art.generator.model.*;
+import io.art.model.implementation.storage.*;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 
-import static io.art.generator.constants.Names.STORAGE_SPACE_SUFFIX;
-import static io.art.generator.model.NewClass.newClass;
-import static io.art.generator.model.NewMethod.newMethod;
-import static io.art.generator.model.NewParameter.newParameter;
-import static io.art.generator.service.NamingService.sequenceName;
+import static io.art.generator.constants.Names.*;
+import static io.art.generator.model.NewClass.*;
 import static java.lang.reflect.Modifier.*;
 
 public class StorageSpaceInterfaceCreator {

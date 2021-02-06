@@ -9,6 +9,9 @@ import io.art.generator.model.*;
 import io.art.generator.service.*;
 import io.art.model.implementation.communicator.*;
 import lombok.experimental.*;
+
+import java.lang.reflect.*;
+
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.checker.NullityChecker.*;
@@ -35,7 +38,6 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.util.Objects.*;
-import java.lang.reflect.*;
 
 @UtilityClass
 public class CommunicatorProxyCreator {

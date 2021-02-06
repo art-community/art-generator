@@ -5,6 +5,9 @@ import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import lombok.*;
+
+import java.lang.reflect.*;
+
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.caller.MethodCaller.*;
@@ -31,7 +34,6 @@ import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import static lombok.AccessLevel.*;
-import java.lang.reflect.*;
 
 @RequiredArgsConstructor(access = PRIVATE)
 public class FromModelMapperCreator {

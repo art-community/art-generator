@@ -1,8 +1,10 @@
 package io.art.generator.constants;
 
 import io.art.communicator.proxy.*;
-import static io.art.core.wrapper.ExceptionWrapper.*;
+
 import java.lang.reflect.*;
+
+import static io.art.core.wrapper.ExceptionWrapper.*;
 
 public interface CommunicatorConstants {
     interface CommunicatorProxyMethods {

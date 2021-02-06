@@ -31,8 +31,10 @@ import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import io.art.value.registry.*;
-import static io.art.generator.model.TypeModel.*;
+
 import java.util.*;
+
+import static io.art.generator.model.TypeModel.*;
 
 public interface TypeModels {
     TypeModel OPTIONAL_TYPE = type(Optional.class);

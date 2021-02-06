@@ -5,6 +5,10 @@ import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import lombok.*;
+
+import java.lang.reflect.*;
+import java.util.function.*;
+
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ExceptionMessages.*;
@@ -18,8 +22,6 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.NamingService.*;
 import static java.text.MessageFormat.*;
-import java.lang.reflect.*;
-import java.util.function.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class ToModelMapperByInitializerCreator {

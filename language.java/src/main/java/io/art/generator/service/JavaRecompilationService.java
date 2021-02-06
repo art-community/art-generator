@@ -1,50 +1,43 @@
 package io.art.generator.service;
 
-import com.sun.tools.javac.api.JavacTool;
-import com.sun.tools.javac.file.JavacFileManager;
-import io.art.core.collection.ImmutableSet;
-import io.art.core.managed.LazyValue;
-import io.art.generator.exception.GenerationException;
-import lombok.SneakyThrows;
+import com.sun.tools.javac.api.*;
+import com.sun.tools.javac.file.*;
+import io.art.core.collection.*;
+import io.art.core.managed.*;
+import io.art.generator.exception.*;
+import lombok.*;
 
-import javax.tools.DiagnosticCollector;
-import javax.tools.FileObject;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardLocation;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
+import javax.tools.*;
+import java.io.*;
+import java.util.*;
 
-import static com.sun.tools.javac.main.Main.Result.OK;
-import static io.art.core.collection.ImmutableArray.immutableArrayBuilder;
-import static io.art.core.collector.SetCollector.setCollector;
-import static io.art.core.constants.ArrayConstants.EMPTY_BYTES;
-import static io.art.core.constants.StringConstants.COMMA;
-import static io.art.core.extensions.StringExtensions.toCommaDelimitedString;
-import static io.art.core.factory.ArrayFactory.immutableArrayOf;
-import static io.art.core.factory.SetFactory.setOf;
-import static io.art.core.managed.LazyValue.lazy;
+import static com.sun.tools.javac.main.Main.Result.*;
+import static io.art.core.collection.ImmutableArray.*;
+import static io.art.core.collector.SetCollector.*;
+import static io.art.core.constants.ArrayConstants.*;
+import static io.art.core.constants.StringConstants.*;
+import static io.art.core.extensions.StringExtensions.*;
+import static io.art.core.factory.ArrayFactory.*;
+import static io.art.core.factory.SetFactory.*;
+import static io.art.core.managed.LazyValue.*;
 import static io.art.generator.constants.CompilerOptions.*;
-import static io.art.generator.constants.ExceptionMessages.RECOMPILATION_FAILED;
+import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.ProcessorOptions.*;
-import static io.art.generator.context.GeneratorContext.processingEnvironment;
-import static io.art.generator.logger.GeneratorLogger.info;
-import static io.art.generator.logger.GeneratorLogger.success;
-import static io.art.generator.normalizer.ClassPathNormalizer.normalizeClassPath;
-import static io.art.generator.state.GeneratorState.generatedClasses;
-import static java.text.MessageFormat.format;
+import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.logger.GeneratorLogger.*;
+import static io.art.generator.normalizer.ClassPathNormalizer.*;
+import static io.art.generator.state.GeneratorState.*;
+import static java.text.MessageFormat.*;
 
 public class JavaRecompilationService implements RecompilationService {
     JavacTool javacTool;
-    LazyValue<JavacFileManager> fileManager;
+    LazyValue<JavacFileManager> stubFileManager;
 
     @SneakyThrows
     public JavaRecompilationService(){
         javacTool = JavacTool.create();
-        fileManager = lazy( () -> {
+        stubFileManager = lazy( () -> {
         JavacFileManager manager = javacTool.getStandardFileManager(new DiagnosticCollector<>(), null, null);
         Set<File> generatedSourcesRoot = setOf(new File(processingEnvironment().getOptions().get(GENERATED_SOURCES_ROOT_DIRECTORY)));
         try {
@@ -68,8 +61,7 @@ public class JavaRecompilationService implements RecompilationService {
     @Override
     public void recompile(Iterable<String> sources){
         success(RECOMPILATION_STARTED);
-
-
+        stubFileManager.get().close();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(EMPTY_BYTES);
         String[] recompileArguments = immutableArrayBuilder()
@@ -92,7 +84,7 @@ public class JavaRecompilationService implements RecompilationService {
     @Override
     @SneakyThrows
     public FileObject createStubFile(String className){
-        return fileManager.get().getJavaFileForOutput(
+        return stubFileManager.get().getJavaFileForOutput(
                 StandardLocation.SOURCE_OUTPUT,
                 className,
                 JavaFileObject.Kind.SOURCE,

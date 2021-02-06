@@ -1,12 +1,14 @@
 package io.art.generator.registry;
 
 import lombok.*;
+
+import java.lang.reflect.*;
+import java.util.*;
+
 import static io.art.core.factory.MapFactory.*;
 import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.service.NamingService.*;
 import static java.util.Objects.*;
-import java.lang.reflect.*;
-import java.util.*;
 
 @RequiredArgsConstructor
 public class GeneratedTypesRegistry {

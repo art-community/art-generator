@@ -3,6 +3,9 @@ package io.art.generator.creator.mapper;
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.generator.model.*;
 import lombok.*;
+
+import java.lang.reflect.*;
+
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.MappersConstants.*;
 import static io.art.generator.constants.Names.*;
@@ -12,7 +15,6 @@ import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.NamingService.*;
-import java.lang.reflect.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class ToModelMapperByBuilderCreator {

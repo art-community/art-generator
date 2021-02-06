@@ -5,6 +5,11 @@ import io.art.generator.caller.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.module.*;
 import lombok.experimental.*;
+
+import javax.lang.model.element.Modifier;
+import java.lang.reflect.*;
+import java.util.*;
+
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.collector.SetCollector.*;
 import static io.art.core.extensions.CollectionExtensions.*;
@@ -32,9 +37,6 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.util.Arrays.*;
-import javax.lang.model.element.Modifier;
-import java.lang.reflect.*;
-import java.util.*;
 
 @UtilityClass
 public class ProviderClassCreator {

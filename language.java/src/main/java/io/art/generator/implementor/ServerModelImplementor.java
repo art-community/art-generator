@@ -7,6 +7,9 @@ import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.server.*;
 import lombok.experimental.*;
+
+import java.lang.reflect.*;
+
 import static com.sun.tools.javac.code.Flags.PRIVATE;
 import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.checker.EmptinessChecker.*;
@@ -33,7 +36,6 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.text.MessageFormat.*;
-import java.lang.reflect.*;
 
 @UtilityClass
 public class ServerModelImplementor {

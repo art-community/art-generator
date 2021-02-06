@@ -1,28 +1,25 @@
 package io.art.generator.service;
 
-import io.art.generator.context.GeneratorContext;
-import io.art.generator.model.ExistedClass;
-import io.art.generator.model.StubClass;
+import io.art.generator.context.*;
+import io.art.generator.model.*;
 
-import javax.tools.FileObject;
-import java.io.File;
-import java.util.Set;
-import java.util.stream.Collectors;
+import javax.tools.*;
+import java.io.*;
+import java.util.*;
+import java.util.stream.*;
 
-import static io.art.core.collector.SetCollector.setCollector;
+import static io.art.core.collector.SetCollector.*;
 import static io.art.core.constants.CharacterConstants.DOT;
-import static io.art.core.constants.StringConstants.EMPTY_STRING;
-import static io.art.core.constants.StringConstants.JAVA_FILE_EXTENSION;
-import static io.art.core.extensions.FileExtensions.deleteFileRecursive;
+import static io.art.core.constants.StringConstants.*;
+import static io.art.core.extensions.FileExtensions.*;
 import static io.art.generator.constants.LoggingMessages.*;
-import static io.art.generator.constants.ProcessorOptions.SOURCES_PROCESSOR_OPTION;
-import static io.art.generator.constants.ProcessorOptions.SOURCES_ROOT_DIRECTORY;
+import static io.art.generator.constants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
-import static io.art.generator.creator.provider.ProviderClassCreator.createProviderStub;
-import static io.art.generator.logger.GeneratorLogger.success;
+import static io.art.generator.creator.provider.ProviderClassCreator.*;
+import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.service.ClassGenerationService.*;
-import static io.art.generator.state.GeneratorState.generatedClasses;
-import static java.util.Arrays.stream;
+import static io.art.generator.state.GeneratorState.*;
+import static java.util.Arrays.*;
 
 
 public class StubService {

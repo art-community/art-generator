@@ -4,6 +4,10 @@ import io.art.core.collection.*;
 import lombok.Builder;
 import lombok.*;
 import lombok.experimental.*;
+
+import java.lang.reflect.*;
+import java.util.*;
+
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.core.factory.MapFactory.*;
@@ -11,8 +15,6 @@ import static io.art.generator.constants.Names.*;
 import static io.art.generator.inspector.TypeInspector.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
-import java.lang.reflect.*;
-import java.util.*;
 
 @Getter
 @Builder(toBuilder = true)

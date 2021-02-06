@@ -1,34 +1,28 @@
 package io.art.generator.model;
 
-import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.List;
-import com.sun.tools.javac.util.ListBuffer;
-import com.sun.tools.javac.util.Name;
-import io.art.core.collection.ImmutableMap;
+import com.sun.tools.javac.util.*;
+import io.art.core.collection.*;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.experimental.Accessors;
+import lombok.*;
+import lombok.experimental.*;
 
-import java.io.File;
-import java.lang.reflect.Type;
+import java.io.*;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.function.*;
 
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-
-import static com.sun.tools.javac.code.Flags.INTERFACE;
-import static io.art.core.caster.Caster.cast;
-import static io.art.core.collection.ImmutableMap.immutableMapBuilder;
-import static io.art.core.collector.SetCollector.setCollector;
 import static com.sun.tools.javac.tree.JCTree.*;
-import static io.art.generator.constants.Imports.NOT_IMPLEMENTED_EXCEPTION_MODEL;
-import static io.art.generator.constants.TypeModels.NOT_IMPLEMENTED_EXCEPTION_TYPE;
+import static io.art.core.caster.Caster.*;
+import static io.art.core.collection.ImmutableMap.*;
+import static io.art.core.collector.SetCollector.*;
+import static io.art.generator.constants.Imports.*;
+import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
-import static java.lang.reflect.Modifier.PUBLIC;
-import static java.lang.reflect.Modifier.isInterface;
-import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.toCollection;
 import static io.art.generator.service.JavacService.*;
+import static java.lang.reflect.Modifier.*;
+import static java.util.stream.Collectors.*;
 
 @Builder
 @Getter
