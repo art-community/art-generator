@@ -15,6 +15,7 @@ import io.art.generator.normalizer.ClassPathNormalizer.normalizeClassPath
 import io.art.generator.state.GeneratorState.generatedClasses
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import java.text.MessageFormat.format
+import javax.tools.FileObject
 
 
 class KotlinRecompilationService : RecompilationService {
@@ -43,5 +44,9 @@ class KotlinRecompilationService : RecompilationService {
         info(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(arguments)))
         K2JVMCompiler.main(arguments)
         success(RECOMPILATION_COMPLETED)
+    }
+
+    override fun createStubFile(className: String?): FileObject {
+        TODO("Not yet implemented")
     }
 }

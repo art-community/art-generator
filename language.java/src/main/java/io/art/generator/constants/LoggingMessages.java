@@ -6,6 +6,9 @@ public interface LoggingMessages {
     String RECOMPILATION_COMPLETED = "Recompilation completed";
     String GENERATION_STARTED = "Generation started";
     String GENERATION_COMPLETED = "Generation completed";
+    String STUB_GENERATION_STARTED = "Stubs generation started";
+    String STUB_GENERATION_COMPLETED = "Stubs generation completed";
+    String STUBS_REMOVED = "Removed stubs for existed classes";
     String GENERATED_MAPPER = "Generated mapper for type: {0}";
     String GENERATED_CONFIGURATION_PROXY = "Generated configuration proxy for type: {0}";
     String GENERATED_CLASS = "Generated class: {0}";

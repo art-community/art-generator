@@ -1,16 +1,19 @@
 package io.art.generator.state;
 
-import io.art.core.collection.*;
-import io.art.generator.model.*;
-import io.art.generator.registry.*;
-import lombok.*;
-import static io.art.core.checker.NullityChecker.*;
-import static io.art.core.factory.MapFactory.*;
-import static io.art.generator.constants.MappersConstants.*;
-import static io.art.generator.constants.Names.*;
-import javax.tools.*;
-import java.lang.reflect.*;
-import java.util.*;
+import io.art.core.collection.ImmutableMap;
+import io.art.generator.model.ExistedClass;
+import io.art.generator.registry.GeneratedTypesRegistry;
+import lombok.RequiredArgsConstructor;
+
+import javax.tools.FileObject;
+import java.lang.reflect.Type;
+import java.util.Map;
+
+import static io.art.core.checker.NullityChecker.let;
+import static io.art.core.factory.MapFactory.immutableMapOf;
+import static io.art.core.factory.MapFactory.map;
+import static io.art.generator.constants.MappersConstants.MAPPING_INTERFACE_NAME;
+import static io.art.generator.constants.Names.PROXY_CLASS_SUFFIX;
 
 public class GeneratorState {
     private final static ThreadLocal<GeneratorState> LOCAL_STATE = new ThreadLocal<>();
@@ -70,6 +73,10 @@ public class GeneratorState {
 
     public static void putGeneratedClass(String name, FileObject file) {
         getLocalState().GENERATED_CLASSES.put(name, file);
+    }
+
+    public static void removeFromGeneratedClasses(String name){
+        getLocalState().GENERATED_CLASSES.remove(name);
     }
 
 
