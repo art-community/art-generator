@@ -84,4 +84,6 @@ public interface Names {
     String STORAGE_INTERFACES_SUFFIX = "StorageInterfaces";
     String STORAGE_GET_BY_PREFIX = "getBy";
     String STORAGE_SELECT_BY_PREFIX = "selectBy";
+    String STORAGE_KEY_PARAMETER_NAME = "key";
+    String STORAGE_TRANSACTION_DEPENDENCY_KEY_NAME = "keyDependency";
 }

@@ -16,6 +16,7 @@ dependencies {
     api(project(":model"))
     api(project(":rsocket"))
     api(project(":storage"))
+    api(project(":tarantool"))
 }
 
 tasks.withType<JavaCompile> {

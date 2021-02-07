@@ -51,7 +51,8 @@ public class NewMethod {
         JCModifiers modifiers = maker().Modifiers(this.modifiers);
         Name name = elements().getName(this.name);
         JCExpression type = returnType.generateFullType();
-        JCBlock body = maker().Block(0L, from(statements.stream()
+        JCBlock body = statements.isEmpty() ? null :
+                maker().Block(0L, from(statements.stream()
                 .map(Supplier::get)
                 .collect(toCollection(ListBuffer::new))));
         com.sun.tools.javac.util.List<JCVariableDecl> parameters = this.parameters
