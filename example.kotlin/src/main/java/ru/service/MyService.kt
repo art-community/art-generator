@@ -8,7 +8,7 @@ import ru.model.Request
 import ru.model.Response
 import java.util.concurrent.atomic.AtomicLong
 
-class MyService : MyClient {
+object MyService : MyClient {
     override fun myMethod1() {
         LoggingModule.logger(MyService::class.java).info("myMethod1")
     }

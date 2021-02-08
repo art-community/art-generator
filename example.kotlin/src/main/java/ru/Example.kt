@@ -1,32 +1,47 @@
-@file:JvmName("Example")
-
 package ru
 
-import io.art.communicator.module.CommunicatorModule.communicator
-import io.art.json.descriptor.JsonReader
+import io.art.kotlin.communicator
 import io.art.kotlin.module
+import io.art.kotlin.scheduleFixedRate
 import io.art.launcher.ModuleLauncher.launch
 import io.art.model.annotation.Configurator
-import io.art.model.configurator.ModuleModelConfigurator
-import io.art.model.configurator.RsocketServiceModelConfigurator
-import io.art.value.module.ValueModule
 import ru.ExampleProvider.provide
 import ru.communicator.MyClient
+import ru.configuration.MyConfig
 import ru.model.Request
 import ru.service.MyService
+import java.time.Duration.ofSeconds
 
+val myClient: MyClient by communicator()
 
-fun main() = launch(provide())
+object Example {
+    @Configurator
+    fun configure() = module {
+        value {
+            model(Request::class)
+        }
 
-@Configurator
-fun configure(): ModuleModelConfigurator = module("Example") { value {} }
-        .value { value -> value.model(Request::class.java) }
-        .serve { server ->
-            server.rsocket(MyService::class.java, RsocketServiceModelConfigurator::logging)
+        configure {
+            configuration(MyConfig::class)
         }
-        .communicate { communicator ->
-            communicator.rsocket(MyClient::class.java, { client -> client.to(MyService::class.java) })
+
+        serve {
+            rsocket(MyService)
         }
-        .onLoad {
-            println(ValueModule.model(Request::class.java, JsonReader.readJson("{}")))
+
+        communicate {
+            rsocket(MyClient::class) to MyService
         }
+
+        onLoad {
+            scheduleFixedRate(ofSeconds(30)) {
+                myClient.myMethod2(Request())
+                communicator<MyClient>().myMethod2(Request())
+                communicator(MyClient::class) { myMethod2(Request()) }
+            }
+        }
+    }
+
+    @JvmStatic
+    fun main(vararg arguments: String) = launch(provide())
+}

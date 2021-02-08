@@ -1,4 +1,4 @@
 package ru.configuration
 
 
-data class MyConfig(val FBInteger: Int)
+data class MyConfig(val FBInteger: Boolean)

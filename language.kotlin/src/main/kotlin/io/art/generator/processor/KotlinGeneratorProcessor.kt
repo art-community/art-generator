@@ -72,9 +72,10 @@ class KotlinGeneratorProcessor : AbstractProcessor() {
             logger(GeneratorLogger(System.out::println, System.err::println))
             GeneratorScanner(elements, this)
         }
-        for (rootElement in roundEnvironment.rootElements) {
-            scanner.scan(trees.getPath(rootElement), trees)
-        }
+        roundEnvironment.rootElements
+                .asSequence()
+                .map(trees::getPath)
+                .forEach { path -> scanner.scan(path, trees) }
         initialize(configurationBuilder.build())
         return false
     }
