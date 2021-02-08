@@ -29,6 +29,12 @@
     },
     {
       "pattern": "\\Qmodule.yml\\E"
+    },
+    {
+      "pattern": "META-INF/.*.kotlin_module$"
+    },
+    {
+      "pattern": ".*.kotlin_builtins"
     }
   ],
   "bundles": []

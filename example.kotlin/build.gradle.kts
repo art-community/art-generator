@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin.Companion.isIncrementalKapt
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -30,6 +29,7 @@ dependencies {
 
 val processResources: Task = tasks["processResources"]
 val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
+val compileJava: JavaCompile = tasks["compileJava"] as JavaCompile
 val languageJar = project(":language.kotlin").tasks["jar"] as Jar
 
 with(compileKotlin) {
@@ -42,9 +42,19 @@ kapt {
     useBuildCache = false
     javacOptions {
         arguments {
-            arg("art.generator.recompilation.destination", compileKotlin.destinationDir.absolutePath)
-            arg("art.generator.recompilation.classpath", compileKotlin.classpath.files.joinToString(","))
-            arg("art.generator.recompilation.sources", compileKotlin.source.files.joinToString(","))
+            arg("art.generator.recompilation.destination", compileKotlin
+                    .destinationDir
+                    .absolutePath)
+            arg("art.generator.recompilation.classpath", compileKotlin
+                    .classpath
+                    .files
+                    .filter { it.exists() }
+                    .joinToString(","))
+            arg("art.generator.recompilation.sources", compileKotlin
+                    .source
+                    .files
+                    .filter { it.exists() }
+                    .joinToString(","))
         }
     }
 }
@@ -58,9 +68,10 @@ tasks.register("executableJar", Jar::class) {
     }
 
     from(processResources.outputs.files)
+    from(compileJava.outputs.files)
     from(compileKotlin.outputs.files)
-    from(configurations.compileClasspath.get().filter { it.extension != "gz" }.map { if (it.isDirectory) it else zipTree(it) })
-    from(configurations.runtimeClasspath.get().filter { it.extension != "gz" }.map { if (it.isDirectory) it else zipTree(it) })
+    from(configurations.compileClasspath.get().filter { it.exists() && it.extension != "gz" }.map { if (it.isDirectory) it else zipTree(it) })
+    from(configurations.runtimeClasspath.get().filter { it.exists() && it.extension != "gz" }.map { if (it.isDirectory) it else zipTree(it) })
 }
 
 graal {

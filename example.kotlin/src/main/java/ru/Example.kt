@@ -7,15 +7,22 @@ import io.art.launcher.ModuleLauncher.launch
 import io.art.model.annotation.Configurator
 import ru.ExampleProvider.provide
 import ru.communicator.MyClient
+import ru.configuration.MyConfig
 import ru.model.Request
 import ru.service.MyService
 import java.time.Duration.ofSeconds
+
+val myClient: MyClient by communicator()
 
 object Example {
     @Configurator
     fun configure() = module {
         value {
             model(Request::class)
+        }
+
+        configure {
+            configuration(MyConfig::class)
         }
 
         serve {
@@ -28,7 +35,9 @@ object Example {
 
         onLoad {
             scheduleFixedRate(ofSeconds(30)) {
+                myClient.myMethod2(Request())
                 communicator<MyClient>().myMethod2(Request())
+                communicator(MyClient::class) { myMethod2(Request()) }
             }
         }
     }
