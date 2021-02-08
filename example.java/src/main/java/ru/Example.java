@@ -2,7 +2,6 @@ package ru;
 
 import io.art.model.annotation.*;
 import io.art.model.configurator.*;
-import io.art.value.immutable.Value;
 import ru.communicator.*;
 import ru.configuration.*;
 import ru.model.*;
@@ -11,6 +10,8 @@ import static io.art.communicator.module.CommunicatorModule.*;
 import static io.art.launcher.ModuleLauncher.*;
 import static io.art.core.constants.EmptyFunctions.emptyFunction;
 import static io.art.model.configurator.ModuleModelConfigurator.*;
+import static io.art.scheduler.manager.SchedulersManager.*;
+import static java.time.Duration.*;
 import static ru.ExampleProvider.*;
 
 public class Example {
@@ -23,9 +24,9 @@ public class Example {
         return module(Example.class)
                 .value(value -> value.model(Request.class))
                 .configure(configurator -> configurator.configuration(MyConfig.class))
-                .serve(server -> server.rsocket(MyService.class, RsocketServiceModelConfigurator::logging))
+                .serve(server -> server.rsocket(MyService.class))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
-                .onLoad(() -> communicator(MyClient.class).myMethod2(Request.builder().build()))
+                .onLoad(() -> scheduleFixedRate(() -> communicator(MyClient.class).myMethod2(Request.builder().build()), ofSeconds(30)))
                 .store(storage -> storage.tarantool("s2_seq", Model.class, Model.class, space -> space
                                 .cluster("storage2")
                                 .sharded(emptyFunction())

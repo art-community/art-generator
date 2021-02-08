@@ -7,16 +7,15 @@ import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.server.*;
 import lombok.experimental.*;
-
-import java.lang.reflect.*;
-
 import static com.sun.tools.javac.code.Flags.PRIVATE;
 import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.constants.MethodProcessingMode.*;
+import static io.art.core.handler.ExceptionHandler.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ExceptionMessages.*;
+import static io.art.generator.constants.JavaDialect.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
@@ -36,6 +35,8 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.text.MessageFormat.*;
+import static java.util.Objects.*;
+import java.lang.reflect.*;
 
 @UtilityClass
 public class ServerModelImplementor {
@@ -146,7 +147,11 @@ public class ServerModelImplementor {
         if (isVoid(serviceMethod.getReturnType()) && isEmpty(serviceMethod.getParameterTypes())) {
             name = RUNNER_NAME;
         }
-        JCExpression owner = isStatic(serviceMethod.getModifiers()) ? type(serviceClass).generateBaseType() : method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
+        JCExpression owner = isStatic(serviceMethod.getModifiers())
+                ? type(serviceClass).generateBaseType()
+                : dialect() == KOTLIN && nonNull(nullIfException(() -> serviceClass.getField(INSTANCE_FIELD_NAME)))
+                ? select(type(serviceClass), INSTANCE_FIELD_NAME)
+                : method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
                 .addArguments(classReference(serviceClass))
                 .addArguments(newReference(type(serviceClass)))
                 .apply();

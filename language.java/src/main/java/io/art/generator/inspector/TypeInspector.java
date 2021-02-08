@@ -1,7 +1,7 @@
 package io.art.generator.inspector;
 
 import io.art.core.collection.*;
-import io.art.core.managed.*;
+import io.art.core.property.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.server.validation.*;
@@ -65,7 +65,7 @@ public class TypeInspector {
     }
 
     public boolean isLazyValue(Type fieldType) {
-        return LazyValue.class == extractClass(fieldType);
+        return LazyProperty.class == extractClass(fieldType);
     }
 
     public boolean isOptional(Type fieldType) {

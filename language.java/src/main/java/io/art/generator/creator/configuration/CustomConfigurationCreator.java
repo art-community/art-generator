@@ -45,10 +45,6 @@ public class CustomConfigurationCreator {
     private ImmutableArray<JCExpression> createConstructorParameters(ImmutableArray<ExtractedProperty> properties) {
         ImmutableArray.Builder<JCExpression> constructorParameters = immutableArrayBuilder();
         for (ExtractedProperty property : properties) {
-            Type type = property.type();
-            if (isJavaPrimitiveType(type)) {
-                throw new ValidationException(formatSignature(property), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
-            }
             constructorParameters.add(createPropertyProvider(property));
         }
         return constructorParameters.build();

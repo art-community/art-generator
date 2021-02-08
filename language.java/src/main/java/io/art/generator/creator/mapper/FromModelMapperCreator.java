@@ -132,7 +132,7 @@ public class FromModelMapperCreator {
 
         if (isLazyValue(parameterizedType)) {
             Type fieldTypeArgument = typeArguments[0];
-            return method(LAZY_VALUE_MAPPING_TYPE, FROM_LAZY)
+            return method(LAZY_MAPPING_TYPE, FROM_LAZY)
                     .addArguments(fromModelMapper(fieldTypeArgument))
                     .apply();
         }

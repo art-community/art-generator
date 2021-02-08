@@ -4,7 +4,6 @@ import io.art.communicator.action.*;
 import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
 import io.art.configurator.custom.*;
-import io.art.core.checker.*;
 import io.art.core.constants.*;
 import io.art.core.exception.*;
 import io.art.core.extensions.*;
@@ -27,22 +26,18 @@ import io.art.server.decorator.*;
 import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
-import io.art.server.validation.*;
 import io.art.storage.registry.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import io.art.value.immutable.*;
 import io.art.value.mapping.*;
 import io.art.value.registry.*;
-
-import java.util.*;
-
 import static io.art.generator.model.TypeModel.*;
+import java.util.*;
 
 public interface TypeModels {
     TypeModel OPTIONAL_TYPE = type(Optional.class);
     TypeModel ARRAY_EXTENSIONS_TYPE = type(ArrayExtensions.class);
     TypeModel NESTED_CONFIGURATION_TYPE = type(NestedConfiguration.class);
-    TypeModel NULLITY_CHECKER_TYPE = type(NullityChecker.class);
     TypeModel SET_FACTORY_TYPE = type(SetFactory.class);
     TypeModel STRING_ARRAY_TYPE = type(String[].class);
     TypeModel VOID_TYPE = type(void.class);
@@ -53,7 +48,7 @@ public interface TypeModels {
     TypeModel ARRAY_MAPPING_TYPE = type(ArrayMapping.class);
     TypeModel PRIMITIVE_MAPPING_TYPE = type(PrimitiveMapping.class);
     TypeModel ENTITY_MAPPING_TYPE = type(EntityMapping.class);
-    TypeModel LAZY_VALUE_MAPPING_TYPE = type(LazyValueMapping.class);
+    TypeModel LAZY_MAPPING_TYPE = type(LazyMapping.class);
     TypeModel OPTIONAL_MAPPING_TYPE = type(OptionalMapping.class);
     TypeModel PRIMITIVE_ENUM_TYPE = type(PrimitiveType.class);
 
@@ -77,7 +72,6 @@ public interface TypeModels {
     TypeModel VALUE_MODULE_MODEL_TYPE = type(ValueModuleModel.class);
     TypeModel VALUE_MAPPER_REGISTRY_TYPE = type(ValueMapperRegistry.class);
 
-    TypeModel VALIDATABLE_TYPE = type(Validatable.class);
     TypeModel SERVICE_VALIDATION_DECORATOR_TYPE = type(ServiceValidationDecorator.class);
     TypeModel SERVICE_SPECIFICATION_TYPE = type(ServiceSpecification.class);
     TypeModel SERVICE_METHOD_SPECIFICATION_TYPE = type(ServiceMethodSpecification.class);
@@ -90,7 +84,7 @@ public interface TypeModels {
     TypeModel COMMUNICATOR_PROXY_REGISTRY_TYPE = type(CommunicatorProxyRegistry.class);
     TypeModel COMMUNICATOR_ACTION_TYPE = type(CommunicatorAction.class);
     TypeModel COMMUNICATOR_ACTION_REGISTRY_TYPE = type(CommunicatorActionRegistry.class);
-    TypeModel RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE = type(RsocketCommunicator.class);
+    TypeModel RSOCKET_COMMUNICATOR_ACTION_TYPE = type(RsocketCommunicatorAction.class);
     TypeModel COMMUNICATOR_ACTION_IDENTIFIER_TYPE = type(CommunicatorActionIdentifier.class);
 
     TypeModel STORAGE_MODULE_MODEL_TYPE = type(StorageModuleModel.class);

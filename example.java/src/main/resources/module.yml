@@ -25,9 +25,8 @@ rsocket:
   communicator:
     connectors:
       MyClient:
-        defaults:
-          dataFormat: messagePack
-          metaDataFormat: messagePack
+        dataFormat: messagePack
+        metaDataFormat: messagePack
         transport:
           mode: tcp
           tcp:

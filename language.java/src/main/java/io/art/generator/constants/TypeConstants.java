@@ -1,7 +1,7 @@
 package io.art.generator.constants;
 
 import io.art.core.collection.*;
-import io.art.core.managed.*;
+import io.art.core.property.*;
 import io.art.generator.model.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import reactor.core.publisher.*;
@@ -65,7 +65,7 @@ public interface TypeConstants {
             LocalDateTime.class,
             ZonedDateTime.class,
             Object.class,
-            LazyValue.class,
+            LazyProperty.class,
             Optional.class
     );
 
