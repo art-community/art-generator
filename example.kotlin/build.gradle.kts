@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
+    implementation(project(":kotlin"))
     kapt(project(":language.kotlin"))
 }
 

@@ -1,22 +1,27 @@
 package io.art.generator.creator.provider;
 
+import com.sun.tools.javac.tree.*;
 import io.art.core.collection.*;
 import io.art.generator.caller.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.module.*;
+import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.collector.SetCollector.*;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.core.factory.SetFactory.*;
+import static io.art.core.handler.ExceptionHandler.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.collector.CommunicatorTypesCollector.*;
 import static io.art.generator.collector.ServiceTypesCollector.*;
 import static io.art.generator.collector.TypeCollector.*;
 import static io.art.generator.constants.Imports.*;
+import static io.art.generator.constants.JavaDialect.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
+import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.decorate.DecorateMethodCreator.*;
 import static io.art.generator.finder.ConfigureMethodFinder.*;
 import static io.art.generator.implementor.CommunicatorModelImplementor.*;
@@ -32,6 +37,7 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.util.Arrays.*;
+import static java.util.Objects.*;
 import javax.lang.model.element.Modifier;
 import java.lang.reflect.*;
 import java.util.*;
@@ -100,9 +106,11 @@ public class ProviderClassCreator {
                 .statement(() -> returnVariable(MODEL_STATIC_NAME));
     }
 
+    @SneakyThrows
     private NewField createModelField() {
         ExistedClass moduleClass = moduleClass();
         ExistedMethod configureMethod = findConfigureAnnotatedMethod(moduleClass);
+
         MethodCaller configureStatic = method(type(moduleClass.asClass()), configureMethod.getName());
 
         MethodCaller singletonMethod = method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
@@ -110,14 +118,17 @@ public class ProviderClassCreator {
                 .addArgument(newReference(type(moduleClass.asClass())));
         MethodCaller configureSingleton = method(singletonMethod.apply(), configureMethod.getName());
 
+        MethodCaller configureInstance = method(select(type(moduleClass.asClass()), INSTANCE_FIELD_NAME), configureMethod.getName());
+
+        JCTree.JCExpression decorate = configureMethod.getDeclaration().getModifiers().getFlags().contains(Modifier.STATIC)
+                ? configureStatic.apply()
+                : dialect() == KOTLIN && nonNull(nullIfException(() -> moduleClass.asClass().getField(INSTANCE_FIELD_NAME)))
+                ? configureInstance.apply() : configureSingleton.apply();
+
         return newField()
                 .name(MODEL_STATIC_NAME)
                 .modifiers(PRIVATE | FINAL | STATIC)
                 .type(MODULE_MODEL_TYPE)
-                .initializer(() -> method(DECORATE_NAME)
-                        .addArguments(configureMethod.getDeclaration().getModifiers().getFlags().contains(Modifier.STATIC)
-                                ? configureStatic.apply()
-                                : configureSingleton.apply())
-                        .apply());
+                .initializer(() -> method(DECORATE_NAME).addArguments(decorate).apply());
     }
 }
