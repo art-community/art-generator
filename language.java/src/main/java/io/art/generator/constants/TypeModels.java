@@ -20,6 +20,7 @@ import io.art.model.implementation.communicator.*;
 import io.art.model.implementation.configurator.*;
 import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
+import io.art.model.implementation.storage.*;
 import io.art.model.implementation.value.*;
 import io.art.rsocket.communicator.*;
 import io.art.server.decorator.*;
@@ -27,6 +28,7 @@ import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
 import io.art.server.validation.*;
+import io.art.storage.registry.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import io.art.value.immutable.*;
 import io.art.value.mapping.*;
@@ -90,6 +92,10 @@ public interface TypeModels {
     TypeModel COMMUNICATOR_ACTION_REGISTRY_TYPE = type(CommunicatorActionRegistry.class);
     TypeModel RSOCKET_COMMUNICATOR_IMPLEMENTATION_TYPE = type(RsocketCommunicator.class);
     TypeModel COMMUNICATOR_ACTION_IDENTIFIER_TYPE = type(CommunicatorActionIdentifier.class);
+
+    TypeModel STORAGE_MODULE_MODEL_TYPE = type(StorageModuleModel.class);
+    TypeModel STORAGE_CUSTOMIZER_TYPE = type(StorageCustomizer.class);
+    TypeModel STORAGE_REGISTRY_TYPE = type(StorageSpacesRegistry.class);
 
     TypeModel CONFIGURATION_SOURCE_TYPE = type(ConfigurationSource.class);
 

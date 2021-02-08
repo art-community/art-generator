@@ -23,6 +23,7 @@ import io.art.model.implementation.communicator.*;
 import io.art.model.implementation.configurator.*;
 import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
+import io.art.model.implementation.storage.*;
 import io.art.model.implementation.value.*;
 import io.art.rsocket.communicator.*;
 import io.art.rsocket.constants.RsocketModuleConstants.*;
@@ -32,6 +33,7 @@ import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
 import io.art.server.validation.*;
+import io.art.storage.registry.*;
 import io.art.value.constants.ValueModuleConstants.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import io.art.value.immutable.Value;
@@ -136,6 +138,10 @@ public interface Imports {
             RsocketCommunicator.class.getName(),
             CommunicationMode.class.getName(),
             RsocketSetupPayload.class.getName(),
-            RsocketProtocol.class.getName()
+            RsocketProtocol.class.getName(),
+
+            StorageSpacesRegistry.class.getName(),
+            StorageModuleModel.class.getName(),
+            StorageCustomizer.class.getName()
     };
 }

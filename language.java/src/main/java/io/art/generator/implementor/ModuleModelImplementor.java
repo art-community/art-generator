@@ -5,7 +5,7 @@ import lombok.experimental.*;
 
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.provider.ProviderClassCreator.*;
-import static io.art.generator.creator.storage.StorageSpaceInterfaceCreator.createStorageSpaceInterfaces;
+import static io.art.generator.creator.storage.StorageSpaceInterfaceCreator.createStorageInterfaces;
 import static io.art.generator.loader.ModelLoader.*;
 import static io.art.generator.service.ClassGenerationService.*;
 import static io.art.generator.state.GeneratorState.*;
@@ -15,7 +15,7 @@ public class ModuleModelImplementor {
     public void implementModuleModel() {
         for (ExistedClass existedClass : moduleClasses().values()) {
             useModuleClass(existedClass);
-            generateClass(createStorageSpaceInterfaces(loadModel().getStorageModel()), moduleClass().getPackageName());
+            generateClass(createStorageInterfaces(loadModel().getStorageModel()), moduleClass().getPackageName());
             generateClass(createProviderClass(loadModel()), moduleClass().getPackageName());
         }
     }

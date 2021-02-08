@@ -23,7 +23,7 @@ import static java.lang.reflect.Modifier.*;
 
 public class StorageSpaceInterfaceCreator {
 
-    public static NewClass createStorageSpaceInterfaces(StorageModuleModel storageModel){
+    public static NewClass createStorageInterfaces(StorageModuleModel storageModel){
         NewClass storageInterfaces = newClass().modifiers(PUBLIC)
                 .addImport(classImport(moduleClass().getFullName()))
                 .name(moduleClass().getName() + STORAGE_INTERFACES_SUFFIX);

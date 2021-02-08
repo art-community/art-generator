@@ -80,6 +80,10 @@ public interface Names {
     String TARGET_SERVICE_METHOD_NAME = "targetServiceMethod";
     String SERVICE_METHOD_NAME = "serviceMethod";
 
+    String STORAGE_NAME = "storage";
+    String STORAGES_NAME = "storages";
+    String STORAGE_MODEL_NAME = "storageModel";
+    String GET_STORAGE_MODEL_NAME = "getStorageModel";
     String STORAGE_SPACE_SUFFIX = "Space";
     String STORAGE_INTERFACES_SUFFIX = "StorageInterfaces";
     String STORAGE_GET_BY_PREFIX = "getBy";

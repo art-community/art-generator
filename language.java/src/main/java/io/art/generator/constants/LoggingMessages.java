@@ -18,4 +18,5 @@ public interface LoggingMessages {
     String GENERATED_SERVICE_SPECIFICATIONS = "All service specifications were successfully generated";
     String GENERATED_COMMUNICATOR_PROXIES = "All communicator proxies were successfully generated";
     String GENERATED_CUSTOM_CONFIGURATION_PROXIES = "All custom configuration proxies were successfully generated";
+    String GENERATED_STORAGE_SPACES = "All storage spaces were successfully generated";
 }

@@ -17,6 +17,7 @@ import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.collector.CommunicatorTypesCollector.*;
 import static io.art.generator.collector.ServiceTypesCollector.*;
+import static io.art.generator.collector.StorageTypesCollector.*;
 import static io.art.generator.collector.TypeCollector.*;
 import static io.art.generator.constants.Imports.*;
 import static io.art.generator.constants.LoggingMessages.*;
@@ -28,6 +29,7 @@ import static io.art.generator.implementor.CommunicatorModelImplementor.*;
 import static io.art.generator.implementor.ConfiguratorModelImplementor.*;
 import static io.art.generator.implementor.MappersImplementor.*;
 import static io.art.generator.implementor.ServerModelImplementor.*;
+import static io.art.generator.implementor.StorageModelImplementor.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewClass.*;
@@ -50,7 +52,8 @@ public class ProviderClassCreator {
         Set<Type> types = combineToSet(
                 model.getValueModel().getCustomTypes().stream().flatMap(type -> collectModelTypes(type).stream()).collect(setCollector()),
                 collectServerTypes(model.getServerModel()).toMutable(),
-                collectCommunicatorTypes(model.getCommunicatorModel()).toMutable()
+                collectCommunicatorTypes(model.getCommunicatorModel()).toMutable(),
+                collectStorageTypes(model.getStorageModel()).toMutable()
         );
 
         NewMethod mappersMethod = implementMappersMethod(immutableSetOf(types));
@@ -68,6 +71,11 @@ public class ProviderClassCreator {
         ImmutableArray<NewClass> customConfigurators = implementCustomConfigurators(model.getConfiguratorModel());
         success(GENERATED_CUSTOM_CONFIGURATION_PROXIES);
 
+        NewMethod storagesMethod = implementStoragesMethod(model.getStorageModel());
+        ImmutableArray<NewClass> storageSpaces = implementStorageSpaces(model.getStorageModel());
+        success(GENERATED_STORAGE_SPACES);
+
+
         return providerClass
                 .field(createModelField())
                 .method(createProvideMethod())
@@ -76,9 +84,11 @@ public class ProviderClassCreator {
                 .method(servicesMethod)
                 .method(communicatorsMethod)
                 .method(configurationsMethod)
+                .method(storagesMethod)
                 .inners(mappers)
                 .inners(communicatorProxies)
-                .inners(customConfigurators);
+                .inners(customConfigurators)
+                .inners(storageSpaces);
     }
 
 

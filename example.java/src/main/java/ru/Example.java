@@ -26,9 +26,9 @@ public class Example {
                 .serve(server -> server.rsocket(MyService.class, RsocketServiceModelConfigurator::logging))
                 .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
                 .onLoad(() -> communicator(MyClient.class).myMethod2(Request.builder().build()))
-                .store(storage -> storage.tarantool("s2_seq", Value.class, Value.class, space -> space
+                .store(storage -> storage.tarantool("s2_seq", Model.class, Model.class, space -> space
                                 .cluster("storage2")
                                 .sharded(emptyFunction())
-                                .searchBy("indexName", Value.class)));
+                                .searchBy("indexName", Model.class)));
     }
 }
