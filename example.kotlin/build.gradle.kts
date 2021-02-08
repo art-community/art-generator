@@ -33,7 +33,6 @@ val compileJava: JavaCompile = tasks["compileJava"] as JavaCompile
 val languageJar = project(":language.kotlin").tasks["jar"] as Jar
 
 with(compileKotlin) {
-    dependsOn("clean")
     dependsOn(languageJar)
 }
 
