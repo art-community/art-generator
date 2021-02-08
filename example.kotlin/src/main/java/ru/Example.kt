@@ -19,11 +19,11 @@ object Example {
         }
 
         serve {
-            rsocket(MyService::class)
+            rsocket(MyService)
         }
 
         communicate {
-            rsocket(MyClient::class) to MyService::class
+            rsocket(MyClient::class) to MyService
         }
 
         onLoad {
