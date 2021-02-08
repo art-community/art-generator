@@ -4,6 +4,7 @@ import com.sun.tools.javac.api.*;
 import com.sun.tools.javac.file.*;
 import io.art.core.collection.*;
 import io.art.core.managed.*;
+import io.art.core.property.*;
 import io.art.generator.exception.*;
 import lombok.*;
 
@@ -19,7 +20,7 @@ import static io.art.core.constants.StringConstants.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.core.factory.SetFactory.*;
-import static io.art.core.managed.LazyValue.*;
+import static io.art.core.property.LazyProperty.*;
 import static io.art.generator.constants.CompilerOptions.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.LoggingMessages.*;
@@ -32,7 +33,7 @@ import static java.text.MessageFormat.*;
 
 public class JavaRecompilationService implements RecompilationService {
     JavacTool javacTool;
-    LazyValue<JavacFileManager> stubFileManager;
+    LazyProperty<JavacFileManager> stubFileManager;
 
     @SneakyThrows
     public JavaRecompilationService(){
