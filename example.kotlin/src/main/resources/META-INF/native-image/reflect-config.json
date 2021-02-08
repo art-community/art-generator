@@ -1756,10 +1756,6 @@
     "name": "kotlin.jvm.internal.DefaultConstructorMarker"
   },
   {
-    "name": "kotlin.reflect.jvm.internal.ReflectionFactoryImpl",
-    "allDeclaredConstructors": true
-  },
-  {
     "name": "java.lang.String"
   },
   {
