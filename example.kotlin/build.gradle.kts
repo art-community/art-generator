@@ -45,9 +45,8 @@ kapt {
             arg("art.generator.recompilation.destination", compileKotlin
                     .destinationDir
                     .absolutePath)
-            arg("art.generator.recompilation.classpath", compileKotlin
-                    .classpath
-                    .files
+            arg("art.generator.recompilation.classpath", (compileKotlin.classpath.files + compileJava.classpath.files)
+                    .toSet()
                     .filter { it.exists() }
                     .joinToString(","))
             arg("art.generator.recompilation.sources", compileKotlin
