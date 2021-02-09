@@ -9,6 +9,7 @@ import io.art.generator.constants.KOTLIN_NO_STD_LIB
 import io.art.generator.constants.LoggingMessages.*
 import io.art.generator.constants.ProcessorOptions.*
 import io.art.generator.context.GeneratorContext.processingEnvironment
+import io.art.generator.logger.GeneratorLogger.info
 import io.art.generator.logger.GeneratorLogger.success
 import io.art.generator.normalizer.ClassPathNormalizer.normalizeClassPath
 import io.art.generator.state.GeneratorState.generatedClasses
@@ -36,7 +37,7 @@ class KotlinRecompilationService : RecompilationService {
             addAll(sources.filter { file -> File(file).exists() })
             toTypedArray()
         }
-        success(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(arguments)))
+        info(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(arguments)))
         K2JVMCompiler.main(arguments)
         success(RECOMPILATION_COMPLETED)
     }

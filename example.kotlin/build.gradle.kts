@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
+    implementation(project(":rocks-db"))
     implementation(project(":language.kotlin"))
     kapt(project(":language.kotlin"))
 }

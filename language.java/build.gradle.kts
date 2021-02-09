@@ -20,6 +20,7 @@ dependencies {
     api(project(":protobuf"))
     api(project(":scheduler"))
     api(project(":logging"))
+    api(project(":rocks-db"))
 }
 
 tasks.withType<JavaCompile> {

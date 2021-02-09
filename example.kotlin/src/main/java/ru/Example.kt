@@ -8,7 +8,9 @@ import io.art.model.annotation.Configurator
 import ru.ExampleProvider.provide
 import ru.communicator.MyClient
 import ru.configuration.MyConfig
+import ru.model.Model
 import ru.model.Request
+import ru.model.Response
 import ru.service.MyService
 import java.time.Duration.ofSeconds
 
@@ -17,7 +19,11 @@ val myClient: MyClient by communicator()
 object Example {
     @Configurator
     fun configure() = module {
-        value { model(Request::class) }
+        value {
+            model(Request::class)
+            model(Model::class)
+            model(Response::class)
+        }
         configure { configuration(MyConfig::class) }
         serve { rsocket(MyService) }
         communicate { rsocket(MyClient::class) to MyService }
