@@ -15,6 +15,11 @@ dependencies {
     api(project(":value"))
     api(project(":model"))
     api(project(":rsocket"))
+    api(project(":json"))
+    api(project(":message-pack"))
+    api(project(":protobuf"))
+    api(project(":scheduler"))
+    api(project(":logging"))
 }
 
 tasks.withType<JavaCompile> {

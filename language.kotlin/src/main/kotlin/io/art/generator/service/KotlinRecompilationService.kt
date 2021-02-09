@@ -9,7 +9,6 @@ import io.art.generator.constants.KOTLIN_NO_STD_LIB
 import io.art.generator.constants.LoggingMessages.*
 import io.art.generator.constants.ProcessorOptions.*
 import io.art.generator.context.GeneratorContext.processingEnvironment
-import io.art.generator.logger.GeneratorLogger.info
 import io.art.generator.logger.GeneratorLogger.success
 import io.art.generator.normalizer.ClassPathNormalizer.normalizeClassPath
 import io.art.generator.state.GeneratorState.generatedClasses
@@ -20,7 +19,7 @@ import java.text.MessageFormat.format
 class KotlinRecompilationService : RecompilationService {
     override fun recompile() {
         success(RECOMPILATION_STARTED)
-        val sources = mutableListOf<String>().apply {
+        val sources = mutableSetOf<String>().apply {
             addAll(processingEnvironment().options[SOURCES_PROCESSOR_OPTION]!!.split(COMMA))
             addAll(generatedClasses().values().map { file -> file.name })
         }
@@ -30,7 +29,7 @@ class KotlinRecompilationService : RecompilationService {
             add(KOTLIN_JAVA_PARAMETERS)
             add(NO_WARN_OPTION)
             add(CLASS_PATH_OPTION)
-            add(normalizeClassPath(processingEnvironment().options[CLASS_PATH_PROCESSOR_OPTION].toString().split(COMMA).toTypedArray()))
+            add(normalizeClassPath(processingEnvironment().options[CLASS_PATH_PROCESSOR_OPTION].toString().split(COMMA).toSet().toTypedArray()))
             add(DIRECTORY_OPTION)
             add(processingEnvironment().options[DIRECTORY_PROCESSOR_OPTION].toString())
             addAll(sources)
