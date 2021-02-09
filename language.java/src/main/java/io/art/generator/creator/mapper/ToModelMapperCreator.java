@@ -26,9 +26,6 @@ import java.lang.reflect.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ToModelMapperCreator {
-    private static final ToModelMapperByBuilderCreator builderCreator = new ToModelMapperByBuilderCreator();
-    private static final ToModelMapperByInitializerCreator initializerCreator = new ToModelMapperByInitializerCreator();
-
     public static JCExpression toModelMapper(Type type) {
         String generatedMapper = mappers().get(type);
         if (nonNull(generatedMapper)) {
@@ -64,11 +61,11 @@ public class ToModelMapperCreator {
             }
 
             if (hasBuilder(type)) {
-                return builderCreator.create(modelClass);
+                return ToModelMapperByBuilderCreator.create(modelClass);
             }
 
             if (hasConstructorWithAllProperties(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
-                return initializerCreator.create(modelClass);
+                return ToModelMapperByInitializerCreator.create(modelClass);
             }
 
             throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
@@ -115,11 +112,11 @@ public class ToModelMapperCreator {
             }
 
             if (hasBuilder(type)) {
-                return builderCreator.create(parameterizedType);
+                return ToModelMapperByBuilderCreator.create(parameterizedType);
             }
 
             if (hasConstructorWithAllProperties(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
-                return initializerCreator.create(parameterizedType);
+                return ToModelMapperByInitializerCreator.create(parameterizedType);
             }
 
             throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
