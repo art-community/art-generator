@@ -48,7 +48,7 @@ public class ExtractedProperty {
             Field field = declaredFields[index];
             Type fieldType = field.getGenericType();
             boolean booleanProperty = isBoolean(fieldType);
-            String getterName = (isBoolean(fieldType) && dialect() == JAVA ? IS_NAME : GET_NAME) + capitalize(field.getName());
+            String getterName = (booleanProperty && dialect() == JAVA ? IS_NAME : GET_NAME) + capitalize(field.getName());
             String setterName = SET_NAME + capitalize(field.getName());
             boolean hasGetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(getterName));
             boolean hasSetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(setterName));
