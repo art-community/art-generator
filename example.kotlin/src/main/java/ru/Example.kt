@@ -1,7 +1,6 @@
 package ru
 
 import io.art.kotlin.communicator
-import io.art.kotlin.configuration
 import io.art.kotlin.module
 import io.art.kotlin.scheduleFixedRate
 import io.art.launcher.ModuleLauncher.launch
@@ -18,30 +17,11 @@ val myClient: MyClient by communicator()
 object Example {
     @Configurator
     fun configure() = module {
-        value {
-            model(Request::class)
-        }
-
-        configure {
-            configuration(MyConfig::class)
-        }
-
-        serve {
-            rsocket(MyService)
-        }
-
-        communicate {
-            rsocket(MyClient::class) to MyService
-        }
-
-        onLoad {
-            scheduleFixedRate(ofSeconds(30)) {
-                myClient.myMethod2(Request())
-                communicator<MyClient>().myMethod2(Request())
-                communicator(MyClient::class) { myMethod2(Request()) }
-                println(configuration<MyConfig>().FBInteger)
-            }
-        }
+        value { model(Request::class) }
+        configure { configuration(MyConfig::class) }
+        serve { rsocket(MyService) }
+        communicate { rsocket(MyClient::class) to MyService }
+        onLoad { scheduleFixedRate(ofSeconds(30)) { myClient.myMethod2(Request()) } }
     }
 
     @JvmStatic
