@@ -26,4 +26,6 @@ object MyService : MyClient {
     override fun myMethod15(request: Mono<Request>): Flux<Response> = Flux.empty<Response>().also { logger().info("myMethod15:${request.block()}") }
     override fun myMethod16(request: Flux<Request>): Flux<Response> = Flux.empty<Response>().also { request.subscribe { data: Request -> logger().info("myMethod16:$data") } }
     override fun myMethod17(request: String) = "myMethod17:$request"
+    override fun myMethod18(request: List<List<List<String>>>) = "myMethod18:$request"
+    override fun myMethod19(request: List<Array<List<String>>>) = "myMethod19:$request"
 }

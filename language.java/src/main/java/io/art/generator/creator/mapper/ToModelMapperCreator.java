@@ -19,6 +19,7 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.selector.ToMapperMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
+import static io.art.generator.substitutor.TypeSubstitutor.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
@@ -130,6 +131,10 @@ public class ToModelMapperCreator {
                     .addTypeParameters(type(genericComponentType))
                     .addArguments(newReference(type(type)), toModelMapper(genericComponentType))
                     .apply();
+        }
+
+        if (isWildcard(type)) {
+            return createToModelMapper(substituteWildcard((WildcardType) type));
         }
 
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));

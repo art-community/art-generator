@@ -23,4 +23,6 @@ interface MyClient {
     fun myMethod15(request: Mono<Request>): Flux<Response>
     fun myMethod16(request: Flux<Request>): Flux<Response>
     fun myMethod17(request: String): String
+    fun myMethod18(request: List<List<List<String>>>): String
+    fun myMethod19(request: List<Array<List<String>>>): String
 }

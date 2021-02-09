@@ -6,7 +6,9 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
+import io.art.generator.inspector.*;
 import lombok.*;
+import static com.sun.tools.javac.code.BoundKind.*;
 import static com.sun.tools.javac.util.List.*;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.checker.NullityChecker.*;
@@ -42,8 +44,13 @@ public class TypeModel {
     private TypeTag primitive;
     private boolean jdk;
     private boolean array;
+    private boolean wildcard;
 
     private TypeModel(Type type) {
+        ofType(type);
+    }
+
+    private void ofType(Type type) {
         if (isClass(type)) {
             ofClass((Class<?>) type);
             return;
@@ -56,6 +63,11 @@ public class TypeModel {
 
         if (isGenericArray(type)) {
             ofGenericArrayType((GenericArrayType) type);
+            return;
+        }
+
+        if (TypeInspector.isWildcard(type)) {
+            ofWildcardType((WildcardType) type);
             return;
         }
 
@@ -106,7 +118,15 @@ public class TypeModel {
         this.parameters = emptyImmutableArray();
     }
 
+    private void ofWildcardType(WildcardType wildcardType) {
+        this.type = wildcardType;
+        this.wildcard = true;
+    }
+
     public JCExpression generateFullType() {
+        if (wildcard) {
+            return generateWildcard();
+        }
         if (nonNull(primitive)) {
             return maker().TypeIdent(primitive);
         }
@@ -125,6 +145,9 @@ public class TypeModel {
     }
 
     public JCExpression generateBaseType() {
+        if (wildcard) {
+            return generateWildcard();
+        }
         if (nonNull(primitive)) {
             return isArray()
                     ? maker().TypeArray(maker().TypeIdent(primitive))
@@ -133,6 +156,17 @@ public class TypeModel {
         return isArray()
                 ? maker().TypeArray(generateArrayBaseType())
                 : maker().Ident(elements().getName(name));
+    }
+
+    public List<JCExpression> generateParameters() {
+        ImmutableArray<TypeModel> parameters = getParameters();
+        if (isEmpty(parameters)) {
+            return nil();
+        }
+        ListBuffer<JCExpression> expressions = parameters.stream()
+                .map(TypeModel::generateFullType)
+                .collect(toCollection(ListBuffer::new));
+        return expressions.toList();
     }
 
     private JCExpression generateArrayFullType() {
@@ -149,15 +183,17 @@ public class TypeModel {
         return type(((Class<?>) type).getComponentType()).generateBaseType();
     }
 
-    public List<JCExpression> generateParameters() {
-        ImmutableArray<TypeModel> parameters = getParameters();
-        if (isEmpty(parameters)) {
-            return nil();
+    private JCExpression generateWildcard() {
+        WildcardType wildcardType = (WildcardType) type;
+        Type[] lowerBounds = wildcardType.getLowerBounds();
+        Type[] upperBounds = wildcardType.getUpperBounds();
+        if (lowerBounds.length > 0) {
+            return maker().Wildcard(maker().TypeBoundKind(SUPER), type(lowerBounds[0]).generateFullType());
         }
-        ListBuffer<JCExpression> expressions = parameters.stream()
-                .map(TypeModel::generateFullType)
-                .collect(toCollection(ListBuffer::new));
-        return expressions.toList();
+        if (upperBounds.length > 0) {
+            return maker().Wildcard(maker().TypeBoundKind(EXTENDS), type(upperBounds[0]).generateFullType());
+        }
+        return maker().Wildcard(maker().TypeBoundKind(UNBOUND), null);
     }
 
     public static TypeModel type(Type type) {

@@ -28,6 +28,7 @@ import static io.art.generator.selector.FromMapperMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GeneratorState.*;
+import static io.art.generator.substitutor.TypeSubstitutor.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import static lombok.AccessLevel.*;
@@ -46,6 +47,10 @@ public class FromModelMapperCreator {
     }
 
     public static JCExpression createFromModelMapper(Type type) {
+        if (isWildcard(type)) {
+            return createFromModelMapper(substituteWildcard((WildcardType) type));
+        }
+
         FromModelMapperCreator creator = new FromModelMapperCreator(sequenceName(MODEL_NAME));
 
         if (isClass(type)) {

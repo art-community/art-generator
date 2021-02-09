@@ -2,6 +2,7 @@ package io.art.generator.comparator;
 
 import lombok.experimental.*;
 import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.substitutor.TypeSubstitutor.*;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -13,16 +14,10 @@ public class TypeMatcher {
         second = boxed(second);
         if (isWildcard(first) && isWildcard(second)) return Objects.equals(first, second);
         if (isWildcard(first)) {
-            WildcardType wildcard = (WildcardType) first;
-            Type[] upperBounds = wildcard.getUpperBounds();
-            if (upperBounds.length == 0) return isObject(second);
-            return typeMatches(upperBounds[0], second);
+            return typeMatches(substituteWildcard((WildcardType) first), second);
         }
         if (isWildcard(second)) {
-            WildcardType wildcard = (WildcardType) second;
-            Type[] upperBounds = wildcard.getUpperBounds();
-            if (upperBounds.length == 0) return isObject(first);
-            return typeMatches(upperBounds[0], first);
+            return typeMatches(first, substituteWildcard((WildcardType) second));
         }
         if (isClass(first)) return first.equals(second);
         if (isParametrized(first) && !isParametrized(second)) return false;
@@ -55,16 +50,10 @@ public class TypeMatcher {
         second = extractGenericPropertyType(owner, boxed(second));
         if (isWildcard(first) && isWildcard(second)) return Objects.equals(first, second);
         if (isWildcard(first)) {
-            WildcardType wildcard = (WildcardType) first;
-            Type[] upperBounds = wildcard.getUpperBounds();
-            if (upperBounds.length == 0) return isObject(second);
-            return typeMatches(owner, upperBounds[0], second);
+            return typeMatches(owner, substituteWildcard((WildcardType) first), second);
         }
         if (isWildcard(second)) {
-            WildcardType wildcard = (WildcardType) second;
-            Type[] upperBounds = wildcard.getUpperBounds();
-            if (upperBounds.length == 0) return isObject(first);
-            return typeMatches(owner, upperBounds[0], first);
+            return typeMatches(owner, first, substituteWildcard((WildcardType) second));
         }
         if (isClass(first)) return first.equals(second);
         if (isParametrized(first) && !isParametrized(second)) return false;
