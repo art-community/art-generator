@@ -36,7 +36,7 @@ class KotlinRecompilationService : RecompilationService {
             addAll(sources)
             toTypedArray()
         }
-        info(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(arguments)))
+        success(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(arguments)))
         K2JVMCompiler.main(arguments)
         success(RECOMPILATION_COMPLETED)
     }

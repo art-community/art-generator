@@ -23,7 +23,7 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
-    implementation(project(":kotlin"))
+    implementation(project(":extensions"))
     kapt(project(":language.kotlin"))
 }
 
@@ -38,7 +38,7 @@ with(compileKotlin) {
 
 kapt {
     includeCompileClasspath = false
-    useBuildCache = false
+    useBuildCache = true
     javacOptions {
         arguments {
             arg("art.generator.recompilation.destination", compileKotlin
