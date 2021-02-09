@@ -27,7 +27,7 @@ public class ToModelMapperByBuilderCreator {
     static JCExpression create(ParameterizedType type) {
         return newLambda()
                 .parameter(newParameter(ENTITY_TYPE, entityName))
-                .expression(() -> forProperties(type, extractClass(type)))
+                .expression(() -> forProperties(type))
                 .generate();
     }
 
@@ -40,7 +40,7 @@ public class ToModelMapperByBuilderCreator {
         return method(builderInvocation, BUILD_METHOD_NAME).apply();
     }
 
-    private static JCMethodInvocation forProperties(ParameterizedType parameterizedType, Class<?> rawClass) {
+    private static JCMethodInvocation forProperties(ParameterizedType parameterizedType) {
         JCMethodInvocation builderInvocation = method(type(parameterizedType), BUILDER_METHOD_NAME).apply();
         for (ExtractedProperty property : getProperties(parameterizedType)) {
             JCMethodInvocation fieldMapping = propertyMappingCreator.forProperty(property.name(), extractGenericPropertyType(parameterizedType, property.type()));
