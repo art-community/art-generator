@@ -1,8 +1,8 @@
 package ru
 
-import io.art.kotlin.communicator
-import io.art.kotlin.module
-import io.art.kotlin.scheduleFixedRate
+import io.art.extensions.communicator
+import io.art.extensions.module
+import io.art.extensions.scheduleFixedRate
 import io.art.launcher.ModuleLauncher.launch
 import io.art.model.annotation.Configurator
 import ru.ExampleProvider.provide
