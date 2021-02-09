@@ -237,10 +237,8 @@ public class TypeInspector {
                 continue;
             }
             Type parameterType = parameters[argumentIndex].getParameterizedType();
-            if (isParametrized(type)) {
-                if (typeMatches((ParameterizedType) type, argumentType, parameterType)) {
-                    return true;
-                }
+            if (isParametrized(type) && typeMatches((ParameterizedType) type, argumentType, parameterType)) {
+                return true;
             }
             if (typeMatches(argumentType, parameterType)) {
                 return true;
@@ -259,21 +257,19 @@ public class TypeInspector {
         for (Constructor<?> constructor : rawClass.getConstructors()) {
             if (!isPublic(constructor.getModifiers())) continue;
             Parameter[] parameters = constructor.getParameters();
-            if (argumentTypes.size() != parameters.length) return false;
+            if (argumentTypes.size() != parameters.length) continue;
             for (int i = 0; i < parameters.length; i++) {
                 Type parameterType = parameters[i].getParameterizedType();
                 Type argumentType = argumentTypes.get(i);
-                if (isParametrized(type)) {
-                    if (!typeMatches((ParameterizedType) type, parameterType, argumentType)) {
-                        return false;
-                    }
+                if (isParametrized(type) && typeMatches((ParameterizedType) type, parameterType, argumentType)) {
+                    return true;
                 }
-                if (!typeMatches(parameterType, argumentType)) {
-                    return false;
+                if (typeMatches(parameterType, argumentType)) {
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     public Type boxed(Type primitiveType) {
