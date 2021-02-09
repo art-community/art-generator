@@ -19,6 +19,7 @@ import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeConstants.*;
 import static io.art.generator.model.ExtractedProperty.*;
+import static io.art.generator.substitutor.TypeSubstitutor.*;
 import static java.lang.reflect.Modifier.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
@@ -172,6 +173,9 @@ public class TypeInspector {
     }
 
     public boolean isCoreType(Type type) {
+        if (isWildcard(type)) {
+            return isCoreType(substituteWildcard((WildcardType) type));
+        }
         if (isParametrized(type)) {
             return isCoreType(extractClass((ParameterizedType) type));
         }
@@ -298,11 +302,17 @@ public class TypeInspector {
         if (isGenericArray(type)) {
             return extractClass((GenericArrayType) type);
         }
+        if (isWildcard(type)) {
+            return extractClass(substituteWildcard((WildcardType) type));
+        }
         throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
 
     public Type extractGenericPropertyType(ParameterizedType owner, Type type) {
+        if (isWildcard(type)) {
+            return extractGenericPropertyType(owner, substituteWildcard((WildcardType) type));
+        }
         if (isVariable(type)) {
             return owner.getActualTypeArguments()[typeVariableIndex((TypeVariable<?>) type)];
         }

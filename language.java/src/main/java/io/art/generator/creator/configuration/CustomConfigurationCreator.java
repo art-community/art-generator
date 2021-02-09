@@ -27,6 +27,7 @@ import static io.art.generator.selector.ConfigurationSourceMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GeneratorState.*;
+import static io.art.generator.substitutor.TypeSubstitutor.*;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 
@@ -81,6 +82,9 @@ public class CustomConfigurationCreator {
         }
         if (isGenericArray(type)) {
             return createPropertyProvider(property, (GenericArrayType) type);
+        }
+        if (isWildcard(type)) {
+            return createPropertyProvider(property, (WildcardType) type);
         }
         throw new ValidationException(formatSignature(type), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
     }
@@ -173,6 +177,10 @@ public class CustomConfigurationCreator {
         }
         return asArray.next(TO_ARRAY_RAW_NAME, toArray -> toArray.addArguments(newReference(type(type)))).apply();
 
+    }
+
+    private JCExpression createPropertyProvider(String property, WildcardType type) {
+        return createPropertyProvider(property, substituteWildcard(type));
     }
 
     private JCMethodInvocation createArrayPropertyProvider(String property, Class<?> type) {
