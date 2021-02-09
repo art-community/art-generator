@@ -39,13 +39,14 @@ kapt {
             arg("art.generator.recompilation.destination", compileKotlin
                     .destinationDir
                     .absolutePath)
-            arg("art.generator.recompilation.classpath", configurations.compileClasspath.get().files
+            arg("art.generator.recompilation.classpath", configurations.compileClasspath
+                    .get()
+                    .files
                     .toSet()
                     .joinToString(","))
             arg("art.generator.recompilation.sources", compileKotlin
                     .source
                     .files
-                    .filter { it.exists() }
                     .joinToString(","))
         }
     }

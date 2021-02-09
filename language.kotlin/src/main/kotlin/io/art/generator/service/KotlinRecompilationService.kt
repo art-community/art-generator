@@ -33,7 +33,7 @@ class KotlinRecompilationService : RecompilationService {
             add(normalizeClassPath(processingEnvironment().options[CLASS_PATH_PROCESSOR_OPTION].toString().split(COMMA).toSet().filter { file -> File(file).exists() }.toTypedArray()))
             add(DIRECTORY_OPTION)
             add(processingEnvironment().options[DIRECTORY_PROCESSOR_OPTION].toString())
-            addAll(sources)
+            addAll(sources.filter { file -> File(file).exists() })
             toTypedArray()
         }
         success(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(arguments)))
