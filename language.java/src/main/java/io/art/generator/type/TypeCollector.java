@@ -1,11 +1,11 @@
-package io.art.generator.collector;
+package io.art.generator.type;
 
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.constants.ExceptionMessages.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
 import java.lang.reflect.*;

@@ -24,7 +24,7 @@ import static io.art.generator.creator.registry.RegistryVariableCreator.*;
 import static io.art.generator.factory.ReferenceFactory.*;
 import static io.art.generator.formater.SignatureFormatter.*;
 import static io.art.generator.inspector.ServiceMethodsInspector.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewBuilder.*;

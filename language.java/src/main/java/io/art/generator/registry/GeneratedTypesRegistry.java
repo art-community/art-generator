@@ -2,7 +2,7 @@ package io.art.generator.registry;
 
 import lombok.*;
 import static io.art.core.factory.MapFactory.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static io.art.generator.service.NamingService.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;

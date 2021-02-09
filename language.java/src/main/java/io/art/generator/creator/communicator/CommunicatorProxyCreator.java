@@ -26,7 +26,7 @@ import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.formater.SignatureFormatter.*;
 import static io.art.generator.inspector.CommunicatorsMethodsInspector.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static io.art.generator.model.NewBuilder.*;
 import static io.art.generator.model.NewClass.*;
 import static io.art.generator.model.NewField.*;

@@ -3,7 +3,7 @@ package io.art.generator.model;
 import io.art.generator.exception.*;
 import lombok.*;
 import static io.art.generator.constants.ExceptionMessages.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 

@@ -8,7 +8,7 @@ import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.MappersConstants.*;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static io.art.generator.service.JavacService.*;
 import java.lang.reflect.*;
 

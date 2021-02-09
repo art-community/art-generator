@@ -10,7 +10,7 @@ import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.MappersConstants.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.NewVariable.*;
 import static io.art.generator.model.TypeModel.*;

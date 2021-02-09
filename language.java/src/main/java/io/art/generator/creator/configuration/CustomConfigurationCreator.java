@@ -18,7 +18,7 @@ import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.formater.SignatureFormatter.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
@@ -27,7 +27,7 @@ import static io.art.generator.selector.ConfigurationSourceMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GeneratorState.*;
-import static io.art.generator.substitutor.TypeSubstitutor.*;
+import static io.art.generator.type.TypeSubstitutor.*;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 

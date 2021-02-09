@@ -19,7 +19,7 @@ import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.creator.registry.RegistryVariableCreator.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewClass.*;

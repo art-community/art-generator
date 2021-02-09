@@ -10,7 +10,7 @@ import static io.art.core.factory.MapFactory.*;
 import static io.art.generator.constants.JavaDialect.JAVA;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.context.GeneratorContext.dialect;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
