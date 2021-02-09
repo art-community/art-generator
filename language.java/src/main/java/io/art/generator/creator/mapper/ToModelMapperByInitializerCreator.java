@@ -26,19 +26,6 @@ public class ToModelMapperByInitializerCreator {
     private final static ToModelPropertyMappingCreator fieldMappingCreator = new ToModelPropertyMappingCreator(entityName);
 
     static JCExpression create(Class<?> type) {
-        if (hasNoArgumentsConstructor(type)) {
-            return NewLambda.newLambda()
-                    .parameter(newParameter(ENTITY_TYPE, entityName))
-                    .addStatement(() -> newVariable()
-                            .type(type(type))
-                            .name(MODEL_NAME)
-                            .initializer(() -> newObject(type(type)))
-                            .generate())
-                    .addStatements(forPropertiesBySetters(type))
-                    .addStatement(() -> returnVariable(MODEL_NAME))
-                    .generate();
-        }
-
         if (hasConstructorWithAllProperties(type)) {
             return NewLambda.newLambda()
                     .parameter(newParameter(ENTITY_TYPE, entityName))
@@ -46,6 +33,19 @@ public class ToModelMapperByInitializerCreator {
                             .type(type(type))
                             .name(MODEL_NAME)
                             .initializer(() -> newObject(type(type), forPropertiesByConstructor(type)))
+                            .generate())
+                    .addStatements(forPropertiesBySetters(type))
+                    .addStatement(() -> returnVariable(MODEL_NAME))
+                    .generate();
+        }
+
+        if (hasNoArgumentsConstructor(type)) {
+            return NewLambda.newLambda()
+                    .parameter(newParameter(ENTITY_TYPE, entityName))
+                    .addStatement(() -> newVariable()
+                            .type(type(type))
+                            .name(MODEL_NAME)
+                            .initializer(() -> newObject(type(type)))
                             .generate())
                     .addStatements(forPropertiesBySetters(type))
                     .addStatement(() -> returnVariable(MODEL_NAME))
@@ -56,19 +56,6 @@ public class ToModelMapperByInitializerCreator {
     }
 
     static JCExpression create(ParameterizedType type) {
-        if (hasNoArgumentsConstructor(type)) {
-            return NewLambda.newLambda()
-                    .parameter(newParameter(ENTITY_TYPE, entityName))
-                    .addStatement(() -> newVariable()
-                            .type(type(type))
-                            .name(MODEL_NAME)
-                            .initializer(() -> newObject(type(type)))
-                            .generate())
-                    .addStatements(forPropertiesBySetters(type))
-                    .addStatement(() -> returnVariable(MODEL_NAME))
-                    .generate();
-        }
-
         if (hasConstructorWithAllProperties(type)) {
             return NewLambda.newLambda()
                     .parameter(newParameter(ENTITY_TYPE, entityName))
@@ -76,6 +63,19 @@ public class ToModelMapperByInitializerCreator {
                             .type(type(type))
                             .name(MODEL_NAME)
                             .initializer(() -> newObject(type(type), forPropertiesByConstructor(type)))
+                            .generate())
+                    .addStatements(forPropertiesBySetters(type))
+                    .addStatement(() -> returnVariable(MODEL_NAME))
+                    .generate();
+        }
+
+        if (hasNoArgumentsConstructor(type)) {
+            return NewLambda.newLambda()
+                    .parameter(newParameter(ENTITY_TYPE, entityName))
+                    .addStatement(() -> newVariable()
+                            .type(type(type))
+                            .name(MODEL_NAME)
+                            .initializer(() -> newObject(type(type)))
                             .generate())
                     .addStatements(forPropertiesBySetters(type))
                     .addStatement(() -> returnVariable(MODEL_NAME))
