@@ -23,18 +23,14 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
-    implementation(project(":kotlin"))
+    implementation(project(":rocks-db"))
+    implementation(project(":language.kotlin"))
     kapt(project(":language.kotlin"))
 }
 
 val processResources: Task = tasks["processResources"]
 val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
 val compileJava: JavaCompile = tasks["compileJava"] as JavaCompile
-val languageJar = project(":language.kotlin").tasks["jar"] as Jar
-
-with(compileKotlin) {
-    dependsOn(languageJar)
-}
 
 kapt {
     includeCompileClasspath = false
@@ -44,14 +40,14 @@ kapt {
             arg("art.generator.recompilation.destination", compileKotlin
                     .destinationDir
                     .absolutePath)
-            arg("art.generator.recompilation.classpath", (compileKotlin.classpath.files + compileJava.classpath.files)
+            arg("art.generator.recompilation.classpath", configurations.compileClasspath
+                    .get()
+                    .files
                     .toSet()
-                    .filter { it.exists() }
                     .joinToString(","))
             arg("art.generator.recompilation.sources", compileKotlin
                     .source
                     .files
-                    .filter { it.exists() }
                     .joinToString(","))
         }
     }

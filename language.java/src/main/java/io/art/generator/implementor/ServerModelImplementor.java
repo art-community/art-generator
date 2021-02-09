@@ -11,11 +11,9 @@ import static com.sun.tools.javac.code.Flags.PRIVATE;
 import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.constants.MethodProcessingMode.*;
-import static io.art.core.handler.ExceptionHandler.*;
 import static io.art.generator.calculator.MethodProcessingModeCalculator.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ExceptionMessages.*;
-import static io.art.generator.constants.JavaDialect.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
@@ -23,6 +21,7 @@ import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.creator.registry.RegistryVariableCreator.*;
+import static io.art.generator.factory.ReferenceFactory.*;
 import static io.art.generator.formater.SignatureFormatter.*;
 import static io.art.generator.inspector.ServiceMethodsInspector.*;
 import static io.art.generator.inspector.TypeInspector.*;
@@ -35,7 +34,6 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.text.MessageFormat.*;
-import static java.util.Objects.*;
 import java.lang.reflect.*;
 
 @UtilityClass
@@ -147,14 +145,7 @@ public class ServerModelImplementor {
         if (isVoid(serviceMethod.getReturnType()) && isEmpty(serviceMethod.getParameterTypes())) {
             name = RUNNER_NAME;
         }
-        JCExpression owner = isStatic(serviceMethod.getModifiers())
-                ? type(serviceClass).generateBaseType()
-                : dialect() == KOTLIN && nonNull(nullIfException(() -> serviceClass.getField(INSTANCE_FIELD_NAME)))
-                ? select(type(serviceClass), INSTANCE_FIELD_NAME)
-                : method(SINGLETON_REGISTRY_TYPE, SINGLETON_NAME)
-                .addArguments(classReference(serviceClass))
-                .addArguments(newReference(type(serviceClass)))
-                .apply();
+        JCExpression owner = callOwner(serviceClass, isStatic(serviceMethod.getModifiers()));
         JCMemberReference reference = invokeReference(owner, (serviceMethod.getName()));
         JCLiteral serviceName = literal(serviceClass.getSimpleName());
         JCLiteral methodName = literal(serviceMethod.getName());

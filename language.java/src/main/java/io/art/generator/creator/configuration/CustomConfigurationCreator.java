@@ -19,7 +19,6 @@ import static io.art.generator.constants.ConfiguratorConstants.ConfiguratorMetho
 import static io.art.generator.constants.ConfiguratorConstants.NestedConfigurationMethods.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.Names.*;
-import static io.art.generator.constants.TypeConstants.*;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.formater.SignatureFormatter.*;
 import static io.art.generator.inspector.TypeInspector.*;
@@ -31,12 +30,13 @@ import static io.art.generator.selector.ConfigurationSourceMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GeneratorState.*;
+import static io.art.generator.substitutor.TypeSubstitutor.*;
 import static java.text.MessageFormat.*;
 
 @UtilityClass
 public class CustomConfigurationCreator {
     public NewMethod createConfigureMethod(Class<?> configurationClass) {
-        ImmutableArray<ExtractedProperty> properties = getConstructorProperties(extractClass(configurationClass));
+        ImmutableArray<ExtractedProperty> properties = getConstructorProperties(configurationClass);
         NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass)).parameters(setOf(newParameter(CONFIGURATION_SOURCE_TYPE, SOURCE_NAME)));
         ImmutableArray<JCExpression> constructorParameters = createConstructorParameters(properties);
         return method.statement(() -> returnExpression(newObject(type(configurationClass), constructorParameters)));
@@ -52,13 +52,9 @@ public class CustomConfigurationCreator {
 
     private JCExpression createPropertyProvider(ExtractedProperty property) {
         Type type = property.type();
-        JCMethodInvocation getNested = method(SOURCE_NAME, GET_NESTED)
-                .addArguments(literal(property.name()))
-                .addArguments(newLambda()
-                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, property.name()))
-                        .expression(() -> createPropertyProvider(property.name(), type))
-                        .generate())
-                .apply();
+        if (isNestedConfiguration(type)) {
+            return method(SOURCE_NAME, GET_NESTED).addArguments(literal(property.name())).apply();
+        }
         if (isOptional(type)) {
             return method(OPTIONAL_TYPE, OF_NULLABLE_NAME)
                     .addArguments(method(SOURCE_NAME, GET_NESTED)
@@ -70,7 +66,13 @@ public class CustomConfigurationCreator {
                             .apply())
                     .apply();
         }
-        return getNested;
+        return method(SOURCE_NAME, GET_NESTED)
+                .addArguments(literal(property.name()))
+                .addArguments(newLambda()
+                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, property.name()))
+                        .expression(() -> createPropertyProvider(property.name(), type))
+                        .generate())
+                .apply();
     }
 
     private JCExpression createPropertyProvider(String property, Type type) {
@@ -82,6 +84,9 @@ public class CustomConfigurationCreator {
         }
         if (isGenericArray(type)) {
             return createPropertyProvider(property, (GenericArrayType) type);
+        }
+        if (isWildcard(type)) {
+            return createPropertyProvider(property, (WildcardType) type);
         }
         throw new ValidationException(formatSignature(type), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
     }
@@ -103,41 +108,46 @@ public class CustomConfigurationCreator {
     }
 
     private JCExpression createPropertyProvider(String property, ParameterizedType type) {
+        Type firstType = extractFirstTypeParameter(type);
         if (isOptional(type)) {
             return method(OPTIONAL_TYPE, OF_NULLABLE_NAME)
-                    .addArguments(createPropertyProvider(property, extractFirstTypeParameter(type)))
+                    .addArguments(createPropertyProvider(property, firstType))
                     .apply();
         }
 
-        if (isMapType(type) || isImmutableMapType(type)) {
-            if (extractFirstTypeParameter(type) != String.class) {
+        if (isMap(type) || isImmutableMap(type)) {
+            if (firstType != String.class) {
                 throw new ValidationException(formatSignature(type), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
             }
+            Type secondType = extractTypeParameter(type, 1);
             String lambdaParameter = sequenceName(property);
-            MethodCaller propertyProvider = method(property, AS_MAP)
-                    .addArguments(newLambda()
-                            .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
-                            .expression(() -> createPropertyProvider(lambdaParameter, extractTypeParameter(type, 1)))
-                            .generate());
-            if (isMapType(type)) {
+            MethodCaller propertyProvider = method(property, AS_MAP);
+            if (!isNestedConfiguration(secondType)) {
+                propertyProvider = propertyProvider.addArguments(newLambda()
+                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
+                        .expression(() -> createPropertyProvider(lambdaParameter, secondType))
+                        .generate());
+            }
+            if (isMap(type)) {
                 propertyProvider = method(propertyProvider.apply(), TO_MUTABLE_NAME);
             }
             return propertyProvider.apply();
         }
 
-        if (!isCollectionType(type)) {
+        if (!isCollection(type)) {
             throw new ValidationException(formatSignature(type), format(NOT_CONFIGURATION_SOURCE_TYPE, type));
         }
 
         String lambdaParameter = sequenceName(property);
-        MethodCaller propertyProvider = method(property, AS_ARRAY)
-                .addArguments(newLambda()
-                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
-                        .expression(() -> createPropertyProvider(lambdaParameter, extractFirstTypeParameter(type)))
-                        .generate());
-
-        if (isSetType(type) || isImmutableSetType(type)) {
-            if (isMutableType(type)) {
+        MethodCaller propertyProvider = method(property, AS_ARRAY);
+        if (!isNestedConfiguration(firstType)) {
+            propertyProvider = propertyProvider.addArguments(newLambda()
+                    .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
+                    .expression(() -> createPropertyProvider(lambdaParameter, firstType))
+                    .generate());
+        }
+        if (isSet(type) || isImmutableSet(type)) {
+            if (isMutableCollection(type)) {
                 return method(SET_FACTORY_TYPE, SET_OF_NAME)
                         .addArguments(propertyProvider.apply())
                         .apply();
@@ -147,8 +157,8 @@ public class CustomConfigurationCreator {
                     .apply();
         }
 
-        if (isListType(type) || isImmutableArrayType(type)) {
-            if (isMutableType(type)) {
+        if (isList(type) || isImmutableArray(type)) {
+            if (isMutableCollection(type)) {
                 propertyProvider = method(propertyProvider.apply(), TO_MUTABLE_NAME);
             }
             return propertyProvider.apply();
@@ -159,31 +169,35 @@ public class CustomConfigurationCreator {
 
     private JCExpression createPropertyProvider(String property, GenericArrayType type) {
         String lambdaParameter = sequenceName(property);
-        return method(property, AS_ARRAY)
-                .addArguments(newLambda()
-                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
-                        .expression(() -> createPropertyProvider(lambdaParameter, type.getGenericComponentType()))
-                        .generate())
-                .next(TO_ARRAY_RAW_NAME, toArray -> toArray.addArguments(newReference(type(type))))
-                .apply();
+        Type componentType = type.getGenericComponentType();
+        MethodCaller asArray = method(property, AS_ARRAY);
+        if (!isNestedConfiguration(componentType)) {
+            asArray = asArray.addArguments(newLambda()
+                    .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
+                    .expression(() -> createPropertyProvider(lambdaParameter, componentType))
+                    .generate());
+        }
+        return asArray.next(TO_ARRAY_RAW_NAME, toArray -> toArray.addArguments(newReference(type(type)))).apply();
 
     }
 
+    private JCExpression createPropertyProvider(String property, WildcardType type) {
+        return createPropertyProvider(property, substituteWildcard(type));
+    }
+
     private JCMethodInvocation createArrayPropertyProvider(String property, Class<?> type) {
-        boolean primitiveType = isJavaPrimitiveType(type.getComponentType());
-        Class<?> componentType = primitiveType
-                ? JAVA_PRIMITIVE_MAPPINGS.get(type.getComponentType())
-                : type.getComponentType();
+        Type componentType = boxed(type.getComponentType());
 
         if (configurations().contains(componentType)) {
             String lambdaParameter = sequenceName(property);
-            return method(property, AS_ARRAY)
-                    .addArguments(newLambda()
-                            .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
-                            .expression(() -> createPropertyProvider(lambdaParameter, componentType))
-                            .generate())
-                    .next(TO_ARRAY_RAW_NAME, toArray -> toArray.addArguments(newReference(type(type))))
-                    .apply();
+            MethodCaller asArray = method(property, AS_ARRAY);
+            if (!isNestedConfiguration(componentType)) {
+                asArray = asArray.addArguments(newLambda()
+                        .parameter(newParameter(NESTED_CONFIGURATION_TYPE, lambdaParameter))
+                        .expression(() -> createPropertyProvider(lambdaParameter, componentType))
+                        .generate());
+            }
+            return asArray.next(TO_ARRAY_RAW_NAME, toArray -> toArray.addArguments(newReference(type(type)))).apply();
         }
 
         ParameterizedTypeImplementation immutableArrayType = parameterizedType(ImmutableArray.class, componentType);
@@ -191,7 +205,7 @@ public class CustomConfigurationCreator {
                 .next(TO_ARRAY_RAW_NAME, toArray -> toArray.addArguments(newReference(type(type))))
                 .apply();
 
-        if (primitiveType) {
+        if (isJavaPrimitive(type.getComponentType())) {
             return method(ARRAY_EXTENSIONS_TYPE, UNBOX_NAME)
                     .addArguments(asArray)
                     .apply();

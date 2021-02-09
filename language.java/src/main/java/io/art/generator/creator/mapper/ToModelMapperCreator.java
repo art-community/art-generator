@@ -12,9 +12,9 @@ import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.MappersConstants.ArrayMappingMethods.*;
 import static io.art.generator.constants.MappersConstants.BinaryMappingMethods.*;
 import static io.art.generator.constants.MappersConstants.EntityMappingMethods.*;
+import static io.art.generator.constants.MappersConstants.*;
 import static io.art.generator.constants.MappersConstants.LazyValueMappingMethods.*;
 import static io.art.generator.constants.MappersConstants.OptionalMappingMethods.*;
-import static io.art.generator.constants.MappersConstants.*;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.inspector.TypeInspector.*;
@@ -22,14 +22,12 @@ import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.selector.ToMapperMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
+import static io.art.generator.substitutor.TypeSubstitutor.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ToModelMapperCreator {
-    private static final ToModelMapperByBuilderCreator builderCreator = new ToModelMapperByBuilderCreator();
-    private static final ToModelMapperByInitializerCreator initializerCreator = new ToModelMapperByInitializerCreator();
-
     public static JCExpression toModelMapper(Type type) {
         String generatedMapper = mappers().get(type);
         if (nonNull(generatedMapper)) {
@@ -41,12 +39,17 @@ public class ToModelMapperCreator {
     public static JCExpression createToModelMapper(Type type) {
         if (isClass(type)) {
             Class<?> modelClass = (Class<?>) type;
-            if (byte[].class.equals(type)) {
+
+            if (isByteArray(modelClass)) {
                 return select(BINARY_MAPPING_TYPE, TO_BINARY);
             }
 
-            if (modelClass.isArray()) {
-                if (isJavaPrimitiveType(modelClass.getComponentType())) {
+            if (isValue(modelClass)) {
+                return method(VALUE_TO_MODEL_MAPPER_TYPE, IDENTITY_NAME).apply();
+            }
+
+            if (isArray(modelClass)) {
+                if (isJavaPrimitive(modelClass.getComponentType())) {
                     return select(ARRAY_MAPPING_TYPE, selectToArrayJavaPrimitiveMethod(modelClass));
                 }
                 JCExpression parameterMapper = toModelMapper(modelClass.getComponentType());
@@ -55,16 +58,16 @@ public class ToModelMapperCreator {
                         .apply();
             }
 
-            if (isPrimitiveType(modelClass)) {
+            if (isPrimitive(modelClass)) {
                 return select(PRIMITIVE_MAPPING_TYPE, selectToPrimitiveMethod(modelClass));
             }
 
             if (hasBuilder(type)) {
-                return builderCreator.create(modelClass);
+                return ToModelMapperByBuilderCreator.create(modelClass);
             }
 
             if (hasConstructorWithAllProperties(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
-                return initializerCreator.create(modelClass);
+                return ToModelMapperByInitializerCreator.create(modelClass);
             }
 
             throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
@@ -76,21 +79,21 @@ public class ToModelMapperCreator {
             Class<?> rawClass = extractedType.getRawClass();
             Type[] typeArguments = extractedType.getTypeArguments();
 
-            if (isCollectionType(rawClass)) {
+            if (isCollection(rawClass)) {
                 JCExpression parameterMapper = toModelMapper(typeArguments[0]);
                 return method(ARRAY_MAPPING_TYPE, selectToCollectionMethod(rawClass))
                         .addArguments(parameterMapper)
                         .apply();
             }
 
-            if (isMapType(rawClass) || isImmutableMapType(rawClass)) {
-                if (isComplexType(typeArguments[0])) {
+            if (isMap(rawClass) || isImmutableMap(rawClass)) {
+                if (isUserType(typeArguments[0])) {
                     throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
                 }
                 JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
                 JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
                 JCExpression valueMapper = toModelMapper(typeArguments[1]);
-                if (isImmutableType(rawClass)) {
+                if (isImmutableCollection(rawClass)) {
                     return method(ENTITY_MAPPING_TYPE, TO_IMMUTABLE_MAP)
                             .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
                             .apply();
@@ -111,11 +114,11 @@ public class ToModelMapperCreator {
             }
 
             if (hasBuilder(type)) {
-                return builderCreator.create(parameterizedType);
+                return ToModelMapperByBuilderCreator.create(parameterizedType);
             }
 
             if (hasConstructorWithAllProperties(type) || (hasNoArgumentsConstructor(type) && hasAtLeastOneSetter(type))) {
-                return initializerCreator.create(parameterizedType);
+                return ToModelMapperByInitializerCreator.create(parameterizedType);
             }
 
             throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
@@ -130,11 +133,8 @@ public class ToModelMapperCreator {
         }
 
         if (isWildcard(type)) {
-            WildcardType wildcardType = (WildcardType) type;
-            Type[] upperBounds = wildcardType.getUpperBounds();
-            return toModelMapper(upperBounds[0]);
+            return createToModelMapper(substituteWildcard((WildcardType) type));
         }
-
 
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }

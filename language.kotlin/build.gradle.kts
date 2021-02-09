@@ -5,7 +5,6 @@ plugins {
 val kotlinVersion: String by project
 
 dependencies {
-    implementation(project(":kotlin"))
     implementation(project(":language.java"))
     implementation("org.jetbrains.kotlin", "kotlin-compiler-embeddable", kotlinVersion)
 }

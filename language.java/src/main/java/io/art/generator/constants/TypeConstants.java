@@ -2,8 +2,10 @@ package io.art.generator.constants;
 
 import io.art.core.collection.*;
 import io.art.core.property.*;
+import io.art.core.source.*;
 import io.art.generator.model.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
+import io.art.value.immutable.Value;
 import reactor.core.publisher.*;
 
 import java.lang.reflect.*;
@@ -24,7 +26,7 @@ import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveTyp
 import static io.art.value.constants.ValueModuleConstants.ValueType.PrimitiveType.STRING;
 
 public interface TypeConstants {
-    ImmutableSet<Class<?>> LIBRARY_BASED_TYPES = immutableSetOf(
+    ImmutableSet<Class<?>> CORE_BASE_TYPES = immutableSetOf(
             List.class,
             Collection.class,
             Set.class,
@@ -37,10 +39,12 @@ public interface TypeConstants {
             Stream.class,
             ImmutableArray.class,
             ImmutableSet.class,
-            ImmutableMap.class
+            ImmutableMap.class,
+            Value.class,
+            NestedConfiguration.class
     );
 
-    ImmutableSet<Class<?>> LIBRARY_TYPES = immutableSetOf(
+    ImmutableSet<Class<?>> CORE_TYPES = immutableSetOf(
             void.class,
             Void.class,
             String.class,

@@ -24,7 +24,7 @@ public class MethodProcessingModeCalculator {
             }
             return BLOCKING;
         }
-        if (isGenericArray(parameterType)) {
+        if (isGenericArray(parameterType) || isWildcard(parameterType)) {
             return BLOCKING;
         }
         if (isClass(parameterType)) {

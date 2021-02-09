@@ -31,6 +31,7 @@ import static io.art.generator.selector.FromMapperMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GeneratorState.*;
+import static io.art.generator.substitutor.TypeSubstitutor.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import static lombok.AccessLevel.*;
@@ -48,6 +49,10 @@ public class FromModelMapperCreator {
     }
 
     public static JCExpression createFromModelMapper(Type type) {
+        if (isWildcard(type)) {
+            return createFromModelMapper(substituteWildcard((WildcardType) type));
+        }
+
         FromModelMapperCreator creator = new FromModelMapperCreator(sequenceName(MODEL_NAME));
 
         if (isClass(type)) {
@@ -63,11 +68,6 @@ public class FromModelMapperCreator {
             return creator.create((GenericArrayType) type);
         }
 
-        if (isWildcard(type)) {
-            WildcardType wildcardType = (WildcardType) type;
-            return fromModelMapper(wildcardType.getUpperBounds()[0]);
-        }
-
         throw new GenerationException(format(UNSUPPORTED_TYPE, type.getTypeName()));
     }
 
@@ -78,21 +78,24 @@ public class FromModelMapperCreator {
     }
 
     private JCExpression create(Class<?> modelClass) {
-        if (byte[].class.equals(modelClass)) {
+        if (isByteArray(modelClass)) {
             return select(BINARY_MAPPING_TYPE, FROM_BINARY);
         }
-        if (modelClass.isArray()) {
-            if (isJavaPrimitiveType(modelClass.getComponentType())) {
+        if (isValue(modelClass)) {
+            return method(VALUE_FROM_MODEL_MAPPER_TYPE, IDENTITY_NAME).apply();
+        }
+        if (isArray(modelClass)) {
+            if (isJavaPrimitive(modelClass.getComponentType())) {
                 return select(ARRAY_MAPPING_TYPE, selectFromArrayJavaPrimitiveMethod(modelClass));
             }
             JCExpression parameterMapper = fromModelMapper(modelClass.getComponentType());
             return method(ARRAY_MAPPING_TYPE, FROM_ARRAY).addArguments(parameterMapper).apply();
         }
-        if (isPrimitiveType(modelClass)) {
+        if (isPrimitive(modelClass)) {
             return select(PRIMITIVE_MAPPING_TYPE, selectFromPrimitiveMethod(modelClass));
         }
         JCMethodInvocation builderInvocation = method(ENTITY_TYPE, ENTITY_BUILDER_NAME).apply();
-        for (ExtractedProperty property : getProperties(modelClass)) {
+        for (ExtractedProperty property : getGettableProperties(modelClass)) {
             builderInvocation = forProperty(builderInvocation, property.name(), property.type());
         }
         final JCMethodInvocation finalBuilderInvocation = builderInvocation;
@@ -106,21 +109,21 @@ public class FromModelMapperCreator {
         ExtractedParametrizedType extractedType = ExtractedParametrizedType.from(parameterizedType);
         Class<?> rawClass = extractedType.getRawClass();
         Type[] typeArguments = extractedType.getTypeArguments();
-        if (isCollectionType(rawClass)) {
+        if (isCollection(rawClass)) {
             JCExpression parameterMapper = fromModelMapper(typeArguments[0]);
             return method(ARRAY_MAPPING_TYPE, selectFromCollectionMethod(rawClass))
                     .addArguments(parameterMapper)
                     .apply();
         }
 
-        if (isMapType(rawClass) || isImmutableMapType(rawClass)) {
-            if (isComplexType(typeArguments[0])) {
+        if (isMap(rawClass) || isImmutableMap(rawClass)) {
+            if (isUserType(typeArguments[0])) {
                 throw new GenerationException(format(UNSUPPORTED_TYPE, typeArguments[0]));
             }
             JCExpression keyToModelMapper = toModelMapper(typeArguments[0]);
             JCExpression keyFromModelMapper = fromModelMapper(typeArguments[0]);
             JCExpression valueMapper = fromModelMapper(typeArguments[1]);
-            if (isImmutableType(rawClass)) {
+            if (isImmutableCollection(rawClass)) {
                 return method(ENTITY_MAPPING_TYPE, FROM_IMMUTABLE_MAP)
                         .addArguments(keyToModelMapper, keyFromModelMapper, valueMapper)
                         .apply();
@@ -145,7 +148,7 @@ public class FromModelMapperCreator {
         }
 
         JCMethodInvocation builderInvocation = method(ENTITY_TYPE, ENTITY_BUILDER_NAME).apply();
-        for (ExtractedProperty property : getProperties(rawClass)) {
+        for (ExtractedProperty property : getGettableProperties(parameterizedType)) {
             Type fieldType = extractGenericPropertyType(parameterizedType, property.type());
             builderInvocation = forProperty(builderInvocation, property.name(), fieldType);
         }

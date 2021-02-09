@@ -14,13 +14,14 @@ import io.art.generator.logger.GeneratorLogger.success
 import io.art.generator.normalizer.ClassPathNormalizer.normalizeClassPath
 import io.art.generator.state.GeneratorState.generatedClasses
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
+import java.io.File
 import java.text.MessageFormat.format
 import javax.tools.FileObject
 
 
 class KotlinRecompilationService : RecompilationService {
     override fun recompile() {
-        val sources = mutableListOf<String>().apply {
+        val sources = mutableSetOf<String>().apply {
             addAll(processingEnvironment().options[SOURCES_PROCESSOR_OPTION]!!.split(COMMA))
             addAll(generatedClasses().values().map { file -> file.name })
         }
@@ -35,10 +36,11 @@ class KotlinRecompilationService : RecompilationService {
             add(KOTLIN_JAVA_PARAMETERS)
             add(NO_WARN_OPTION)
             add(CLASS_PATH_OPTION)
-            add(normalizeClassPath(processingEnvironment().options[CLASS_PATH_PROCESSOR_OPTION].toString().split(COMMA).toTypedArray()))
+            add(normalizeClassPath(processingEnvironment().options[CLASS_PATH_PROCESSOR_OPTION].toString().split(COMMA)
+                    .toSet().filter { file -> File(file).exists() }.toTypedArray()))
             add(DIRECTORY_OPTION)
             add(processingEnvironment().options[DIRECTORY_PROCESSOR_OPTION].toString())
-            addAll(sources)
+            addAll(sources.filter { file -> File(file).exists() })
             toTypedArray()
         }
         info(format(RECOMPILE_ARGUMENTS, toCommaDelimitedString(arguments)))

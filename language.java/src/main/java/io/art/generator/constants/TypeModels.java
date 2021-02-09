@@ -29,6 +29,7 @@ import io.art.server.specification.*;
 import io.art.storage.registry.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import io.art.value.immutable.*;
+import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import io.art.value.registry.*;
 import static io.art.generator.model.TypeModel.*;
@@ -43,6 +44,8 @@ public interface TypeModels {
     TypeModel VOID_TYPE = type(void.class);
     TypeModel SINGLETON_REGISTRY_TYPE = type(SingletonsRegistry.class);
 
+    TypeModel VALUE_FROM_MODEL_MAPPER_TYPE = type(ValueFromModelMapper.class);
+    TypeModel VALUE_TO_MODEL_MAPPER_TYPE = type(ValueToModelMapper.class);
     TypeModel ENTITY_TYPE = type(Entity.class);
     TypeModel BINARY_MAPPING_TYPE = type(BinaryMapping.class);
     TypeModel ARRAY_MAPPING_TYPE = type(ArrayMapping.class);

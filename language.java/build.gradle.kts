@@ -15,6 +15,12 @@ dependencies {
     api(project(":value"))
     api(project(":model"))
     api(project(":rsocket"))
+    api(project(":json"))
+    api(project(":message-pack"))
+    api(project(":protobuf"))
+    api(project(":scheduler"))
+    api(project(":logging"))
+    api(project(":rocks-db"))
     api(project(":storage"))
     api(project(":tarantool"))
 }

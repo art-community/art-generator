@@ -3,18 +3,16 @@ package io.art.generator.constants;
 import io.art.configurator.custom.*;
 import io.art.core.collection.*;
 import io.art.core.source.*;
-
+import io.art.core.wrapper.*;
+import static io.art.generator.constants.ConfiguratorConstants.NestedConfigurationMethods.*;
+import static io.art.core.reflection.ParameterizedTypeImplementation.*;
 import java.lang.reflect.*;
 import java.time.*;
 import java.util.*;
 
-import static io.art.core.reflection.ParameterizedTypeImplementation.*;
-import static io.art.core.wrapper.ExceptionWrapper.*;
-import static io.art.generator.constants.ConfiguratorConstants.NestedConfigurationMethods.*;
-
 public interface ConfiguratorConstants {
     interface ConfiguratorMethods {
-        Method CONFIGURE_METHOD = wrapException(() -> CustomConfigurator.class.getDeclaredMethod("configure", ConfigurationSource.class));
+        Method CONFIGURE_METHOD = ExceptionWrapper.wrapExceptionCall(() -> CustomConfigurator.class.getDeclaredMethod("configure", ConfigurationSource.class));
     }
 
     interface ConfigurationSourceMethods {

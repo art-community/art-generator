@@ -11,6 +11,7 @@ public interface MappersConstants {
     String ENTITY_BUILDER_NAME = "entityBuilder";
     String LAZY_PUT_NAME = "lazyPut";
     String MAP_NAME = "map";
+    String IDENTITY_NAME = "identity";
 
     interface PrimitiveMappingMethods {
         String TO_UUID = "toUuid";

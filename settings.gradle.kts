@@ -71,6 +71,7 @@ val artModules = listOf(
         "tarantool",
         "template-engine",
         "graal",
+        "rocks-db",
         "storage",
         "kotlin"
 )

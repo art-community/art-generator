@@ -1,13 +1,15 @@
 package io.art.generator.collector;
 
 import io.art.core.collection.*;
+import io.art.generator.exception.*;
 import io.art.generator.model.*;
-
+import static io.art.core.factory.SetFactory.*;
+import static io.art.generator.constants.ExceptionMessages.*;
+import static io.art.generator.inspector.TypeInspector.*;
+import static java.text.MessageFormat.*;
+import static java.util.Arrays.*;
 import java.lang.reflect.*;
 import java.util.*;
-
-import static io.art.core.factory.SetFactory.*;
-import static io.art.generator.inspector.TypeInspector.*;
 
 public class TypeCollector {
     private final Set<Type> types = set();
@@ -37,8 +39,13 @@ public class TypeCollector {
             collectTypes(((GenericArrayType) type));
             return;
         }
-return;
-    //throw new GenerationException(format(UNSUPPORTED_TYPE, type));
+
+        if (isWildcard(type)) {
+            collectTypes((WildcardType) type);
+            return;
+        }
+
+        throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
     private void collectTypes(Class<?> type) {
@@ -46,7 +53,7 @@ return;
             return;
         }
 
-        if (isLibraryType(type)) {
+        if (isCoreType(type)) {
             return;
         }
 
@@ -86,6 +93,12 @@ return;
             if (isParametrized(propertyType)) {
                 collectTypes((ParameterizedType) propertyType);
             }
+
+
+            if (isWildcard(propertyType)) {
+                collectTypes((WildcardType) propertyType);
+                return;
+            }
         }
     }
 
@@ -94,7 +107,7 @@ return;
             return;
         }
 
-        if (!isLibraryType(type)) {
+        if (!isCoreType(type)) {
             types.add(type);
         }
 
@@ -113,5 +126,14 @@ return;
         }
 
         collectTypes(type.getGenericComponentType());
+    }
+
+    private void collectTypes(WildcardType type) {
+        if (types.contains(type)) {
+            return;
+        }
+
+        stream(type.getUpperBounds()).forEach(this::collectTypes);
+        stream(type.getLowerBounds()).forEach(this::collectTypes);
     }
 }
