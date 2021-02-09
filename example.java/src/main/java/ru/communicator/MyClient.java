@@ -2,12 +2,12 @@ package ru.communicator;
 
 import reactor.core.publisher.*;
 import ru.model.*;
-import java.util.stream.*;
+import java.util.*;
 
 public interface MyClient {
     void myMethod1();
 
-    String myMethod100(String request);
+    String myMethod17(String request);
 
     void myMethod2(Request request);
 
@@ -39,4 +39,7 @@ public interface MyClient {
 
     Flux<Response> myMethod16(Flux<Request> request);
 
+    Set<String> myMethod18(List<String> request);
+
+    GenericModel<String, GenericTypeParameter<String>> myMethod19(GenericModel<String, GenericTypeParameter<String>> request);
 }

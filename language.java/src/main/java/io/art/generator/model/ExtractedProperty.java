@@ -7,7 +7,9 @@ import lombok.experimental.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.core.factory.MapFactory.*;
+import static io.art.generator.constants.JavaDialect.JAVA;
 import static io.art.generator.constants.Names.*;
+import static io.art.generator.context.GeneratorContext.dialect;
 import static io.art.generator.inspector.TypeInspector.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
@@ -32,12 +34,12 @@ public class ExtractedProperty {
     private final String getterName;
     private final String setterName;
 
-    public static ImmutableArray<ExtractedProperty> from(Class<?> type) {
+    public static ImmutableArray<ExtractedProperty> collectProperties(Class<?> type) {
         ImmutableArray<ExtractedProperty> cached = CACHE.get(type);
         if (nonNull(cached)) return cached;
         ImmutableArray.Builder<ExtractedProperty> properties = immutableArrayBuilder();
         Class<?> superclass = type.getSuperclass();
-        if (nonNull(superclass)) properties.addAll(from(superclass));
+        if (nonNull(superclass)) properties.addAll(collectProperties(superclass));
         int lastIndex = properties.size();
         Method[] declaredMethods = type.getDeclaredMethods();
         Field[] declaredFields = type.getDeclaredFields();
@@ -45,7 +47,7 @@ public class ExtractedProperty {
             Field field = declaredFields[index];
             Type fieldType = field.getGenericType();
             boolean booleanProperty = isBoolean(fieldType);
-            String getterName = booleanProperty ? IS_NAME + capitalize(field.getName()) : GET_NAME + capitalize(field.getName());
+            String getterName = (isBoolean(fieldType) && dialect() == JAVA ? IS_NAME : GET_NAME) + capitalize(field.getName());
             String setterName = SET_NAME + capitalize(field.getName());
             boolean hasGetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(getterName));
             boolean hasSetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(setterName));

@@ -2,7 +2,10 @@ package ru.model;
 
 import io.art.core.collection.*;
 import io.art.core.property.*;
+import io.art.value.immutable.Value;
+import io.art.value.immutable.*;
 import lombok.*;
+import static io.art.core.constants.CompilerSuppressingWarnings.*;
 import java.time.*;
 import java.util.*;
 import java.util.stream.*;
@@ -10,6 +13,7 @@ import java.util.stream.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@SuppressWarnings(ALL)
 public class Model {
     int FInteger;
     char FCharacter;
@@ -30,9 +34,9 @@ public class Model {
     Float FBFloat;
 
     UUID FUUID;
-    LocalDateTime localDateTime;
-    ZonedDateTime zonedDateTime;
-    Date date;
+    LocalDateTime FlocalDateTime;
+    ZonedDateTime FzonedDateTime;
+    Date FDate;
 
     int[] FAint;
     char[] FAchar;
@@ -96,9 +100,6 @@ public class Model {
     Model FModel;
 
     Model[] FAModel;
-    List<Model>[] FALModel;
-    Set<Model>[] FASModel;
-    Map<String, Model>[] FAMModel;
 
     List<Model> FLModel;
     List<List<Model>> FLLModel;
@@ -106,6 +107,7 @@ public class Model {
     List<Collection<Model>> FLCModel;
     List<Map<String, Model>> FLMModel;
     List<Model[]> FLAModel;
+    List<Model>[] FALModel;
 
     Set<Model> FSModel;
     Set<List<Model>> FSLModel;
@@ -113,6 +115,7 @@ public class Model {
     Set<Collection<Model>> FSCModel;
     Set<Map<String, Model>> FSMModel;
     Set<Model[]> FSAModel;
+    Set<Model>[] FASModel;
 
     Collection<Model> FCModel;
     Collection<List<Model>> FCLModel;
@@ -120,6 +123,7 @@ public class Model {
     Collection<Collection<Model>> FCCModel;
     Collection<Map<String, Model>> FCMModel;
     Collection<Model[]> FCAModel;
+    Collection<Model>[] FACModel;
 
     Map<String, Model> FMModel;
     Map<String, Model[]> FMAModel;
@@ -127,6 +131,7 @@ public class Model {
     Map<String, Set<Model>> FMSModel;
     Map<String, Collection<Model>> FMCModel;
     Map<String, Map<String, Model>> FMMModel;
+    Map<String, Model>[] FAMModel;
 
     Collection<List<Map<String, Model>>> FCCMModel;
     Collection<Set<Map<String, Model>>> FCLMModel;
@@ -141,6 +146,7 @@ public class Model {
     GenericModel<String, GenericTypeParameterImplementation<String, Integer>> FGModel;
     GenericModel<Long, GenericTypeParameterImplementation<Long, Integer>> FGSModel;
     GenericModel<String, GenericTypeParameterImplementation<String, Integer>>[] FAGModel;
+    GenericModel<String[], GenericTypeParameterImplementation<String[], Integer[]>>[] FASAGModel;
     List<GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FLGModel;
     Set<GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FSGModel;
     Collection<GenericModel<String, GenericTypeParameterImplementation<String, Integer>>> FCGModel;
@@ -177,7 +183,14 @@ public class Model {
     ImmutableSet<Optional<Collection<Long[][]>[]>[]>[] ISSOptionalMCMLongMultiA;
     ImmutableMap<String, Optional<Collection<Long[][]>[]>[]>[] IMSOptionalMCMLongMultiA;
 
-    Stream<String> simpleStream;
+    Stream<String> FStringStream;
 
-    Optional<String> simpleoptional;
+    Value FValue;
+    Entity FEntity;
+
+    Value[] FAValue;
+    Entity[] FAEntity;
+
+    Collection<Value> FCValue;
+    Collection<Value[]> FCAValue;
 }

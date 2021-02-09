@@ -14,7 +14,7 @@ import java.lang.reflect.*;
 @UtilityClass
 public class ConfigurationSourceMethodSelector {
     public String selectConfigurationSourceMethod(Type propertyType) {
-        if (isJavaPrimitiveType(propertyType)) {
+        if (isJavaPrimitive(propertyType)) {
             propertyType = JAVA_PRIMITIVE_MAPPINGS.get(propertyType);
         }
         String name;

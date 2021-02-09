@@ -1,13 +1,16 @@
 package ru.configuration;
 
 import io.art.core.collection.*;
+import io.art.core.source.*;
 import lombok.*;
+import static io.art.core.constants.CompilerSuppressingWarnings.*;
 import java.time.*;
 import java.util.*;
 
 @Getter
 @ToString
 @RequiredArgsConstructor
+@SuppressWarnings(ALL)
 public class MyConfig {
     private final Integer FBInteger;
     private final Short FBShort;
@@ -18,9 +21,9 @@ public class MyConfig {
     private final Double FBDouble;
     private final Float FBFloat;
     private final UUID FUUID;
-    private final LocalDateTime localDateTime;
-    private final ZonedDateTime zonedDateTime;
-    private final Date date;
+    private final LocalDateTime FlocalDateTime;
+    private final ZonedDateTime FzonedDateTime;
+    private final Date Fdate;
 
     private final int[] FAint;
     private final char[] FAchar;
@@ -99,8 +102,18 @@ public class MyConfig {
 
     private final ImmutableMap<String, List<MyConfigParent>[]> FPModelLSLAIM;
     private final Map<String, List<MyConfigParent>[]> FPModelLSLAM;
+    private final Map<String, Map<String, List<MyConfigParent>>[]> FPModelLSLAMM;
+    private final Map<String, Map<String, Optional<List<MyConfigParent>>>[]> FPModelLSLAMOM;
 
-    private final Optional<ImmutableMap<String, Set<String>>> SIM;
-    private final Optional<Map<String, String>> SM;
+    private final Optional<ImmutableMap<String, Set<String>>> FSIM;
+    private final Optional<Map<String, String>> FSM;
+    private final Optional<Map<String, String>[]> FSMA;
 
+    private final NestedConfiguration FNested;
+    private final Map<String, NestedConfiguration> FNestedMap;
+    private final ImmutableMap<String, NestedConfiguration> FNestedIMap;
+    private final List<NestedConfiguration> FNestedList;
+    private final ImmutableArray<NestedConfiguration> FNestedIList;
+    private final Set<NestedConfiguration> FNestedSet;
+    private final ImmutableSet<NestedConfiguration> FNestedISet;
 }

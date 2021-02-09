@@ -2,19 +2,22 @@ package io.art.generator.inspector;
 
 import io.art.core.collection.*;
 import io.art.core.property.*;
+import io.art.core.source.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.server.validation.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
+import io.art.value.immutable.Value;
 import lombok.experimental.*;
 import reactor.core.publisher.*;
 import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
+import static io.art.core.reflection.GenericArrayTypeImplementation.*;
+import static io.art.core.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeConstants.*;
-import static io.art.core.reflection.GenericArrayTypeImplementation.*;
-import static io.art.core.reflection.ParameterizedTypeImplementation.*;
+import static io.art.generator.model.ExtractedProperty.*;
 import static java.lang.reflect.Modifier.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;
@@ -24,7 +27,7 @@ import java.util.*;
 @UtilityClass
 public class TypeInspector {
     public ImmutableArray<ExtractedProperty> getProperties(Class<?> type) {
-        return ExtractedProperty.from(type);
+        return collectProperties(type);
     }
 
     public ImmutableArray<ExtractedProperty> getSettableProperties(Class<?> type) {
@@ -70,49 +73,53 @@ public class TypeInspector {
         return Optional.class == extractClass(fieldType);
     }
 
-    public boolean isCollectionType(Type type) {
+    public boolean isCollection(Type type) {
         return COLLECTION_TYPES.stream().anyMatch(collection -> collection.isAssignableFrom(extractClass(type)));
     }
 
-    public boolean isListType(Type type) {
+    public boolean isObject(Type type) {
+        return type == Object.class;
+    }
+
+    public boolean isList(Type type) {
         return List.class.isAssignableFrom(extractClass(type));
     }
 
-    public boolean isSetType(Type type) {
+    public boolean isSet(Type type) {
         return Set.class.isAssignableFrom(extractClass(type));
     }
 
-    public boolean isMapType(Type type) {
+    public boolean isMap(Type type) {
         return Map.class.isAssignableFrom(extractClass(type));
     }
 
-    public boolean isImmutableArrayType(Type type) {
+    public boolean isImmutableArray(Type type) {
         return ImmutableArray.class.isAssignableFrom(extractClass(type));
     }
 
-    public boolean isImmutableSetType(Type type) {
+    public boolean isImmutableSet(Type type) {
         return ImmutableSet.class.isAssignableFrom(extractClass(type));
     }
 
-    public boolean isImmutableMapType(Type type) {
+    public boolean isImmutableMap(Type type) {
         return ImmutableMap.class.isAssignableFrom(extractClass(type));
     }
 
-    public boolean isImmutableType(Type type) {
+    public boolean isImmutableCollection(Type type) {
         return ImmutableMap.class.isAssignableFrom(extractClass(type))
                 || ImmutableSet.class.isAssignableFrom(extractClass(type))
                 || ImmutableArray.class.isAssignableFrom(extractClass(type));
     }
 
-    public boolean isMutableType(Type type) {
-        return !isImmutableType(type);
+    public boolean isMutableCollection(Type type) {
+        return !isImmutableCollection(type);
     }
 
-    public boolean isJavaPrimitiveType(Type type) {
+    public boolean isJavaPrimitive(Type type) {
         return JAVA_PRIMITIVE_TYPES.contains(type);
     }
 
-    public boolean isPrimitiveType(Type type) {
+    public boolean isPrimitive(Type type) {
         return PRIMITIVE_TYPES.contains(type);
     }
 
@@ -136,29 +143,45 @@ public class TypeInspector {
         return type instanceof TypeVariable;
     }
 
-    public boolean isComplexType(Type type) {
-        return !isPrimitiveType(type);
+    public boolean isValue(Type type) {
+        return Value.class.isAssignableFrom(extractClass(type));
     }
 
-    public boolean isLibraryType(Type type) {
+    public boolean isNestedConfiguration(Type type) {
+        return NestedConfiguration.class.isAssignableFrom(extractClass(type));
+    }
+
+    public boolean isByteArray(Type type) {
+        return byte[].class.equals(type);
+    }
+
+    public boolean isArray(Type type) {
+        return isGenericArray(type) || extractClass(type).isArray();
+    }
+
+    public boolean isUserType(Type type) {
+        return !isPrimitive(type);
+    }
+
+    public boolean isCoreType(Type type) {
         if (isParametrized(type)) {
-            return isLibraryType(extractClass((ParameterizedType) type));
+            return isCoreType(extractClass((ParameterizedType) type));
         }
         if (isGenericArray(type)) {
-            return isLibraryType(extractClass((GenericArrayType) type));
+            return isCoreType(extractClass((GenericArrayType) type));
         }
         if (isClass(type)) {
             Class<?> typeAsClass = (Class<?>) type;
             if (typeAsClass.isArray()) {
-                return isLibraryType(typeAsClass.getComponentType());
+                return isCoreType(typeAsClass.getComponentType());
             }
-            boolean libraryBasedType = LIBRARY_BASED_TYPES
+            boolean coreBased = CORE_BASE_TYPES
                     .stream()
                     .anyMatch(matching -> matching.isAssignableFrom(typeAsClass));
-            boolean libraryType = LIBRARY_TYPES
+            boolean core = CORE_TYPES
                     .stream()
                     .anyMatch(matching -> matching.equals(typeAsClass));
-            return libraryType || libraryBasedType;
+            return core || coreBased;
         }
         return false;
     }

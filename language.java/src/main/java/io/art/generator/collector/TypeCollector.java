@@ -4,9 +4,9 @@ import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import static io.art.core.factory.SetFactory.*;
-import static io.art.generator.constants.ExceptionMessages.*;
+import static io.art.generator.constants.ExceptionMessages.UNSUPPORTED_TYPE;
 import static io.art.generator.inspector.TypeInspector.*;
-import static java.text.MessageFormat.*;
+import static java.text.MessageFormat.format;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -38,8 +38,8 @@ public class TypeCollector {
             collectTypes(((GenericArrayType) type));
             return;
         }
-return;
-    //throw new GenerationException(format(UNSUPPORTED_TYPE, type));
+
+        throw new GenerationException(format(UNSUPPORTED_TYPE, type));
     }
 
     private void collectTypes(Class<?> type) {
@@ -47,7 +47,7 @@ return;
             return;
         }
 
-        if (isLibraryType(type)) {
+        if (isCoreType(type)) {
             return;
         }
 
@@ -95,7 +95,7 @@ return;
             return;
         }
 
-        if (!isLibraryType(type)) {
+        if (!isCoreType(type)) {
             types.add(type);
         }
 

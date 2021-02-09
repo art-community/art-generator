@@ -5,18 +5,13 @@ import io.art.generator.model.*;
 import io.art.model.configurator.*;
 import io.art.model.implementation.module.*;
 import lombok.experimental.*;
-import static io.art.core.handler.ExceptionHandler.*;
-import static io.art.core.singleton.SingletonsRegistry.*;
-import static io.art.core.wrapper.ExceptionWrapper.wrapException;
 import static io.art.generator.constants.Annotations.*;
 import static io.art.generator.constants.ExceptionMessages.*;
-import static io.art.generator.constants.JavaDialect.*;
-import static io.art.generator.constants.Names.*;
 import static io.art.generator.context.GeneratorContext.*;
+import static io.art.generator.factory.ReferenceFactory.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.*;
-import static java.util.Objects.*;
 import java.lang.reflect.*;
 
 @UtilityClass
@@ -29,11 +24,7 @@ public class ModelLoader {
                     .filter(ModelLoader::hasConfiguratorAnnotation)
                     .findFirst()
                     .orElseThrow(() -> new GenerationException(MODULE_CONFIGURATOR_NOT_FOUND));
-            Object target = isStatic(configureMethod.getModifiers())
-                    ? null
-                    : dialect() == KOTLIN && nonNull(nullIfException(() -> mainClass.getField(INSTANCE_FIELD_NAME)))
-                    ? mainClass.getField(INSTANCE_FIELD_NAME).get(null)
-                    : singleton(mainClass, () -> wrapException(() -> mainClass.getConstructor().newInstance()));
+            Object target = fieldOwner(mainClass, isStatic(configureMethod.getModifiers()));
             ModuleModelConfigurator modeler = (ModuleModelConfigurator) configureMethod.invoke(target);
             return modeler.configure();
         } catch (Throwable throwable) {

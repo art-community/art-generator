@@ -17,7 +17,7 @@ public class ToModelPropertyMappingCreator {
     private final String entityName;
 
     JCMethodInvocation forProperty(String fieldName, Type fieldType) {
-        boolean javaPrimitiveType = isJavaPrimitiveType(fieldType);
+        boolean javaPrimitiveType = isJavaPrimitive(fieldType);
         ImmutableArray.Builder<JCExpression> arguments = immutableArrayBuilder();
         arguments.add(literal(fieldName));
         if (javaPrimitiveType) {

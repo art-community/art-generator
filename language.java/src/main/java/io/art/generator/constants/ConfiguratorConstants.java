@@ -3,7 +3,7 @@ package io.art.generator.constants;
 import io.art.configurator.custom.*;
 import io.art.core.collection.*;
 import io.art.core.source.*;
-import static io.art.core.wrapper.ExceptionWrapper.*;
+import io.art.core.wrapper.*;
 import static io.art.generator.constants.ConfiguratorConstants.NestedConfigurationMethods.*;
 import static io.art.core.reflection.ParameterizedTypeImplementation.*;
 import java.lang.reflect.*;
@@ -12,7 +12,7 @@ import java.util.*;
 
 public interface ConfiguratorConstants {
     interface ConfiguratorMethods {
-        Method CONFIGURE_METHOD = wrapException(() -> CustomConfigurator.class.getDeclaredMethod("configure", ConfigurationSource.class));
+        Method CONFIGURE_METHOD = ExceptionWrapper.wrapExceptionCall(() -> CustomConfigurator.class.getDeclaredMethod("configure", ConfigurationSource.class));
     }
 
     interface ConfigurationSourceMethods {

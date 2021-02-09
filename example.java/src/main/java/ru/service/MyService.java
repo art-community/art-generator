@@ -4,6 +4,7 @@ import reactor.core.publisher.*;
 import reactor.core.scheduler.*;
 import ru.communicator.*;
 import ru.model.*;
+import static io.art.core.factory.SetFactory.*;
 import static io.art.logging.LoggingModule.*;
 import static ru.communicator.Communicators.*;
 import java.time.*;
@@ -16,12 +17,6 @@ public class MyService implements MyClient {
     @Override
     public void myMethod1() {
         logger(MyService.class).info("myMethod1");
-    }
-
-    @Override
-    public String myMethod100(String request) {
-        System.out.println(counter.incrementAndGet());
-        return "Mono.empty()";
     }
 
 
@@ -63,7 +58,7 @@ public class MyService implements MyClient {
     public Response myMethod8(Flux<Request> request) {
         Request first = request.blockFirst();
         logger(MyService.class).info("myMethod8:" + first);
-        return Response.builder().FBString(first.getFBString()).build();
+        return Response.builder().build();
     }
 
 
@@ -95,7 +90,7 @@ public class MyService implements MyClient {
     @Override
     public Flux<Response> myMethod13() {
         logger(MyService.class).info("myMethod13");
-        return Flux.interval(Duration.ofSeconds(1), Schedulers.newParallel("myMethod13")).map(index -> Response.builder().FFloat(new Random().nextFloat()).build());
+        return Flux.interval(Duration.ofSeconds(1), Schedulers.newParallel("myMethod13")).map(index -> Response.builder().build());
     }
 
     @Override
@@ -113,6 +108,24 @@ public class MyService implements MyClient {
     @Override
     public Flux<Response> myMethod16(Flux<Request> request) {
         request.subscribe(data -> logger(MyService.class).info("myMethod16:" + data));
-        return Flux.interval(Duration.ofSeconds(1), Schedulers.newParallel("myMethod16-output")).map(index -> Response.builder().FFloat(new Random().nextFloat()).build());
+        return Flux.interval(Duration.ofSeconds(1), Schedulers.newParallel("myMethod16-output")).map(index -> Response.builder().build());
+    }
+
+    @Override
+    public String myMethod17(String request) {
+        System.out.println(counter.incrementAndGet());
+        return "Mono.empty()";
+    }
+
+    @Override
+    public Set<String> myMethod18(List<String> request) {
+        System.out.println(counter.incrementAndGet());
+        return setOf("Mono.empty()");
+    }
+
+    @Override
+    public GenericModel<String, GenericTypeParameter<String>> myMethod19(GenericModel<String, GenericTypeParameter<String>> request) {
+        System.out.println(counter.incrementAndGet());
+        return null;
     }
 }
