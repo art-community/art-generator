@@ -1,6 +1,7 @@
 package ru
 
 import io.art.kotlin.communicator
+import io.art.kotlin.configuration
 import io.art.kotlin.module
 import io.art.kotlin.scheduleFixedRate
 import io.art.launcher.ModuleLauncher.launch
@@ -34,7 +35,12 @@ object Example {
         }
 
         onLoad {
-            scheduleFixedRate(ofSeconds(30)) {}
+            scheduleFixedRate(ofSeconds(30)) {
+                myClient.myMethod2(Request())
+                communicator<MyClient>().myMethod2(Request())
+                communicator(MyClient::class) { myMethod2(Request()) }
+                println(configuration<MyConfig>().FBInteger)
+            }
         }
     }
 
