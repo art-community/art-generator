@@ -76,7 +76,7 @@ public class ToModelMapperByInitializerCreator {
                     .addStatement(() -> newVariable()
                             .type(type(type))
                             .name(MODEL_NAME)
-                            .initializer(() -> newObject(type(type), forPropertiesByConstructor(type, extractClass(type))))
+                            .initializer(() -> newObject(type(type), forPropertiesByConstructor(type)))
                             .generate())
                     .addStatements(forPropertiesBySetters(type))
                     .addStatement(() -> returnVariable(MODEL_NAME))
@@ -98,7 +98,7 @@ public class ToModelMapperByInitializerCreator {
 
     private ImmutableArray<Supplier<JCStatement>> forPropertiesBySetters(ParameterizedType parameterizedType) {
         ImmutableArray.Builder<Supplier<JCStatement>> setters = immutableArrayBuilder();
-        for (ExtractedProperty property : getSettableProperties(extractClass(parameterizedType))) {
+        for (ExtractedProperty property : getSettableProperties(parameterizedType)) {
             setters.add(() -> method(MODEL_NAME, property.setterName())
                     .addArguments(fieldMappingCreator.forProperty(property.name(), extractGenericPropertyType(parameterizedType, property.type())))
                     .execute());
@@ -114,9 +114,9 @@ public class ToModelMapperByInitializerCreator {
         return setters.build();
     }
 
-    private ImmutableArray<JCExpression> forPropertiesByConstructor(ParameterizedType parameterizedType, Class<?> rawClass) {
+    private ImmutableArray<JCExpression> forPropertiesByConstructor(ParameterizedType parameterizedType) {
         ImmutableArray.Builder<JCExpression> setters = immutableArrayBuilder();
-        for (ExtractedProperty property : getConstructorProperties(rawClass)) {
+        for (ExtractedProperty property : getConstructorProperties(parameterizedType)) {
             setters.add(fieldMappingCreator.forProperty(property.name(), extractGenericPropertyType(parameterizedType, property.type())));
         }
         return setters.build();

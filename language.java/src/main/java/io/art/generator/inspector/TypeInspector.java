@@ -14,6 +14,7 @@ import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.reflection.GenericArrayTypeImplementation.*;
 import static io.art.core.reflection.ParameterizedTypeImplementation.*;
+import static io.art.generator.comparator.TypeMatcher.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeConstants.*;
@@ -26,18 +27,25 @@ import java.util.*;
 
 @UtilityClass
 public class TypeInspector {
-    public ImmutableArray<ExtractedProperty> getProperties(Class<?> type) {
+    public ImmutableArray<ExtractedProperty> getProperties(Type type) {
         return collectProperties(type);
     }
 
-    public ImmutableArray<ExtractedProperty> getSettableProperties(Class<?> type) {
+    public ImmutableArray<ExtractedProperty> getGettableProperties(Type type) {
+        return getProperties(type)
+                .stream()
+                .filter(ExtractedProperty::hasGetter)
+                .collect(immutableArrayCollector());
+    }
+
+    public ImmutableArray<ExtractedProperty> getSettableProperties(Type type) {
         return getProperties(type)
                 .stream()
                 .filter(ExtractedProperty::hasSetter)
                 .collect(immutableArrayCollector());
     }
 
-    public ImmutableArray<ExtractedProperty> getConstructorProperties(Class<?> type) {
+    public ImmutableArray<ExtractedProperty> getConstructorProperties(Type type) {
         return getProperties(type)
                 .stream()
                 .filter(ExtractedProperty::usedInConstructorArguments)
@@ -228,7 +236,13 @@ public class TypeInspector {
             if (argumentIndex >= parameters.length) {
                 continue;
             }
-            if (argumentType.equals(parameters[argumentIndex].getParameterizedType())) {
+            Type parameterType = parameters[argumentIndex].getParameterizedType();
+            if (isParametrized(type)) {
+                if (typeMatches((ParameterizedType) type, argumentType, parameterType)) {
+                    return true;
+                }
+            }
+            if (typeMatches(argumentType, parameterType)) {
                 return true;
             }
         }
@@ -236,9 +250,8 @@ public class TypeInspector {
     }
 
     public boolean hasConstructorWithAllProperties(Type type) {
-        Class<?> rawClass = extractClass(type);
-        ImmutableArray<ExtractedProperty> properties = getConstructorProperties(rawClass);
-        return matchConstructorArguments(rawClass, properties.stream().map(ExtractedProperty::type).collect(immutableArrayCollector()));
+        ImmutableArray<ExtractedProperty> properties = getConstructorProperties(type);
+        return matchConstructorArguments(type, properties.stream().map(ExtractedProperty::type).collect(immutableArrayCollector()));
     }
 
     public boolean matchConstructorArguments(Type type, ImmutableArray<Type> argumentTypes) {
@@ -248,8 +261,14 @@ public class TypeInspector {
             Parameter[] parameters = constructor.getParameters();
             if (argumentTypes.size() != parameters.length) return false;
             for (int i = 0; i < parameters.length; i++) {
-                Parameter parameter = parameters[i];
-                if (!parameter.getParameterizedType().equals(argumentTypes.get(i))) {
+                Type parameterType = parameters[i].getParameterizedType();
+                Type argumentType = argumentTypes.get(i);
+                if (isParametrized(type)) {
+                    if (!typeMatches((ParameterizedType) type, parameterType, argumentType)) {
+                        return false;
+                    }
+                }
+                if (!typeMatches(parameterType, argumentType)) {
                     return false;
                 }
             }
@@ -257,6 +276,9 @@ public class TypeInspector {
         return true;
     }
 
+    public Type boxed(Type primitiveType) {
+        return isJavaPrimitive(primitiveType) ? JAVA_PRIMITIVE_MAPPINGS.get(primitiveType) : primitiveType;
+    }
 
     public PrimitiveType primitiveTypeFromJava(Type type) {
         return orThrow(JAVA_TO_PRIMITIVE_TYPE.get(type), () -> new GenerationException(format(UNSUPPORTED_TYPE, type)));

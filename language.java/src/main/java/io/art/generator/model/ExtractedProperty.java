@@ -34,15 +34,16 @@ public class ExtractedProperty {
     private final String getterName;
     private final String setterName;
 
-    public static ImmutableArray<ExtractedProperty> collectProperties(Class<?> type) {
-        ImmutableArray<ExtractedProperty> cached = CACHE.get(type);
+    public static ImmutableArray<ExtractedProperty> collectProperties(Type type) {
+        Class<?> rawClass = extractClass(type);
+        ImmutableArray<ExtractedProperty> cached = CACHE.get(rawClass);
         if (nonNull(cached)) return cached;
         ImmutableArray.Builder<ExtractedProperty> properties = immutableArrayBuilder();
-        Class<?> superclass = type.getSuperclass();
-        if (nonNull(superclass)) properties.addAll(collectProperties(superclass));
+        Type superType = rawClass.getGenericSuperclass();
+        if (nonNull(superType)) properties.addAll(collectProperties(superType));
         int lastIndex = properties.size();
-        Method[] declaredMethods = type.getDeclaredMethods();
-        Field[] declaredFields = type.getDeclaredFields();
+        Method[] declaredMethods = rawClass.getDeclaredMethods();
+        Field[] declaredFields = rawClass.getDeclaredFields();
         for (int index = 0; index < declaredFields.length; index++) {
             Field field = declaredFields[index];
             Type fieldType = field.getGenericType();
@@ -68,7 +69,7 @@ public class ExtractedProperty {
             }
         }
         cached = properties.build();
-        CACHE.put(type, cached);
+        CACHE.put(rawClass, cached);
         return cached;
     }
 }

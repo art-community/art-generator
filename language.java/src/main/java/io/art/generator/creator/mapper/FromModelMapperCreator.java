@@ -88,7 +88,7 @@ public class FromModelMapperCreator {
             return select(PRIMITIVE_MAPPING_TYPE, selectFromPrimitiveMethod(modelClass));
         }
         JCMethodInvocation builderInvocation = method(ENTITY_TYPE, ENTITY_BUILDER_NAME).apply();
-        for (ExtractedProperty property : getProperties(modelClass)) {
+        for (ExtractedProperty property : getGettableProperties(modelClass)) {
             builderInvocation = forProperty(builderInvocation, property.name(), property.type());
         }
         final JCMethodInvocation finalBuilderInvocation = builderInvocation;
@@ -141,7 +141,7 @@ public class FromModelMapperCreator {
         }
 
         JCMethodInvocation builderInvocation = method(ENTITY_TYPE, ENTITY_BUILDER_NAME).apply();
-        for (ExtractedProperty property : getProperties(rawClass)) {
+        for (ExtractedProperty property : getGettableProperties(parameterizedType)) {
             Type fieldType = extractGenericPropertyType(parameterizedType, property.type());
             builderInvocation = forProperty(builderInvocation, property.name(), fieldType);
         }

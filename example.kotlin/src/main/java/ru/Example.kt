@@ -34,11 +34,7 @@ object Example {
         }
 
         onLoad {
-            scheduleFixedRate(ofSeconds(30)) {
-                myClient.myMethod2(Request())
-                communicator<MyClient>().myMethod2(Request())
-                communicator(MyClient::class) { myMethod2(Request()) }
-            }
+            scheduleFixedRate(ofSeconds(30)) {}
         }
     }
 

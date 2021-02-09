@@ -16,7 +16,6 @@ import static io.art.generator.constants.ConfiguratorConstants.ConfiguratorMetho
 import static io.art.generator.constants.ConfiguratorConstants.NestedConfigurationMethods.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.Names.*;
-import static io.art.generator.constants.TypeConstants.*;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.formater.SignatureFormatter.*;
 import static io.art.generator.inspector.TypeInspector.*;
@@ -34,7 +33,7 @@ import java.lang.reflect.*;
 @UtilityClass
 public class CustomConfigurationCreator {
     public NewMethod createConfigureMethod(Class<?> configurationClass) {
-        ImmutableArray<ExtractedProperty> properties = getConstructorProperties(extractClass(configurationClass));
+        ImmutableArray<ExtractedProperty> properties = getConstructorProperties(configurationClass);
         NewMethod method = overrideMethod(CONFIGURE_METHOD, type(configurationClass)).parameters(setOf(newParameter(CONFIGURATION_SOURCE_TYPE, SOURCE_NAME)));
         ImmutableArray<JCExpression> constructorParameters = createConstructorParameters(properties);
         return method.statement(() -> returnExpression(newObject(type(configurationClass), constructorParameters)));
@@ -177,10 +176,7 @@ public class CustomConfigurationCreator {
     }
 
     private JCMethodInvocation createArrayPropertyProvider(String property, Class<?> type) {
-        boolean primitiveType = isJavaPrimitive(type.getComponentType());
-        Class<?> componentType = primitiveType
-                ? JAVA_PRIMITIVE_MAPPINGS.get(type.getComponentType())
-                : type.getComponentType();
+        Type componentType = boxed(type.getComponentType());
 
         if (configurations().contains(componentType)) {
             String lambdaParameter = sequenceName(property);
@@ -199,7 +195,7 @@ public class CustomConfigurationCreator {
                 .next(TO_ARRAY_RAW_NAME, toArray -> toArray.addArguments(newReference(type(type))))
                 .apply();
 
-        if (primitiveType) {
+        if (isJavaPrimitive(type.getComponentType())) {
             return method(ARRAY_EXTENSIONS_TYPE, UNBOX_NAME)
                     .addArguments(asArray)
                     .apply();

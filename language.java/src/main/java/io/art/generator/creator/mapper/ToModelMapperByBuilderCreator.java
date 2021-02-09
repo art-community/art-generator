@@ -44,7 +44,7 @@ public class ToModelMapperByBuilderCreator {
 
     private JCMethodInvocation forProperties(ParameterizedType parameterizedType, Class<?> rawClass) {
         JCMethodInvocation builderInvocation = method(type(parameterizedType), BUILDER_METHOD_NAME).apply();
-        for (ExtractedProperty property : getProperties(rawClass)) {
+        for (ExtractedProperty property : getProperties(parameterizedType)) {
             JCMethodInvocation fieldMapping = propertyMappingCreator.forProperty(property.name(), extractGenericPropertyType(parameterizedType, property.type()));
             builderInvocation = method(builderInvocation, property.name()).addArguments(fieldMapping).apply();
         }
