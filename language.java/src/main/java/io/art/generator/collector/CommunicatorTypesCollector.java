@@ -5,13 +5,11 @@ import io.art.generator.exception.*;
 import io.art.generator.inspector.*;
 import io.art.model.implementation.communicator.*;
 import lombok.experimental.*;
-
-import java.lang.reflect.*;
-
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.collection.ImmutableSet.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.formater.SignatureFormatter.*;
+import java.lang.reflect.*;
 
 @UtilityClass
 public class CommunicatorTypesCollector {

@@ -5,14 +5,12 @@ import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
 import lombok.*;
-
-import java.util.function.*;
-
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.JavacService.*;
 import static java.util.Objects.*;
+import java.util.function.*;
 
 @Builder
 public class MethodCaller {
