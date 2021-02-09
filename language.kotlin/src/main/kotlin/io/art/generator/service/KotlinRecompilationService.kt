@@ -13,6 +13,7 @@ import io.art.generator.logger.GeneratorLogger.success
 import io.art.generator.normalizer.ClassPathNormalizer.normalizeClassPath
 import io.art.generator.state.GeneratorState.generatedClasses
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
+import java.io.File
 import java.text.MessageFormat.format
 
 
@@ -29,7 +30,7 @@ class KotlinRecompilationService : RecompilationService {
             add(KOTLIN_JAVA_PARAMETERS)
             add(NO_WARN_OPTION)
             add(CLASS_PATH_OPTION)
-            add(normalizeClassPath(processingEnvironment().options[CLASS_PATH_PROCESSOR_OPTION].toString().split(COMMA).toSet().toTypedArray()))
+            add(normalizeClassPath(processingEnvironment().options[CLASS_PATH_PROCESSOR_OPTION].toString().split(COMMA).toSet().filter { file -> File(file).exists() }.toTypedArray()))
             add(DIRECTORY_OPTION)
             add(processingEnvironment().options[DIRECTORY_PROCESSOR_OPTION].toString())
             addAll(sources)
