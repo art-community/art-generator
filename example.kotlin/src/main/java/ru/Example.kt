@@ -1,7 +1,7 @@
 package ru
 
-import io.art.extensions.communicator
-import io.art.extensions.module
+import io.art.kotlin.extensions.communicator
+import io.art.kotlin.extensions.module
 import io.art.launcher.ModuleLauncher.launch
 import io.art.model.annotation.Configurator
 import ru.ExampleProvider.provide

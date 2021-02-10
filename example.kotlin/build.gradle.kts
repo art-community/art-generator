@@ -24,7 +24,8 @@ dependencies {
     implementation(project(":yaml"))
     implementation(project(":graal"))
     implementation(project(":rocks-db"))
-    implementation(project(":language.kotlin"))
+    implementation(project(":kotlin-extensions"))
+    kapt(project(":kotlin-extensions"))
     kapt(project(":language.kotlin"))
 }
 

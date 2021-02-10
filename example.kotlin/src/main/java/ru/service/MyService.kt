@@ -1,7 +1,7 @@
 package ru.service
 
-import io.art.extensions.communicator
-import io.art.extensions.logger
+import io.art.kotlin.extensions.communicator
+import io.art.kotlin.extensions.logger
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import ru.communicator.MyClient
