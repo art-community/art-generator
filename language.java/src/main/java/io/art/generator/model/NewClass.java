@@ -7,11 +7,6 @@ import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import lombok.*;
 import lombok.experimental.*;
-
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.function.*;
-
 import static com.sun.tools.javac.util.List.*;
 import static io.art.core.factory.MapFactory.*;
 import static io.art.core.factory.SetFactory.*;
@@ -26,6 +21,9 @@ import static java.util.Arrays.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
 import static lombok.AccessLevel.*;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.function.*;
 
 @Getter
 @Setter
@@ -38,7 +36,8 @@ public class NewClass implements GeneratedClass{
     private Map<String, NewField> fields = map();
     private Set<NewMethod> methods = set();
     private Set<NewClass> innerClasses = set();
-    private Set<TypeModel> interfaceTypes = set();
+    private Set<JCExpression> interfaceTypes = set();
+    private JCExpression extending = null;
 
     public NewClass addImport(ImportModel importModel) {
         imports.add(importModel);
@@ -64,13 +63,18 @@ public class NewClass implements GeneratedClass{
 
     public NewClass implement(TypeModel interfaceType) {
         imports.add(classImport(interfaceType.getFullName()));
-        interfaceTypes.add(interfaceType);
+        interfaceTypes.add(interfaceType.generateFullType());
         return this;
     }
 
     public NewClass implement(ImmutableArray<NewClass> newClasses) {
         newClasses.forEach(innerClass -> imports.addAll(innerClass.imports));
         innerClasses.addAll(newClasses.toMutable());
+        return this;
+    }
+
+    public NewClass implement(JCExpression type){
+        interfaceTypes.add(type);
         return this;
     }
 
@@ -89,13 +93,24 @@ public class NewClass implements GeneratedClass{
     }
 
     public NewClass constructor(NewMethod constructor) {
-        methods.add(constructor.name(CONSTRUCTOR_NAME).returnType(VOID_TYPE));
+        methods.add(newMethod()
+                .name(CONSTRUCTOR_NAME)
+                .returnType(VOID_TYPE)
+                .modifiers(constructor.modifiers())
+                .classImports(constructor.classImports())
+                .parameters(constructor.parameters())
+                .statements(constructor.statements()));
         imports.addAll(constructor.classImports());
         return this;
     }
 
     public NewClass constructors(NewMethod... constructors) {
         stream(constructors).forEach(this::constructor);
+        return this;
+    }
+
+    public NewClass extend(JCExpression superClass){
+        extending = superClass;
         return this;
     }
 
@@ -116,10 +131,9 @@ public class NewClass implements GeneratedClass{
                 .map(NewClass::generate)
                 .forEach(definitions::add);
         List<JCExpression> implementations = interfaceTypes.stream()
-                .map(TypeModel::generateFullType)
                 .collect(toCollection(ListBuffer::new))
                 .toList();
-        return maker().ClassDef(modifiers, name, nil(), null, implementations, definitions.toList());
+        return maker().ClassDef(modifiers, name, nil(), extending, implementations, definitions.toList());
     }
 
     private void generateConstructor() {

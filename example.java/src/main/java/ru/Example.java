@@ -30,6 +30,6 @@ public class Example {
                 .store(storage -> storage.tarantool("s2_seq", Model.class, Model.class, space -> space
                                 .cluster("storage2")
                                 .sharded(emptyFunction())
-                                .searchBy("indexName", Model.class)));
+                                .searchBy("customIndex", Model.class)));
     }
 }

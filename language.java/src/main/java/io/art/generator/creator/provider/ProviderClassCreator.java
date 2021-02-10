@@ -12,6 +12,7 @@ import java.util.*;
 
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.tree.JCTree.*;
+import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.collector.SetCollector.*;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.core.factory.SetFactory.*;
@@ -40,9 +41,6 @@ import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.util.Arrays.*;
-import javax.lang.model.element.Modifier;
-import java.lang.reflect.*;
-import java.util.*;
 
 @UtilityClass
 public class ProviderClassCreator {
@@ -75,8 +73,9 @@ public class ProviderClassCreator {
         ImmutableArray<NewClass> customConfigurators = implementCustomConfigurators(model.getConfiguratorModel());
         success(GENERATED_CUSTOM_CONFIGURATION_PROXIES);
 
-        NewMethod storagesMethod = implementStoragesMethod(model.getStorageModel());
-        ImmutableArray<NewClass> storageSpaces = implementStorageSpaces(model.getStorageModel());
+        providerClass.addImport(classImport(moduleClass().getFullName() + STORAGE_INTERFACES_SUFFIX));
+        Map<String, NewClass> storageSpaces = implementStorageSpaces(model.getStorageModel());
+        NewMethod storagesMethod = implementStoragesMethod(storageSpaces);
         success(GENERATED_STORAGE_SPACES);
 
 
@@ -92,7 +91,7 @@ public class ProviderClassCreator {
                 .inners(mappers)
                 .inners(communicatorProxies)
                 .inners(customConfigurators)
-                .inners(storageSpaces);
+                .inners(storageSpaces.values().stream().collect(immutableArrayCollector()));
     }
 
 

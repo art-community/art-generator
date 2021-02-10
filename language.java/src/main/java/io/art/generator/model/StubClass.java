@@ -18,6 +18,7 @@ import static io.art.core.caster.Caster.*;
 import static io.art.core.collection.ImmutableMap.*;
 import static io.art.core.collector.SetCollector.*;
 import static io.art.generator.constants.Imports.*;
+import static io.art.generator.constants.Names.CONSTRUCTOR_NAME;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.JavacService.*;
@@ -115,7 +116,7 @@ public class StubClass implements GeneratedClass {
     private static JCTree generateDefaultConstructor(){
         return maker().MethodDef(
                 maker().Modifiers(PUBLIC),
-                elements().getName("<init>"),
+                elements().getName(CONSTRUCTOR_NAME),
                 null,
                 new ListBuffer<JCTypeParameter>().toList(),
                 null,

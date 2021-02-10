@@ -78,6 +78,7 @@ public interface Names {
     String TARGET_METHOD_ID_NAME = "targetMethodId";
     String TARGET_SERVICE_METHOD_NAME = "targetServiceMethod";
     String SERVICE_METHOD_NAME = "serviceMethod";
+    String MAP_NAME = "map";
 
     String STORAGE_NAME = "storage";
     String STORAGES_NAME = "storages";
@@ -89,4 +90,7 @@ public interface Names {
     String STORAGE_SELECT_BY_PREFIX = "selectBy";
     String STORAGE_KEY_PARAMETER_NAME = "key";
     String STORAGE_TRANSACTION_DEPENDENCY_KEY_NAME = "keyDependency";
+    String MAPPER_SUFFIX = "Mapper";
+    String SPACE_GET_METHOD_NAME = "get";
+    String SPACE_SELECT_METHOD_NAME = "select";
 }

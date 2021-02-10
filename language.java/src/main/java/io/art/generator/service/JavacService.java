@@ -42,12 +42,25 @@ public class JavacService {
 
 
     public JCExpressionStatement execMethodCall(String variable, String method, ImmutableArray<JCExpression> arguments) {
-        return maker().Exec(maker().Apply(List.nil(), select(variable, method), List.from(arguments)));
+        return maker().Exec(methodCall(variable, method, arguments));
+    }
+
+    public JCExpressionStatement execMethodCall(JCExpression method, ImmutableArray<JCExpression> arguments){
+        return maker().Exec(methodCall(method, arguments));
+    }
+
+    public JCExpression methodCall(String variable, String method, ImmutableArray<JCExpression> arguments) {
+        return maker().Apply(List.nil(), select(variable, method), List.from(arguments));
+    }
+
+    public JCExpression methodCall(JCExpression method, ImmutableArray<JCExpression> arguments){
+        return maker().Apply(List.nil(), method, List.from(arguments));
     }
 
     public JCReturn returnMethodCall(String variable, String method, ImmutableArray<JCExpression> arguments) {
         return returnExpression(maker().Apply(List.nil(), select(variable, method), List.from(arguments)));
     }
+
 
     public JCReturn returnMethodCall(String variable, String method, JCExpression... arguments) {
         return returnExpression(maker().Apply(List.nil(), select(variable, method), List.from(arguments)));
