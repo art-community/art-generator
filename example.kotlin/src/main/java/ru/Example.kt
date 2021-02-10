@@ -1,7 +1,7 @@
 package ru
 
-import io.art.kotlin.extensions.communicator
-import io.art.kotlin.extensions.module
+import io.art.kotlin.extensions.communicator.communicator
+import io.art.kotlin.extensions.model.module
 import io.art.launcher.ModuleLauncher.launch
 import io.art.model.annotation.Configurator
 import ru.ExampleProvider.provide
@@ -11,8 +11,6 @@ import ru.model.Model
 import ru.model.Request
 import ru.model.Response
 import ru.service.MyService
-
-val myClient: MyClient by communicator()
 
 object Example {
     @Configurator
