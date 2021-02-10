@@ -17,6 +17,11 @@ config:
       - "test4"
   FBInteger: 123
 
+http:
+  server:
+    transport:
+      port: 1234
+
 rsocket:
   server:
     transport:

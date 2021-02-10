@@ -15,6 +15,7 @@ dependencies {
     api(project(":value"))
     api(project(":model"))
     api(project(":rsocket"))
+    api(project(":http"))
     api(project(":json"))
     api(project(":message-pack"))
     api(project(":protobuf"))
