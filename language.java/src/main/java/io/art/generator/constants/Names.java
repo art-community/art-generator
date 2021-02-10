@@ -23,7 +23,7 @@ public interface Names {
     String COMMUNICATOR_NAME = "communicator";
     String VALUE_NAME = "value";
     String PROVIDE_NAME = "provide";
-    String MODEL_NAME = "model";
+    String MODEL_NAME = "mapping";
     String CONFIGURATOR_NAME = "configurator";
     String CONFIGURATOR_MODEL_NAME = "configuratorModel";
     String VALUE_MODEL_NAME = "valueModel";

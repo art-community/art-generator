@@ -11,7 +11,6 @@ import io.art.model.implementation.communicator.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.checker.EmptinessChecker.*;
-import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.core.reflection.ParameterizedTypeImplementation.*;
@@ -26,7 +25,6 @@ import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.formater.SignatureFormatter.*;
 import static io.art.generator.inspector.CommunicatorsMethodsInspector.*;
-import static io.art.generator.type.TypeInspector.*;
 import static io.art.generator.model.NewBuilder.*;
 import static io.art.generator.model.NewClass.*;
 import static io.art.generator.model.NewField.*;
@@ -34,13 +32,15 @@ import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
+import static io.art.generator.type.TypeInspector.*;
 import static java.util.Objects.*;
 import java.lang.reflect.*;
+import java.util.*;
 
 @UtilityClass
 public class CommunicatorProxyCreator {
-    public NewClass createNewProxyClass(TypeModel implementationType, CommunicatorModel communicatorModel) {
-        JCExpression protocolExpression = select(type(communicatorModel.getProtocol().getClass()), communicatorModel.getProtocol().name());
+    public NewClass createNewProxyClass(TypeModel implementationType, CommunicatorModel model) {
+        JCExpression protocolExpression = select(type(model.getProtocol().getClass()), model.getProtocol().name());
         TypeModel implementationsReturnType = type(parameterizedType(ImmutableMap.class, String.class, CommunicatorAction.class));
         NewMethod getActions = overrideMethod(GET_ACTIONS_METHOD, implementationsReturnType).statement(() -> returnMethodCall(REGISTRY_NAME, GET_NAME));
         NewMethod getProtocol = overrideMethod(GET_PROTOCOL_METHOD).statement(() -> returnExpression(protocolExpression));
@@ -50,26 +50,26 @@ public class CommunicatorProxyCreator {
                         .type(COMMUNICATOR_MODEL_TYPE)
                         .name(COMMUNICATOR_MODEL_NAME)
                         .byConstructor(true))
-                .name(communicatorName(communicatorModel.getProxyClass()))
+                .name(communicatorName(model.getCommunicatorInterface()))
                 .modifiers(PRIVATE | STATIC)
-                .implement(type(communicatorModel.getProxyClass()))
+                .implement(type(model.getCommunicatorInterface()))
                 .implement(COMMUNICATOR_PROXY_TYPE)
                 .field(createRegistryField())
                 .method(getActions)
                 .method(getProtocol);
         int actionIndex = 0;
-        for (Method method : getCommunicatorMethods(communicatorModel.getProxyClass())) {
+        for (Method method : getCommunicatorMethods(model.getCommunicatorInterface())) {
             if (method.getParameterCount() > 1) {
-                throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(communicatorModel.getProxyClass(), method));
+                throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(model.getCommunicatorInterface(), method));
             }
             String actionFieldName = ACTION_FIELD_PREFIX + actionIndex++;
-            NewBuilder implementation = createCommunicatorImplementation(implementationType, communicatorModel, method);
+            NewBuilder implementation = createCommunicatorImplementation(implementationType, model, method);
             NewField actionField = newField()
                     .type(COMMUNICATOR_ACTION_TYPE)
                     .name(actionFieldName)
                     .modifiers(PRIVATE)
                     .byConstructor(true)
-                    .initializer(() -> executeActionBuilder(communicatorModel, method, implementation));
+                    .initializer(() -> executeActionBuilder(model, method, implementation));
             NewMethod proxyMethod = createProxyMethod(method, actionFieldName);
             proxy.field(actionField).method(proxyMethod);
         }
@@ -100,23 +100,26 @@ public class CommunicatorProxyCreator {
         return methodImplementation.statement(() -> returnExpression(method(actionFieldName, COMMUNICATE_METHOD_NAME).addArguments(arguments).apply()));
     }
 
-    private JCExpression executeActionBuilder(CommunicatorModel communicatorModel, Method proxyMethod, NewBuilder implementationBuilder) {
-        TypeModel methodProcessingModeType = METHOD_PROCESSING_MODE_TYPE;
-        Type[] parameterTypes = proxyMethod.getGenericParameterTypes();
+    private JCExpression executeActionBuilder(CommunicatorModel model, Method method, NewBuilder implementationBuilder) {
+        Type[] parameterTypes = method.getGenericParameterTypes();
         if (parameterTypes.length > 1) {
-            throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(communicatorModel.getProxyClass(), proxyMethod));
+            throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(model.getCommunicatorInterface(), method));
         }
-        Type returnType = proxyMethod.getGenericReturnType();
+        Type returnType = method.getGenericReturnType();
         MethodProcessingMode inputMode = isEmpty(parameterTypes) ? BLOCKING : calculateProcessingMode(parameterTypes[0]);
         MethodProcessingMode outputMode = calculateProcessingMode(returnType);
+        Optional<CommunicatorActionModel> action = model.getActionByName(method.getName());
+        String communicatorId = model.getId();
+        String actionId = action.map(CommunicatorActionModel::getId).orElse(method.getName());
         NewBuilder actionBuilder = newBuilder(COMMUNICATOR_ACTION_TYPE)
-                .method(COMMUNICATOR_ID_NAME, literal(communicatorModel.getId()))
-                .method(ACTION_ID_NAME, literal(proxyMethod.getName()));
+                .method(COMMUNICATOR_ID_NAME, literal(communicatorId))
+                .method(ACTION_ID_NAME, literal(actionId));
 
-        if (nonNull(communicatorModel.getTargetServiceId())) {
+        String targetServiceId = action.map(CommunicatorActionModel::getTargetServiceId).orElse(model.getTargetServiceId());
+        if (nonNull(targetServiceId)) {
             actionBuilder.method(TARGET_SERVICE_METHOD_NAME, method(SERVICE_METHOD_IDENTIFIER_TYPE, SERVICE_METHOD_NAME)
-                    .addArgument(literal(communicatorModel.getTargetServiceId()))
-                    .addArgument(literal(orElse(communicatorModel.getTargetMethodId(), proxyMethod.getName())))
+                    .addArgument(literal(targetServiceId))
+                    .addArgument(literal(action.map(CommunicatorActionModel::getTargetMethodId).orElse(method.getName())))
                     .apply());
         }
 
@@ -149,13 +152,13 @@ public class CommunicatorProxyCreator {
             }
         }
         return method(REGISTRY_NAME, REGISTER_NAME)
-                .addArguments(literal(proxyMethod.getName()))
+                .addArguments(literal(method.getName()))
                 .addArguments(actionBuilder
-                        .method(INPUT_MODE_NAME, select(methodProcessingModeType, inputMode.name()))
-                        .method(OUTPUT_MODE_NAME, select(methodProcessingModeType, outputMode.name()))
+                        .method(INPUT_MODE_NAME, select(METHOD_PROCESSING_MODE_TYPE, inputMode.name()))
+                        .method(OUTPUT_MODE_NAME, select(METHOD_PROCESSING_MODE_TYPE, outputMode.name()))
                         .method(IMPLEMENTATION_NAME, implementationBuilder.generate())
                         .generate(builder -> method(COMMUNICATOR_MODEL_NAME, IMPLEMENT_NAME)
-                                .addArguments(literal(communicatorModel.getProxyClass().getSimpleName()), builder)
+                                .addArguments(literal(communicatorId), literal(actionId), builder)
                                 .apply()))
                 .apply();
     }

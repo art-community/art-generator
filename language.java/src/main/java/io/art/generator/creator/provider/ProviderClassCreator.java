@@ -47,7 +47,7 @@ public class ProviderClassCreator {
         stream(IMPORTING_CLASSES).map(ImportModel::classImport).forEach(providerClass::addImport);
 
         Set<Type> types = combineToSet(
-                model.getValueModel().getCustomTypes().stream().flatMap(type -> collectModelTypes(type).stream()).collect(setCollector()),
+                model.getValueModel().getMappedTypes().stream().flatMap(type -> collectModelTypes(type).stream()).collect(setCollector()),
                 collectServerTypes(model.getServerModel()).toMutable(),
                 collectCommunicatorTypes(model.getCommunicatorModel()).toMutable()
         );

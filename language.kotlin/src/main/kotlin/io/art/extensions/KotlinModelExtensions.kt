@@ -47,17 +47,13 @@ class ValueModelConfiguratorExtension(val delegate: ValueModelConfigurator) {
 
     fun model(type: KClass<*>) = model(type.java)
 
-    fun model(type: Type) = delegate.model(type).let { this }
+    fun model(type: Type) = delegate.mapping(type).let { this }
 }
 
 class ServerModelConfiguratorExtension(val delegate: ServerModelConfigurator) {
     fun rsocket(service: Any) = rsocket(service::class)
 
-    fun rsocket(service: Any, method: String) = rsocket(service::class, method)
-
     fun rsocket(service: KClass<*>) = delegate.rsocket(service.java).let { this }
-
-    fun rsocket(service: KClass<*>, method: String) = delegate.rsocket(service.java, method).let { this }
 }
 
 class CommunicatorModelConfiguratorExtension(val delegate: CommunicatorModelConfigurator) {
@@ -83,8 +79,6 @@ class CommunicatorModelConfiguratorExtension(val delegate: CommunicatorModelConf
         infix fun to(targetService: Class<*>) = to(targetService.simpleName)
 
         infix fun to(targetServiceId: String) = delegate.to(targetServiceId)
-
-        infix fun overrideMethod(id: String) = delegate.overrideMethod(id)
     }
 }
 
