@@ -1,6 +1,5 @@
 package ru
 
-import io.art.kotlin.extensions.communicator.communicator
 import io.art.kotlin.extensions.model.module
 import io.art.launcher.ModuleLauncher.launch
 import io.art.model.annotation.Configurator
@@ -16,13 +15,22 @@ object Example {
     @Configurator
     fun configure() = module {
         value {
-            model(Request::class)
-            model(Model::class)
-            model(Response::class)
+            mapping(Request::class, Model::class, Response::class)
+            mapping<Model>()
         }
-        configure { configuration(MyConfig::class) }
-        serve { rsocket(MyService) }
-        communicate { rsocket(MyClient::class) to MyService }
+
+        configure {
+            configuration(MyConfig::class.java)
+            configuration<MyConfig>()
+        }
+
+        serve {
+            rsocket<MyService>()
+        }
+
+        communicate {
+            rsocket<MyClient>() to MyService
+        }
     }
 
     @JvmStatic

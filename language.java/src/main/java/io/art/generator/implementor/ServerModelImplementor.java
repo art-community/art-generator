@@ -58,7 +58,7 @@ public class ServerModelImplementor {
     private JCMethodInvocation executeRegisterMethod(NewMethod servicesMethod, ServiceModel serviceModel) {
         JCMethodInvocation specificationBuilder = executeServiceSpecificationBuilder(servicesMethod, serviceModel);
         return method(REGISTRY_NAME, REGISTER_NAME)
-                .addArguments(literal(serviceModel.getServiceClass().getSimpleName()), specificationBuilder)
+                .addArguments(literal(serviceModel.getId()), specificationBuilder)
                 .apply();
     }
 
