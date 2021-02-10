@@ -17,12 +17,12 @@ import static io.art.generator.constants.MappersConstants.LazyValueMappingMethod
 import static io.art.generator.constants.MappersConstants.OptionalMappingMethods.*;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.selector.ToMapperMethodSelector.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
-import static io.art.generator.substitutor.TypeSubstitutor.*;
+import static io.art.generator.type.TypeSubstitutor.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 

@@ -1,3 +1,3 @@
 package ru.model
 
-data class Request(private val FModel: Model? = null)
+data class Request(val FModel: Model? = null)

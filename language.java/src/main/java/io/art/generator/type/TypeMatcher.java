@@ -1,8 +1,8 @@
-package io.art.generator.comparator;
+package io.art.generator.type;
 
 import lombok.experimental.*;
-import static io.art.generator.inspector.TypeInspector.*;
-import static io.art.generator.substitutor.TypeSubstitutor.*;
+import static io.art.generator.type.TypeInspector.*;
+import static io.art.generator.type.TypeSubstitutor.*;
 import java.lang.reflect.*;
 import java.util.*;
 

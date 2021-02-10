@@ -1,4 +1,4 @@
-package io.art.generator.inspector;
+package io.art.generator.type;
 
 import io.art.core.collection.*;
 import io.art.core.property.*;
@@ -14,12 +14,12 @@ import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.reflection.GenericArrayTypeImplementation.*;
 import static io.art.core.reflection.ParameterizedTypeImplementation.*;
-import static io.art.generator.comparator.TypeMatcher.*;
+import static io.art.generator.type.TypeMatcher.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeConstants.*;
 import static io.art.generator.model.ExtractedProperty.*;
-import static io.art.generator.substitutor.TypeSubstitutor.*;
+import static io.art.generator.type.TypeSubstitutor.*;
 import static java.lang.reflect.Modifier.*;
 import static java.text.MessageFormat.*;
 import static java.util.Arrays.*;

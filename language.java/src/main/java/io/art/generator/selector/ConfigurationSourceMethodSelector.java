@@ -8,7 +8,7 @@ import java.lang.reflect.*;
 
 import static io.art.generator.constants.ConfiguratorConstants.*;
 import static io.art.generator.constants.ExceptionMessages.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 

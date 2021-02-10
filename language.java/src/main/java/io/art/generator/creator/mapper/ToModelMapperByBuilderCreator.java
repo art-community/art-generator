@@ -1,16 +1,19 @@
 package io.art.generator.creator.mapper;
 
 import com.sun.tools.javac.tree.JCTree.*;
+import io.art.generator.exception.*;
 import io.art.generator.model.*;
+import static io.art.core.wrapper.ExceptionWrapper.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.MappersConstants.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static io.art.generator.model.NewLambda.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.NamingService.*;
+import static java.util.Arrays.*;
 import java.lang.reflect.*;
 
 public class ToModelMapperByBuilderCreator {
@@ -33,7 +36,11 @@ public class ToModelMapperByBuilderCreator {
 
     private static JCMethodInvocation forProperties(Class<?> modelClass) {
         JCMethodInvocation builderInvocation = method(type(modelClass), BUILDER_METHOD_NAME).apply();
+        Class<?> builderClass = wrapExceptionCall(() -> modelClass.getMethod(BUILDER_METHOD_NAME).getReturnType(), GenerationException::new);
         for (ExtractedProperty property : getProperties(modelClass)) {
+            if (stream(builderClass.getMethods()).noneMatch(method -> method.getName().equals(property.name()))) {
+                continue;
+            }
             JCMethodInvocation propertyMapper = propertyMappingCreator.forProperty(property.name(), property.type());
             builderInvocation = method(builderInvocation, property.name()).addArguments(propertyMapper).apply();
         }
@@ -42,7 +49,12 @@ public class ToModelMapperByBuilderCreator {
 
     private static JCMethodInvocation forProperties(ParameterizedType parameterizedType) {
         JCMethodInvocation builderInvocation = method(type(parameterizedType), BUILDER_METHOD_NAME).apply();
+        Class<?> modelClass = extractClass(parameterizedType);
+        Class<?> builderClass = wrapExceptionCall(() -> modelClass.getMethod(BUILDER_METHOD_NAME).getReturnType(), GenerationException::new);
         for (ExtractedProperty property : getProperties(parameterizedType)) {
+            if (stream(builderClass.getMethods()).noneMatch(method -> method.getName().equals(property.name()))) {
+                continue;
+            }
             JCMethodInvocation fieldMapping = propertyMappingCreator.forProperty(property.name(), extractGenericPropertyType(parameterizedType, property.type()));
             builderInvocation = method(builderInvocation, property.name()).addArguments(fieldMapping).apply();
         }

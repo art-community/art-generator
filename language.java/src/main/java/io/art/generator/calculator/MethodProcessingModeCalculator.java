@@ -5,7 +5,7 @@ import io.art.generator.exception.*;
 import lombok.experimental.*;
 import static io.art.core.constants.MethodProcessingMode.*;
 import static io.art.generator.constants.ExceptionMessages.*;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
 

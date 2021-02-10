@@ -1,4 +1,4 @@
-package io.art.generator.substitutor;
+package io.art.generator.type;
 
 import lombok.experimental.*;
 import java.lang.reflect.*;

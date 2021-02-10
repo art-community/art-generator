@@ -24,7 +24,6 @@ import static io.art.generator.creator.registry.RegistryVariableCreator.*;
 import static io.art.generator.factory.ReferenceFactory.*;
 import static io.art.generator.formater.SignatureFormatter.*;
 import static io.art.generator.inspector.ServiceMethodsInspector.*;
-import static io.art.generator.inspector.TypeInspector.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.model.ImportModel.*;
 import static io.art.generator.model.NewBuilder.*;
@@ -32,6 +31,7 @@ import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
+import static io.art.generator.type.TypeInspector.*;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.text.MessageFormat.*;
 import java.lang.reflect.*;
@@ -56,34 +56,39 @@ public class ServerModelImplementor {
     }
 
     private JCMethodInvocation executeRegisterMethod(NewMethod servicesMethod, ServiceModel serviceModel) {
-        JCMethodInvocation specificationBuilder = executeServiceSpecificationBuilder(servicesMethod, serviceModel.getServiceClass());
+        JCMethodInvocation specificationBuilder = executeServiceSpecificationBuilder(servicesMethod, serviceModel);
         return method(REGISTRY_NAME, REGISTER_NAME)
-                .addArguments(literal(serviceModel.getServiceClass().getSimpleName()), specificationBuilder)
+                .addArguments(literal(serviceModel.getId()), specificationBuilder)
                 .apply();
     }
 
-    private JCMethodInvocation executeServiceSpecificationBuilder(NewMethod servicesMethod, Class<?> serviceClass) {
+    private JCMethodInvocation executeServiceSpecificationBuilder(NewMethod servicesMethod, ServiceModel model) {
         NewBuilder builder = newBuilder(SERVICE_SPECIFICATION_TYPE);
+        Class<?> serviceClass = model.getServiceClass();
         for (Method method : getServiceMethods(serviceClass)) {
-            JCMethodInvocation methodSpecificationBuilder = executeMethodSpecificationBuilder(servicesMethod, serviceClass, method);
+            if (isNotEmpty(model.getMethods()) && !model.getMethodByName(method.getName()).isPresent()) {
+                continue;
+            }
+            JCMethodInvocation methodSpecificationBuilder = executeMethodSpecificationBuilder(servicesMethod, model, method);
             builder.method(METHOD_NAME, literal(method.getName()), methodSpecificationBuilder);
             info(format(GENERATED_SERVICE_METHOD_SPECIFICATION, formatSignature(serviceClass, method)));
         }
         return builder.generate();
     }
 
-    private JCMethodInvocation executeMethodSpecificationBuilder(NewMethod servicesMethod, Class<?> serviceClass, Method serviceMethod) {
-        TypeModel methodProcessingModeType = METHOD_PROCESSING_MODE_TYPE;
-        Type[] parameterTypes = serviceMethod.getGenericParameterTypes();
+    private JCMethodInvocation executeMethodSpecificationBuilder(NewMethod servicesMethod, ServiceModel model, Method method) {
+        Type[] parameterTypes = method.getGenericParameterTypes();
         if (parameterTypes.length > 1) {
-            throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(serviceClass, serviceMethod));
+            throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(model.getServiceClass(), method));
         }
-        Type returnType = serviceMethod.getGenericReturnType();
+        Type returnType = method.getGenericReturnType();
         MethodProcessingMode inputMode = isEmpty(parameterTypes) ? BLOCKING : calculateProcessingMode(parameterTypes[0]);
         MethodProcessingMode outputMode = calculateProcessingMode(returnType);
+        String serviceId = model.getId();
+        String methodId = model.getMethodByName(method.getName()).map(ServiceMethodModel::getId).orElse(method.getName());
         NewBuilder methodBuilder = newBuilder(SERVICE_METHOD_SPECIFICATION_TYPE)
-                .method(SERVICE_ID_NAME, literal(serviceClass.getSimpleName()))
-                .method(METHOD_ID_NAME, literal(serviceMethod.getName()));
+                .method(SERVICE_ID_NAME, literal(serviceId))
+                .method(METHOD_ID_NAME, literal(methodId));
         if (isNotEmpty(parameterTypes) && isNotVoid(parameterTypes[0])) {
             TypeModel parameterTypeModel = type(parameterTypes[0]);
             if (!parameterTypeModel.isJdk()) {
@@ -102,7 +107,7 @@ public class ServerModelImplementor {
                     break;
             }
             if (isValidatable(parameterTypes[0])) {
-                JCNewClass serviceMethodIdentifier = newObject(SERVICE_METHOD_IDENTIFIER_TYPE, literal(serviceClass.getSimpleName()), literal(serviceMethod.getName()));
+                JCNewClass serviceMethodIdentifier = newObject(SERVICE_METHOD_IDENTIFIER_TYPE, literal(serviceId), literal(methodId));
                 JCNewClass decorator = newObject(SERVICE_VALIDATION_DECORATOR_TYPE, serviceMethodIdentifier);
                 methodBuilder.method(INPUT_DECORATOR_NAME, decorator);
             }
@@ -126,31 +131,31 @@ public class ServerModelImplementor {
             }
         }
         return methodBuilder
-                .method(INPUT_MODE_NAME, select(methodProcessingModeType, inputMode.name()))
-                .method(OUTPUT_MODE_NAME, select(methodProcessingModeType, outputMode.name()))
-                .method(IMPLEMENTATION_NAME, executeHandlerMethod(serviceClass, serviceMethod))
+                .method(INPUT_MODE_NAME, select(METHOD_PROCESSING_MODE_TYPE, inputMode.name()))
+                .method(OUTPUT_MODE_NAME, select(METHOD_PROCESSING_MODE_TYPE, outputMode.name()))
+                .method(IMPLEMENTATION_NAME, executeHandlerMethod(model, method))
                 .generate(builder -> method(SERVER_MODEL_NAME, IMPLEMENT_NAME)
-                        .addArguments(literal(serviceClass.getSimpleName()), literal(serviceMethod.getName()), builder)
+                        .addArguments(literal(serviceId), literal(methodId), builder)
                         .apply());
     }
 
-    private JCMethodInvocation executeHandlerMethod(Class<?> serviceClass, Method serviceMethod) {
+    private JCMethodInvocation executeHandlerMethod(ServiceModel model, Method method) {
         String name = HANDLER_NAME;
-        if (isEmpty(serviceMethod.getParameterTypes())) {
+        if (isEmpty(method.getParameterTypes())) {
             name = PRODUCER_NAME;
         }
-        if (isVoid(serviceMethod.getReturnType())) {
+        if (isVoid(method.getReturnType())) {
             name = CONSUMER_NAME;
         }
-        if (isVoid(serviceMethod.getReturnType()) && isEmpty(serviceMethod.getParameterTypes())) {
+        if (isVoid(method.getReturnType()) && isEmpty(method.getParameterTypes())) {
             name = RUNNER_NAME;
         }
-        JCExpression owner = callOwner(serviceClass, isStatic(serviceMethod.getModifiers()));
-        JCMemberReference reference = invokeReference(owner, (serviceMethod.getName()));
-        JCLiteral serviceName = literal(serviceClass.getSimpleName());
-        JCLiteral methodName = literal(serviceMethod.getName());
+        JCExpression owner = callOwner(model.getServiceClass(), isStatic(method.getModifiers()));
+        JCMemberReference reference = invokeReference(owner, (method.getName()));
+        String serviceId = model.getId();
+        String methodId = model.getMethodByName(method.getName()).map(ServiceMethodModel::getId).orElse(method.getName());
         return method(SERVICE_METHOD_IMPLEMENTATION_TYPE, name)
-                .addArguments(reference, serviceName, methodName)
+                .addArguments(reference, literal(serviceId), literal(methodId))
                 .apply();
     }
 }

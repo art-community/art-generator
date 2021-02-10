@@ -5,11 +5,6 @@ import io.art.generator.model.*;
 import io.art.model.implementation.module.*;
 import lombok.*;
 import lombok.experimental.*;
-
-import javax.lang.model.element.Modifier;
-import java.lang.reflect.*;
-import java.util.*;
-
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.collection.ImmutableArray.*;
@@ -41,6 +36,9 @@ import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.util.Arrays.*;
+import javax.lang.model.element.Modifier;
+import java.lang.reflect.*;
+import java.util.*;
 
 @UtilityClass
 public class ProviderClassCreator {
@@ -52,7 +50,7 @@ public class ProviderClassCreator {
         stream(IMPORTING_CLASSES).map(ImportModel::classImport).forEach(providerClass::addImport);
 
         Set<Type> types = combineToSet(
-                model.getValueModel().getCustomTypes().stream().flatMap(type -> collectModelTypes(type).stream()).collect(setCollector()),
+                model.getValueModel().getMappedTypes().stream().flatMap(type -> collectModelTypes(type).stream()).collect(setCollector()),
                 collectServerTypes(model.getServerModel()).toMutable(),
                 collectCommunicatorTypes(model.getCommunicatorModel()).toMutable(),
                 collectStorageTypes(model.getStorageModel()).toMutable()

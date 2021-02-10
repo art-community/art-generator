@@ -14,7 +14,7 @@ import static io.art.core.factory.MapFactory.*;
 import static io.art.generator.constants.JavaDialect.JAVA;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.context.GeneratorContext.dialect;
-import static io.art.generator.inspector.TypeInspector.*;
+import static io.art.generator.type.TypeInspector.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
 
@@ -50,7 +50,7 @@ public class ExtractedProperty {
             Field field = declaredFields[index];
             Type fieldType = field.getGenericType();
             boolean booleanProperty = isBoolean(fieldType);
-            String getterName = (isBoolean(fieldType) && dialect() == JAVA ? IS_NAME : GET_NAME) + capitalize(field.getName());
+            String getterName = (booleanProperty && dialect() == JAVA ? IS_NAME : GET_NAME) + capitalize(field.getName());
             String setterName = SET_NAME + capitalize(field.getName());
             boolean hasGetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(getterName));
             boolean hasSetter = stream(declaredMethods).anyMatch(method -> method.getName().equals(setterName));

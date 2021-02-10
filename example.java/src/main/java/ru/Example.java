@@ -22,14 +22,17 @@ public class Example {
     @Configurator
     public static ModuleModelConfigurator configure() {
         return module(Example.class)
-                .value(value -> value.model(Request.class))
+                .value(value -> value.mapping(Request.class))
                 .configure(configurator -> configurator.configuration(MyConfig.class))
                 .serve(server -> server.rsocket(MyService.class))
-                .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
-                .onLoad(() -> scheduleFixedRate(() -> communicator(MyClient.class).myMethod2(Request.builder().build()), ofSeconds(30)))
+                .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client
+                        .to(MyService.class)
+                        .decorate((id, communicatorActionBuilder) -> communicatorActionBuilder)
+                        .implement((id, rsocketCommunicatorActionBuilder) -> rsocketCommunicatorActionBuilder)))
                 .store(storage -> storage.tarantool("s2_seq", Model.class, Model.class, space -> space
                                 .cluster("storage2")
                                 .sharded(emptyFunction())
-                                .searchBy("customIndex", Model.class)));
+                                .searchBy("customIndex", Model.class)))
+                .onLoad(() -> scheduleFixedRate(() -> communicator(MyClient.class).myMethod2(Request.builder().build()), ofSeconds(30)));
     }
 }
