@@ -15,7 +15,7 @@ import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.collector.CommunicatorTypesCollector.*;
 import static io.art.generator.collector.ServiceTypesCollector.*;
 import static io.art.generator.collector.StorageTypesCollector.*;
-import static io.art.generator.collector.TypeCollector.*;
+import static io.art.generator.type.TypeCollector.*;
 import static io.art.generator.constants.Imports.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;

@@ -3,7 +3,6 @@ package io.art.generator.service;
 import com.sun.tools.javac.api.*;
 import com.sun.tools.javac.file.*;
 import io.art.core.collection.*;
-import io.art.core.managed.*;
 import io.art.core.property.*;
 import io.art.generator.exception.*;
 import lombok.*;
