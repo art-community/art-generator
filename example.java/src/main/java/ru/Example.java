@@ -24,7 +24,10 @@ public class Example {
                 .value(value -> value.mapping(Request.class))
                 .configure(configurator -> configurator.configuration(MyConfig.class))
                 .serve(server -> server.rsocket(MyService.class))
-                .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client.to(MyService.class)))
+                .communicate(communicator -> communicator.rsocket(MyClient.class, client -> client
+                        .to(MyService.class)
+                        .decorate((id, communicatorActionBuilder) -> communicatorActionBuilder)
+                        .implement((id, rsocketCommunicatorActionBuilder) -> rsocketCommunicatorActionBuilder)))
                 .onLoad(() -> scheduleFixedRate(() -> communicator(MyClient.class).myMethod2(Request.builder().build()), ofSeconds(30)));
     }
 }
