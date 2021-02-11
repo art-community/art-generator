@@ -75,6 +75,7 @@ graal {
     outputName("example")
     option("-H:+TraceClassInitialization")
     option("-H:+ReportExceptionStackTraces")
+    option("-H:+JNI")
     option("--no-fallback")
     option("--report-unsupported-elements-at-runtime")
     option("--allow-incomplete-classpath")

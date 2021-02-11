@@ -10,7 +10,9 @@ import ru.model.Request
 import ru.model.Response
 
 object MyService : MyClient {
-    override fun myMethod1() = logger().info("myMethod1")
+    override fun myMethod1() {
+        logger().info("myMethod1")
+    }
     override fun myMethod2(request: Request) = communicator<MyClient>().myMethod6(Request()).run { logger().info("myMethod2") }
     override fun myMethod3(request: Mono<Request>) = logger().info("myMethod3:${request.block()}")
     override fun myMethod4(request: Flux<Request>) = logger().info("myMethod4:${request.blockFirst()}")
