@@ -1,6 +1,6 @@
 package ru
 
-import io.art.communicator.module.CommunicatorModule
+import io.art.kotlin.extensions.communicator.communicator
 import io.art.kotlin.extensions.model.module
 import io.art.kotlin.extensions.scheduler.scheduleDelayed
 import io.art.launcher.ModuleLauncher.launch
@@ -32,31 +32,32 @@ object Example {
 
         onLoad {
             scheduleDelayed(ofSeconds(10)) {
-                val communicator = CommunicatorModule.communicator(MyClient::class.java)
-                val request = Request()
-                val mono = Mono.just(request)
-                val flux = Flux.just(request)
-                communicator.myMethod1()
-                communicator.myMethod1()
-                communicator.myMethod1()
-                communicator.myMethod2(request)
-                communicator.myMethod2(request)
-                communicator.myMethod2(request)
-                communicator.myMethod3(mono)
-                communicator.myMethod4(flux)
-                communicator.myMethod5()
-                communicator.myMethod6(request)
-                communicator.myMethod7(mono)
-                communicator.myMethod8(flux)
-                communicator.myMethod9().block()
-                communicator.myMethod10(request).block()
-                communicator.myMethod11(mono).block()
-                communicator.myMethod12(flux).block()
-                communicator.myMethod13().blockFirst()
-                communicator.myMethod14(request).blockFirst()
-                communicator.myMethod15(mono).blockFirst()
-                communicator.myMethod16(flux).blockFirst()
-                communicator.myMethod17("test")
+                communicator(MyClient::class) {
+                    val request = Request()
+                    val mono = Mono.just(request)
+                    val flux = Flux.just(request)
+                    myMethod1()
+                    myMethod1()
+                    myMethod1()
+                    myMethod2(request)
+                    myMethod2(request)
+                    myMethod2(request)
+                    myMethod3(mono)
+                    myMethod4(flux)
+                    myMethod5()
+                    myMethod6(request)
+                    myMethod7(mono)
+                    myMethod8(flux)
+                    myMethod9().block()
+                    myMethod10(request).block()
+                    myMethod11(mono).block()
+                    myMethod12(flux).block()
+                    myMethod13().blockFirst()
+                    myMethod14(request).blockFirst()
+                    myMethod15(mono).blockFirst()
+                    myMethod16(flux).blockFirst()
+                    myMethod17("test")
+                }
             }
         }
     }
