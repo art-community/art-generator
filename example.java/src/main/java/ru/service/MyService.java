@@ -9,11 +9,8 @@ import static io.art.logging.LoggingModule.*;
 import static ru.communicator.Communicators.*;
 import java.time.*;
 import java.util.*;
-import java.util.concurrent.atomic.*;
 
 public class MyService implements MyClient {
-    AtomicLong counter = new AtomicLong();
-
     @Override
     public void myMethod1() {
         logger(MyService.class).info("myMethod1");
@@ -76,13 +73,13 @@ public class MyService implements MyClient {
 
     @Override
     public Mono<Response> myMethod11(Mono<Request> request) {
-        logger(MyService.class).info("myMethod11:" + request.block());
+        logger(MyService.class).info("myMethod11");
         return Mono.just(Response.builder().build());
     }
 
     @Override
     public Mono<Response> myMethod12(Flux<Request> request) {
-        logger(MyService.class).info("myMethod12:" + request.blockFirst());
+        logger(MyService.class).info("myMethod12");
         return Mono.just(Response.builder().build());
     }
 
@@ -101,31 +98,31 @@ public class MyService implements MyClient {
 
     @Override
     public Flux<Response> myMethod15(Mono<Request> request) {
-        logger(MyService.class).info("myMethod15:" + request.block());
+        logger(MyService.class).info("myMethod15");
         return Flux.just(Response.builder().build());
     }
 
     @Override
     public Flux<Response> myMethod16(Flux<Request> request) {
-        request.subscribe(data -> logger(MyService.class).info("myMethod16:" + data));
-        return Flux.interval(Duration.ofSeconds(1), Schedulers.newParallel("myMethod16-output")).map(index -> Response.builder().build());
+        logger(MyService.class).info("myMethod16");
+        return Flux.empty();
     }
 
     @Override
     public String myMethod17(String request) {
-        System.out.println(counter.incrementAndGet());
+        logger(MyService.class).info("myMethod17");
         return "Mono.empty()";
     }
 
     @Override
     public Set<String> myMethod18(List<String> request) {
-        System.out.println(counter.incrementAndGet());
+        logger(MyService.class).info("myMethod18");
         return setOf("Mono.empty()");
     }
 
     @Override
     public GenericModel<String, GenericTypeParameter<String>> myMethod19(GenericModel<String, GenericTypeParameter<String>> request) {
-        System.out.println(counter.incrementAndGet());
+        logger(MyService.class).info("myMethod19");
         return null;
     }
 }
