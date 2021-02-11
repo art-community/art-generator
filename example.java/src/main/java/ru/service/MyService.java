@@ -14,12 +14,18 @@ public class MyService implements MyClient {
     @Override
     public void myMethod1() {
         logger(MyService.class).info("myMethod1");
+        while (true) {
+
+        }
     }
 
 
     @Override
     public void myMethod2(Request request) {
         myClient().myMethod1();
+        while (true) {
+
+        }
     }
 
     @Override
