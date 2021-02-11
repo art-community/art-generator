@@ -5,6 +5,8 @@ import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import static io.art.core.collection.ImmutableArray.*;
+import static io.art.core.collection.ImmutableSet.*;
+import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.MappersConstants.*;
@@ -27,6 +29,7 @@ public class ToModelMapperByInitializerCreator {
 
     static JCExpression create(Class<?> type) {
         if (hasConstructorWithAllProperties(type)) {
+            ImmutableSet<ExtractedProperty> constructorProperties = immutableSetOf(getConstructorProperties(type));
             return NewLambda.newLambda()
                     .parameter(newParameter(ENTITY_TYPE, entityName))
                     .addStatement(() -> newVariable()
@@ -34,7 +37,7 @@ public class ToModelMapperByInitializerCreator {
                             .name(MODEL_NAME)
                             .initializer(() -> newObject(type(type), forPropertiesByConstructor(type)))
                             .generate())
-                    .addStatements(forPropertiesBySetters(type))
+                    .addStatements(forPropertiesBySetters(constructorProperties, type))
                     .addStatement(() -> returnVariable(MODEL_NAME))
                     .generate();
         }
@@ -47,7 +50,7 @@ public class ToModelMapperByInitializerCreator {
                             .name(MODEL_NAME)
                             .initializer(() -> newObject(type(type)))
                             .generate())
-                    .addStatements(forPropertiesBySetters(type))
+                    .addStatements(forPropertiesBySetters(emptyImmutableSet(), type))
                     .addStatement(() -> returnVariable(MODEL_NAME))
                     .generate();
         }
@@ -57,6 +60,7 @@ public class ToModelMapperByInitializerCreator {
 
     static JCExpression create(ParameterizedType type) {
         if (hasConstructorWithAllProperties(type)) {
+            ImmutableSet<ExtractedProperty> constructorProperties = immutableSetOf(getConstructorProperties(type));
             return NewLambda.newLambda()
                     .parameter(newParameter(ENTITY_TYPE, entityName))
                     .addStatement(() -> newVariable()
@@ -64,7 +68,7 @@ public class ToModelMapperByInitializerCreator {
                             .name(MODEL_NAME)
                             .initializer(() -> newObject(type(type), forPropertiesByConstructor(type)))
                             .generate())
-                    .addStatements(forPropertiesBySetters(type))
+                    .addStatements(forPropertiesBySetters(constructorProperties, type))
                     .addStatement(() -> returnVariable(MODEL_NAME))
                     .generate();
         }
@@ -77,7 +81,7 @@ public class ToModelMapperByInitializerCreator {
                             .name(MODEL_NAME)
                             .initializer(() -> newObject(type(type)))
                             .generate())
-                    .addStatements(forPropertiesBySetters(type))
+                    .addStatements(forPropertiesBySetters(emptyImmutableSet(), type))
                     .addStatement(() -> returnVariable(MODEL_NAME))
                     .generate();
         }
@@ -85,9 +89,10 @@ public class ToModelMapperByInitializerCreator {
         throw new GenerationException(format(NOT_FOUND_FACTORY_METHODS, type));
     }
 
-    private static ImmutableArray<Supplier<JCStatement>> forPropertiesBySetters(Class<?> modelClass) {
+    private static ImmutableArray<Supplier<JCStatement>> forPropertiesBySetters(ImmutableSet<ExtractedProperty> exclude, Class<?> modelClass) {
         ImmutableArray.Builder<Supplier<JCStatement>> setters = immutableArrayBuilder();
         for (ExtractedProperty property : getSettableProperties(modelClass)) {
+            if (exclude.contains(property.name())) continue;
             setters.add(() -> method(MODEL_NAME, property.setterName())
                     .addArguments(fieldMappingCreator.forProperty(property.name(), property.type()))
                     .execute());
@@ -95,9 +100,10 @@ public class ToModelMapperByInitializerCreator {
         return setters.build();
     }
 
-    private static ImmutableArray<Supplier<JCStatement>> forPropertiesBySetters(ParameterizedType parameterizedType) {
+    private static ImmutableArray<Supplier<JCStatement>> forPropertiesBySetters(ImmutableSet<ExtractedProperty> exclude, ParameterizedType parameterizedType) {
         ImmutableArray.Builder<Supplier<JCStatement>> setters = immutableArrayBuilder();
         for (ExtractedProperty property : getSettableProperties(parameterizedType)) {
+            if (exclude.contains(property)) continue;
             setters.add(() -> method(MODEL_NAME, property.setterName())
                     .addArguments(fieldMappingCreator.forProperty(property.name(), extractGenericPropertyType(parameterizedType, property.type())))
                     .execute());
