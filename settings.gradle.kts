@@ -67,6 +67,7 @@ val artModules = mapOf(
                 "json",
                 "protobuf",
                 "rsocket",
+                "http",
                 "message-pack",
                 "communicator",
                 "yaml-configuration",

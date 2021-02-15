@@ -35,6 +35,9 @@
     },
     {
       "pattern": ".*.kotlin_builtins"
+    },
+    {
+      "pattern": ".*.jnilib"
     }
   ],
   "bundles": []

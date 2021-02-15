@@ -14,11 +14,11 @@ import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.reflection.GenericArrayTypeImplementation.*;
 import static io.art.core.reflection.ParameterizedTypeImplementation.*;
-import static io.art.generator.type.TypeMatcher.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeConstants.*;
 import static io.art.generator.model.ExtractedProperty.*;
+import static io.art.generator.type.TypeMatcher.*;
 import static io.art.generator.type.TypeSubstitutor.*;
 import static java.lang.reflect.Modifier.*;
 import static java.text.MessageFormat.*;
@@ -49,7 +49,7 @@ public class TypeInspector {
     public ImmutableArray<ExtractedProperty> getConstructorProperties(Type type) {
         return getProperties(type)
                 .stream()
-                .filter(ExtractedProperty::usedInConstructorArguments)
+                .filter(ExtractedProperty::byConstructor)
                 .collect(immutableArrayCollector());
     }
 
@@ -230,21 +230,24 @@ public class TypeInspector {
                 .anyMatch(constructor -> constructor.getParameterCount() == 0);
     }
 
-    public boolean hasConstructorArgument(Type type, Type argumentType, int argumentIndex) {
+    public boolean hasConstructorArgument(Type type, ExtractedProperty property) {
         Class<?> rawClass = extractClass(type);
         for (Constructor<?> constructor : rawClass.getConstructors()) {
             if (!isPublic(constructor.getModifiers())) {
                 continue;
             }
             Parameter[] parameters = constructor.getParameters();
-            if (argumentIndex >= parameters.length) {
+            if (property.index() >= parameters.length) {
                 continue;
             }
-            Type parameterType = parameters[argumentIndex].getParameterizedType();
-            if (isParametrized(type) && typeMatches((ParameterizedType) type, argumentType, parameterType)) {
+            Parameter parameter = parameters[property.index()];
+            if (!parameter.getName().equals(property.name())) {
+                continue;
+            }
+            if (isParametrized(type) && typeMatches((ParameterizedType) type, property.type(), parameter.getParameterizedType())) {
                 return true;
             }
-            if (typeMatches(argumentType, parameterType)) {
+            if (typeMatches(property.type(), parameter.getParameterizedType())) {
                 return true;
             }
         }
