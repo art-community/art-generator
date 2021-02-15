@@ -77,9 +77,9 @@ public class StubService {
         String sourcesRoot = processingEnvironment().getOptions().get(SOURCES_ROOT_PROCESSOR_OPTION);
         return stream(processingEnvironment().getOptions().get(SOURCES_PROCESSOR_OPTION).split(","))
                 .filter(path -> path.startsWith(sourcesRoot))
-                .map(path -> path.substring(sourcesRoot.length() + 1)
-                        .replace(File.separatorChar, DOT)
-                        .replace(JAVA_SOURCE_FILE_EXTENSION, EMPTY_STRING))
+                .map(path -> path.substring(0, path.lastIndexOf(DOT))
+                        .substring(sourcesRoot.length() + 1)
+                        .replace(File.separatorChar, DOT))
                 .collect(Collectors.toSet());
     }
 }

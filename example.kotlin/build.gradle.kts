@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin.Companion.findKaptConfiguration
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -51,6 +52,8 @@ kapt {
                     .source
                     .files
                     .joinToString(","))
+            arg("art.generator.recompilation.sourcesRoot", sourceSets.main.get().java.sourceDirectories.asPath)
+            //arg("art.generator.recompilation.generatedSourcesRoot", ?????)
         }
     }
 }
