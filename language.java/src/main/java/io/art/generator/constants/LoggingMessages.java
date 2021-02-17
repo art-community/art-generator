@@ -2,7 +2,8 @@ package io.art.generator.constants;
 
 public interface LoggingMessages {
     String RECOMPILE_ARGUMENTS = "Executing recompilation with arguments: {0}";
-    String RECOMPILATION_STARTED = "Recompilation started";
+    String STUB_RECOMPILATION_STARTED = "Stub recompilation started";
+    String MODULE_CLASS_RECOMPILATION_STARTED = "Module class recompilation started";
     String RECOMPILATION_COMPLETED = "Recompilation completed";
     String GENERATION_STARTED = "Generation started";
     String GENERATION_COMPLETED = "Generation completed";

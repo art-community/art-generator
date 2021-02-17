@@ -45,7 +45,7 @@ public class StubClass implements GeneratedClass {
     private static StubClass from(JCClassDecl declaration, JCCompilationUnit packageUnit){
 
         StubClassBuilder builder = StubClass.builder()
-                .modifiers(deleteAnnotations(declaration.getModifiers()))
+                .modifiers(stubModifiers(declaration.getModifiers()))
                 .name(declaration.getSimpleName().toString())
                 .typarams(declaration.getTypeParameters())
                 .extending(declaration.getExtendsClause())
@@ -80,12 +80,12 @@ public class StubClass implements GeneratedClass {
     }
 
     private static final Function<JCVariableDecl, JCTree> generateVariableStub = (existed) ->
-            maker().VarDef(deleteAnnotations(existed.mods), existed.name, existed.vartype, null);
+            maker().VarDef(stubModifiers(existed.mods), existed.name, existed.vartype, null);
 
     private static final Function<JCMethodDecl, JCTree> generateMethodStub = (existed) ->{
             if (existed.name.toString().equals("<init>") && existed.params.length() == 0) return null;
             return maker().MethodDef(
-                    deleteAnnotations(existed.mods),
+                    stubModifiers(existed.mods),
                     existed.name,
                     existed.restype,
                     existed.typarams,
@@ -109,8 +109,8 @@ public class StubClass implements GeneratedClass {
             .put(JCClassDecl.class, generateInnerClassStub)
             .build());
 
-    private static JCModifiers deleteAnnotations(JCModifiers from){
-        return maker().Modifiers(from.flags);
+    private static JCModifiers stubModifiers(JCModifiers from){
+        return maker().Modifiers(from.flags & (~FINAL));
     }
 
     private static JCTree generateDefaultConstructor(){

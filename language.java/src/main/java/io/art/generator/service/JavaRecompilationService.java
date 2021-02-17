@@ -31,12 +31,11 @@ import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
 
 public class JavaRecompilationService implements RecompilationService {
-    JavacTool javacTool;
+    JavacTool javacTool = JavacTool.create();
     LazyProperty<JavacFileManager> stubFileManager;
 
     @SneakyThrows
     public JavaRecompilationService(){
-        javacTool = JavacTool.create();
         stubFileManager = lazy( () -> {
         JavacFileManager manager = javacTool.getStandardFileManager(new DiagnosticCollector<>(), null, null);
         Set<File> generatedSourcesRoot = setOf(new File(processingEnvironment().getOptions().get(GENERATED_SOURCES_ROOT_PROCESSOR_OPTION)));
@@ -60,14 +59,16 @@ public class JavaRecompilationService implements RecompilationService {
 
     @Override
     public void recompile(Iterable<String> sources){
-        success(RECOMPILATION_STARTED);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(EMPTY_BYTES);
         String[] recompileArguments = immutableArrayBuilder()
                 .add(NO_WARN_OPTION)
                 .add(PARAMETERS_OPTION)
                 .add(CLASS_PATH_OPTION)
-                .add(normalizeClassPath(processingEnvironment().getOptions().get(CLASS_PATH_PROCESSOR_OPTION).split(COMMA)))
+                .add(normalizeClassPath(processingEnvironment().getOptions().get(CLASS_PATH_PROCESSOR_OPTION)
+                        .concat(COMMA)
+                        .concat(processingEnvironment().getOptions().get(DIRECTORY_PROCESSOR_OPTION))
+                        .split(COMMA)))
                 .add(DIRECTORY_OPTION)
                 .add(processingEnvironment().getOptions().get(DIRECTORY_PROCESSOR_OPTION))
                 .addAll(sources)

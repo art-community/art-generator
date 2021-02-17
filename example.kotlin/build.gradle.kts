@@ -25,6 +25,8 @@ dependencies {
     implementation(project(":message-pack"))
     implementation(project(":yaml"))
     implementation(project(":graal"))
+    implementation(project(":tarantool"))
+    implementation(project(":storage"))
     implementation(project(":rocks-db"))
     implementation(project(":kotlin-extensions"))
     kapt(project(":kotlin-extensions"))

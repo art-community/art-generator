@@ -7,6 +7,7 @@ import io.art.core.extensions.StringExtensions.toCommaDelimitedString
 import io.art.core.factory.SetFactory
 import io.art.core.property.LazyProperty
 import io.art.generator.constants.CompilerOptions.*
+import io.art.generator.constants.ExceptionMessages.COULD_NOT_CREATE_JAVAC_INSTANCE
 import io.art.generator.constants.KOTLIN_JAVA_PARAMETERS
 import io.art.generator.constants.KOTLIN_NO_REFLECT
 import io.art.generator.constants.KOTLIN_NO_STD_LIB
@@ -28,7 +29,7 @@ import javax.tools.StandardLocation
 
 
 class KotlinRecompilationService : RecompilationService {
-    private var javacTool: JavacTool = JavacTool.create()?:throw GenerationException("no javac in kotlin")
+    private var javacTool: JavacTool = JavacTool.create()?:throw GenerationException(COULD_NOT_CREATE_JAVAC_INSTANCE)
     private var stubFileManager: LazyProperty<JavacFileManager> = LazyProperty.lazy {
         val manager = javacTool.getStandardFileManager(DiagnosticCollector(), null, null)?:throw GenerationException("no fileMan in kotlin")
         val generatedSourcesRoot = SetFactory.setOf(File(processingEnvironment().options[GENERATED_SOURCES_ROOT_PROCESSOR_OPTION]!!))
@@ -45,14 +46,16 @@ class KotlinRecompilationService : RecompilationService {
     }
 
     override fun recompile(sources: Iterable<String>) {
-        success(RECOMPILATION_STARTED)
         val arguments = with(mutableListOf<String>()) {
             add(KOTLIN_NO_STD_LIB)
             add(KOTLIN_NO_REFLECT)
             add(KOTLIN_JAVA_PARAMETERS)
             add(NO_WARN_OPTION)
             add(CLASS_PATH_OPTION)
-            add(normalizeClassPath(processingEnvironment().options[CLASS_PATH_PROCESSOR_OPTION].toString().split(COMMA)
+            add(normalizeClassPath((processingEnvironment().options[CLASS_PATH_PROCESSOR_OPTION].toString()
+                    + COMMA
+                    + processingEnvironment().options[DIRECTORY_PROCESSOR_OPTION].toString())
+                    .split(COMMA)
                     .toSet().filter { file -> File(file).exists() }.toTypedArray()))
             add(DIRECTORY_OPTION)
             add(processingEnvironment().options[DIRECTORY_PROCESSOR_OPTION].toString())

@@ -27,7 +27,7 @@ public class StubService {
     public static void generateStubs() {
         success(STUB_GENERATION_STARTED);
         generateProviderStubs();
-        generateExistedClassesStubs(projectClasses());
+        generateExistedClassesStubs(existedClassNames());
         success(STUB_GENERATION_COMPLETED);
     }
 
@@ -41,25 +41,16 @@ public class StubService {
         classNames.stream()
                 .map(GeneratorContext::existedClass)
                 .map(StubClass::from)
-                .filter(stub -> !moduleClasses().containsKey(stub.name()))
                 .forEach(stub -> generateStubClass(stub, stub.packageName()));
     }
 
     public static void recompileWithStubs(){
-        Set<String> sources = moduleClasses().values().stream()
-                .map(moduleClass -> moduleClass.getPackageUnit().getSourceFile().getName())
-                .collect(setCollector());
-        sources.addAll(generatedSources());
-        compilationService().recompile(sources);
+        success(STUB_RECOMPILATION_STARTED);
+        new JavaRecompilationService().recompile(generatedSources());
     }
 
     public static void deleteStubSources(){
-        Set<String> moduleClassNames = moduleClasses().values().stream()
-                .map(ExistedClass::getFullName)
-                .collect(setCollector());
-        projectClasses().stream()
-                .filter(className -> !moduleClassNames.contains(className))
-                .forEach(className ->{
+        existedClassNames().forEach(className -> {
                     String path = generatedClasses().get(className).getName();
                     flushFile(className);
                     deleteFileRecursive(path);
@@ -73,13 +64,10 @@ public class StubService {
                 .collect(setCollector());
     }
 
-    private static Set<String> projectClasses(){
-        String sourcesRoot = processingEnvironment().getOptions().get(SOURCES_ROOT_PROCESSOR_OPTION);
-        return stream(processingEnvironment().getOptions().get(SOURCES_PROCESSOR_OPTION).split(","))
-                .filter(path -> path.startsWith(sourcesRoot))
-                .map(path -> path.substring(0, path.lastIndexOf(DOT))
-                        .substring(sourcesRoot.length() + 1)
-                        .replace(File.separatorChar, DOT))
-                .collect(Collectors.toSet());
+    private static Set<String> existedClassNames(){
+        return existedClasses().entrySet().stream()
+                .filter(entry -> !existedClasses().containsKey(entry.getValue().getDeclaration().sym.owner.name.toString()))
+                .map(Map.Entry::getKey)
+                .collect(setCollector());
     }
 }

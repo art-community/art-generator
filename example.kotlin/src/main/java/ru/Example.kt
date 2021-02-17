@@ -27,7 +27,7 @@ object Example {
         }
 
         communicate {
-            rsocket<MyClient>() to MyService
+            rsocket<MyClient>() to MyService::class
         }
 
         onLoad {
