@@ -22,6 +22,7 @@ import static io.art.core.factory.SetFactory.*;
 import static io.art.core.property.LazyProperty.*;
 import static io.art.generator.constants.CompilerOptions.*;
 import static io.art.generator.constants.ExceptionMessages.*;
+import static io.art.generator.constants.JavaDialect.JAVA;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
@@ -38,7 +39,9 @@ public class JavaRecompilationService implements RecompilationService {
     public JavaRecompilationService(){
         stubFileManager = lazy( () -> {
         JavacFileManager manager = javacTool.getStandardFileManager(new DiagnosticCollector<>(), null, null);
-        Set<File> generatedSourcesRoot = setOf(new File(processingEnvironment().getOptions().get(GENERATED_SOURCES_ROOT_PROCESSOR_OPTION)));
+        String generatedSourcesPath = processingEnvironment().getOptions()
+                .get( dialect() == JAVA ? JAVA_GENERATED_SOURCES_ROOT_PROCESSOR_OPTION : KOTLIN_GENERATED_SOURCES_ROOT_PROCESSOR_OPTION);
+        Set<File> generatedSourcesRoot = setOf(new File(generatedSourcesPath));
         try {
             manager.setLocation(StandardLocation.SOURCE_OUTPUT, generatedSourcesRoot);
         } catch (IOException e){
@@ -59,6 +62,7 @@ public class JavaRecompilationService implements RecompilationService {
 
     @Override
     public void recompile(Iterable<String> sources){
+        new File(processingEnvironment().getOptions().get(DIRECTORY_PROCESSOR_OPTION)).mkdirs();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(EMPTY_BYTES);
         String[] recompileArguments = immutableArrayBuilder()

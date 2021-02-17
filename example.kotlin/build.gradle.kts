@@ -55,7 +55,6 @@ kapt {
                     .files
                     .joinToString(","))
             arg("art.generator.recompilation.sourcesRoot", sourceSets.main.get().java.sourceDirectories.asPath)
-            //arg("art.generator.recompilation.generatedSourcesRoot", ?????)
         }
     }
 }

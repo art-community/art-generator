@@ -32,7 +32,7 @@ class KotlinRecompilationService : RecompilationService {
     private var javacTool: JavacTool = JavacTool.create()?:throw GenerationException(COULD_NOT_CREATE_JAVAC_INSTANCE)
     private var stubFileManager: LazyProperty<JavacFileManager> = LazyProperty.lazy {
         val manager = javacTool.getStandardFileManager(DiagnosticCollector(), null, null)?:throw GenerationException("no fileMan in kotlin")
-        val generatedSourcesRoot = SetFactory.setOf(File(processingEnvironment().options[GENERATED_SOURCES_ROOT_PROCESSOR_OPTION]!!))
+        val generatedSourcesRoot = SetFactory.setOf(File(processingEnvironment().options[KOTLIN_GENERATED_SOURCES_ROOT_PROCESSOR_OPTION]!!))
         manager.setLocation(StandardLocation.SOURCE_OUTPUT, generatedSourcesRoot)
         return@lazy manager
     }
