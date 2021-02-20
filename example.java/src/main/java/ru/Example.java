@@ -60,9 +60,9 @@ public class Example {
                     communicator.myMethod18(fixedArrayOf("test"));
                     communicator.myMethod19(GenericModel.<String, GenericTypeParameter<String>>builder().build());
                 }, ofSeconds(30)))
-                .store(storage -> storage.tarantool("s2_seq", Model.class, Model.class, space -> space
-                                .cluster("storage2")
-                                .sharded(emptyFunction())
-                                .searchBy("customIndex", Model.class)));
+                .store(storage -> storage.tarantool("example", StorageExampleModel.class, Integer.class, space -> space
+                        .cluster("routers")
+                        .sharded(ignored -> 99L)
+                        .searchBy("secondary", Integer.class)));
     }
 }

@@ -32,3 +32,23 @@ rsocket:
           tcp:
             host: 127.0.0.1
             port: 5678
+
+tarantool:
+  logging: false
+  clusters:
+    routers:
+      instances:
+        router_1:
+          username: username
+          password: password
+          host: localhost
+          port: 3311
+          readable: true
+          writeable: true
+        router_2:
+          username: username
+          password: password
+          host: localhost
+          port: 3312
+          readable: true
+          writeable: true
