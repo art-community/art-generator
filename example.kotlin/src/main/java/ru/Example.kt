@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono
 import ru.ExampleProvider.provide
 import ru.communicator.MyClient
 import ru.configuration.MyConfig
+import ru.model.Model
 import ru.model.Request
 import ru.service.MyService
 import java.time.Duration.ofSeconds
@@ -58,6 +59,14 @@ object Example {
                     myMethod16(flux).blockFirst()
                     myMethod17("test")
                 }
+            }
+        }
+
+        store {
+            tarantool<Model, Model>("spaceName"){
+                cluster("routers")
+                sharded { 99 }
+                searchBy("customIndex", Model::class.java)
             }
         }
     }
