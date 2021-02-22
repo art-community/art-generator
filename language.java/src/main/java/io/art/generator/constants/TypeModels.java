@@ -85,7 +85,6 @@ public interface TypeModels {
     TypeModel COMMUNICATOR_PROXY_REGISTRY_TYPE = type(CommunicatorProxyRegistry.class);
     TypeModel COMMUNICATOR_ACTION_TYPE = type(CommunicatorAction.class);
     TypeModel COMMUNICATOR_ACTION_REGISTRY_TYPE = type(CommunicatorActionRegistry.class);
-    TypeModel RSOCKET_COMMUNICATOR_ACTION_TYPE = type(RsocketCommunicatorAction.class);
     TypeModel COMMUNICATOR_ACTION_IDENTIFIER_TYPE = type(CommunicatorActionIdentifier.class);
 
     TypeModel CONFIGURATION_SOURCE_TYPE = type(ConfigurationSource.class);

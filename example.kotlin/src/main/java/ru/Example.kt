@@ -22,8 +22,8 @@ object Example {
         }
 
         serve {
-            rsocket<MyService>()
-            http<MyService>()
+            rsocket(MyService)
+            http(MyService)
         }
 
         communicate {

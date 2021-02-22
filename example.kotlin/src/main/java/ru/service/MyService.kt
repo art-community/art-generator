@@ -4,6 +4,8 @@ import io.art.kotlin.extensions.communicator.communicator
 import io.art.kotlin.extensions.logger.logger
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
+import reactor.core.scheduler.Schedulers.*
 import ru.communicator.MyClient
 import ru.model.Model
 import ru.model.Request
@@ -22,11 +24,11 @@ object MyService : MyClient {
     override fun myMethod8(request: Flux<Request>) = Response().also { logger().info("myMethod8:${request.blockFirst()}") }
     override fun myMethod9(): Mono<Response> = Mono.empty<Response>().also { logger().info("myMethod9") }
     override fun myMethod10(request: Request): Mono<Response> = Mono.empty<Response>().also { logger().info("myMethod10:$request") }
-    override fun myMethod11(request: Mono<Request>): Mono<Response> = Mono.empty<Response>().also { logger().info("myMethod11:${request.block()}") }
-    override fun myMethod12(request: Flux<Request>): Mono<Response> = Mono.empty<Response>().also { logger().info("myMethod12:${request.blockFirst()}") }
+    override fun myMethod11(request: Mono<Request>): Mono<Response> = Mono.defer { Mono.empty<Response>().also { logger().info("myMethod11:${request.block()}") }}.subscribeOn(boundedElastic())
+    override fun myMethod12(request: Flux<Request>): Mono<Response> = Mono.defer { Mono.empty<Response>().also { logger().info("myMethod12:${request.blockFirst()}") }}.subscribeOn(boundedElastic())
     override fun myMethod13(): Flux<Response> = Flux.just(Response()).also { logger().info("myMethod13") }
     override fun myMethod14(request: Request): Flux<Response> = Flux.empty<Response>().also { logger().info("myMethod14:$request") }
-    override fun myMethod15(request: Mono<Request>): Flux<Response> = Flux.empty<Response>().also { logger().info("myMethod15:${request.block()}") }
+    override fun myMethod15(request: Mono<Request>): Flux<Response> = Flux.defer { Mono.empty<Response>().also { logger().info("myMethod15:${request.block()}") }}.subscribeOn(boundedElastic())
     override fun myMethod16(request: Flux<Request>): Flux<Response> = Flux.empty<Response>().also { request.subscribe { data: Request -> logger().info("myMethod16:$data") } }
     override fun myMethod17(request: String) = "myMethod17:$request"
     override fun myMethod18(request: List<List<List<String>>>) = "myMethod18:$request"
