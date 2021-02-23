@@ -9,6 +9,7 @@ import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.generator.caller.MethodCaller.*;
+import static io.art.generator.constants.CommunicatorConstants.*;
 import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
@@ -36,10 +37,10 @@ public class CommunicatorModelImplementor {
 
     public ImmutableArray<NewClass> implementCommunicatorProxies(CommunicatorModuleModel communicatorModel) {
         ImmutableArray.Builder<NewClass> proxies = immutableArrayBuilder();
-        communicatorModel.getRsocketCommunicators()
+        communicatorModel.getCommunicators()
                 .values()
                 .stream()
-                .map(model -> createNewProxyClass(RSOCKET_COMMUNICATOR_ACTION_TYPE, model))
+                .map(model -> createNewProxyClass(PROTOCOLS.get(model.getProtocol()), model))
                 .forEach(proxies::add);
         return proxies.build();
     }
