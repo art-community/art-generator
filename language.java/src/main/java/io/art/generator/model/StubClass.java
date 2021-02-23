@@ -50,12 +50,7 @@ public class StubClass implements GeneratedClass {
                 .typarams(declaration.getTypeParameters())
                 .extending(declaration.getExtendsClause())
                 .implementations(declaration.getImplementsClause())
-                .imports(packageUnit.getImports().stream()
-                        .map(jcImport -> new ImportModel(
-                                jcImport.getQualifiedIdentifier().toString(),
-                                jcImport.getQualifiedIdentifier().toString().endsWith("*"),
-                                jcImport.isStatic()))
-                        .collect(setCollector()))
+                .imports(stubImports(packageUnit.getImports()))
                 .packageName(packageUnit.getPackageName().toString());
 
         if(isInterface((int)declaration.mods.flags)) {
@@ -69,7 +64,7 @@ public class StubClass implements GeneratedClass {
                 .collect(toCollection(ListBuffer::new)));
 
         builder.imports.add(NOT_IMPLEMENTED_EXCEPTION_MODEL);
-        builder.definitions.add(generateDefaultConstructor());
+        builder.definitions.add(defaultConstructor());
         return builder.build();
     }
 
@@ -113,7 +108,7 @@ public class StubClass implements GeneratedClass {
         return maker().Modifiers(from.flags & (~FINAL));
     }
 
-    private static JCTree generateDefaultConstructor(){
+    private static JCTree defaultConstructor(){
         return maker().MethodDef(
                 maker().Modifiers(PUBLIC),
                 elements().getName(CONSTRUCTOR_NAME),
@@ -125,5 +120,14 @@ public class StubClass implements GeneratedClass {
                 maker().Block(0L, List.of(throwException(NOT_IMPLEMENTED_EXCEPTION_TYPE, literal("default constructor")))),
                 null
         );
+    }
+
+    private static Set<ImportModel> stubImports(List<JCImport> from){
+        return from.stream()
+                .map(jcImport -> new ImportModel(
+                        jcImport.getQualifiedIdentifier().toString(),
+                        jcImport.getQualifiedIdentifier().toString().endsWith("*"),
+                        jcImport.isStatic()))
+                .collect(setCollector());
     }
 }

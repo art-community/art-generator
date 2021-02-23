@@ -1,7 +1,6 @@
 package io.art.generator.creator.storage;
 
 import com.sun.tools.javac.tree.*;
-import io.art.core.caster.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
 import io.art.generator.service.*;
@@ -17,24 +16,23 @@ import io.art.value.mapper.*;
 import java.util.*;
 
 import static io.art.core.caster.Caster.*;
-import static io.art.core.collection.ImmutableArray.immutableArrayBuilder;
-import static io.art.core.collector.SetCollector.setCollector;
+import static io.art.core.collection.ImmutableArray.*;
+import static io.art.core.collector.SetCollector.*;
 import static io.art.core.constants.StringConstants.*;
-import static io.art.core.factory.ArrayFactory.immutableArrayOf;
-import static io.art.core.factory.MapFactory.map;
+import static io.art.core.factory.ArrayFactory.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.core.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.constants.Names.*;
+import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
+import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.model.NewClass.*;
-import static io.art.generator.model.NewField.newField;
+import static io.art.generator.model.NewField.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.model.NewParameter.*;
-import static io.art.generator.model.NewVariable.newVariable;
 import static io.art.generator.model.TypeModel.*;
 import static io.art.generator.service.JavacService.*;
+import static io.art.tarantool.space.TarantoolSpaceImplementation.*;
 import static java.lang.reflect.Modifier.*;
-import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
-import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 
 public class TarantoolSpaceCreator {
     public static NewClass createTarantoolSpaceClass(TarantoolSpaceModel model){
@@ -102,7 +100,7 @@ public class TarantoolSpaceCreator {
         methods.add(newMethod()
                 .name(nameWithPrefix(indexName, STORAGE_SELECT_BY_PREFIX))
                 .modifiers(PUBLIC)
-                .returnType(type(TarantoolSpaceImplementation.SelectRequest.class))
+                .returnType(type(parameterizedType(SelectRequest.class, modelClass)))
                 .parameter(newParameter(type(indexKeyModel), STORAGE_KEY_PARAMETER_NAME))
                 .statement(() -> returnExpression(methodCall(ident(SPACE_SELECT_METHOD_NAME),
                         immutableArrayOf(
@@ -113,7 +111,7 @@ public class TarantoolSpaceCreator {
         methods.add(newMethod()
                 .name(nameWithPrefix(indexName, STORAGE_SELECT_BY_PREFIX))
                 .modifiers(PUBLIC)
-                .returnType(type(TarantoolSpaceImplementation.SelectRequest.class))
+                .returnType(type(parameterizedType(SelectRequest.class, modelClass)))
                 .parameter(newParameter(type(TarantoolTransactionDependency.class), STORAGE_TRANSACTION_DEPENDENCY_KEY_NAME))
                 .statement(() -> returnExpression(methodCall(ident(SPACE_SELECT_METHOD_NAME),
                         immutableArrayOf(

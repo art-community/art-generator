@@ -57,11 +57,11 @@ public class StorageSpaceInterfaceCreator {
                     .parameter(newParameter(type(TarantoolTransactionDependency.class), STORAGE_TRANSACTION_DEPENDENCY_KEY_NAME)));
             spaceInterface.method(newMethod()
                     .name(formatMethodName(indexName, STORAGE_SELECT_BY_PREFIX))
-                    .returnType(type(SelectRequest.class))
+                    .returnType(type(parameterizedType(SelectRequest.class, spaceModel.getSpaceModelClass())))
                     .parameter(newParameter(type(indexModel), STORAGE_KEY_PARAMETER_NAME)));
             spaceInterface.method(newMethod()
                     .name(formatMethodName(indexName, STORAGE_SELECT_BY_PREFIX))
-                    .returnType(type(SelectRequest.class))
+                    .returnType(type(parameterizedType(SelectRequest.class, spaceModel.getSpaceModelClass())))
                     .parameter(newParameter(type(TarantoolTransactionDependency.class), STORAGE_TRANSACTION_DEPENDENCY_KEY_NAME)));
 
         });

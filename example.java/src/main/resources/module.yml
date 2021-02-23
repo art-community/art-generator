@@ -52,3 +52,19 @@ tarantool:
           port: 3312
           readable: true
           writeable: true
+    storage1:
+      instances:
+        storage_1_a:
+          username: username
+          password: password
+          host: localhost
+          port: 3301
+          readable: false
+          writeable: true
+        storage_1_b:
+          username: username
+          password: password
+          host: localhost
+          port: 3302
+          readable: true
+          writeable: false
