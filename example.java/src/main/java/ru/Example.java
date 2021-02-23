@@ -21,8 +21,6 @@ public class Example {
         launch(provide());
     }
 
-
-
     public static void communicatorExample(){
         scheduleFixedRate(() -> {
             MyClient communicator = communicator(MyClient.class);
