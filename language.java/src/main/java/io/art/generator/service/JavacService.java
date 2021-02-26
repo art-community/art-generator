@@ -57,6 +57,11 @@ public class JavacService {
         return maker().Apply(List.nil(), method, List.from(arguments));
     }
 
+    public JCExpression ternaryExpression(JCExpression condition, JCExpression truePart, JCExpression falsePart){
+        return maker().Conditional(condition, truePart, falsePart);
+    }
+
+
     public JCReturn returnMethodCall(String variable, String method, ImmutableArray<JCExpression> arguments) {
         return returnExpression(maker().Apply(List.nil(), select(variable, method), List.from(arguments)));
     }

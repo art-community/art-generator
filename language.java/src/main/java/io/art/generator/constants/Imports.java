@@ -41,6 +41,7 @@ import io.art.tarantool.space.*;
 import io.art.tarantool.transaction.*;
 import io.art.value.constants.ValueModuleConstants.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
+import io.art.value.factory.*;
 import io.art.value.immutable.Value;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
@@ -72,10 +73,13 @@ public interface Imports {
             ZonedDateTime.class.getName(),
             Stream.class.getName(),
             SetFactory.class.getName(),
+            EntityFactory.class.getName(),
             ArrayFactory.class.getName(),
             ArrayExtensions.class.getName(),
             NestedConfiguration.class.getName(),
             Function.class.getName(),
+            Objects.class.getName(),
+
 
             Flux.class.getName(),
             Mono.class.getName(),

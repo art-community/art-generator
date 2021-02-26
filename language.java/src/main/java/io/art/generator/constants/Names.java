@@ -71,6 +71,7 @@ public interface Names {
     String SET_OF_NAME = "setOf";
     String TO_ARRAY_RAW_NAME = "toArrayRaw";
     String OF_NULLABLE_NAME = "ofNullable";
+    String NON_NULL_NAME = "nonNull";
     String UNBOX_NAME = "unbox";
     String BY_CLASS_NAME = "byClass";
     String SOURCE_NAME = "source";
@@ -79,6 +80,7 @@ public interface Names {
     String TARGET_SERVICE_METHOD_NAME = "targetServiceMethod";
     String SERVICE_METHOD_NAME = "serviceMethod";
     String MAP_NAME = "map";
+    String EMPTY_ENTITY_NAME = "emptyEntity";
 
     String STORAGE_NAME = "storage";
     String STORAGES_NAME = "storages";

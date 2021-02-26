@@ -101,7 +101,11 @@ public class FromModelMapperCreator {
         final JCMethodInvocation finalBuilderInvocation = builderInvocation;
         return newLambda()
                 .parameter(newParameter(type(modelClass), modelName))
-                .expression(() -> method(finalBuilderInvocation, BUILD_METHOD_NAME).apply())
+                .expression(() -> ternaryExpression(
+                        method(OBJECTS_TYPE, NON_NULL_NAME).addArgument(ident(modelName)).apply(),
+                        method(finalBuilderInvocation, BUILD_METHOD_NAME).apply(),
+                        method(ENTITY_FACTORY_TYPE, EMPTY_ENTITY_NAME).apply()
+                ))
                 .generate();
     }
 
