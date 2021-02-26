@@ -36,6 +36,12 @@ class KotlinRecompilationService : RecompilationService {
         manager.setLocation(StandardLocation.SOURCE_OUTPUT, generatedSourcesRoot)
         return@lazy manager
     }
+    private var projectFileManager: LazyProperty<JavacFileManager> = LazyProperty.lazy {
+        val manager = javacTool.getStandardFileManager(DiagnosticCollector(), null, null)?:throw GenerationException("no fileMan in kotlin")
+        val sourcesRoot = SetFactory.setOf(File(processingEnvironment().options[SOURCES_ROOT_PROCESSOR_OPTION]!!))
+        manager.setLocation(StandardLocation.SOURCE_OUTPUT, sourcesRoot)
+        return@lazy manager
+    }
 
     override fun recompile() {
         val sources = mutableSetOf<String>().apply {
@@ -69,6 +75,15 @@ class KotlinRecompilationService : RecompilationService {
 
     override fun createStubFile(className: String?): FileObject {
         return stubFileManager.get().getJavaFileForOutput(
+                StandardLocation.SOURCE_OUTPUT,
+                className,
+                JavaFileObject.Kind.SOURCE,
+                null
+        )
+    }
+
+    override fun createProjectFile(className: String?): FileObject {
+        return projectFileManager.get().getJavaFileForOutput(
                 StandardLocation.SOURCE_OUTPUT,
                 className,
                 JavaFileObject.Kind.SOURCE,

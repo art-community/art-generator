@@ -20,6 +20,7 @@ import static io.art.core.extensions.StringExtensions.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.core.property.LazyProperty.*;
+import static io.art.core.wrapper.ExceptionWrapper.ignoreException;
 import static io.art.generator.constants.CompilerOptions.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static io.art.generator.constants.JavaDialect.JAVA;
@@ -34,20 +35,23 @@ import static java.text.MessageFormat.*;
 public class JavaRecompilationService implements RecompilationService {
     JavacTool javacTool = JavacTool.create();
     LazyProperty<JavacFileManager> stubFileManager;
+    LazyProperty<JavacFileManager> projectFileManager;
 
     @SneakyThrows
     public JavaRecompilationService(){
         stubFileManager = lazy( () -> {
-        JavacFileManager manager = javacTool.getStandardFileManager(new DiagnosticCollector<>(), null, null);
-        String generatedSourcesPath = processingEnvironment().getOptions()
-                .get( dialect() == JAVA ? JAVA_GENERATED_SOURCES_ROOT_PROCESSOR_OPTION : KOTLIN_GENERATED_SOURCES_ROOT_PROCESSOR_OPTION);
-        Set<File> generatedSourcesRoot = setOf(new File(generatedSourcesPath));
-        try {
-            manager.setLocation(StandardLocation.SOURCE_OUTPUT, generatedSourcesRoot);
-        } catch (IOException e){
+            JavacFileManager manager = javacTool.getStandardFileManager(new DiagnosticCollector<>(), null, null);
+            String generatedSourcesPath = processingEnvironment().getOptions()
+                    .get( dialect() == JAVA ? JAVA_GENERATED_SOURCES_ROOT_PROCESSOR_OPTION : KOTLIN_GENERATED_SOURCES_ROOT_PROCESSOR_OPTION);
+            Set<File> generatedSourcesRoot = setOf(new File(generatedSourcesPath));
+            ignoreException(() -> manager.setLocation(StandardLocation.SOURCE_OUTPUT, generatedSourcesRoot));
             return manager;
-        }
-        return manager;
+        });
+        projectFileManager = lazy( () -> {
+            JavacFileManager manager = javacTool.getStandardFileManager(new DiagnosticCollector<>(), null, null);
+            Set<File> SourcesRoot = setOf(new File(processingEnvironment().getOptions().get(SOURCES_ROOT_PROCESSOR_OPTION)));
+            ignoreException(() -> manager.setLocation(StandardLocation.SOURCE_OUTPUT, SourcesRoot));
+            return manager;
         });
     }
 
@@ -89,6 +93,17 @@ public class JavaRecompilationService implements RecompilationService {
     @SneakyThrows
     public FileObject createStubFile(String className){
         return stubFileManager.get().getJavaFileForOutput(
+                StandardLocation.SOURCE_OUTPUT,
+                className,
+                JavaFileObject.Kind.SOURCE,
+                null
+        );
+    }
+
+    @Override
+    @SneakyThrows
+    public FileObject createProjectFile(String className){
+        return projectFileManager.get().getJavaFileForOutput(
                 StandardLocation.SOURCE_OUTPUT,
                 className,
                 JavaFileObject.Kind.SOURCE,

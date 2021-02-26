@@ -6,4 +6,5 @@ public interface RecompilationService {
     void recompile();
     void recompile(Iterable<String> sources);
     FileObject createStubFile(String className);
+    FileObject createProjectFile(String className);
 }

@@ -9,6 +9,7 @@ import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.collector.SetCollector.*;
+import static io.art.core.constants.StringConstants.DOT;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
@@ -71,7 +72,7 @@ public class ProviderClassCreator {
         ImmutableArray<NewClass> customConfigurators = implementCustomConfigurators(model.getConfiguratorModel());
         success(GENERATED_CUSTOM_CONFIGURATION_PROXIES);
 
-        providerClass.addImport(classImport(moduleClass().getFullName() + STORAGE_INTERFACES_SUFFIX));
+        providerClass.addImport(classImport(moduleClass().getPackageName() + DOT + STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX));
         Map<String, NewClass> storageSpaces = implementStorageSpaces(model.getStorageModel());
         NewMethod storagesMethod = implementStoragesMethod(storageSpaces);
         success(GENERATED_STORAGE_SPACES);

@@ -4,22 +4,16 @@ import io.art.generator.context.*;
 import io.art.generator.model.*;
 
 import javax.tools.*;
-import java.io.*;
 import java.util.*;
-import java.util.stream.*;
 
 import static io.art.core.collector.SetCollector.*;
-import static io.art.core.constants.CharacterConstants.DOT;
-import static io.art.core.constants.StringConstants.*;
 import static io.art.core.extensions.FileExtensions.*;
 import static io.art.generator.constants.LoggingMessages.*;
-import static io.art.generator.constants.ProcessorOptions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.provider.ProviderClassCreator.*;
 import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.service.ClassGenerationService.*;
 import static io.art.generator.state.GeneratorState.*;
-import static java.util.Arrays.*;
 
 
 public class StubService {
@@ -34,7 +28,7 @@ public class StubService {
     public static void generateProviderStubs(){
         moduleClasses()
                 .values()
-                .forEach(moduleClass -> generateClass(createProviderStub(moduleClass), moduleClass.getPackageName()));
+                .forEach(moduleClass -> generateProviderClass(createProviderStub(moduleClass), moduleClass.getPackageName()));
     }
 
     public static void generateExistedClassesStubs(Set<String> classNames){

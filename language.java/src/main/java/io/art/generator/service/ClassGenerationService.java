@@ -26,16 +26,25 @@ import static java.util.Objects.*;
 @UtilityClass
 public class ClassGenerationService {
     @SneakyThrows
-    public void generateClass(NewClass generatedClass, String packageName) {
-        ListBuffer<JCTree> definitions = collectDefinitions(generatedClass);
+    public void generateProviderClass(NewClass generatedClass, String packageName) {
         String className = packageName + DOT + generatedClass.name();
-        writeSource(packageName, definitions, getClassFile(className).getName());
+        generateClass(generatedClass, packageName, getClassFile(className).getName());
     }
 
     public void generateStubClass(StubClass generatedClass, String packageName){
-        ListBuffer<JCTree> definitions = collectDefinitions(generatedClass);
         String className = packageName + DOT + generatedClass.name();
-        writeSource(packageName, definitions, getStubFile(className).getName());
+        generateClass(generatedClass, packageName, getStubFile(className).getName());
+    }
+
+    @SneakyThrows
+    public void generateProjectClass(NewClass generatedClass, String packageName){
+        String filename = compilationService().createProjectFile(packageName + DOT + generatedClass.name()).getName();
+        generateClass(generatedClass, packageName, filename);
+    }
+
+    private void generateClass(GeneratedClass generatedClass, String packageName, String filePath){
+        ListBuffer<JCTree> definitions = collectDefinitions(generatedClass);
+        writeSource(packageName, definitions, filePath);
     }
 
     private ListBuffer<JCTree> collectDefinitions(GeneratedClass generatedClass){
