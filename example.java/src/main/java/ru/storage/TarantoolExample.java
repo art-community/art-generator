@@ -1,15 +1,12 @@
 package ru.storage;
 
-import io.art.core.collection.*;
 import io.art.tarantool.constants.*;
 import io.art.tarantool.instance.*;
 import org.apache.logging.log4j.*;
-import ru.*;
 import ru.model.*;
 
 import java.util.*;
 
-import static io.art.core.extensions.ThreadExtensions.*;
 import static io.art.logging.LoggingModule.*;
 import static io.art.storage.module.StorageModule.*;
 import static io.art.tarantool.configuration.space.TarantoolSpaceConfig.*;
@@ -19,6 +16,8 @@ import static io.art.tarantool.constants.TarantoolModuleConstants.TarantoolField
 import static io.art.tarantool.constants.TarantoolModuleConstants.TarantoolIndexIterator.*;
 import static io.art.tarantool.model.operation.TarantoolFilterOperation.*;
 import static io.art.tarantool.module.TarantoolModule.*;
+import static ru.storage.ExampleStorageInterfaces.StorageExampleModelFieldNames.*;
+import static ru.storage.ExampleStorageInterfaces.*;
 
 public class TarantoolExample {
     private static final Random random = new Random();
@@ -28,30 +27,24 @@ public class TarantoolExample {
     private static final Logger logger = logger(TarantoolExample.class);
 
     public static void storageExample(){
-        //initializeSpace();
-        ExampleStorageInterfaces.StorageExampleModelSpace space = space(StorageExampleModel.class);
+        initializeSpace();
+        StorageExampleModelSpace space = space(StorageExampleModel.class);
 
-//        for (int i = 0; i<recordsCount; i++){
-//            space.insert(newRecord((long)i)).synchronize();
-//        }
-        sleep(1000);
-        logger.info("Added " + space.count().get() + " records to space");
+        for (int i = 0; i<recordsCount; i++){
+            space.insert(newRecord()).synchronize();
+        }
+        logger.info("Inserted " + space.count().get() + " records to space");
 
-        StorageExampleModel item1 = space.get(1).get();
-        logger.info("Got item1 id: " + item1.id + ", data: " + item1.data);
-
-        ImmutableArray<StorageExampleModel> results = space.select(500)
+        space.select(500)
                 .iterator(LE)
-                .filter(less(2L, 700))
-                .filter(more(2L, 600))
-                .limit(10L)
-                .get();
+                .filter(data.less(700))
+                .filter(more(data, 600))
+                .sortBy(data.ascending())
+                .limit(10)
+                .stream()
+                .forEach(item -> logger.info("Got item id: " + item.id + ", data: " + item.data));
 
-        sleep(1000);
-
-        results.forEach(item -> logger.info("Got item id: " + item.id + ", data: " + item.data));
-
-//        dropSpace();
+        dropSpace();
     }
 
     private static void initializeSpace(){
@@ -65,11 +58,13 @@ public class TarantoolExample {
                 .part("id")
                 .ifNotExists(true)
                 .unique(true)
+                .ifNotExists(true)
                 .sequence());
         db.createIndex(spaceName, "data", tarantoolSpaceIndex()
                 .part(3)
-                .unique(false));
-        logger.info("Created space");
+                .unique(false)
+                .ifNotExists(true));
+        logger.info("Space initialized");
     }
 
     private static void dropSpace(){
@@ -78,7 +73,9 @@ public class TarantoolExample {
         logger.info("Dropped space");
     }
 
-    private static StorageExampleModel newRecord(Long id){
-        return new StorageExampleModel(null, random.nextInt(recordsCount));
+    private static StorageExampleModel newRecord(){
+        StorageExampleModel model = new StorageExampleModel();
+        model.setData(random.nextInt(recordsCount));
+        return model;
     }
 }

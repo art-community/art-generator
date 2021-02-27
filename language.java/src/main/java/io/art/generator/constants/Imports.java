@@ -35,6 +35,7 @@ import io.art.server.registry.*;
 import io.art.server.specification.*;
 import io.art.server.validation.*;
 import io.art.storage.registry.*;
+import io.art.tarantool.model.field.*;
 import io.art.tarantool.model.record.*;
 import io.art.tarantool.model.transaction.dependency.*;
 import io.art.tarantool.space.*;
@@ -158,6 +159,7 @@ public interface Imports {
             TarantoolSpaceImplementation.class.getName(),
             TarantoolRecord.class.getName(),
             TarantoolTransactionDependency.class.getName(),
-            TarantoolTransactionManager.class.getName()
+            TarantoolTransactionManager.class.getName(),
+            TarantoolField.class.getName()
     };
 }

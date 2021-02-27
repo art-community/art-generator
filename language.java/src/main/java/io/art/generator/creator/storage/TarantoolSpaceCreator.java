@@ -3,7 +3,6 @@ package io.art.generator.creator.storage;
 import com.sun.tools.javac.tree.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
-import io.art.generator.service.*;
 import io.art.generator.state.*;
 import io.art.model.implementation.storage.*;
 import io.art.tarantool.model.record.*;
@@ -17,12 +16,15 @@ import java.util.*;
 
 import static io.art.core.caster.Caster.*;
 import static io.art.core.collection.ImmutableArray.*;
+import static io.art.core.collector.ArrayCollector.*;
 import static io.art.core.collector.SetCollector.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.core.reflection.ParameterizedTypeImplementation.*;
 import static io.art.generator.constants.Names.*;
+import static io.art.generator.constants.TypeModels.*;
+import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.creator.mapper.FromModelMapperCreator.*;
 import static io.art.generator.creator.mapper.ToModelMapperCreator.*;
 import static io.art.generator.model.NewClass.*;
@@ -57,10 +59,21 @@ public class TarantoolSpaceCreator {
                 .add(fromModelMapper(model.getSpaceModelClass()))
                 .add(fromModelMapper(model.getPrimaryKeyClass()))
                 .build());
-        return newMethod()
+        NewMethod constructor = newMethod()
                 .modifiers(PUBLIC)
                 .parameter(newParameter(type(TarantoolTransactionManager.class), "transactionManager"))
-                .statement(() -> JavacService.execMethodCall(ident("super"), superArgs));
+                .statement(() -> execMethodCall(ident("super"), superArgs));
+        List<String> fieldNames = existedClass(model.getSpaceModelClass().getName()).getFields().values().stream()
+                .sequential()
+                .map(ExistedField::getName)
+                .collect(listCollector());
+        for (int i = 0; i<fieldNames.size(); i++){
+            int index = i;
+            constructor.statement(() -> execMethodCall(FIELDS_NAME, PUT_NAME,
+                    literal(fieldNames.get(index)),
+                    newObject(TARANTOOL_FIELD_TYPE, literal(index + 1), literal(fieldNames.get(index)))));
+        }
+        return constructor;
     }
 
     private static Set<NewField> indexKeyMappers(Map<String, Class<?>> indices){

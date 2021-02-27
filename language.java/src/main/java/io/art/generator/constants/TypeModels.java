@@ -27,6 +27,7 @@ import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
 import io.art.storage.registry.*;
+import io.art.tarantool.model.field.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
 import io.art.value.factory.*;
 import io.art.value.immutable.*;
@@ -46,6 +47,7 @@ public interface TypeModels {
     TypeModel VOID_TYPE = type(void.class);
     TypeModel SINGLETON_REGISTRY_TYPE = type(SingletonsRegistry.class);
     TypeModel OBJECTS_TYPE = type(Objects.class);
+    TypeModel STRING_TYPE = type(String.class);
 
     TypeModel VALUE_FROM_MODEL_MAPPER_TYPE = type(ValueFromModelMapper.class);
     TypeModel VALUE_TO_MODEL_MAPPER_TYPE = type(ValueToModelMapper.class);
@@ -95,6 +97,7 @@ public interface TypeModels {
     TypeModel STORAGE_MODULE_MODEL_TYPE = type(StorageModuleModel.class);
     TypeModel STORAGE_CUSTOMIZER_TYPE = type(StorageCustomizer.class);
     TypeModel STORAGE_REGISTRY_TYPE = type(StorageSpacesRegistry.class);
+    TypeModel TARANTOOL_FIELD_TYPE = type(TarantoolField.class);
 
     TypeModel CONFIGURATION_SOURCE_TYPE = type(ConfigurationSource.class);
 

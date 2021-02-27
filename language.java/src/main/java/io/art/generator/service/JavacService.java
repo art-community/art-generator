@@ -45,6 +45,10 @@ public class JavacService {
         return maker().Exec(methodCall(variable, method, arguments));
     }
 
+    public JCExpressionStatement execMethodCall(String variable, String method, JCExpression... arguments) {
+        return maker().Exec(methodCall(variable, method, immutableArrayOf(arguments)));
+    }
+
     public JCExpressionStatement execMethodCall(JCExpression method, ImmutableArray<JCExpression> arguments){
         return maker().Exec(methodCall(method, arguments));
     }

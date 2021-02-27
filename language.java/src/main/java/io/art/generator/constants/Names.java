@@ -95,4 +95,7 @@ public interface Names {
     String MAPPER_SUFFIX = "Mapper";
     String SPACE_GET_METHOD_NAME = "get";
     String SPACE_SELECT_METHOD_NAME = "select";
+    String FIELD_NAMES_NAME = "FieldNames";
+    String FIELDS_NAME = "fields";
+    String PUT_NAME = "put";
 }
