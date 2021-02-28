@@ -68,10 +68,8 @@ public class Example {
                         .tarantool("storage1", cluster -> cluster
                                 .space("example", StorageExampleModel.class, Integer.class, space -> space
                                         .searchBy("secondary", Integer.class))
-
                                 .space("example2", Model.class, Long.class, space -> space
-                                        .searchBy("someIndex", Boolean.class)
-                                        .sharded((Function<Model, Long>) Model::getFBLong))
+                                        .searchBy("someIndex", Boolean.class))
                 ))
                 .onLoad(() -> {
                     storageExample();

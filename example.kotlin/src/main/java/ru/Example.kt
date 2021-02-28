@@ -66,10 +66,10 @@ object Example {
             tarantool("routers") {
                 space<Model, Int>("someSpace"){
                     searchBy("customIndex", Model::class.java)
-                    sharded { 99 }
+                    sharded { model -> model.FBLong }
                 }
                 space<Model, Long>("anotherSpace"){
-                    sharded { record -> record.hashCode().toLong() }
+                    sharded { 99 }
                 }
             }
         }
