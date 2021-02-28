@@ -12,6 +12,7 @@ import ru.communicator.MyClient
 import ru.configuration.MyConfig
 import ru.model.Model
 import ru.model.Request
+import ru.model.StorageExampleModel
 import ru.service.MyService
 import java.time.Duration.ofSeconds
 
@@ -64,9 +65,9 @@ object Example {
 
         store{
             tarantool("routers") {
-                space<Model, Int>("someSpace"){
+                space<StorageExampleModel, Int>("someSpace"){
                     searchBy("customIndex", Model::class.java)
-                    sharded { model -> model.FBLong }
+                    sharded { model -> model.id }
                 }
                 space<Model, Long>("anotherSpace"){
                     sharded { 99 }
