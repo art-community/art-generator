@@ -23,8 +23,8 @@ object Example {
         }
 
         serve {
-            rsocket(MyService)
-            http(MyService)
+            rsocket(MyService::class)
+            http(MyService::class)
         }
 
         communicate {
@@ -62,13 +62,18 @@ object Example {
             }
         }
 
-        store {
-            tarantool<Model, Model>("spaceName"){
-                cluster("routers")
-                sharded { 99 }
-                searchBy("customIndex", Model::class.java)
+        store{
+            tarantool("routers") {
+                space<Model, Int>("someSpace"){
+                    searchBy("customIndex", Model::class.java)
+                    sharded { 99 }
+                }
+                space<Model, Long>("anotherSpace"){
+                    sharded { record -> record.hashCode().toLong() }
+                }
             }
         }
+
     }
 
     @JvmStatic

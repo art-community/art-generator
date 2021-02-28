@@ -7,6 +7,7 @@ import ru.communicator.*;
 import ru.configuration.*;
 import ru.model.*;
 import ru.service.*;
+import java.util.function.*;
 import static io.art.communicator.module.CommunicatorModule.*;
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.launcher.ModuleLauncher.*;
@@ -63,9 +64,15 @@ public class Example {
                         .to(MyService.class)
                         .decorate((id, communicatorActionBuilder) -> communicatorActionBuilder)
                         .implement((id, rsocketCommunicatorActionBuilder) -> rsocketCommunicatorActionBuilder)))
-                .store(storage -> storage.tarantool("example", StorageExampleModel.class, Integer.class, space -> space
-                        .cluster("storage1")
-                        .searchBy("secondary", Integer.class)))
+                .store(storage -> storage
+                        .tarantool("storage1", cluster -> cluster
+                                .space("example", StorageExampleModel.class, Integer.class, space -> space
+                                        .searchBy("secondary", Integer.class))
+
+                                .space("example2", Model.class, Long.class, space -> space
+                                        .searchBy("someIndex", Boolean.class)
+                                        .sharded((Function<Model, Long>) Model::getFBLong))
+                ))
                 .onLoad(() -> {
                     storageExample();
                     communicatorExample();
