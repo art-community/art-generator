@@ -66,9 +66,9 @@ public class ServerModelImplementor {
         NewBuilder builder = newBuilder(SERVICE_SPECIFICATION_TYPE);
         Class<?> serviceClass = model.getServiceClass();
         for (Method method : getServiceMethods(serviceClass)) {
-            if (isNotEmpty(model.getMethods()) && !model.getMethodByName(method.getName()).isPresent()) {
-                continue;
-            }
+//            if (isNotEmpty(model.getMethods()) && !model.getMethodByName(method.getName()).isPresent()) {
+//                continue;
+//            }
             JCMethodInvocation methodSpecificationBuilder = executeMethodSpecificationBuilder(servicesMethod, model, method);
             builder.method(METHOD_NAME, literal(method.getName()), methodSpecificationBuilder);
             info(format(GENERATED_SERVICE_METHOD_SPECIFICATION, formatSignature(serviceClass, method)));
