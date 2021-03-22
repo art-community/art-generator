@@ -21,6 +21,7 @@ dependencies {
     implementation(project(":graal"))
     implementation(project(":tarantool"))
     implementation(project(":storage"))
+    implementation(project(":http"))
     annotationProcessor(project(":language.java"))
 }
 
