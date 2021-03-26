@@ -1,8 +1,8 @@
 package ru.service;
 
-import io.art.http.module.*;
 import ru.model.*;
 
+import static io.art.http.module.HttpModule.*;
 import static io.art.logging.LoggingModule.logger;
 
 public class MyHttpService {
@@ -13,7 +13,9 @@ public class MyHttpService {
 
     public HttpResponse method2(String request){
         logger(MyHttpService.class).info("method1");
-        HttpModule.httpContext().setStatus(205);
+        httpContext()
+                .status(201)
+                .header("header1", "value1");
         return new HttpResponse("method2 ok. Request was: " + request);
     }
 }
