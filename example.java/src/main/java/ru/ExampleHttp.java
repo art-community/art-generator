@@ -23,7 +23,6 @@ public class ExampleHttp {
                         .http(http -> http
                                 .port(8080)
                                 .host(LOCALHOST)
-                                .compress()
                                 .logging(true)
                                 .route("/my-service", MyService.class, route -> route
                                         .method("myMethod9", method -> method
