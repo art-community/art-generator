@@ -25,24 +25,19 @@ public class ExampleHttp {
                                 .host(LOCALHOST)
                                 .logging(true)
                                 .route("/my-service", MyService.class, route -> route
-                                        .method("myMethod9", method -> method
-                                                .pathName("9")
-                                                .httpMethod(HttpMethod.POST))
-                                        .method("myMethod5", method -> method
-                                                .pathName("two-in-one")
-                                                .httpMethod(HttpMethod.GET))
-                                        .method("myMethod6", method -> method
-                                                .pathName("two-in-one")
-                                                .httpMethod(HttpMethod.POST))
+                                        .post("myMethod9", method -> method
+                                                .pathName("9"))
+                                        .get("myMethod5", method -> method
+                                                .pathName("two-in-one"))
+                                        .post("myMethod6", method -> method
+                                                .pathName("two-in-one"))
                                 )
                                 .route("/my-http-service", MyHttpService.class, route->route
                                         .logging(true)
-                                        .method("method1", method -> method
-                                                .pathName("1")
-                                                .httpMethod(HttpMethod.GET))
-                                        .method("method2", method -> method
-                                                .pathName("2")
-                                                .httpMethod(HttpMethod.POST))
+                                        .get("method1", method -> method
+                                                .pathName("{id}/1"))
+                                        .post("method2", method -> method
+                                                .pathName("2"))
                                 )
                         )
                 );

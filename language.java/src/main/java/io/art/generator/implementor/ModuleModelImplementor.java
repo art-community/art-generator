@@ -17,7 +17,9 @@ public class ModuleModelImplementor {
     public void implementModuleModel() {
         for (ExistedClass existedClass : moduleClasses().values()) {
             useModuleClass(existedClass);
-            generateProjectClass(createStorageInterfaces(loadModel().getStorageModel()), moduleClass().getPackageName() + DOT + STORAGE_NAME);
+            if (!loadModel().getStorageModel().getStorages().isEmpty()) {
+                generateProjectClass(createStorageInterfaces(loadModel().getStorageModel()), moduleClass().getPackageName() + DOT + STORAGE_NAME);
+            }
             generateProviderClass(createProviderClass(loadModel()), moduleClass().getPackageName());
         }
     }
