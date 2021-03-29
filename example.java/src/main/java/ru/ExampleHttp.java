@@ -40,6 +40,6 @@ public class ExampleHttp {
                                                 .pathName("2"))
                                 )
                         )
-                );
+                ); 
     }
 }
