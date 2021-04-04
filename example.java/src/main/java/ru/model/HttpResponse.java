@@ -6,5 +6,9 @@ import lombok.*;
 @Setter
 @Value
 public class HttpResponse {
-    String text;
+    String message;
+
+    public static HttpResponse httpResponse(String response){
+        return new HttpResponse(response);
+    }
 }
