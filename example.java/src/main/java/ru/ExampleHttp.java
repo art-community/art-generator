@@ -4,15 +4,16 @@ import io.art.model.annotation.*;
 import io.art.model.configurator.*;
 import io.netty.handler.codec.http.*;
 import ru.model.*;
-import ru.model.HttpResponse;
 import ru.service.*;
 
-import static io.art.core.constants.NetworkConstants.LOCALHOST;
-import static io.art.http.module.HttpModule.httpContext;
+import java.io.*;
+
+import static io.art.http.module.HttpModule.*;
 import static io.art.launcher.ModuleLauncher.*;
 import static io.art.model.configurator.ModuleModelConfigurator.*;
+import static io.art.value.constants.ValueModuleConstants.DataFormat.*;
 import static ru.ExampleHttpProvider.*;
-import static ru.model.HttpResponse.httpResponse;
+import static ru.model.HttpResponse.*;
 
 public class ExampleHttp {
 
@@ -29,6 +30,10 @@ public class ExampleHttp {
                                 .host("0.0.0.0")
                                 .logging(true)
                                 .compress()
+                                .wiretap(false)
+                                .accessLogging(true)
+                                .defaultDataFormat(JSON)
+                                .defaultMetaDataFormat(JSON)
                                 .route("/my-http-service", MyHttpService.class, route->route
                                         .logging(true)
                                         .get("method1", method -> method
