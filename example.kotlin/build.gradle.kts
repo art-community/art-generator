@@ -2,31 +2,31 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.palantir.graal") version "0.7.2"
-    kotlin("jvm") version "1.4.20"
-    kotlin("kapt") version "1.4.20"
+    kotlin("jvm") version "1.4.32"
+    kotlin("kapt") version "1.4.32"
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":scheduler"))
-    implementation(project(":configurator"))
-    implementation(project(":server"))
-    implementation(project(":communicator"))
-    implementation(project(":value"))
-    implementation(project(":logging"))
-    implementation(project(":launcher"))
-    implementation(project(":model"))
-    implementation(project(":xml"))
-    implementation(project(":rsocket"))
-    implementation(project(":http"))
-    implementation(project(":json"))
-    implementation(project(":protobuf"))
-    implementation(project(":message-pack"))
-    implementation(project(":yaml"))
-    implementation(project(":graal"))
-    implementation(project(":rocks-db"))
-    implementation(project(":kotlin-extensions"))
-    kapt(project(":kotlin-extensions"))
+    implementation("io.art:core")
+    implementation("io.art:scheduler")
+    implementation("io.art:configurator")
+    implementation("io.art:server")
+    implementation("io.art:communicator")
+    implementation("io.art:value")
+    implementation("io.art:logging")
+    implementation("io.art:launcher")
+    implementation("io.art:model")
+    implementation("io.art:xml")
+    implementation("io.art:rsocket")
+    implementation("io.art:http")
+    implementation("io.art:json")
+    implementation("io.art:protobuf")
+    implementation("io.art:message-pack")
+    implementation("io.art:yaml")
+    implementation("io.art:graal")
+    implementation("io.art:rocks-db")
+    implementation("io.art:kotlin-extensions")
+    kapt("io.art:kotlin-extensions")
     kapt(project(":language.kotlin"))
 }
 

@@ -3,34 +3,35 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":scheduler"))
-    implementation(project(":configurator"))
-    implementation(project(":server"))
-    implementation(project(":communicator"))
-    implementation(project(":value"))
-    implementation(project(":logging"))
-    implementation(project(":launcher"))
-    implementation(project(":model"))
-    implementation(project(":xml"))
-    implementation(project(":rsocket"))
-    implementation(project(":json"))
-    implementation(project(":protobuf"))
-    implementation(project(":message-pack"))
-    implementation(project(":yaml"))
-    implementation(project(":graal"))
+    implementation("io.art:core")
+    implementation("io.art:scheduler")
+    implementation("io.art:configurator")
+    implementation("io.art:server")
+    implementation("io.art:communicator")
+    implementation("io.art:value")
+    implementation("io.art:logging")
+    implementation("io.art:launcher")
+    implementation("io.art:model")
+    implementation("io.art:xml")
+    implementation("io.art:rsocket")
+    implementation("io.art:json")
+    implementation("io.art:protobuf")
+    implementation("io.art:message-pack")
+    implementation("io.art:yaml")
+    implementation("io.art:graal")
     annotationProcessor(project(":language.java"))
 }
 
 val compileJava: JavaCompile = tasks["compileJava"] as JavaCompile
 val processResources: Task = tasks["processResources"]
 
-compileJava.options.compilerArgs.addAll(arrayOf(
-        "-Aart.generator.recompilation.destination=${compileJava.destinationDir.absolutePath}",
-        "-Aart.generator.recompilation.classpath=${compileJava.classpath.files.joinToString(",")}",
-        "-Aart.generator.recompilation.sources=${compileJava.source.files.joinToString(",")}"
-))
-
+compileJava.doFirst {
+    compileJava.options.compilerArgs.addAll(arrayOf(
+            "-Aart.generator.recompilation.destination=${compileJava.destinationDir.absolutePath}",
+            "-Aart.generator.recompilation.classpath=${compileJava.classpath.files.joinToString(",")}",
+            "-Aart.generator.recompilation.sources=${compileJava.source.files.joinToString(",")}"
+    ))
+}
 compileJava.dependsOn("clean").dependsOn(project(":language.java").tasks["build"])
 
 tasks.register("executableJar", Jar::class) {
