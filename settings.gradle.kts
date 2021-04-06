@@ -19,6 +19,14 @@
 
 rootProject.name = "art-generator"
 
+pluginManagement {
+    plugins {
+        val kotlinVersion: String by settings
+        kotlin("jvm") version kotlinVersion
+        kotlin("kapt") version kotlinVersion
+    }
+}
+
 include("language.kotlin")
 include("language.java")
 include("example.java")

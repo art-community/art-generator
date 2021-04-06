@@ -1,10 +1,11 @@
 plugins {
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm")
 }
 
 val kotlinVersion: String by project
 
 dependencies {
     implementation(project(":language.java"))
+    implementation(kotlin("stdlib-jdk8", kotlinVersion))
     implementation("org.jetbrains.kotlin", "kotlin-compiler-embeddable", kotlinVersion)
 }

@@ -1,5 +1,6 @@
 package ru
 
+import io.art.core.callable.ExceptionCallable
 import io.art.kotlin.extensions.communicator.communicator
 import io.art.kotlin.extensions.model.module
 import io.art.kotlin.extensions.scheduler.scheduleDelayed
@@ -31,7 +32,7 @@ object Example {
         }
 
         onLoad {
-            scheduleDelayed(ofSeconds(10)) {
+            scheduleDelayed(ofSeconds(10), ExceptionCallable<Unit> {
                 communicator(MyClient::class) {
                     val request = Request()
                     val mono = Mono.just(request)
@@ -58,7 +59,7 @@ object Example {
                     myMethod16(flux).blockFirst()
                     myMethod17("test")
                 }
-            }
+            })
         }
     }
 
