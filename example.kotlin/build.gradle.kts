@@ -3,13 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     kotlin("kapt")
-    `kotlin-generator` apply false
+    `kotlin-generator`
 }
 
-afterEvaluate {
-    apply(plugin = "kotlin-generator")
-}
-// TODO: FIX THIS SHIT
 dependencies {
     implementation("io.art.java:core")
     implementation("io.art.java:scheduler")
@@ -34,9 +30,26 @@ dependencies {
     kapt(project(":language.kotlin"))
 }
 
-tasks.withType(KotlinCompile::class.java).all {
-    kotlinOptions {
-        apiVersion = "1.4"
-        languageVersion = "1.4"
+kapt {
+    val compileClasspath = configurations["compileClasspath"]
+    val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
+    includeCompileClasspath = false
+    useBuildCache = false
+    javacOptions {
+        arguments {
+            arg("art.generator.recompilation.destination", compileKotlin
+                    .destinationDir
+                    .absolutePath)
+//            arg("art.generator.recompilation.classpath", compileClasspath
+//                    .files
+//                    .toSet()
+//                    .joinToString(","))
+
+            //TODO : FIX
+            arg("art.generator.recompilation.sources", compileKotlin
+                    .source
+                    .files
+                    .joinToString(","))
+        }
     }
 }

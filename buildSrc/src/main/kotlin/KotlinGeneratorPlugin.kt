@@ -18,9 +18,7 @@
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.get
-import org.jetbrains.kotlin.gradle.plugin.KaptExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 class KotlinGeneratorPlugin : Plugin<Project> {
@@ -28,29 +26,6 @@ class KotlinGeneratorPlugin : Plugin<Project> {
         target.run {
             val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
             configureExecutableJar { from(compileKotlin.outputs.files) }
-            configureKapt()
-        }
-    }
-
-    private fun Project.configureKapt() = configure<KaptExtension> {
-        val compileClasspath = configurations["compileClasspath"]
-        val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
-        includeCompileClasspath = false
-        useBuildCache = false
-        javacOptions {
-            arguments {
-                arg("art.generator.recompilation.destination", compileKotlin
-                        .destinationDir
-                        .absolutePath)
-                arg("art.generator.recompilation.classpath", compileClasspath
-                        .files
-                        .toSet()
-                        .joinToString(","))
-                arg("art.generator.recompilation.sources", compileKotlin
-                        .source
-                        .files
-                        .joinToString(","))
-            }
         }
     }
 }
