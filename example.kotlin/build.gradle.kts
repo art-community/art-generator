@@ -3,9 +3,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     kotlin("kapt")
-    `kotlin-generator`
+    `kotlin-generator` apply false
 }
 
+afterEvaluate {
+    apply(plugin = "kotlin-generator")
+}
+// TODO: FIX THIS SHIT
 dependencies {
     implementation("io.art.java:core")
     implementation("io.art.java:scheduler")

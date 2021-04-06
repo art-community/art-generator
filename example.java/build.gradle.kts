@@ -21,7 +21,8 @@ dependencies {
     implementation("io.art.java:message-pack")
     implementation("io.art.java:yaml")
     implementation("io.art.java:graal")
-    annotationProcessor(project(":language.java"))
+
     compileOnly("org.projectlombok", "lombok", lombokVersion)
+    annotationProcessor(project(":language.java"))
     annotationProcessor("org.projectlombok", "lombok", lombokVersion)
 }

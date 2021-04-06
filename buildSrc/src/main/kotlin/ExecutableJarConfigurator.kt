@@ -1,9 +1,3 @@
-import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.get
-
 /*
  * ART
  *
@@ -21,6 +15,12 @@ import org.gradle.kotlin.dsl.get
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.get
 
 fun Project.configureExecutableJar(additional: Jar.() -> Unit = { }) {
     tasks.register("executableJar", Jar::class.java) {
