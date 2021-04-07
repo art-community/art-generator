@@ -27,7 +27,8 @@ pluginManagement {
     }
 }
 
-include("language.kotlin")
-include("language.java")
-include("example.java")
-include("example.kotlin")
+include("language-kotlin")
+include("language-java")
+include("example-java")
+include("example-kotlin")
+includeBuild("gradle-plugin")

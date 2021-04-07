@@ -1,9 +1,7 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm")
     kotlin("kapt")
-    `kotlin-generator`
+    id("kotlin-generator")
 }
 
 dependencies {
@@ -27,29 +25,5 @@ dependencies {
     implementation("io.art.java:rocks-db")
     implementation("io.art.kotlin:kotlin-extensions")
     kapt("io.art.kotlin:kotlin-extensions")
-    kapt(project(":language.kotlin"))
-}
-
-kapt {
-    val compileClasspath = configurations["compileClasspath"]
-    val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
-    includeCompileClasspath = false
-    useBuildCache = false
-    javacOptions {
-        arguments {
-            arg("art.generator.recompilation.destination", compileKotlin
-                    .destinationDir
-                    .absolutePath)
-//            arg("art.generator.recompilation.classpath", compileClasspath
-//                    .files
-//                    .toSet()
-//                    .joinToString(","))
-
-            //TODO : FIX
-            arg("art.generator.recompilation.sources", compileKotlin
-                    .source
-                    .files
-                    .joinToString(","))
-        }
-    }
+    kapt(project(":language-kotlin"))
 }

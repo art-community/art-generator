@@ -17,9 +17,7 @@
  */
 
 repositories {
-    jcenter()
     mavenCentral()
-    gradlePluginPortal()
 }
 
 plugins {
@@ -27,13 +25,19 @@ plugins {
     `java-library`
 }
 
+group = "io.art.gradle"
+
+tasks.withType(type = Wrapper::class) {
+    gradleVersion = "7.0-rc-2"
+}
+
 gradlePlugin {
     plugins {
-        register("java-generator") {
+        create("java-generator") {
             id = "java-generator"
-            implementationClass = "JavaGeneratorPlugin"
+            implementationClass = "io.art.gradle.JavaGeneratorPlugin"
         }
-        register("kotlin-generator") {
+        create("kotlin-generator") {
             id = "kotlin-generator"
             implementationClass = "KotlinGeneratorPlugin"
         }
@@ -41,10 +45,5 @@ gradlePlugin {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("gradle-plugin"))
-}
-
-kotlinDslPluginOptions {
-    experimentalWarning.set(false)
 }

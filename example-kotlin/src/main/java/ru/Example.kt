@@ -3,11 +3,9 @@ package ru
 import io.art.kotlin.extensions.communicator.communicator
 import io.art.kotlin.extensions.model.module
 import io.art.kotlin.extensions.scheduler.scheduleDelayed
-import io.art.launcher.ModuleLauncher.launch
 import io.art.model.annotation.Configurator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import ru.ExampleProvider.provide
 import ru.communicator.MyClient
 import ru.configuration.MyConfig
 import ru.model.Request
@@ -63,5 +61,5 @@ object Example {
     }
 
     @JvmStatic
-    fun main(vararg arguments: String) = launch(provide())
+    fun main(vararg arguments: String) = {}//launch(provide())
 }

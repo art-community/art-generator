@@ -1,5 +1,5 @@
 plugins {
-    `java-generator`
+    id("java-generator")
 }
 
 val lombokVersion: String by project
@@ -23,6 +23,6 @@ dependencies {
     implementation("io.art.java:graal")
 
     compileOnly("org.projectlombok", "lombok", lombokVersion)
-    annotationProcessor(project(":language.java"))
+    annotationProcessor(project(":language-java"))
     annotationProcessor("org.projectlombok", "lombok", lombokVersion)
 }

@@ -1,7 +1,7 @@
 /*
- * ART
+ * ART Java
  *
- * Copyright 2020 ART
+ * Copyright 2019 ART
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.kotlin.dsl.get
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-class KotlinGeneratorPlugin : Plugin<Project> {
-    override fun apply(target: Project) {
-        target.run {
-            val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
-            configureExecutableJar { from(compileKotlin.outputs.files) }
-        }
-    }
-}
+rootProject.name = "gradle-plugin"

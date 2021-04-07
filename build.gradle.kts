@@ -6,7 +6,6 @@ group = "io.art.generator"
 
 allprojects {
     repositories {
-        jcenter()
         mavenCentral()
     }
 }
