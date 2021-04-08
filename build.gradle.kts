@@ -4,6 +4,10 @@ plugins {
 
 group = "io.art.generator"
 
+tasks.withType(type = Wrapper::class) {
+    gradleVersion = "7.0-rc-2"
+}
+
 allprojects {
     repositories {
         mavenCentral()
