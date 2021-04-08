@@ -29,5 +29,3 @@ pluginManagement {
 
 include("language-kotlin")
 include("language-java")
-include("example-java")
-include("example-kotlin")
