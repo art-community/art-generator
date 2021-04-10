@@ -1,15 +1,12 @@
 package ru.service;
 
-import io.art.http.exception.HttpException;
-import io.art.value.immutable.*;
 import lombok.*;
 import org.apache.logging.log4j.core.*;
 import reactor.core.publisher.*;
 import ru.model.*;
 
 import static io.art.http.module.HttpModule.*;
-import static io.art.logging.LoggingModule.logger;
-import static ru.model.HttpResponse.httpResponse;
+import static io.art.logging.LoggingModule.*;
 
 
 public class MyHttpService {
@@ -20,12 +17,12 @@ public class MyHttpService {
         return new HttpResponse("method1 ok");
     }
 
-    public HttpResponse method2(String request){
+    public HttpResponse method2(HttpResponse request){
         logger.info("method1");
         httpContext()
                 .status(201)
                 .header("header1", "value1");
-        return new HttpResponse("method2 ok. Request was: " + request);
+        return new HttpResponse("method2 ok. Request was: " + request.getMessage());
     }
 
     @SneakyThrows

@@ -28,14 +28,12 @@ public class ExampleHttp {
                         .http(http -> http
                                 .port(8080)
                                 .host("0.0.0.0")
-                                .logging(true)
-                                .compress()
+                                .logging(false)
                                 .wiretap(false)
-                                .accessLogging(true)
+                                .accessLogging(false)
                                 .defaultDataFormat(JSON)
                                 .defaultMetaDataFormat(JSON)
                                 .route("/my-http-service", MyHttpService.class, route->route
-                                        .logging(true)
                                         .get("method1", method -> method
                                                 .pathName("{id}/1"))
                                         .post("method2", method -> method
