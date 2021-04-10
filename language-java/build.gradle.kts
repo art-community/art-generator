@@ -1,29 +1,31 @@
 import org.gradle.internal.jvm.Jvm
 
+
 val googleFormatterVersion: String by project
+val lombokVersion: String by project
 
 dependencies {
     if (JavaVersion.current().isJava8) {
         api(files(Jvm.current().toolsJar))
     }
     api("com.google.googlejavaformat", "google-java-format", googleFormatterVersion)
-    api(project(":launcher"))
-    api(project(":core"))
-    api(project(":configurator"))
-    api(project(":server"))
-    api(project(":communicator"))
-    api(project(":value"))
-    api(project(":model"))
-    api(project(":rsocket"))
-    api(project(":http"))
-    api(project(":json"))
-    api(project(":message-pack"))
-    api(project(":protobuf"))
-    api(project(":scheduler"))
-    api(project(":logging"))
-    api(project(":rocks-db"))
-    api(project(":storage"))
-    api(project(":tarantool"))
+    api("io.art.java:launcher")
+    api("io.art.java:core")
+    api("io.art.java:configurator")
+    api("io.art.java:server")
+    api("io.art.java:communicator")
+    api("io.art.java:value")
+    api("io.art.java:model")
+    api("io.art.java:rsocket")
+    api("io.art.java:http")
+    api("io.art.java:json")
+    api("io.art.java:message-pack")
+    api("io.art.java:protobuf")
+    api("io.art.java:scheduler")
+    api("io.art.java:logging")
+    api("io.art.java:rocks-db")
+    compileOnly("org.projectlombok", "lombok", lombokVersion)
+    annotationProcessor("org.projectlombok", "lombok", lombokVersion)
 }
 
 tasks.withType<JavaCompile> {
@@ -39,4 +41,3 @@ tasks.withType<JavaCompile> {
         ))
     }
 }
-
