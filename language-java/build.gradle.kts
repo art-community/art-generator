@@ -24,6 +24,8 @@ dependencies {
     api("io.art.java:scheduler")
     api("io.art.java:logging")
     api("io.art.java:rocks-db")
+    api("io.art.java:storage")
+    api("io.art.java:tarantool")
     compileOnly("org.projectlombok", "lombok", lombokVersion)
     annotationProcessor("org.projectlombok", "lombok", lombokVersion)
 }
