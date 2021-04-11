@@ -39,6 +39,7 @@ tasks.withType<JavaCompile> {
                 "--add-exports", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
                 "--add-exports", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
                 "--add-exports", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
+                "--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
                 "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"
         ))
     }
