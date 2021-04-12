@@ -20,6 +20,10 @@
 rootProject.name = "art-generator"
 
 pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = uri("https://nexus.art-platform.io/repository/art-gradle-plugins/") }
+    }
     plugins {
         val kotlinVersion: String by settings
         kotlin("jvm") version kotlinVersion

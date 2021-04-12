@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("art-internal")
+    id("art-internal") version "main"
 }
 
 group = "io.art.generator"
