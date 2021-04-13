@@ -1,29 +1,33 @@
 import org.gradle.internal.jvm.Jvm
 
+
 val googleFormatterVersion: String by project
+val lombokVersion: String by project
 
 dependencies {
     if (JavaVersion.current().isJava8) {
         api(files(Jvm.current().toolsJar))
     }
     api("com.google.googlejavaformat", "google-java-format", googleFormatterVersion)
-    api(project(":launcher"))
-    api(project(":core"))
-    api(project(":configurator"))
-    api(project(":server"))
-    api(project(":communicator"))
-    api(project(":value"))
-    api(project(":model"))
-    api(project(":rsocket"))
-    api(project(":http"))
-    api(project(":json"))
-    api(project(":message-pack"))
-    api(project(":protobuf"))
-    api(project(":scheduler"))
-    api(project(":logging"))
-    api(project(":rocks-db"))
-    api(project(":storage"))
-    api(project(":tarantool"))
+    api("io.art.java:launcher:main")
+    api("io.art.java:core:main")
+    api("io.art.java:configurator:main")
+    api("io.art.java:server:main")
+    api("io.art.java:communicator:main")
+    api("io.art.java:value:main")
+    api("io.art.java:model:main")
+    api("io.art.java:rsocket:main")
+    api("io.art.java:http:main")
+    api("io.art.java:json:main")
+    api("io.art.java:message-pack:main")
+    api("io.art.java:protobuf:main")
+    api("io.art.java:scheduler:main")
+    api("io.art.java:logging:main")
+    api("io.art.java:rocks-db:main")
+    api("io.art.java:storage:main")
+    api("io.art.java:tarantool:main")
+    compileOnly("org.projectlombok", "lombok", lombokVersion)
+    annotationProcessor("org.projectlombok", "lombok", lombokVersion)
 }
 
 tasks.withType<JavaCompile> {
@@ -35,8 +39,8 @@ tasks.withType<JavaCompile> {
                 "--add-exports", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
                 "--add-exports", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
                 "--add-exports", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
+                "--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
                 "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"
         ))
     }
 }
-
