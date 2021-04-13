@@ -1,4 +1,4 @@
-name: ART Java Pull Request
+name: ART Generator Pull Request
 on: [ pull_request ]
 jobs:
   gradle:

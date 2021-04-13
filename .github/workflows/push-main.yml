@@ -1,4 +1,4 @@
-name: ART Java Publish
+name: ART Generator Publish
 on:
   push:
     branches:

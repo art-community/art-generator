@@ -1,4 +1,4 @@
-name: ART Java Build
+name: ART Generator Build
 on:
   push:
     branches-ignore:
