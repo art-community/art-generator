@@ -7,6 +7,7 @@ import ru.model.*;
 
 import static io.art.http.module.HttpModule.*;
 import static io.art.logging.LoggingModule.*;
+import static ru.model.HttpResponse.httpResponse;
 
 
 public class MyHttpService {
@@ -51,5 +52,10 @@ public class MyHttpService {
     public Flux<HttpResponse> wsFlux(Flux<HttpResponse> req){
         logger.info("wsFlux");
         return req;
+    }
+
+    public Flux<HttpResponse> voidFlux(){
+        logger.info("voidFlux");
+        return Flux.just(httpResponse("fromVoid"));
     }
 }

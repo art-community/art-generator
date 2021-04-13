@@ -39,6 +39,7 @@ public class ExampleHttp {
                                         .websocket("websocket", method -> method
                                                 .logging(true))
                                         .websocket("wsFlux")
+                                        .websocket("voidFlux")
                                         .exceptions(e -> e
                                                 .on(HttpExampleException.class, 404, () -> httpResponse("httpExampleException"))
                                                 .on(IllegalStateException.class, exception -> {
