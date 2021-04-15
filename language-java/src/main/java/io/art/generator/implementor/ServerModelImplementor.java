@@ -82,7 +82,7 @@ public class ServerModelImplementor {
             throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(model.getServiceClass(), method));
         }
         Type returnType = method.getGenericReturnType();
-        MethodProcessingMode inputMode = isEmpty(parameterTypes) ? VOID : calculateProcessingMode(parameterTypes[0]);
+        MethodProcessingMode inputMode = isEmpty(parameterTypes) ? EMPTY : calculateProcessingMode(parameterTypes[0]);
         MethodProcessingMode outputMode = calculateProcessingMode(returnType);
         String serviceId = model.getId();
         String methodId = model.getMethodByName(method.getName()).map(ServiceMethodModel::getId).orElse(method.getName());
