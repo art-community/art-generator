@@ -1,6 +1,7 @@
 package io.art.generator.exception;
 
 import lombok.*;
+
 import static com.google.common.base.Throwables.*;
 import static io.art.generator.constants.ExceptionMessages.*;
 import static java.text.MessageFormat.*;

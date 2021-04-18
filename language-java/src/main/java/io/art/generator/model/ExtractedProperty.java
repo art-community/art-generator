@@ -4,6 +4,10 @@ import io.art.core.collection.*;
 import lombok.Builder;
 import lombok.*;
 import lombok.experimental.*;
+
+import java.lang.reflect.*;
+import java.util.*;
+
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.core.factory.MapFactory.*;
@@ -13,8 +17,6 @@ import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.type.TypeInspector.*;
 import static java.util.Arrays.*;
 import static java.util.Objects.*;
-import java.lang.reflect.*;
-import java.util.*;
 
 @Getter
 @ToString

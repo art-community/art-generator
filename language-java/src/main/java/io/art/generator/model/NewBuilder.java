@@ -5,11 +5,13 @@ import com.sun.tools.javac.util.*;
 import io.art.generator.caller.*;
 import lombok.*;
 import lombok.experimental.*;
+
+import java.util.*;
+import java.util.function.*;
+
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.constants.Names.*;
 import static java.util.function.UnaryOperator.*;
-import java.util.*;
-import java.util.function.*;
 
 @Getter
 @Setter

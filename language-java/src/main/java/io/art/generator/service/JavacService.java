@@ -5,6 +5,7 @@ import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
+
 import static com.sun.source.tree.MemberReferenceTree.ReferenceMode.*;
 import static com.sun.tools.javac.code.TypeTag.*;
 import static io.art.core.collection.ImmutableArray.*;
@@ -41,12 +42,34 @@ public class JavacService {
 
 
     public JCExpressionStatement execMethodCall(String variable, String method, ImmutableArray<JCExpression> arguments) {
-        return maker().Exec(maker().Apply(List.nil(), select(variable, method), List.from(arguments)));
+        return maker().Exec(methodCall(variable, method, arguments));
     }
+
+    public JCExpressionStatement execMethodCall(String variable, String method, JCExpression... arguments) {
+        return maker().Exec(methodCall(variable, method, immutableArrayOf(arguments)));
+    }
+
+    public JCExpressionStatement execMethodCall(JCExpression method, ImmutableArray<JCExpression> arguments){
+        return maker().Exec(methodCall(method, arguments));
+    }
+
+    public JCExpression methodCall(String variable, String method, ImmutableArray<JCExpression> arguments) {
+        return maker().Apply(List.nil(), select(variable, method), List.from(arguments));
+    }
+
+    public JCExpression methodCall(JCExpression method, ImmutableArray<JCExpression> arguments){
+        return maker().Apply(List.nil(), method, List.from(arguments));
+    }
+
+    public JCExpression ternaryExpression(JCExpression condition, JCExpression truePart, JCExpression falsePart){
+        return maker().Conditional(condition, truePart, falsePart);
+    }
+
 
     public JCReturn returnMethodCall(String variable, String method, ImmutableArray<JCExpression> arguments) {
         return returnExpression(maker().Apply(List.nil(), select(variable, method), List.from(arguments)));
     }
+
 
     public JCReturn returnMethodCall(String variable, String method, JCExpression... arguments) {
         return returnExpression(maker().Apply(List.nil(), select(variable, method), List.from(arguments)));

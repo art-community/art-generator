@@ -1,9 +1,10 @@
 package io.art.generator.service;
 
 
+import java.util.*;
+
 import static io.art.core.factory.MapFactory.*;
 import static java.lang.Math.*;
-import java.util.*;
 
 public class NamingService {
     private static final Random RANDOM = new Random();

@@ -6,9 +6,11 @@ import com.sun.tools.javac.util.List;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
+
+import java.util.*;
+
 import static io.art.generator.constants.Annotations.*;
 import static io.art.generator.constants.ExceptionMessages.*;
-import java.util.*;
 
 @UtilityClass
 public class ConfigureMethodFinder {

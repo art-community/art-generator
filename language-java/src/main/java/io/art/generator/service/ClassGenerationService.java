@@ -8,6 +8,10 @@ import io.art.generator.model.*;
 import io.art.generator.writer.*;
 import lombok.*;
 import lombok.experimental.*;
+
+import javax.tools.*;
+import java.io.*;
+
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.extensions.FileExtensions.*;
 import static io.art.core.factory.SetFactory.*;
@@ -18,36 +22,72 @@ import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
-import javax.tools.*;
-import java.io.*;
 
 @UtilityClass
 public class ClassGenerationService {
     @SneakyThrows
-    public void generateClass(NewClass newClass, String packageName) {
+    public void generateProviderClass(NewClass generatedClass, String packageName) {
+        String className = packageName + DOT + generatedClass.name();
+        generateClass(generatedClass, packageName, getClassFile(className).getName());
+    }
+
+    public void generateStubClass(StubClass generatedClass, String packageName){
+        String className = packageName + DOT + generatedClass.name();
+        generateClass(generatedClass, packageName, getStubFile(className).getName());
+    }
+
+    @SneakyThrows
+    public void generateProjectClass(NewClass generatedClass, String packageName){
+        String filename = compilationService().createProjectFile(packageName + DOT + generatedClass.name()).getName();
+        generateClass(generatedClass, packageName, filename);
+    }
+
+    private void generateClass(GeneratedClass generatedClass, String packageName, String filePath){
+        ListBuffer<JCTree> definitions = collectDefinitions(generatedClass);
+        writeSource(packageName, definitions, filePath);
+    }
+
+    private ListBuffer<JCTree> collectDefinitions(GeneratedClass generatedClass){
         ListBuffer<JCTree> definitions = new ListBuffer<>();
-        definitions.addAll(createImports(immutableSetOf(newClass.imports())));
-        definitions.add(newClass.generate());
-        String className = packageName + DOT + newClass.name();
+        definitions.addAll(createImports(immutableSetOf(generatedClass.imports())));
+        definitions.add(generatedClass.generate());
+        return definitions;
+    }
+
+    @SneakyThrows
+    private FileObject getClassFile(String className){
         FileObject file = generatedClasses().get(className);
         if (nonNull(file)) {
-            writeSource(packageName, definitions, file.getName());
-            return;
+            return file;
         }
         file = processingEnvironment().getFiler().createSourceFile(className);
         putGeneratedClass(className, file);
-        writeSource(packageName, definitions, file.getName());
+        return file;
+    }
+
+    private FileObject getStubFile(String className){
+        FileObject file = generatedClasses().get(className);
+        if (nonNull(file)) {
+            return file;
+        }
+        file = compilationService().createStubFile(className);
+        putGeneratedClass(className, file);
+        return file;
     }
 
     @SneakyThrows
     public void flushPendingSources() {
-        for (FileObject fileObject : generatedClasses().values()) {
-            String content = readFile(fileObject.getName());
-            try (Writer writer = fileObject.openWriter()) {
-                writer.write(content);
-            }
+        generatedClasses().keySet().forEach(ClassGenerationService::flushFile);
+    }
+
+    @SneakyThrows
+    public void flushFile(String name){
+        FileObject fileObject = generatedClasses().get(name);
+        String content = readFile(fileObject.getName());
+        try (Writer writer = fileObject.openWriter()) {
+            writer.write(content);
         }
-        clearGeneratedClasses();
+        removeFromGeneratedClasses(name);
     }
 
     @SneakyThrows

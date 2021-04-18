@@ -6,12 +6,13 @@ import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import lombok.*;
 import lombok.experimental.*;
+
+import java.util.function.*;
+
 import static io.art.core.factory.ArrayFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
-import java.util.*;
-import java.util.function.*;
 
 @Getter
 @Setter

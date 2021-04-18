@@ -6,18 +6,20 @@ import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
+
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
+
 import static com.sun.source.tree.Tree.Kind.*;
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.collection.ImmutableSet.*;
-import static io.art.core.collector.SetCollector.setCollector;
+import static io.art.core.collector.SetCollector.*;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.ImportModel.*;
 import static java.util.stream.Collectors.*;
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
 
 @UtilityClass
 public class ClassMutationService {

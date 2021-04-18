@@ -5,6 +5,9 @@ import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import lombok.*;
+
+import java.lang.reflect.*;
+
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.caller.MethodCaller.*;
@@ -32,7 +35,6 @@ import static io.art.generator.type.TypeSubstitutor.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
 import static lombok.AccessLevel.*;
-import java.lang.reflect.*;
 
 @RequiredArgsConstructor(access = PRIVATE)
 public class FromModelMapperCreator {
@@ -99,7 +101,11 @@ public class FromModelMapperCreator {
         final JCMethodInvocation finalBuilderInvocation = builderInvocation;
         return newLambda()
                 .parameter(newParameter(type(modelClass), modelName))
-                .expression(() -> method(finalBuilderInvocation, BUILD_METHOD_NAME).apply())
+                .expression(() -> ternaryExpression(
+                        method(OBJECTS_TYPE, NON_NULL_NAME).addArgument(ident(modelName)).apply(),
+                        method(finalBuilderInvocation, BUILD_METHOD_NAME).apply(),
+                        method(ENTITY_FACTORY_TYPE, EMPTY_ENTITY_NAME).apply()
+                ))
                 .generate();
     }
 

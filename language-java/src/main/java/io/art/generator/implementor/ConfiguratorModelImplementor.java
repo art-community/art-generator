@@ -9,6 +9,10 @@ import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.configurator.*;
 import lombok.experimental.*;
+
+import java.lang.reflect.*;
+import java.util.*;
+
 import static com.sun.tools.javac.code.Flags.STATIC;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.collection.ImmutableSet.*;
@@ -36,8 +40,6 @@ import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.text.MessageFormat.*;
-import java.lang.reflect.*;
-import java.util.*;
 
 @UtilityClass
 public class ConfiguratorModelImplementor {

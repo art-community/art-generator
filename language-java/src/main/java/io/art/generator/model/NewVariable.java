@@ -1,17 +1,17 @@
 package io.art.generator.model;
 
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
 import io.art.generator.service.*;
 import lombok.*;
 import lombok.experimental.*;
+
+import java.util.function.*;
+
 import static com.sun.tools.javac.util.List.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static java.util.stream.Collectors.*;
-import java.util.*;
-import java.util.function.*;
 
 @Getter
 @Setter

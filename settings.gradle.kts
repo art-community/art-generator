@@ -20,6 +20,15 @@
 rootProject.name = "art-generator"
 
 pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = uri("https://nexus.art-platform.io/repository/art-gradle-plugins/") }
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "art-internal-jvm") useModule("io.art.gradle:art-gradle:${requested.version}")
+        }
+    }
     plugins {
         val kotlinVersion: String by settings
         kotlin("jvm") version kotlinVersion
@@ -27,5 +36,5 @@ pluginManagement {
     }
 }
 
-include("language-kotlin")
 include("language-java")
+//include("language-kotlin")

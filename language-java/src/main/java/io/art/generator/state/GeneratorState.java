@@ -4,13 +4,15 @@ import io.art.core.collection.*;
 import io.art.generator.model.*;
 import io.art.generator.registry.*;
 import lombok.*;
+
+import javax.tools.*;
+import java.lang.reflect.*;
+import java.util.*;
+
 import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.factory.MapFactory.*;
 import static io.art.generator.constants.MappersConstants.*;
 import static io.art.generator.constants.Names.*;
-import javax.tools.*;
-import java.lang.reflect.*;
-import java.util.*;
 
 public class GeneratorState {
     private final static ThreadLocal<GeneratorState> LOCAL_STATE = new ThreadLocal<>();
@@ -70,6 +72,10 @@ public class GeneratorState {
 
     public static void putGeneratedClass(String name, FileObject file) {
         getLocalState().GENERATED_CLASSES.put(name, file);
+    }
+
+    public static void removeFromGeneratedClasses(String name){
+        getLocalState().GENERATED_CLASSES.remove(name);
     }
 
 

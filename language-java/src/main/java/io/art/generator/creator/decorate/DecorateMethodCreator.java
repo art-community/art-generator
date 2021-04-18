@@ -3,6 +3,7 @@ package io.art.generator.creator.decorate;
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
+
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.Names.*;
@@ -41,6 +42,10 @@ public class DecorateMethodCreator {
                         .name(COMMUNICATOR_MODEL_NAME)
                         .type(COMMUNICATOR_MODEL_TYPE)
                         .initializer(() -> method(MODULE_MODEL_NAME, GET_COMMUNICATOR_MODEL_NAME).apply()).generate())
+                .statement(() -> newVariable()
+                        .name(STORAGE_MODEL_NAME)
+                        .type(STORAGE_MODULE_MODEL_TYPE)
+                        .initializer(() -> method(MODULE_MODEL_NAME, GET_STORAGE_MODEL_NAME).apply()).generate())
                 .statement(() -> returnExpression(customizeMethod()));
     }
 
@@ -56,6 +61,7 @@ public class DecorateMethodCreator {
                                 .next(VALUE_NAME, value -> value.addArguments(valueLambda()))
                                 .next(COMMUNICATOR_NAME, communicator -> communicator.addArguments(communicatorLambda()))
                                 .next(CONFIGURATOR_NAME, configurator -> configurator.addArguments(configuratorLambda()))
+                                .next(STORAGE_NAME, storage -> storage.addArguments(storageLambda()))
                                 .apply()
                 )
                 .generate();
@@ -100,6 +106,17 @@ public class DecorateMethodCreator {
                 .expression(() -> method(COMMUNICATOR_NAME, REGISTRY_NAME)
                         .addArguments(method(COMMUNICATORS_NAME)
                                 .addArguments(ident(COMMUNICATOR_MODEL_NAME))
+                                .apply())
+                        .apply())
+                .generate();
+    }
+
+    private JCLambda storageLambda(){
+        return newLambda()
+                .parameter(newParameter(STORAGE_CUSTOMIZER_TYPE, STORAGE_NAME))
+                .expression(() -> method(STORAGE_NAME, REGISTRY_NAME)
+                        .addArguments(method(STORAGES_NAME)
+                                .addArguments(ident(STORAGE_MODEL_NAME))
                                 .apply())
                         .apply())
                 .generate();

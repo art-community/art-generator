@@ -7,6 +7,9 @@ import io.art.generator.caller.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import lombok.experimental.*;
+
+import java.lang.reflect.*;
+
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.core.reflection.ParameterizedTypeImplementation.*;
@@ -29,7 +32,6 @@ import static io.art.generator.service.NamingService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static io.art.generator.type.TypeSubstitutor.*;
 import static java.text.MessageFormat.*;
-import java.lang.reflect.*;
 
 @UtilityClass
 public class CustomConfigurationCreator {

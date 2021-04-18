@@ -5,6 +5,7 @@ import io.art.communicator.constants.CommunicatorModuleConstants.*;
 import io.art.communicator.proxy.*;
 import io.art.communicator.registry.*;
 import io.art.configurator.custom.*;
+import io.art.core.caster.*;
 import io.art.core.checker.*;
 import io.art.core.collection.*;
 import io.art.core.constants.*;
@@ -15,6 +16,7 @@ import io.art.core.model.*;
 import io.art.core.property.*;
 import io.art.core.singleton.*;
 import io.art.core.source.*;
+import io.art.generator.model.*;
 import io.art.launcher.*;
 import io.art.model.configurator.*;
 import io.art.model.customizer.*;
@@ -22,6 +24,7 @@ import io.art.model.implementation.communicator.*;
 import io.art.model.implementation.configurator.*;
 import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
+import io.art.model.implementation.storage.*;
 import io.art.model.implementation.value.*;
 import io.art.rsocket.communicator.*;
 import io.art.rsocket.constants.RsocketModuleConstants.*;
@@ -31,21 +34,33 @@ import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
 import io.art.server.validation.*;
+import io.art.storage.registry.*;
+import io.art.tarantool.model.field.*;
+import io.art.tarantool.model.record.*;
+import io.art.tarantool.model.transaction.dependency.*;
+import io.art.tarantool.space.*;
+import io.art.tarantool.transaction.*;
 import io.art.value.constants.ValueModuleConstants.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
+import io.art.value.factory.*;
 import io.art.value.immutable.Value;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import io.art.value.mapping.*;
 import io.art.value.registry.*;
 import reactor.core.publisher.*;
+
 import java.time.*;
 import java.util.*;
+import java.util.function.*;
 import java.util.stream.*;
 
 public interface Imports {
+    ImportModel NOT_IMPLEMENTED_EXCEPTION_MODEL = new ImportModel("io.art.core.exception.NotImplementedException", false, false);
+
     String[] IMPORTING_CLASSES = new String[]{
             NotImplementedException.class.getName(),
+            Caster.class.getName(),
             Optional.class.getName(),
             List.class.getName(),
             Set.class.getName(),
@@ -59,9 +74,13 @@ public interface Imports {
             ZonedDateTime.class.getName(),
             Stream.class.getName(),
             SetFactory.class.getName(),
+            EntityFactory.class.getName(),
             ArrayFactory.class.getName(),
             ArrayExtensions.class.getName(),
             NestedConfiguration.class.getName(),
+            Function.class.getName(),
+            Objects.class.getName(),
+
 
             Flux.class.getName(),
             Mono.class.getName(),
@@ -132,6 +151,15 @@ public interface Imports {
             RsocketCommunicatorAction.class.getName(),
             CommunicationMode.class.getName(),
             RsocketSetupPayload.class.getName(),
-            RsocketProtocol.class.getName()
+            RsocketProtocol.class.getName(),
+
+            StorageSpacesRegistry.class.getName(),
+            StorageModuleModel.class.getName(),
+            StorageCustomizer.class.getName(),
+            TarantoolSpaceImplementation.class.getName(),
+            TarantoolRecord.class.getName(),
+            TarantoolTransactionDependency.class.getName(),
+            TarantoolTransactionManager.class.getName(),
+            TarantoolField.class.getName()
     };
 }

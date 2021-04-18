@@ -66,9 +66,9 @@ public class ServerModelImplementor {
         NewBuilder builder = newBuilder(SERVICE_SPECIFICATION_TYPE);
         Class<?> serviceClass = model.getServiceClass();
         for (Method method : getServiceMethods(serviceClass)) {
-            if (isNotEmpty(model.getMethods()) && !model.getMethodByName(method.getName()).isPresent()) {
-                continue;
-            }
+//            if (isNotEmpty(model.getMethods()) && !model.getMethodByName(method.getName()).isPresent()) {
+//                continue;
+//            }
             JCMethodInvocation methodSpecificationBuilder = executeMethodSpecificationBuilder(servicesMethod, model, method);
             builder.method(METHOD_NAME, literal(method.getName()), methodSpecificationBuilder);
             info(format(GENERATED_SERVICE_METHOD_SPECIFICATION, formatSignature(serviceClass, method)));
@@ -82,7 +82,7 @@ public class ServerModelImplementor {
             throw new ValidationException(MORE_THAN_ONE_PARAMETER, formatSignature(model.getServiceClass(), method));
         }
         Type returnType = method.getGenericReturnType();
-        MethodProcessingMode inputMode = isEmpty(parameterTypes) ? BLOCKING : calculateProcessingMode(parameterTypes[0]);
+        MethodProcessingMode inputMode = isEmpty(parameterTypes) ? EMPTY : calculateProcessingMode(parameterTypes[0]);
         MethodProcessingMode outputMode = calculateProcessingMode(returnType);
         String serviceId = model.getId();
         String methodId = model.getMethodByName(method.getName()).map(ServiceMethodModel::getId).orElse(method.getName());

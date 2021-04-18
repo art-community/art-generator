@@ -3,12 +3,14 @@ package io.art.generator.model;
 import com.sun.tools.javac.code.*;
 import io.art.core.collection.*;
 import lombok.*;
+
+import java.util.*;
+
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.factory.MapFactory.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
-import java.util.*;
 
 @Getter
 @Builder

@@ -71,6 +71,7 @@ public interface Names {
     String SET_OF_NAME = "setOf";
     String TO_ARRAY_RAW_NAME = "toArrayRaw";
     String OF_NULLABLE_NAME = "ofNullable";
+    String NON_NULL_NAME = "nonNull";
     String UNBOX_NAME = "unbox";
     String BY_CLASS_NAME = "byClass";
     String SOURCE_NAME = "source";
@@ -78,4 +79,23 @@ public interface Names {
     String TARGET_METHOD_ID_NAME = "targetMethodId";
     String TARGET_SERVICE_METHOD_NAME = "targetServiceMethod";
     String SERVICE_METHOD_NAME = "serviceMethod";
+    String MAP_NAME = "map";
+    String EMPTY_ENTITY_NAME = "emptyEntity";
+
+    String STORAGE_NAME = "storage";
+    String STORAGES_NAME = "storages";
+    String STORAGE_MODEL_NAME = "storageModel";
+    String GET_STORAGE_MODEL_NAME = "getStorageModel";
+    String STORAGE_SPACE_SUFFIX = "Space";
+    String STORAGE_INTERFACES_SUFFIX = "StorageInterfaces";
+    String STORAGE_GET_BY_PREFIX = "getBy";
+    String STORAGE_SELECT_BY_PREFIX = "selectBy";
+    String STORAGE_KEY_PARAMETER_NAME = "key";
+    String STORAGE_TRANSACTION_DEPENDENCY_KEY_NAME = "keyDependency";
+    String MAPPER_SUFFIX = "Mapper";
+    String SPACE_GET_METHOD_NAME = "get";
+    String SPACE_SELECT_METHOD_NAME = "select";
+    String FIELD_NAMES_NAME = "FieldNames";
+    String FIELDS_NAME = "fields";
+    String PUT_NAME = "put";
 }

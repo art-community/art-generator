@@ -4,9 +4,14 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import lombok.*;
 import lombok.experimental.*;
+
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.function.*;
+
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.util.List.*;
-import static io.art.core.collector.SetCollector.setCollector;
+import static io.art.core.collector.SetCollector.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.model.ImportModel.*;
@@ -14,9 +19,6 @@ import static io.art.generator.model.NewParameter.*;
 import static io.art.generator.model.TypeModel.*;
 import static java.util.Arrays.*;
 import static java.util.stream.Collectors.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.function.*;
 
 @Getter
 @Setter
@@ -49,7 +51,8 @@ public class NewMethod {
         JCModifiers modifiers = maker().Modifiers(this.modifiers);
         Name name = elements().getName(this.name);
         JCExpression type = returnType.generateFullType();
-        JCBlock body = maker().Block(0L, from(statements.stream()
+        JCBlock body = statements.isEmpty() ? null :
+                maker().Block(0L, from(statements.stream()
                 .map(Supplier::get)
                 .collect(toCollection(ListBuffer::new))));
         com.sun.tools.javac.util.List<JCVariableDecl> parameters = this.parameters

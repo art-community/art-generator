@@ -4,9 +4,9 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import io.art.core.wrapper.*;
 import lombok.experimental.*;
+import java.lang.reflect.*;
 import static io.art.core.constants.CompilerSuppressingWarnings.*;
 import static javax.lang.model.SourceVersion.*;
-import java.lang.reflect.*;
 
 @UtilityClass
 @SuppressWarnings(ALL)

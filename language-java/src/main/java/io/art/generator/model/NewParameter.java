@@ -3,6 +3,7 @@ package io.art.generator.model;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import lombok.*;
+
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.context.GeneratorContext.*;
 

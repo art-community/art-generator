@@ -19,13 +19,17 @@ import io.art.model.implementation.communicator.*;
 import io.art.model.implementation.configurator.*;
 import io.art.model.implementation.module.*;
 import io.art.model.implementation.server.*;
+import io.art.model.implementation.storage.*;
 import io.art.model.implementation.value.*;
 import io.art.rsocket.communicator.*;
 import io.art.server.decorator.*;
 import io.art.server.implementation.*;
 import io.art.server.registry.*;
 import io.art.server.specification.*;
+import io.art.storage.registry.*;
+import io.art.tarantool.model.field.*;
 import io.art.value.constants.ValueModuleConstants.ValueType.*;
+import io.art.value.factory.*;
 import io.art.value.immutable.*;
 import io.art.value.mapper.*;
 import io.art.value.mapping.*;
@@ -38,9 +42,12 @@ public interface TypeModels {
     TypeModel ARRAY_EXTENSIONS_TYPE = type(ArrayExtensions.class);
     TypeModel NESTED_CONFIGURATION_TYPE = type(NestedConfiguration.class);
     TypeModel SET_FACTORY_TYPE = type(SetFactory.class);
+    TypeModel ENTITY_FACTORY_TYPE = type(EntityFactory.class);
     TypeModel STRING_ARRAY_TYPE = type(String[].class);
     TypeModel VOID_TYPE = type(void.class);
     TypeModel SINGLETON_REGISTRY_TYPE = type(SingletonsRegistry.class);
+    TypeModel OBJECTS_TYPE = type(Objects.class);
+    TypeModel STRING_TYPE = type(String.class);
 
     TypeModel VALUE_FROM_MODEL_MAPPER_TYPE = type(ValueFromModelMapper.class);
     TypeModel VALUE_TO_MODEL_MAPPER_TYPE = type(ValueToModelMapper.class);
@@ -86,6 +93,11 @@ public interface TypeModels {
     TypeModel COMMUNICATOR_ACTION_TYPE = type(CommunicatorAction.class);
     TypeModel COMMUNICATOR_ACTION_REGISTRY_TYPE = type(CommunicatorActionRegistry.class);
     TypeModel COMMUNICATOR_ACTION_IDENTIFIER_TYPE = type(CommunicatorActionIdentifier.class);
+
+    TypeModel STORAGE_MODULE_MODEL_TYPE = type(StorageModuleModel.class);
+    TypeModel STORAGE_CUSTOMIZER_TYPE = type(StorageCustomizer.class);
+    TypeModel STORAGE_REGISTRY_TYPE = type(StorageSpacesRegistry.class);
+    TypeModel TARANTOOL_FIELD_TYPE = type(TarantoolField.class);
 
     TypeModel CONFIGURATION_SOURCE_TYPE = type(ConfigurationSource.class);
 
