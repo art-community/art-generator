@@ -25,7 +25,7 @@ public class CompilationUnitFactory {
 
     @SneakyThrows
     private JCCompilationUnit createLegacyCompilationUnit(String packageName, List<JCTree> definitions) {
-        if (isEmpty(packageName)) return (JCCompilationUnit) TOP_LEVEL_METHOD.invoke(maker(), nil(), nil(), definitions);
+        if (isEmpty(packageName)) return (JCCompilationUnit) TOP_LEVEL_METHOD.invoke(maker(), nil(), null, definitions);
         return (JCCompilationUnit) TOP_LEVEL_METHOD.invoke(maker(), nil(), ident(packageName), definitions);
     }
 
