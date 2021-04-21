@@ -33,14 +33,15 @@ public class GenerationService {
             recompileModuleClasses();
             implementModuleModel();
             flushPendingSources();
-            classLoader().close();
-            clearLocalState();
         } catch (ValidationException validationException) {
             error(validationException.write());
             throw validationException;
         } catch (GenerationException generationException) {
             error(generationException.write());
             throw generationException;
+        } finally {
+            classLoader().close();
+            clearLocalState();
         }
         success(GENERATION_COMPLETED);
     }
