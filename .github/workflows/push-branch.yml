@@ -1,4 +1,4 @@
-name: ART Generator Build
+name: ART Generator Branch
 on:
   push:
     branches-ignore:
