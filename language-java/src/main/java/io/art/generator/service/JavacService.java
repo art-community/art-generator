@@ -61,6 +61,14 @@ public class JavacService {
         return maker().Apply(List.nil(), method, List.from(arguments));
     }
 
+    public JCExpression methodCall(JCExpression variable, String method, JCExpression argument) {
+        return maker().Apply(List.nil(), select(variable, method), List.of(argument));
+    }
+
+    public JCExpression methodCall(String variable, String method) {
+        return maker().Apply(List.nil(), select(variable, method), List.nil());
+    }
+
     public JCExpression ternaryExpression(JCExpression condition, JCExpression truePart, JCExpression falsePart){
         return maker().Conditional(condition, truePart, falsePart);
     }
