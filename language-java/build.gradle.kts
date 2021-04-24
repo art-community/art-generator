@@ -1,6 +1,5 @@
 import org.gradle.internal.jvm.Jvm
 
-
 val googleFormatterVersion: String by project
 val lombokVersion: String by project
 

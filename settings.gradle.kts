@@ -1,3 +1,5 @@
+import org.gradle.api.JavaVersion.current
+
 /*
  * ART Java
  *
@@ -37,4 +39,5 @@ pluginManagement {
 }
 
 include("language-java")
+project(":language-java").name = "language-java-${current()}"
 //include("language-kotlin")
