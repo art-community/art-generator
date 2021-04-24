@@ -16,9 +16,7 @@
  * limitations under the License.
  */
 
-import org.apache.tools.ant.util.JavaEnvUtils.VERSION_1_8
-import org.gradle.api.JavaVersion.VERSION_11
-import org.gradle.api.JavaVersion.current
+import org.gradle.api.JavaVersion.*
 
 rootProject.name = "art-generator"
 
@@ -42,7 +40,7 @@ pluginManagement {
 include("language-java")
 when {
     current().isJava11Compatible -> project(":language-java").name = "language-java-$VERSION_11"
-    else -> project(":language-java").name = "language-java-$VERSION_1_8"
+    else -> project(":language-java").name = "language-java-${VERSION_1_8}"
 }
 
 //include("language-kotlin")
