@@ -92,6 +92,16 @@ public class NewClass implements GeneratedClass{
         return this;
     }
 
+    public NewClass methods(Set<NewMethod> methods) {
+        methods.stream()
+                .filter(Objects::nonNull)
+                .forEach(method -> {
+                    this.methods.add(method);
+                    this.imports.addAll(method.classImports());
+                });
+        return this;
+    }
+
     public NewClass constructor(NewMethod constructor) {
         methods.add(newMethod()
                 .name(CONSTRUCTOR_NAME)

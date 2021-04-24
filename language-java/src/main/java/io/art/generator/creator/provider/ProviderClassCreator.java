@@ -4,6 +4,9 @@ import io.art.core.checker.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.module.*;
+import java.lang.reflect.*;
+import java.util.*;
+import javax.lang.model.element.Modifier;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
@@ -11,14 +14,13 @@ import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.checker.EmptinessChecker.letIfNotEmpty;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.collector.SetCollector.*;
-import static io.art.core.constants.StringConstants.DOT;
+import static io.art.core.constants.StringConstants.*;
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.core.factory.SetFactory.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.collector.CommunicatorTypesCollector.*;
 import static io.art.generator.collector.ServiceTypesCollector.*;
 import static io.art.generator.collector.StorageTypesCollector.*;
-import static io.art.generator.type.TypeCollector.*;
 import static io.art.generator.constants.Imports.*;
 import static io.art.generator.constants.LoggingMessages.*;
 import static io.art.generator.constants.Names.*;
@@ -38,10 +40,8 @@ import static io.art.generator.model.NewField.*;
 import static io.art.generator.model.NewMethod.*;
 import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
+import static io.art.generator.type.TypeCollector.*;
 import static java.util.Arrays.*;
-import javax.lang.model.element.Modifier;
-import java.lang.reflect.*;
-import java.util.*;
 
 @UtilityClass
 public class ProviderClassCreator {
@@ -59,36 +59,34 @@ public class ProviderClassCreator {
                 collectStorageTypes(model.getStorageModel()).toMutable()
         );
 
-        NewMethod mappersMethod = implementMappersMethod(immutableSetOf(types));
+        Set<NewMethod> providerMethods = set();
+
+        if (!types.isEmpty()) providerMethods.add(implementMappersMethod(immutableSetOf(types)));
         ImmutableArray<NewClass> mappers = implementTypeMappers(immutableSetOf(types));
         success(GENERATED_MAPPERS);
 
-        NewMethod servicesMethod = implementServicesMethod(model.getServerModel());
+        if (!model.getServerModel().getServices().isEmpty()) providerMethods.add(implementServicesMethod(model.getServerModel()));
         success(GENERATED_SERVICE_SPECIFICATIONS);
 
-        NewMethod communicatorsMethod = implementCommunicatorsMethod(model.getCommunicatorModel());
+        if (!model.getCommunicatorModel().getCommunicators().isEmpty()) providerMethods.add(implementCommunicatorsMethod(model.getCommunicatorModel()));
         ImmutableArray<NewClass> communicatorProxies = implementCommunicatorProxies(model.getCommunicatorModel());
         success(GENERATED_COMMUNICATOR_PROXIES);
 
-        NewMethod configurationsMethod = implementCustomConfigurationsMethod(model.getConfiguratorModel());
+        if (!model.getConfiguratorModel().getCustomConfigurations().isEmpty()) providerMethods.add(implementCustomConfigurationsMethod(model.getConfiguratorModel()));
         ImmutableArray<NewClass> customConfigurators = implementCustomConfigurators(model.getConfiguratorModel());
         success(GENERATED_CUSTOM_CONFIGURATION_PROXIES);
 
         providerClass.addImport(classImport(letIfNotEmpty(moduleClass().getPackageName(), name -> name  + DOT + STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX, STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX)));
         Map<String, NewClass> storageSpaces = implementStorageSpaces(model.getStorageModel());
-        NewMethod storagesMethod = implementStoragesMethod(storageSpaces);
+        if (!model.getStorageModel().getStorages().isEmpty()) providerMethods.add(implementStoragesMethod(storageSpaces));
         success(GENERATED_STORAGE_SPACES);
 
 
         return providerClass
                 .field(createModelField())
                 .method(createProvideMethod())
-                .method(createDecorateMethod())
-                .method(mappersMethod)
-                .method(servicesMethod)
-                .method(communicatorsMethod)
-                .method(configurationsMethod)
-                .method(storagesMethod)
+                .method(createDecorateMethod(model))
+                .methods(providerMethods)
                 .inners(mappers)
                 .inners(communicatorProxies)
                 .inners(customConfigurators)
