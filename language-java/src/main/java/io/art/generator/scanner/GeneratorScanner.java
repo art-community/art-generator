@@ -59,7 +59,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                         .map(member -> ExistedField.builder().name(member.name.toString()).declaration(member).build())
                         .collect(mapCollector(ExistedField::getName, identity())))
                 .build();
-        String existedClassName = let(packageUnit.getPackageName(), name -> name.toString() + DOT, EMPTY_STRING) + classDeclaration.name.toString();
+        String existedClassName = let(packageUnit.getPackage(), packageDeclaration -> packageDeclaration.getPackageName().toString() + DOT, EMPTY_STRING) + classDeclaration.name.toString();
         configurationBuilder.exitedClass(existedClassName, existedClass);
 
         Optional<JCMethodDecl> modelMethodDeclaration = classDeclaration.getMembers()
