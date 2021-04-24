@@ -15,7 +15,7 @@ If you are adding a new file it should have a header like this:
 
 ```java
 /*
- * ART Java
+ * ART
  *
  * Copyright 2019 ART
  *
