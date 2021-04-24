@@ -9,9 +9,11 @@ import com.sun.tools.javac.util.List;
 import io.art.generator.context.GeneratorContextConfiguration.*;
 import io.art.generator.model.*;
 import lombok.*;
+
+import java.util.*;
+
 import static com.sun.source.tree.Tree.Kind.*;
 import static com.sun.tools.javac.code.Symbol.*;
-import static com.sun.tools.javac.tree.JCTree.Tag.*;
 import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.collector.MapCollector.*;
 import static io.art.core.collector.SetCollector.*;
@@ -22,7 +24,6 @@ import static io.art.generator.constants.Names.*;
 import static java.util.Objects.*;
 import static java.util.function.Function.*;
 import static javax.lang.model.element.Modifier.*;
-import java.util.*;
 
 @RequiredArgsConstructor
 public class GeneratorScanner extends TreePathScanner<Object, Trees> {
@@ -58,9 +59,7 @@ public class GeneratorScanner extends TreePathScanner<Object, Trees> {
                         .map(member -> ExistedField.builder().name(member.name.toString()).declaration(member).build())
                         .collect(mapCollector(ExistedField::getName, identity())))
                 .build();
-        String existedClassName = !packageUnit.defs.isEmpty() && packageUnit.defs.head.hasTag(PACKAGEDEF)
-                ? ((JCPackageDecl) packageUnit.defs.head).getPackageName().toString() + DOT + classDeclaration.name
-                : classDeclaration.name.toString();
+        String existedClassName = let(packageUnit.getPackageName(), name -> name.toString() + DOT, EMPTY_STRING) + classDeclaration.name.toString();
         configurationBuilder.exitedClass(existedClassName, existedClass);
 
         Optional<JCMethodDecl> modelMethodDeclaration = classDeclaration.getMembers()
