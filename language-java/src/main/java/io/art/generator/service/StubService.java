@@ -47,7 +47,7 @@ public class StubService {
         existedClassNames().forEach(className -> {
                     String path = generatedClasses().get(className).getName();
                     flushFile(className);
-                    deleteFileRecursive(path);
+                    recursiveDelete(path);
                 });
         success(STUBS_REMOVED);
     }
