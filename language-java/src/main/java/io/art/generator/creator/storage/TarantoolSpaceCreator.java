@@ -42,7 +42,7 @@ public class TarantoolSpaceCreator {
                 .name(model.getId() + STORAGE_SPACE_SUFFIX)
                 .modifiers(PUBLIC | STATIC)
                 .extend(type(parameterizedType(TarantoolSpaceImplementation.class, model.getSpaceModelClass(), model.getPrimaryKeyClass())).generateFullType())
-                .implement(ident(GeneratorState.moduleClass().getName() + STORAGES_SUFFIX + DOT + model.getId() + STORAGE_SPACE_SUFFIX))
+                .implement(ident(STORAGES_SUFFIX + DOT + model.getId() + STORAGE_SPACE_SUFFIX))
                 .constructor(constructor(model));
         indexKeyMappers(model.getSearchers()).forEach(space::field);
         model.getSearchers().entrySet().stream()
