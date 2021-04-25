@@ -87,7 +87,7 @@ public interface Names {
     String STORAGE_MODEL_NAME = "storageModel";
     String GET_STORAGE_MODEL_NAME = "getStorageModel";
     String STORAGE_SPACE_SUFFIX = "Space";
-    String STORAGE_INTERFACES_SUFFIX = "StorageInterfaces";
+    String STORAGES_SUFFIX = "Storages";
     String STORAGE_GET_BY_PREFIX = "getBy";
     String STORAGE_SELECT_BY_PREFIX = "selectBy";
     String STORAGE_KEY_PARAMETER_NAME = "key";

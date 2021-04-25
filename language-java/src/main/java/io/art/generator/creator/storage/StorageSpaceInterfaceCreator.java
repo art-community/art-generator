@@ -32,7 +32,7 @@ public class StorageSpaceInterfaceCreator {
     public static NewClass createStorageInterfaces(StorageModuleModel storageModel){
         NewClass storageInterfaces = newClass().modifiers(PUBLIC)
                 .addImport(classImport(moduleClass().getFullName()))
-                .name(moduleClass().getName() + STORAGE_INTERFACES_SUFFIX);
+                .name(moduleClass().getName() + STORAGES_SUFFIX);
 
         Set<String> modelFieldNames = set();
         storageModel.getTarantoolSpaces().values().forEach(space -> {
