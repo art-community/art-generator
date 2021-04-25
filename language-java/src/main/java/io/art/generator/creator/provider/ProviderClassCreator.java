@@ -1,6 +1,5 @@
 package io.art.generator.creator.provider;
 
-import io.art.core.checker.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
 import io.art.model.implementation.module.*;
@@ -11,7 +10,7 @@ import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.tree.JCTree.*;
-import static io.art.core.checker.EmptinessChecker.letIfNotEmpty;
+import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.collection.ImmutableArray.*;
 import static io.art.core.collector.SetCollector.*;
 import static io.art.core.constants.StringConstants.*;
@@ -76,7 +75,12 @@ public class ProviderClassCreator {
         ImmutableArray<NewClass> customConfigurators = implementCustomConfigurators(model.getConfiguratorModel());
         success(GENERATED_CUSTOM_CONFIGURATION_PROXIES);
 
-        providerClass.addImport(classImport(letIfNotEmpty(moduleClass().getPackageName(), name -> name  + DOT + STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX, STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX)));
+        String classImport = letIfNotEmpty(
+                moduleClass().getPackageName(),
+                name -> name + DOT + STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX,
+                STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX
+        );
+        providerClass.addImport(classImport(classImport));
         Map<String, NewClass> storageSpaces = implementStorageSpaces(model.getStorageModel());
         if (!model.getStorageModel().getStorages().isEmpty()) providerMethods.add(implementStoragesMethod(storageSpaces));
         success(GENERATED_STORAGE_SPACES);

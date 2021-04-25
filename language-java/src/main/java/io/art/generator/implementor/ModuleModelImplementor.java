@@ -3,6 +3,7 @@ package io.art.generator.implementor;
 import io.art.generator.model.*;
 import lombok.experimental.*;
 
+import static io.art.core.checker.EmptinessChecker.isEmpty;
 import static io.art.core.constants.StringConstants.DOT;
 import static io.art.generator.constants.Names.STORAGE_NAME;
 import static io.art.generator.context.GeneratorContext.*;
@@ -18,7 +19,8 @@ public class ModuleModelImplementor {
         for (ExistedClass existedClass : moduleClasses().values()) {
             useModuleClass(existedClass);
             if (loadModel().getStorageModel().getStorages().size() > 0) {
-                generateProjectClass(createStorageInterfaces(loadModel().getStorageModel()), moduleClass().getPackageName() + DOT + STORAGE_NAME);
+                String packageName = isEmpty(moduleClass().getPackageName()) ? STORAGE_NAME : moduleClass().getPackageName() + DOT + STORAGE_NAME;
+                generateProjectClass(createStorageInterfaces(loadModel().getStorageModel()), packageName);
             }
             generateProviderClass(createProviderClass(loadModel()), moduleClass().getPackageName());
         }
