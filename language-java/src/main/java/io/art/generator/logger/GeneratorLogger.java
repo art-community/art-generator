@@ -3,16 +3,14 @@ package io.art.generator.logger;
 import io.art.core.colorizer.*;
 import io.art.generator.model.*;
 import lombok.*;
-
-import java.time.*;
-import java.util.function.*;
-
 import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.constants.DateTimeConstants.*;
 import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
+import java.time.*;
+import java.util.function.*;
 
 
 @AllArgsConstructor
