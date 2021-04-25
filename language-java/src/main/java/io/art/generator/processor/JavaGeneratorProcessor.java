@@ -13,12 +13,6 @@ import io.art.generator.logger.*;
 import io.art.generator.scanner.*;
 import io.art.generator.service.*;
 import lombok.*;
-
-import javax.annotation.processing.*;
-import javax.lang.model.*;
-import javax.lang.model.element.*;
-import java.util.*;
-
 import static io.art.core.extensions.CollectionExtensions.*;
 import static io.art.generator.constants.Annotations.*;
 import static io.art.generator.constants.JavaDialect.*;
@@ -27,6 +21,10 @@ import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.GenerationService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static javax.lang.model.SourceVersion.*;
+import javax.annotation.processing.*;
+import javax.lang.model.*;
+import javax.lang.model.element.*;
+import java.util.*;
 
 
 @SupportedAnnotationTypes(CONFIGURATOR_ANNOTATION_NAME)

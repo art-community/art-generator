@@ -1,7 +1,7 @@
 /*
- * ART Java
+ * ART
  *
- * Copyright 2019 ART
+ * Copyright 2019-2021 ART
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import org.gradle.api.JavaVersion.*
 
 rootProject.name = "art-generator"
 
@@ -26,7 +27,9 @@ pluginManagement {
     }
     resolutionStrategy {
         eachPlugin {
-            if (requested.id.id == "art-internal-jvm") useModule("io.art.gradle:art-gradle:${requested.version}")
+            if (requested.id.id.contains("art")) {
+                useModule("io.art.gradle:art-gradle:main")
+            }
         }
     }
     plugins {
@@ -37,4 +40,9 @@ pluginManagement {
 }
 
 include("language-java")
+when {
+    current().isJava11Compatible -> project(":language-java").name = "language-java-$VERSION_11"
+    else -> project(":language-java").name = "language-java-${VERSION_1_8}"
+}
+
 //include("language-kotlin")

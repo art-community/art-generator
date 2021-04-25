@@ -4,26 +4,26 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.*;
 import io.art.core.collection.*;
+import io.art.generator.constants.Names;
 import lombok.Builder;
 import lombok.*;
 import lombok.experimental.*;
-
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.function.*;
-
 import static com.sun.tools.javac.tree.JCTree.*;
 import static io.art.core.caster.Caster.*;
 import static io.art.core.collection.ImmutableMap.*;
 import static io.art.core.collector.SetCollector.*;
+import static io.art.core.extensions.StringExtensions.*;
 import static io.art.generator.constants.Imports.*;
-import static io.art.generator.constants.Names.CONSTRUCTOR_NAME;
+import static io.art.generator.constants.Names.*;
 import static io.art.generator.constants.TypeModels.*;
 import static io.art.generator.context.GeneratorContext.*;
 import static io.art.generator.service.JavacService.*;
 import static java.lang.reflect.Modifier.*;
 import static java.util.stream.Collectors.*;
+import java.io.*;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.function.*;
 
 @Builder
 @Getter
@@ -38,11 +38,11 @@ public class StubClass implements GeneratedClass {
     private final Set<ImportModel> imports;
     private final String packageName;
 
-    public static StubClass from(ExistedClass existed){
+    public static StubClass from(ExistedClass existed) {
         return from(existed.getDeclaration(), existed.getPackageUnit());
     }
 
-    private static StubClass from(JCClassDecl declaration, JCCompilationUnit packageUnit){
+    private static StubClass from(JCClassDecl declaration, JCCompilationUnit packageUnit) {
 
         StubClassBuilder builder = StubClass.builder()
                 .modifiers(stubModifiers(declaration.getModifiers()))
@@ -51,9 +51,9 @@ public class StubClass implements GeneratedClass {
                 .extending(declaration.getExtendsClause())
                 .implementations(declaration.getImplementsClause())
                 .imports(stubImports(packageUnit.getImports()))
-                .packageName(packageUnit.getPackageName().toString());
+                .packageName(emptyIfNull(packageUnit.getPackageName()));
 
-        if(isInterface((int)declaration.mods.flags)) {
+        if (isInterface((int) declaration.mods.flags)) {
             builder.definitions(declaration.defs.stream().collect(toCollection(ListBuffer::new)));
             return builder.build();
         }
@@ -77,21 +77,21 @@ public class StubClass implements GeneratedClass {
     private static final Function<JCVariableDecl, JCTree> generateVariableStub = (existed) ->
             maker().VarDef(stubModifiers(existed.mods), existed.name, existed.vartype, null);
 
-    private static final Function<JCMethodDecl, JCTree> generateMethodStub = (existed) ->{
-            if (existed.name.toString().equals("<init>") && existed.params.length() == 0) return null;
-            return maker().MethodDef(
-                    stubModifiers(existed.mods),
-                    existed.name,
-                    existed.restype,
-                    existed.typarams,
-                    existed.recvparam,
-                    existed.params,
-                    existed.thrown,
-                    maker().Block(0L, List.of(throwException(NOT_IMPLEMENTED_EXCEPTION_TYPE, literal(existed.name.toString())))),
-                    existed.defaultValue);
+    private static final Function<JCMethodDecl, JCTree> generateMethodStub = (existed) -> {
+        if (existed.name.toString().equals(CONSTRUCTOR_NAME) && existed.params.length() == 0) return null;
+        return maker().MethodDef(
+                stubModifiers(existed.mods),
+                existed.name,
+                existed.restype,
+                existed.typarams,
+                existed.recvparam,
+                existed.params,
+                existed.thrown,
+                maker().Block(0L, List.of(throwException(NOT_IMPLEMENTED_EXCEPTION_TYPE, literal(existed.name.toString())))),
+                existed.defaultValue);
     };
 
-    private static final Function <JCClassDecl, JCTree> generateInnerClassStub = (existed) -> {
+    private static final Function<JCClassDecl, JCTree> generateInnerClassStub = (existed) -> {
         String sourceFileName = existed.sym.sourcefile.getName().replace(".java", "");
         sourceFileName = sourceFileName.substring(sourceFileName.lastIndexOf(File.separatorChar) + 1);
         String packagePrefix = existed.sym.fullname.toString().substring(0, existed.sym.fullname.toString().indexOf(sourceFileName));
@@ -104,11 +104,11 @@ public class StubClass implements GeneratedClass {
             .put(JCClassDecl.class, generateInnerClassStub)
             .build());
 
-    private static JCModifiers stubModifiers(JCModifiers from){
+    private static JCModifiers stubModifiers(JCModifiers from) {
         return maker().Modifiers(from.flags & (~FINAL));
     }
 
-    private static JCTree defaultConstructor(){
+    private static JCTree defaultConstructor() {
         return maker().MethodDef(
                 maker().Modifiers(PUBLIC),
                 elements().getName(CONSTRUCTOR_NAME),
@@ -122,7 +122,7 @@ public class StubClass implements GeneratedClass {
         );
     }
 
-    private static Set<ImportModel> stubImports(List<JCImport> from){
+    private static Set<ImportModel> stubImports(List<JCImport> from) {
         return from.stream()
                 .map(jcImport -> new ImportModel(
                         jcImport.getQualifiedIdentifier().toString(),

@@ -8,10 +8,7 @@ import io.art.generator.model.*;
 import io.art.generator.writer.*;
 import lombok.*;
 import lombok.experimental.*;
-
-import javax.tools.*;
-import java.io.*;
-
+import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.constants.StringConstants.*;
 import static io.art.core.extensions.FileExtensions.*;
 import static io.art.core.factory.SetFactory.*;
@@ -22,32 +19,35 @@ import static io.art.generator.logger.GeneratorLogger.*;
 import static io.art.generator.state.GeneratorState.*;
 import static java.text.MessageFormat.*;
 import static java.util.Objects.*;
+import javax.tools.*;
+import java.io.*;
 
 @UtilityClass
 public class ClassGenerationService {
     @SneakyThrows
     public void generateProviderClass(NewClass generatedClass, String packageName) {
-        String className = packageName + DOT + generatedClass.name();
+        String className = letIfNotEmpty(packageName, name -> name + DOT + generatedClass.name(), generatedClass.name());
         generateClass(generatedClass, packageName, getClassFile(className).getName());
     }
 
-    public void generateStubClass(StubClass generatedClass, String packageName){
-        String className = packageName + DOT + generatedClass.name();
+    public void generateStubClass(StubClass generatedClass, String packageName) {
+        String className = letIfNotEmpty(packageName, name -> name + DOT + generatedClass.name(), generatedClass.name());
         generateClass(generatedClass, packageName, getStubFile(className).getName());
     }
 
     @SneakyThrows
-    public void generateProjectClass(NewClass generatedClass, String packageName){
-        String filename = compilationService().createProjectFile(packageName + DOT + generatedClass.name()).getName();
+    public void generateProjectClass(NewClass generatedClass, String packageName) {
+        String className = letIfNotEmpty(packageName, name -> name + DOT + generatedClass.name(), generatedClass.name());
+        String filename = compilationService().createProjectFile(className).getName();
         generateClass(generatedClass, packageName, filename);
     }
 
-    private void generateClass(GeneratedClass generatedClass, String packageName, String filePath){
+    private void generateClass(GeneratedClass generatedClass, String packageName, String filePath) {
         ListBuffer<JCTree> definitions = collectDefinitions(generatedClass);
         writeSource(packageName, definitions, filePath);
     }
 
-    private ListBuffer<JCTree> collectDefinitions(GeneratedClass generatedClass){
+    private ListBuffer<JCTree> collectDefinitions(GeneratedClass generatedClass) {
         ListBuffer<JCTree> definitions = new ListBuffer<>();
         definitions.addAll(createImports(immutableSetOf(generatedClass.imports())));
         definitions.add(generatedClass.generate());
@@ -55,7 +55,7 @@ public class ClassGenerationService {
     }
 
     @SneakyThrows
-    private FileObject getClassFile(String className){
+    private FileObject getClassFile(String className) {
         FileObject file = generatedClasses().get(className);
         if (nonNull(file)) {
             return file;
@@ -65,7 +65,7 @@ public class ClassGenerationService {
         return file;
     }
 
-    private FileObject getStubFile(String className){
+    private FileObject getStubFile(String className) {
         FileObject file = generatedClasses().get(className);
         if (nonNull(file)) {
             return file;
@@ -81,7 +81,7 @@ public class ClassGenerationService {
     }
 
     @SneakyThrows
-    public void flushFile(String name){
+    public void flushFile(String name) {
         FileObject fileObject = generatedClasses().get(name);
         String content = readFile(fileObject.getName());
         try (Writer writer = fileObject.openWriter()) {
@@ -103,11 +103,11 @@ public class ClassGenerationService {
         newImports
                 .stream()
                 .distinct()
-                .map(newImport -> maker().Import(
-                        maker().Select(
-                                maker().Ident(elements().getName(newImport.getPackagePart())),
-                                elements().getName(newImport.getImportPart())
-                        ),
+                .filter(newImport -> isNotEmpty(newImport.getImportPart()))
+                .map(newImport -> isEmpty(newImport.getImportPart())
+                        ? maker().Import(maker().Ident(elements().getName(newImport.getPackagePart())), newImport.isAsStatic())
+                        : maker().Import(maker().Select(maker().Ident(elements().getName(newImport.getPackagePart())),
+                        elements().getName(newImport.getImportPart())),
                         newImport.isAsStatic())
                 )
                 .forEach(definitions::add);
