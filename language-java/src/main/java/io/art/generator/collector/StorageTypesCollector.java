@@ -2,7 +2,7 @@ package io.art.generator.collector;
 
 import io.art.core.collection.*;
 import io.art.generator.type.*;
-import io.art.model.implementation.storage.*;
+import io.art.model.modeling.storage.*;
 import lombok.experimental.*;
 import java.lang.reflect.*;
 

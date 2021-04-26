@@ -2,7 +2,7 @@ package io.art.generator.creator.decorate;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import io.art.generator.model.*;
-import io.art.model.implementation.module.*;
+import io.art.model.modeling.module.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static io.art.generator.caller.MethodCaller.*;

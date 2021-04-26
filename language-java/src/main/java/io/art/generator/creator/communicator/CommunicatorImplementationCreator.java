@@ -1,7 +1,7 @@
 package io.art.generator.creator.communicator;
 
 import io.art.generator.model.*;
-import io.art.model.implementation.communicator.*;
+import io.art.model.modeling.communicator.*;
 import lombok.experimental.*;
 import static io.art.generator.caller.MethodCaller.*;
 import static io.art.generator.constants.Names.*;

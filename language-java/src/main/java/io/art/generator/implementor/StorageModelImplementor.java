@@ -3,7 +3,7 @@ package io.art.generator.implementor;
 import com.sun.tools.javac.tree.*;
 import io.art.core.caster.*;
 import io.art.generator.model.*;
-import io.art.model.implementation.storage.*;
+import io.art.model.modeling.storage.*;
 
 import java.util.*;
 

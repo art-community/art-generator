@@ -5,7 +5,7 @@ import io.art.core.collection.*;
 import io.art.core.constants.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
-import io.art.model.implementation.server.*;
+import io.art.model.modeling.server.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.PRIVATE;
 import static com.sun.tools.javac.code.Flags.STATIC;

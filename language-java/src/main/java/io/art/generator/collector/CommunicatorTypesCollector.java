@@ -4,7 +4,7 @@ import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import io.art.generator.inspector.*;
 import io.art.generator.type.*;
-import io.art.model.implementation.communicator.*;
+import io.art.model.modeling.communicator.*;
 import lombok.experimental.*;
 import static io.art.core.checker.EmptinessChecker.*;
 import static io.art.core.collection.ImmutableSet.*;

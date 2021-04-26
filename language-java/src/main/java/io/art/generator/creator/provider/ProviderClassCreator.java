@@ -2,7 +2,7 @@ package io.art.generator.creator.provider;
 
 import io.art.core.collection.*;
 import io.art.generator.model.*;
-import io.art.model.implementation.module.*;
+import io.art.model.modeling.module.*;
 import java.lang.reflect.*;
 import java.util.*;
 import javax.lang.model.element.Modifier;

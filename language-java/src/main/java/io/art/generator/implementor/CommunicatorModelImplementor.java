@@ -3,7 +3,7 @@ package io.art.generator.implementor;
 import com.sun.tools.javac.tree.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
-import io.art.model.implementation.communicator.*;
+import io.art.model.modeling.communicator.*;
 import lombok.experimental.*;
 
 import static com.sun.tools.javac.code.Flags.*;

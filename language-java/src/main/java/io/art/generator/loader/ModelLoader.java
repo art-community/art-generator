@@ -3,7 +3,7 @@ package io.art.generator.loader;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
 import io.art.model.configurator.*;
-import io.art.model.implementation.module.*;
+import io.art.model.modeling.module.*;
 import lombok.experimental.*;
 import static io.art.generator.constants.Annotations.*;
 import static io.art.generator.constants.ExceptionMessages.*;
