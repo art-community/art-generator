@@ -1,4 +1,4 @@
-import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.jvm.Jvm.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -10,7 +10,7 @@ val lombokVersion: String by project
 
 dependencies {
     if (JavaVersion.current().isJava8) {
-        api(files(Jvm.current().toolsJar))
+        api(files(current().toolsJar))
     }
 
     implementation(kotlin("stdlib-jdk8"))
@@ -38,21 +38,6 @@ dependencies {
 
     api("com.google.googlejavaformat", "google-java-format", googleFormatterVersion)
     api("com.squareup", "javapoet", "+")
-}
-
-tasks.withType<JavaCompile> {
-    if (!JavaVersion.current().isJava8) {
-        options.compilerArgs.addAll(arrayOf(
-                "--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
-                "--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
-                "--add-exports", "jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
-                "--add-exports", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
-                "--add-exports", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
-                "--add-exports", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
-                "--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
-                "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"
-        ))
-    }
 }
 
 val compileKotlin by tasks.getting(KotlinCompile::class) {

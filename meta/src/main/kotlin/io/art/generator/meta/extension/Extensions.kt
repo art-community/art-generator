@@ -19,9 +19,7 @@
 package io.art.generator.meta.extension
 
 import io.art.core.extensions.FileExtensions.parseExtension
-import io.art.generator.meta.constants.CLASS
-import io.art.generator.meta.constants.JAR
-import io.art.generator.meta.constants.JAVA
+import io.art.generator.meta.constants.*
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -39,4 +37,19 @@ val Path.isClass: Boolean
     get() = parseExtension(this.toString()) == CLASS
 
 val Path.isJar: Boolean
+    get() = parseExtension(this.toString()) == JAR
+
+val File.isJava: Boolean
+    get() = parseExtension(this.toString()) == JAVA
+
+val File.isKotlin: Boolean
+    get() = parseExtension(this.toString()) == KOTLIN || isKotlinScript
+
+val File.isKotlinScript: Boolean
+    get() = parseExtension(this.toString()) == KOTLIN_SCRIPT
+
+val File.isClass: Boolean
+    get() = parseExtension(this.toString()) == CLASS
+
+val File.isJar: Boolean
     get() = parseExtension(this.toString()) == JAR

@@ -1,5 +1,3 @@
-@file:Suppress("JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE")
-
 /*
  * ART
  *
@@ -18,67 +16,98 @@
  * limitations under the License.
  */
 
+@file:Suppress("JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE")
+
 package io.art.generator.meta
 
-import com.sun.tools.javac.api.JavacTool.create
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.meta.extension.file
+import io.art.generator.meta.extension.isJava
 import io.art.launcher.ModuleLauncher.launch
-import kotlinx.coroutines.runBlocking
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
+import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.ALLOW_KOTLIN_PACKAGE
+import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
+import org.jetbrains.kotlin.cli.common.KOTLIN_HOME_PROPERTY
+import org.jetbrains.kotlin.cli.common.config.ContentRoot
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_FILES
+import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.Companion.createForProduction
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
-import org.jetbrains.kotlin.com.intellij.testFramework.LightVirtualFile
+import org.jetbrains.kotlin.cli.jvm.config.JvmClasspathRoot
+import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.MODULE_NAME
 import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
+import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
+import org.jetbrains.kotlin.load.java.lazy.descriptors.LazyJavaClassDescriptor
+import org.jetbrains.kotlin.name.FqName.ROOT
+import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyClassDescriptor
 import org.jetbrains.kotlin.resolve.multiplatform.findActuals
-import java.io.StringWriter
-import java.nio.charset.Charset
-import java.util.*
-import javax.tools.DiagnosticCollector
-import javax.tools.JavaFileObject
-import javax.tools.JavaFileObject.Kind.SOURCE
-import javax.tools.StandardLocation.CLASS_PATH
-import javax.tools.StandardLocation.SOURCE_PATH
+import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter.Companion.ALL
+import org.jetbrains.kotlin.resolve.scopes.getDescriptorsFiltered
+import org.jetbrains.kotlin.utils.KotlinPaths
+import org.jetbrains.kotlin.utils.KotlinPathsFromHomeDir
+import org.jetbrains.kotlin.utils.PathUtil.KOTLIN_JAVA_STDLIB_JAR
+import org.jetbrains.kotlin.utils.PathUtil.getJdkClassesRootsFromCurrentJre
+import org.jetbrains.kotlin.utils.PathUtil.kotlinPathsForCompiler
+import java.lang.System.setProperty
 
 object MetaGenerator {
     @JvmStatic
-    fun main(args: Array<String>) = runBlocking {
+    fun main(args: Array<String>) {
         launch()
-        //        val configuration = parse("".path)
-        //        val sources = configuration.sourcesDirectory.toFile().walkTopDown().filter { file -> file.isFile && file.toPath().isJava }
-        //        val classpath = configuration.compilationClasspath
-
-
-        val stringWriter = StringWriter()
-        val javac = create()
-        val diagnosticCollector = DiagnosticCollector<JavaFileObject>()
-        val standardFileManager = javac.getStandardFileManager(diagnosticCollector, Locale.getDefault(), Charset.defaultCharset())
-        standardFileManager.setLocation(SOURCE_PATH, listOf("D:\\Development\\Projects\\art\\art-environment\\local\\projects\\sandbox\\src\\main\\java".file))
-        standardFileManager.setLocation(CLASS_PATH, listOf("D:\\Development\\Gradle\\caches\\modules-2\\files-2.1\\org.projectlombok\\lombok\\1.18.20\\18bcea7d5df4d49227b4a0743a536208ce4825bb\\lombok-1.18.20.jar".file))
-        val file = standardFileManager.getJavaFileForInput(SOURCE_PATH, "model\\Request", SOURCE)
-        val task = javac.getTask(
-                stringWriter,
-                standardFileManager,
-                diagnosticCollector,
-                emptyList(),
-                listOf("model.Request"),
-                listOf(file)
-        )
-        val message = task.generate()
-        println(message)
-
+        setProperty("idea.io.use.nio2", "true")
         val configuration = CompilerConfiguration()
-        configuration.put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
+        val collector = object : MessageCollector {
+            override fun clear() {
+            }
+
+            override fun hasErrors(): Boolean {
+                return false
+            }
+
+            override fun report(severity: CompilerMessageSeverity, message: String, location: CompilerMessageSourceLocation?) {
+                println(message)
+            }
+
+        }
+        configuration.put(INCLUDE_RUNTIME, true)
+        configuration.put(MESSAGE_COLLECTOR_KEY, collector)
+        configuration.put(ALLOW_KOTLIN_PACKAGE, false)
         configuration.put(MODULE_NAME, "default")
-        val kotlinCoreEnvironment = KotlinCoreEnvironment.createForProduction({ }, configuration, EnvironmentConfigFiles.JVM_CONFIG_FILES)
-        kotlinCoreEnvironment.addKotlinSourceRoots(listOf("D:\\Development\\Projects\\art\\art-environment\\local\\projects\\art-generator\\meta\\src\\main\\kotlin".file))
-        kotlinCoreEnvironment.projectEnvironment.addSourcesToClasspath(LightVirtualFile())
-        val analyze = KotlinToJVMBytecodeCompiler.analyze(kotlinCoreEnvironment)!!
+        configuration.put(COMPILE_JAVA, true)
+        configuration.put(USE_JAVAC, true)
+        configuration.put(RETAIN_OUTPUT_IN_MEMORY, true)
+        configuration.addJvmClasspathRoots(getJdkClassesRootsFromCurrentJre())
+
+
+        val disposable = {}
+        val kotlinCoreEnvironment = createForProduction(disposable, configuration, JVM_CONFIG_FILES)
+        val root = "D:\\Development\\Projects\\art\\art-environment\\local\\projects\\sandbox\\src\\main\\java".file
+        kotlinCoreEnvironment.registerJavac(
+                javaFiles = root.walkTopDown().filter { file -> file.isJava }.toList(),
+                sourcePath = listOf(root)
+        )
+        kotlinCoreEnvironment.addKotlinSourceRoots(listOf(root))
+
+        val analysisResult = KotlinToJVMBytecodeCompiler.analyzeAndGenerate(kotlinCoreEnvironment)!!
+//        val moduleDescriptor = analysisResult.moduleDescriptor
+//        val packages = moduleDescriptor.getSubPackagesOf(ROOT) { true }.map(moduleDescriptor::getPackage)
+//        packages.forEach { `package` ->
+//            val descriptorsFiltered = `package`.memberScope.getDescriptorsFiltered(ALL)
+//            descriptorsFiltered.forEach { descriptorFiltered ->
+//                println(descriptorFiltered)
+//                when {
+//                    descriptorFiltered is LazyJavaClassDescriptor -> {
+//                        val jClass = descriptorFiltered.jClass
+//                    }
+//                    descriptorFiltered is LazyClassDescriptor -> {
+//                        descriptorFiltered.findActuals()
+//                        println(descriptorFiltered)
+//                    }
+//                }
+//            }
+//        }
         block()
     }
 }

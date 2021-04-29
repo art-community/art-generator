@@ -19,5 +19,7 @@
 package io.art.generator.meta.constants
 
 const val JAVA = "java"
+const val KOTLIN = "kt"
+const val KOTLIN_SCRIPT = "kts"
 const val CLASS = "class"
 const val JAR = "jar"
