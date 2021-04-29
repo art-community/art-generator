@@ -77,8 +77,8 @@ public class ProviderClassCreator {
 
         String classImport = letIfNotEmpty(
                 moduleClass().getPackageName(),
-                name -> name + DOT + STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX,
-                STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX
+                name -> name + DOT + STORAGE_NAME + DOT + moduleClass().getName() + STORAGES_SUFFIX,
+                STORAGE_NAME + DOT + moduleClass().getName() + STORAGES_SUFFIX
         );
         providerClass.addImport(classImport(classImport));
         Map<String, NewClass> storageSpaces = implementStorageSpaces(model.getStorageModel());
