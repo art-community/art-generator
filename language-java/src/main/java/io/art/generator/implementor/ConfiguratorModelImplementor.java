@@ -7,7 +7,7 @@ import io.art.configurator.model.*;
 import io.art.core.collection.*;
 import io.art.generator.exception.*;
 import io.art.generator.model.*;
-import io.art.model.implementation.configurator.*;
+import io.art.model.modeling.configurator.*;
 import lombok.experimental.*;
 
 import java.lang.reflect.*;

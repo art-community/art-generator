@@ -2,7 +2,10 @@ package io.art.generator.creator.provider;
 
 import io.art.core.collection.*;
 import io.art.generator.model.*;
-import io.art.model.implementation.module.*;
+import io.art.model.modeling.module.*;
+import java.lang.reflect.*;
+import java.util.*;
+import javax.lang.model.element.Modifier;
 import lombok.*;
 import lombok.experimental.*;
 import static com.sun.tools.javac.code.Flags.*;
@@ -38,9 +41,6 @@ import static io.art.generator.service.JavacService.*;
 import static io.art.generator.state.GeneratorState.*;
 import static io.art.generator.type.TypeCollector.*;
 import static java.util.Arrays.*;
-import javax.lang.model.element.Modifier;
-import java.lang.reflect.*;
-import java.util.*;
 
 @UtilityClass
 public class ProviderClassCreator {
@@ -64,29 +64,25 @@ public class ProviderClassCreator {
         ImmutableArray<NewClass> mappers = implementTypeMappers(immutableSetOf(types));
         success(GENERATED_MAPPERS);
 
-        if (!model.getServerModel().getServices().isEmpty())
-            providerMethods.add(implementServicesMethod(model.getServerModel()));
+        if (!model.getServerModel().getServices().isEmpty()) providerMethods.add(implementServicesMethod(model.getServerModel()));
         success(GENERATED_SERVICE_SPECIFICATIONS);
 
-        if (!model.getCommunicatorModel().getCommunicators().isEmpty())
-            providerMethods.add(implementCommunicatorsMethod(model.getCommunicatorModel()));
+        if (!model.getCommunicatorModel().getCommunicators().isEmpty()) providerMethods.add(implementCommunicatorsMethod(model.getCommunicatorModel()));
         ImmutableArray<NewClass> communicatorProxies = implementCommunicatorProxies(model.getCommunicatorModel());
         success(GENERATED_COMMUNICATOR_PROXIES);
 
-        if (!model.getConfiguratorModel().getCustomConfigurations().isEmpty())
-            providerMethods.add(implementCustomConfigurationsMethod(model.getConfiguratorModel()));
+        if (!model.getConfiguratorModel().getCustomConfigurations().isEmpty()) providerMethods.add(implementCustomConfigurationsMethod(model.getConfiguratorModel()));
         ImmutableArray<NewClass> customConfigurators = implementCustomConfigurators(model.getConfiguratorModel());
         success(GENERATED_CUSTOM_CONFIGURATION_PROXIES);
 
         String classImport = letIfNotEmpty(
                 moduleClass().getPackageName(),
-                name -> name + DOT + STORAGE_NAME + DOT + STORAGES_SUFFIX,
-                STORAGE_NAME + DOT + STORAGES_SUFFIX
+                name -> name + DOT + STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX,
+                STORAGE_NAME + DOT + moduleClass().getName() + STORAGE_INTERFACES_SUFFIX
         );
         providerClass.addImport(classImport(classImport));
         Map<String, NewClass> storageSpaces = implementStorageSpaces(model.getStorageModel());
-        if (!model.getStorageModel().getStorages().isEmpty())
-            providerMethods.add(implementStoragesMethod(storageSpaces));
+        if (!model.getStorageModel().getStorages().isEmpty()) providerMethods.add(implementStoragesMethod(storageSpaces));
         success(GENERATED_STORAGE_SPACES);
 
 

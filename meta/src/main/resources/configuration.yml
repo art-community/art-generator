@@ -1,0 +1,5 @@
+sourcesDirectory: "D:\\Development\\Projects\\art\\art-environment\\local\\projects\\art-generator\\meta"
+buildDirectory: "D:\\Development\\Projects\\art\\art-environment\\local\\projects\\art-generator\\meta"
+modulePackagePath: "D:\\Development\\Projects\\art\\art-environment\\local\\projects\\art-generator\\meta"
+compilationClasspath: "test"
+watcherPeriod: "12s"

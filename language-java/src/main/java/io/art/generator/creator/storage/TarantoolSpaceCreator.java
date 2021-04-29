@@ -4,7 +4,7 @@ import com.sun.tools.javac.tree.*;
 import io.art.core.collection.*;
 import io.art.generator.model.*;
 import io.art.generator.state.*;
-import io.art.model.implementation.storage.*;
+import io.art.model.modeling.storage.*;
 import io.art.tarantool.model.record.*;
 import io.art.tarantool.model.transaction.dependency.*;
 import io.art.tarantool.space.*;
