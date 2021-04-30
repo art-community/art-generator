@@ -27,7 +27,6 @@ import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.extension.file
 import io.art.generator.meta.extension.isJava
 import io.art.generator.meta.loader.PathClassLoader
-import io.art.launcher.ModuleLauncher.launch
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.ALLOW_KOTLIN_PACKAGE
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
