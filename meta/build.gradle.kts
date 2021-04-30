@@ -1,23 +1,21 @@
-import org.gradle.internal.jvm.Jvm.*
+import org.gradle.internal.jvm.Jvm
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
 }
 
-val googleFormatterVersion: String by project
-val lombokVersion: String by project
+val kotlinVersion: String by project
 
 dependencies {
     if (JavaVersion.current().isJava8) {
-        api(files(current().toolsJar))
+        api(files(Jvm.current().toolsJar))
     }
 
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("compiler-embeddable"))
     implementation(kotlin("reflect"))
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4+")
     implementation("io.art.java:launcher:main")
     implementation("io.art.java:core:main")
     implementation("io.art.java:configurator:main")
@@ -37,14 +35,13 @@ dependencies {
     implementation("io.art.java:rocks-db:main")
     implementation("io.art.java:storage:main")
     implementation("io.art.java:tarantool:main")
-    implementation("org.projectlombok", "lombok", lombokVersion)
 
-    api("com.google.googlejavaformat", "google-java-format", googleFormatterVersion)
     api("com.squareup", "javapoet", "+")
+    api("com.squareup", "kotlinpoet", "+")
 }
 
 val compileKotlin by tasks.getting(KotlinCompile::class) {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.current().toString()
     }
 }

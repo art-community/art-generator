@@ -16,15 +16,17 @@
  * limitations under the License.
  */
 
-@file:Suppress("JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE")
+@file:Suppress(JAVA_MODULE_SUPPRESSION)
 
 package io.art.generator.meta
 
 import io.art.core.constants.StringConstants.SEMICOLON
 import io.art.core.constants.SystemProperties.JAVA_CLASS_PATH
 import io.art.core.extensions.ThreadExtensions.block
+import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.extension.file
 import io.art.generator.meta.extension.isJava
+import io.art.generator.meta.loader.PathClassLoader
 import io.art.launcher.ModuleLauncher.launch
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.ALLOW_KOTLIN_PACKAGE
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
@@ -48,41 +50,14 @@ import org.jetbrains.kotlin.config.JvmTarget.JVM_1_8
 import org.jetbrains.kotlin.javac.JavacWrapper
 import java.io.File
 import java.lang.System.getProperty
-import java.net.URL
-import java.net.URLClassLoader
-import java.nio.file.Path
-import kotlin.time.ExperimentalTime
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler as kotlinCompiler
 
-
-class PathClassLoader(private val path: Path) : ClassLoader() {
-    private val loader: URLClassLoader by lazy { createLoader() }
-    private fun createLoader(): URLClassLoader = try {
-        val urls: Array<URL> = arrayOf(path.toFile().toURI().toURL())
-        URLClassLoader(urls, Thread.currentThread().contextClassLoader)
-    } catch (throwable: Throwable) {
-        throw RuntimeException(throwable)
-    }
-
-    override fun loadClass(name: String?): Class<*> = try {
-        loader.loadClass(name)
-    } catch (throwable: Throwable) {
-        throw RuntimeException(throwable)
-    }
-
-    fun close() = try {
-        loader.close()
-    } catch (throwable: Throwable) {
-        throw RuntimeException(throwable)
-    }
-}
-
 object MetaGenerator {
-    @ExperimentalTime
     @JvmStatic
     fun main(args: Array<String>) {
         launch()
         setIdeaIoUseFallback()
+
         val configuration = CompilerConfiguration()
         val collector = PrintingMessageCollector(System.err, PLAIN_RELATIVE_PATHS, false)
         val base = "D:/Development/Projects/art/art-environment/local/projects/sandbox".file
