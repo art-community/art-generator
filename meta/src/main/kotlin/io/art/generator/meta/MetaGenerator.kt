@@ -55,7 +55,6 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler as kotl
 object MetaGenerator {
     @JvmStatic
     fun main(args: Array<String>) {
-        launch()
         setIdeaIoUseFallback()
 
         val configuration = CompilerConfiguration()
