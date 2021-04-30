@@ -50,9 +50,32 @@ import java.io.File
 import java.lang.System.getProperty
 import java.net.URL
 import java.net.URLClassLoader
+import java.nio.file.Path
 import kotlin.time.ExperimentalTime
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler as kotlinCompiler
 
+
+class PathClassLoader(private val path: Path) : ClassLoader() {
+    private val loader: URLClassLoader by lazy { createLoader() }
+    private fun createLoader(): URLClassLoader = try {
+        val urls: Array<URL> = arrayOf(path.toFile().toURI().toURL())
+        URLClassLoader(urls, Thread.currentThread().contextClassLoader)
+    } catch (throwable: Throwable) {
+        throw RuntimeException(throwable)
+    }
+
+    override fun loadClass(name: String?): Class<*> = try {
+        loader.loadClass(name)
+    } catch (throwable: Throwable) {
+        throw RuntimeException(throwable)
+    }
+
+    fun close() = try {
+        loader.close()
+    } catch (throwable: Throwable) {
+        throw RuntimeException(throwable)
+    }
+}
 
 object MetaGenerator {
     @ExperimentalTime
@@ -65,6 +88,9 @@ object MetaGenerator {
         val base = "D:/Development/Projects/art/art-environment/local/projects/sandbox".file
         val javaSources = base.walkTopDown().filter { file -> file.isJava }.toList()
         val output = base.resolve("output")
+        val sourceRoot = base.resolve("src/main/java")
+        val bootClasspath = getProperty(JAVA_CLASS_PATH).split(SEMICOLON).map(::File)
+
         configuration.put(OUTPUT_DIRECTORY, output)
         configuration.put(MESSAGE_COLLECTOR_KEY, collector)
         configuration.put(MODULE_NAME, "default")
@@ -90,10 +116,8 @@ object MetaGenerator {
         configuration.put(REPORT_OUTPUT_FILES, false)
         configuration.put(JVM_TARGET, JVM_1_8)
 
-        val sourceRoot = base.resolve("src/main/java")
         configuration.addJavaSourceRoot(sourceRoot)
         configuration.addKotlinSourceRoot(sourceRoot.absolutePath)
-        val bootClasspath = getProperty(JAVA_CLASS_PATH).split(SEMICOLON).map(::File)
         configuration.addJvmClasspathRoots(bootClasspath)
 
         val disposable = {}
@@ -110,29 +134,7 @@ object MetaGenerator {
         println("Kotlin compilation result: ${kotlinCompilationResult!!.files}")
         println("Java compilation result: $javaCompilationResult")
 
-
-        val javaLoader = object : ClassLoader() {
-            private val loader: URLClassLoader by lazy { createLoader() }
-            private fun createLoader(): URLClassLoader = try {
-                val urls: Array<URL> = arrayOf(output.toURI().toURL())
-                URLClassLoader(urls, Thread.currentThread().contextClassLoader)
-            } catch (throwable: Throwable) {
-                throw RuntimeException(throwable)
-            }
-
-            override fun loadClass(name: String?): Class<*> = try {
-                loader.loadClass(name)
-            } catch (throwable: Throwable) {
-                throw RuntimeException(throwable)
-            }
-
-            fun close() = try {
-                loader.close()
-            } catch (throwable: Throwable) {
-                throw RuntimeException(throwable)
-            }
-        }
-
+        val javaLoader = PathClassLoader(output.toPath())
         val kotlinLoader = GeneratedClassLoader(kotlinCompilationResult.factory, Thread.currentThread().contextClassLoader)
         println("Kotlin class object:${kotlinLoader.loadClass("model.customer.KotelRequest").newInstance()}")
         println("Java class object:${javaLoader.loadClass("model.customer.Request").newInstance()}")
