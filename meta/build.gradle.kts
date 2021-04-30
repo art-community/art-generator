@@ -15,6 +15,8 @@ dependencies {
 
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("compiler-embeddable"))
+    implementation(kotlin("reflect"))
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4+")
     implementation("io.art.java:launcher:main")
     implementation("io.art.java:core:main")

@@ -36,6 +36,7 @@ import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_F
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.Companion.createForProduction
 import org.jetbrains.kotlin.cli.jvm.config.addJavaSourceRoot
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
+import org.jetbrains.kotlin.codegen.GeneratedClassLoader
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.DISABLE_INLINE
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.MODULE_NAME
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.REPORT_OUTPUT_FILES
@@ -47,8 +48,11 @@ import org.jetbrains.kotlin.config.JvmTarget.JVM_1_8
 import org.jetbrains.kotlin.javac.JavacWrapper
 import java.io.File
 import java.lang.System.getProperty
+import java.net.URL
+import java.net.URLClassLoader
 import kotlin.time.ExperimentalTime
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler as kotlinCompiler
+
 
 object MetaGenerator {
     @ExperimentalTime
@@ -107,7 +111,31 @@ object MetaGenerator {
         println("Java compilation result: $javaCompilationResult")
 
 
-        println(kotlinCompilationResult.factory.asList())
+        val javaLoader = object : ClassLoader() {
+            private val loader: URLClassLoader by lazy { createLoader() }
+            private fun createLoader(): URLClassLoader = try {
+                val urls: Array<URL> = arrayOf(output.toURI().toURL())
+                URLClassLoader(urls, Thread.currentThread().contextClassLoader)
+            } catch (throwable: Throwable) {
+                throw RuntimeException(throwable)
+            }
+
+            override fun loadClass(name: String?): Class<*> = try {
+                loader.loadClass(name)
+            } catch (throwable: Throwable) {
+                throw RuntimeException(throwable)
+            }
+
+            fun close() = try {
+                loader.close()
+            } catch (throwable: Throwable) {
+                throw RuntimeException(throwable)
+            }
+        }
+
+        val kotlinLoader = GeneratedClassLoader(kotlinCompilationResult.factory, Thread.currentThread().contextClassLoader)
+        println("Kotlin class object:${kotlinLoader.loadClass("model.customer.KotelRequest").newInstance()}")
+        println("Java class object:${javaLoader.loadClass("model.customer.Request").newInstance()}")
 
         block()
     }
