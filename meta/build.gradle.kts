@@ -35,6 +35,7 @@ dependencies {
     implementation("io.art.java:rocks-db:main")
     implementation("io.art.java:storage:main")
     implementation("io.art.java:tarantool:main")
+    implementation("org.projectlombok", "lombok", lombokVersion)
 
     api("com.google.googlejavaformat", "google-java-format", googleFormatterVersion)
     api("com.squareup", "javapoet", "+")

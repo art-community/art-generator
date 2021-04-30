@@ -20,94 +20,95 @@
 
 package io.art.generator.meta
 
+import io.art.core.constants.StringConstants.SEMICOLON
+import io.art.core.constants.SystemProperties.JAVA_CLASS_PATH
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.meta.extension.file
 import io.art.generator.meta.extension.isJava
 import io.art.launcher.ModuleLauncher.launch
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.ALLOW_KOTLIN_PACKAGE
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
-import org.jetbrains.kotlin.cli.common.KOTLIN_HOME_PROPERTY
-import org.jetbrains.kotlin.cli.common.config.ContentRoot
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
+import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
+import org.jetbrains.kotlin.cli.common.messages.MessageRenderer.PLAIN_RELATIVE_PATHS
+import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_FILES
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.Companion.createForProduction
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
-import org.jetbrains.kotlin.cli.jvm.config.JvmClasspathRoot
+import org.jetbrains.kotlin.cli.jvm.config.addJavaSourceRoot
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
+import org.jetbrains.kotlin.config.CommonConfigurationKeys.DISABLE_INLINE
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.MODULE_NAME
+import org.jetbrains.kotlin.config.CommonConfigurationKeys.REPORT_OUTPUT_FILES
+import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR
+import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR_EXTENDED_CHECKERS
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
-import org.jetbrains.kotlin.load.java.lazy.descriptors.LazyJavaClassDescriptor
-import org.jetbrains.kotlin.name.FqName.ROOT
-import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyClassDescriptor
-import org.jetbrains.kotlin.resolve.multiplatform.findActuals
-import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter.Companion.ALL
-import org.jetbrains.kotlin.resolve.scopes.getDescriptorsFiltered
-import org.jetbrains.kotlin.utils.KotlinPaths
-import org.jetbrains.kotlin.utils.KotlinPathsFromHomeDir
-import org.jetbrains.kotlin.utils.PathUtil.KOTLIN_JAVA_STDLIB_JAR
-import org.jetbrains.kotlin.utils.PathUtil.getJdkClassesRootsFromCurrentJre
-import org.jetbrains.kotlin.utils.PathUtil.kotlinPathsForCompiler
-import java.lang.System.setProperty
+import org.jetbrains.kotlin.config.JvmTarget.JVM_1_8
+import org.jetbrains.kotlin.javac.JavacWrapper
+import java.io.File
+import java.lang.System.getProperty
+import kotlin.time.ExperimentalTime
+import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler as kotlinCompiler
 
 object MetaGenerator {
+    @ExperimentalTime
     @JvmStatic
     fun main(args: Array<String>) {
         launch()
-        setProperty("idea.io.use.nio2", "true")
+        setIdeaIoUseFallback()
         val configuration = CompilerConfiguration()
-        val collector = object : MessageCollector {
-            override fun clear() {
-            }
-
-            override fun hasErrors(): Boolean {
-                return false
-            }
-
-            override fun report(severity: CompilerMessageSeverity, message: String, location: CompilerMessageSourceLocation?) {
-                println(message)
-            }
-
-        }
-        configuration.put(INCLUDE_RUNTIME, true)
+        val collector = PrintingMessageCollector(System.err, PLAIN_RELATIVE_PATHS, false)
+        val base = "D:/Development/Projects/art/art-environment/local/projects/sandbox".file
+        val javaSources = base.walkTopDown().filter { file -> file.isJava }.toList()
+        val output = base.resolve("output")
+        configuration.put(OUTPUT_DIRECTORY, output)
         configuration.put(MESSAGE_COLLECTOR_KEY, collector)
-        configuration.put(ALLOW_KOTLIN_PACKAGE, false)
         configuration.put(MODULE_NAME, "default")
+
         configuration.put(COMPILE_JAVA, true)
         configuration.put(USE_JAVAC, true)
-        configuration.put(RETAIN_OUTPUT_IN_MEMORY, true)
-        configuration.addJvmClasspathRoots(getJdkClassesRootsFromCurrentJre())
 
+        configuration.put(RETAIN_OUTPUT_IN_MEMORY, true)
+        configuration.put(DISABLE_INLINE, true)
+        configuration.put(DISABLE_OPTIMIZATION, true)
+        configuration.put(NO_RESET_JAR_TIMESTAMPS, true)
+        configuration.put(NO_OPTIMIZED_CALLABLE_REFERENCES, true)
+        configuration.put(PARAMETERS_METADATA, true)
+        configuration.put(EMIT_JVM_TYPE_ANNOTATIONS, true)
+
+        configuration.put(USE_FIR, true)
+        configuration.put(IR, true)
+        configuration.put(USE_FIR_EXTENDED_CHECKERS, false)
+
+        configuration.put(INCLUDE_RUNTIME, true)
+        configuration.put(ALLOW_KOTLIN_PACKAGE, true)
+
+        configuration.put(REPORT_OUTPUT_FILES, false)
+        configuration.put(JVM_TARGET, JVM_1_8)
+
+        val sourceRoot = base.resolve("src/main/java")
+        configuration.addJavaSourceRoot(sourceRoot)
+        configuration.addKotlinSourceRoot(sourceRoot.absolutePath)
+        val bootClasspath = getProperty(JAVA_CLASS_PATH).split(SEMICOLON).map(::File)
+        configuration.addJvmClasspathRoots(bootClasspath)
 
         val disposable = {}
         val kotlinCoreEnvironment = createForProduction(disposable, configuration, JVM_CONFIG_FILES)
-        val root = "D:\\Development\\Projects\\art\\art-environment\\local\\projects\\sandbox\\src\\main\\java".file
-        kotlinCoreEnvironment.registerJavac(
-                javaFiles = root.walkTopDown().filter { file -> file.isJava }.toList(),
-                sourcePath = listOf(root)
-        )
-        kotlinCoreEnvironment.addKotlinSourceRoots(listOf(root))
+        kotlinCoreEnvironment.registerJavac(javaFiles = javaSources, bootClasspath = bootClasspath, sourcePath = listOf(sourceRoot))
 
-        val analysisResult = KotlinToJVMBytecodeCompiler.analyzeAndGenerate(kotlinCoreEnvironment)!!
-//        val moduleDescriptor = analysisResult.moduleDescriptor
-//        val packages = moduleDescriptor.getSubPackagesOf(ROOT) { true }.map(moduleDescriptor::getPackage)
-//        packages.forEach { `package` ->
-//            val descriptorsFiltered = `package`.memberScope.getDescriptorsFiltered(ALL)
-//            descriptorsFiltered.forEach { descriptorFiltered ->
-//                println(descriptorFiltered)
-//                when {
-//                    descriptorFiltered is LazyJavaClassDescriptor -> {
-//                        val jClass = descriptorFiltered.jClass
-//                    }
-//                    descriptorFiltered is LazyClassDescriptor -> {
-//                        descriptorFiltered.findActuals()
-//                        println(descriptorFiltered)
-//                    }
-//                }
-//            }
-//        }
+        val javaCompiler = JavacWrapper.getInstance(kotlinCoreEnvironment.project)
+
+        val analysisResult = kotlinCompiler.analyze(kotlinCoreEnvironment)!!
+        println("Analysis error: ${analysisResult.isError()}")
+
+        val kotlinCompilationResult = kotlinCompiler.analyzeAndGenerate(kotlinCoreEnvironment)
+        val javaCompilationResult = javaCompiler.compile(output)
+        println("Kotlin compilation result: ${kotlinCompilationResult!!.files}")
+        println("Java compilation result: $javaCompilationResult")
+
+
+        println(kotlinCompilationResult.factory.asList())
+
         block()
     }
 }
