@@ -24,6 +24,7 @@ import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.meta.configuration.loadConfiguration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.extension.path
+import io.art.generator.meta.model.generateSource
 import io.art.generator.meta.service.JavaAnalyzingService
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
 import io.art.generator.meta.service.KotlinAnalyzingService.analyzeKotlinSources
@@ -52,7 +53,7 @@ object MetaGenerator {
         }
 
         analyzeKotlinSources()
-        analyzeJavaSources()
+        analyzeJavaSources().map { it.generateSource() }.forEach { println(it) }
         block()
     }
 }

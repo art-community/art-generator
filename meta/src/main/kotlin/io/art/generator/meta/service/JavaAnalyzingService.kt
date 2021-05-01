@@ -45,7 +45,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
 
 object JavaAnalyzingService {
-    fun analyzeJavaSources() {
+    fun analyzeJavaSources(): List<MetaJavaClass> {
         val configuration = CompilerConfiguration()
         configuration.put(MESSAGE_COLLECTOR_KEY, generatorCollector)
         configuration.put(MODULE_NAME, COMPILER_MODULE_NAME)
@@ -74,8 +74,8 @@ object JavaAnalyzingService {
             )
         }
 
-        val analysisResult = KotlinToJVMBytecodeCompiler.analyze(kotlinCoreEnvironment) ?: return
-        if (analysisResult.isError()) return
+        val analysisResult = KotlinToJVMBytecodeCompiler.analyze(kotlinCoreEnvironment) ?: return emptyList()
+        if (analysisResult.isError()) return emptyList()
 
         val javaClasses = sourcesRoot
                 .flatMap { path -> path.listFiles()?.map { file -> file.name } ?: emptyList() }
@@ -88,7 +88,7 @@ object JavaAnalyzingService {
 
         val javac = JavacWrapper.getInstance(kotlinCoreEnvironment.project)
 
-        val java = javaClasses.map { input ->
+        return javaClasses.map { input ->
             val javaDescriptor = javac.findClass(input.jClass.classId!!) as TreeBasedClass
             MetaJavaClass(
                     descriptor = javaDescriptor,
@@ -111,7 +111,5 @@ object JavaAnalyzingService {
                     }
             )
         }
-        println("JAVA: ")
-        java.forEach { println(it) }
     }
 }

@@ -18,10 +18,11 @@
 
 package io.art.generator.meta.model
 
-import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
+import com.squareup.javapoet.*
+import com.squareup.javapoet.TypeSpec.classBuilder
 import org.jetbrains.kotlin.load.java.structure.JavaClass
 
-data class MetaType(val fullName: String)
+data class MetaType(val fullName: String, val packageName: String = fullName.substringBeforeLast("."), val className: String = fullName.substringAfterLast("."))
 
 data class MetaJavaClass(
         val descriptor: JavaClass,
@@ -45,3 +46,22 @@ data class MetaJavaMethod(
         val returnType: MetaType,
         val parameters: Map<String, MetaJavaParameter>
 )
+
+fun MetaJavaClass.generateSource() = JavaFile.builder(type.packageName, classBuilder(type.fullName)
+        .addFields(
+                fields.map { field ->
+                    FieldSpec
+                            .builder(ClassName.get(field.value.type.packageName, field.value.type.className), field.key)
+                            .build()
+                }
+        )
+        .addMethod(
+                MethodSpec.methodBuilder("toMap")
+                        .returns(TypeName.VOID)
+                        .addCode(CodeBlock.builder()
+                                .build())
+                        .build()
+        )
+        .build())
+        .build()
+        .toString()
