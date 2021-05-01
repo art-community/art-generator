@@ -23,7 +23,6 @@ import io.art.generator.meta.constants.COMPILER_MODULE_NAME
 import io.art.generator.meta.constants.EMPTY_DISPOSABLE
 import io.art.generator.meta.extension.isJava
 import io.art.generator.meta.logger.generatorCollector
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.ALLOW_KOTLIN_PACKAGE
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoots
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_FILES
@@ -39,13 +38,19 @@ import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR_EXTENDED_CHEC
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
 import org.jetbrains.kotlin.config.JvmTarget.JVM_1_8
+import org.jetbrains.kotlin.descriptors.ClassDescriptor
+import org.jetbrains.kotlin.descriptors.FieldDescriptor
+import org.jetbrains.kotlin.descriptors.FunctionDescriptor
+import org.jetbrains.kotlin.descriptors.VariableDescriptorWithAccessors
+import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
+import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 
 object KotlinAnalyzingService {
     fun analyzeKotlinSources() {
         val configuration = CompilerConfiguration()
         configuration.put(MESSAGE_COLLECTOR_KEY, generatorCollector)
-        configuration.put(INCLUDE_RUNTIME, true)
-        configuration.put(ALLOW_KOTLIN_PACKAGE, true)
         configuration.put(MODULE_NAME, COMPILER_MODULE_NAME)
         configuration.put(REPORT_OUTPUT_FILES, false)
         configuration.put(JVM_TARGET, JVM_1_8)
@@ -77,8 +82,27 @@ object KotlinAnalyzingService {
             )
         }
 
-        val analysisResult = KotlinToJVMBytecodeCompiler.analyze(kotlinCoreEnvironment)
-        println("Kotlin: ${analysisResult?.isError()}")
+        val analysisResult = KotlinToJVMBytecodeCompiler.analyze(kotlinCoreEnvironment) ?: return
+        if (analysisResult.isError()) return
 
+        val kotlinClasses = sourcesRoot
+                .flatMap { path -> path.listFiles()?.map { file -> file.name } ?: emptyList() }
+                .flatMap { packageName ->
+                    analysisResult.moduleDescriptor.getSubPackagesOf(FqName(packageName)) { true }.flatMap { name ->
+                        val packageView = analysisResult.moduleDescriptor.getPackage(name).memberScope
+                        getAllDescriptors(packageView).filterIsInstance<ClassDescriptor>().filter { descriptor -> descriptor !is JavaClassDescriptor }
+                    }
+                }
+
+        println("Kotlin classes")
+
+//        kotlinClasses.forEach { classDescriptor ->
+//            println(classDescriptor.fqNameSafe)
+//            println("Fields:" + getAllDescriptors(classDescriptor.defaultType.memberScope).filterIsInstance<VariableDescriptorWithAccessors>())
+//            println("Methods:" + getAllDescriptors(classDescriptor.defaultType.memberScope).filterIsInstance<FunctionDescriptor>())
+//            println("Constructors:" + classDescriptor.constructors)
+//        }
+
+        println()
     }
 }

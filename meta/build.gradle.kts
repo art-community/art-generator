@@ -42,10 +42,12 @@ dependencies {
     embedded("io.art.java:rocks-db:main")
     embedded("io.art.java:storage:main")
     embedded("io.art.java:tarantool:main")
+    embedded("io.art.java:meta:main")
 
     embedded("com.squareup", "javapoet", "+")
     embedded("com.squareup", "kotlinpoet", "+")
     embedded("net.sourceforge.argparse4j", "argparse4j", "+")
+    embedded("org.projectlombok", "lombok", "+")
 }
 
 val compileKotlin by tasks.getting(KotlinCompile::class) {
