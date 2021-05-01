@@ -16,30 +16,36 @@
  * limitations under the License.
  */
 
-package io.art.generator.meta.model
+package io.art.generator.meta.configuration
 
 import io.art.configuration.yaml.source.YamlConfigurationSource
 import io.art.configurator.constants.ConfiguratorModuleConstants.ConfigurationSourceType.CUSTOM_FILE
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.extensions.FileExtensions.fileInputStream
-import io.art.generator.meta.exception.cached
 import io.art.generator.meta.extension.path
+import io.art.logging.LoggingModule.logger
 import java.nio.file.Path
 import java.time.Duration
 
-data class Configuration(val sourcesDirectory: Path,
-                         val buildDirectory: Path,
-                         val modulePackagePath: Path,
-                         val compilationClasspath: String,
+
+data class Configuration(val sourcesRoot: Set<Path>,
+                         val stubRoot: Set<Path>,
+                         val sources: Set<Path>,
+                         val classpath: Set<Path>,
                          val watcherPeriod: Duration
 )
 
-fun parse(file: Path) = with(YamlConfigurationSource(EMPTY_STRING, CUSTOM_FILE) { fileInputStream(file) }) {
-    cached("Configuration invalid") {
-        Configuration(sourcesDirectory = requireNotNull("sourcesDirectory".let(::getString)?.path) { "sourcesDirectory" },
-                buildDirectory = requireNotNull("sourcesDirectory".let(::getString)?.path) { "buildDirectory" },
-                modulePackagePath = requireNotNull("sourcesDirectory".let(::getString)?.path) { "modulePackagePath" },
-                compilationClasspath = getString("modulePackagePath"),
-                watcherPeriod = getDuration("watcherPeriod"))
+lateinit var generatorConfiguration: Configuration
+
+fun loadConfiguration(file: Path) {
+    logger(Configuration::class.java).info("Loading configuration from: $file")
+    with(YamlConfigurationSource(EMPTY_STRING, CUSTOM_FILE) { fileInputStream(file) }) {
+        generatorConfiguration = Configuration(
+                sourcesRoot = getStringArray("paths.sources").map { file -> file.path }.toSet(),
+                stubRoot = getStringArray("paths.stubs").map { file -> file.path }.toSet(),
+                sources = getStringArray("sources").map { file -> file.path }.toSet(),
+                classpath = getStringArray("classpath").map { file -> file.path }.toSet(),
+                watcherPeriod = getDuration("watcher.period")
+        )
     }
 }

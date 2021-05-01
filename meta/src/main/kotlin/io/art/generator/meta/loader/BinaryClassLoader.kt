@@ -19,29 +19,11 @@
 package io.art.generator.meta.loader
 
 import io.art.generator.meta.exception.MetaGeneratorException
-import java.lang.Thread.currentThread
-import java.net.URL
-import java.net.URLClassLoader
-import java.nio.file.Path
 
-class PathClassLoader(private val path: Path) : ClassLoader() {
-    private val loader: URLClassLoader by lazy { createLoader() }
-
-    private fun createLoader(): URLClassLoader = try {
-        val urls: Array<URL> = arrayOf(path.toFile().toURI().toURL())
-        URLClassLoader(urls, currentThread().contextClassLoader)
-    } catch (throwable: Throwable) {
-        throw MetaGeneratorException(throwable)
-    }
-
-    override fun loadClass(name: String?): Class<*> = try {
-        loader.loadClass(name)
-    } catch (throwable: Throwable) {
-        throw MetaGeneratorException(throwable)
-    }
-
-    fun close() = try {
-        loader.close()
+class BinaryClassLoader(private val classes: Map<String, ByteArray>) : ClassLoader() {
+    override fun loadClass(name: String): Class<*> = try {
+        val bytes = classes[name] ?: throw ClassNotFoundException(name)
+        defineClass(name, bytes, 0, bytes.size).apply(::resolveClass)
     } catch (throwable: Throwable) {
         throw MetaGeneratorException(throwable)
     }
