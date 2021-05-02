@@ -20,21 +20,50 @@
 
 package io.art.generator.meta.model
 
-import com.sun.tools.javac.code.Symbol.*
-import io.art.core.constants.StringConstants.DOT
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
-import javax.lang.model.element.TypeElement
+import java.lang.reflect.Type
+import javax.lang.model.type.TypeMirror
 
-data class JavaMetaType(
-        val element: TypeElement,
-        val fullName: String,
-        val className: String,
-        val packageName: String
+enum class MetaJavaTypeKind {
+    CLASS_KIND,
+    ENUM_KIND,
+    WILDCARD_KIND,
+    INTERSECTION_KIND,
+    INTERFACE_KIND,
+    JDK_KIND,
+    PRIMITIVE_KIND,
+    VARIABLE_KIND,
+    ARRAY_KIND,
+    UNKNOWN_KIND
+}
+
+data class MetaJavaType(
+        val originalType: TypeMirror? = null,
+        val reflectionType: Type? = null,
+
+        val typeName: String,
+        val kind: MetaJavaTypeKind,
+
+        val classFullName: String? = null,
+        val className: String? = null,
+        val classPackageName: String? = null,
+        val classTypeArguments: Map<String, MetaJavaType> = emptyMap(),
+        val classSuperClass: MetaJavaType? = null,
+        val classSuperInterfaces: Set<MetaJavaType> = emptySet(),
+
+        val arrayComponentType: MetaJavaType? = null,
+
+        val wildcardExtendsBound: MetaJavaType? = null,
+        val wildcardSuperBound: MetaJavaType? = null,
+
+        val intersectionBounds: Set<MetaJavaType> = emptySet(),
+
+        val variableLowerBounds: MetaJavaType? = null,
+        val variableUpperBounds: MetaJavaType? = null,
 )
 
 data class MetaJavaClass(
-        val symbol: ClassSymbol,
-        val type: JavaMetaType,
+        val type: MetaJavaType,
         val fields: Map<String, MetaJavaField>,
         val constructors: Set<MetaJavaMethod>,
         val innerClasses: Map<String, MetaJavaClass>,
@@ -42,20 +71,17 @@ data class MetaJavaClass(
 )
 
 data class MetaJavaField(
-        val symbol: VarSymbol,
         val name: String,
-        val type: JavaMetaType
+        val type: MetaJavaType
 )
 
 data class MetaJavaParameter(
-        val symbol: VarSymbol,
         val name: String,
-        val type: JavaMetaType
+        val type: MetaJavaType
 )
 
 data class MetaJavaMethod(
         val name: String,
-        val symbol: MethodSymbol,
-        val returnType: JavaMetaType,
+        val returnType: MetaJavaType,
         val parameters: Map<String, MetaJavaParameter>
 )

@@ -23,7 +23,6 @@ package io.art.generator.meta
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
-import io.art.generator.meta.service.asPoetFile
 import io.art.generator.meta.service.generateJavaStubs
 import io.art.generator.meta.service.initialize
 

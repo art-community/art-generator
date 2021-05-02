@@ -25,5 +25,7 @@ import javax.tools.Diagnostic
 import javax.tools.DiagnosticListener
 
 object LoggingDiagnosticListener : DiagnosticListener<Any> {
-    override fun report(diagnostic: Diagnostic<out Any>) = logger(JavaAnalyzingService::class.java).trace(diagnostic.getMessage(getDefault()))
+    private val logger = logger(JavaAnalyzingService::class.java)
+
+    override fun report(diagnostic: Diagnostic<out Any>) = logger.trace(diagnostic.getMessage(getDefault()))
 }
