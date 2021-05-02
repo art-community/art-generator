@@ -18,91 +18,62 @@
 
 package io.art.generator.meta.service
 
-import io.art.generator.meta.configuration.generatorConfiguration
-import io.art.generator.meta.constants.COMPILER_MODULE_NAME
-import io.art.generator.meta.constants.EMPTY_DISPOSABLE
-import io.art.generator.meta.extension.isJava
-import io.art.generator.meta.logger.generatorCollector
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
-import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoots
-import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_FILES
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.Companion.createForProduction
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
-import org.jetbrains.kotlin.cli.jvm.config.addJavaSourceRoot
-import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
-import org.jetbrains.kotlin.config.CommonConfigurationKeys.DISABLE_INLINE
-import org.jetbrains.kotlin.config.CommonConfigurationKeys.MODULE_NAME
-import org.jetbrains.kotlin.config.CommonConfigurationKeys.REPORT_OUTPUT_FILES
-import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR
-import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR_EXTENDED_CHECKERS
-import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
-import org.jetbrains.kotlin.config.JvmTarget.JVM_1_8
-import org.jetbrains.kotlin.descriptors.ClassDescriptor
-import org.jetbrains.kotlin.descriptors.FieldDescriptor
-import org.jetbrains.kotlin.descriptors.FunctionDescriptor
-import org.jetbrains.kotlin.descriptors.VariableDescriptorWithAccessors
-import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
-import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
-
 object KotlinAnalyzingService {
     fun analyzeKotlinSources() {
-        val configuration = CompilerConfiguration()
-        configuration.put(MESSAGE_COLLECTOR_KEY, generatorCollector)
-        configuration.put(MODULE_NAME, COMPILER_MODULE_NAME)
-        configuration.put(REPORT_OUTPUT_FILES, false)
-        configuration.put(JVM_TARGET, JVM_1_8)
-        configuration.put(RETAIN_OUTPUT_IN_MEMORY, true)
-        configuration.put(DISABLE_INLINE, true)
-        configuration.put(DISABLE_OPTIMIZATION, true)
-        configuration.put(NO_RESET_JAR_TIMESTAMPS, true)
-        configuration.put(NO_OPTIMIZED_CALLABLE_REFERENCES, true)
-        configuration.put(PARAMETERS_METADATA, true)
-        configuration.put(EMIT_JVM_TYPE_ANNOTATIONS, true)
-        configuration.put(USE_FIR, true)
-        configuration.put(IR, true)
-        configuration.put(USE_FIR_EXTENDED_CHECKERS, false)
-        configuration.put(COMPILE_JAVA, true)
-        configuration.put(USE_JAVAC, true)
-
-        val sourcesRoot = generatorConfiguration.sourcesRoot.map { path -> path.toFile() }
-        val classpath = generatorConfiguration.classpath.map { path -> path.toFile() }
-
-        configuration.addKotlinSourceRoots(sourcesRoot.map { file -> file.absolutePath })
-        configuration.addJvmClasspathRoots(classpath)
-        sourcesRoot.forEach(configuration::addJavaSourceRoot)
-
-        val kotlinCoreEnvironment = createForProduction(EMPTY_DISPOSABLE, configuration, JVM_CONFIG_FILES).apply {
-            registerJavac(
-                    javaFiles = generatorConfiguration.sources.filter { source -> source.isJava }.map { source -> source.toFile() },
-                    bootClasspath = classpath,
-                    sourcePath = sourcesRoot
-            )
-        }
-
-        val analysisResult = KotlinToJVMBytecodeCompiler.analyze(kotlinCoreEnvironment) ?: return
-        if (analysisResult.isError()) return
-
-        val kotlinClasses = sourcesRoot
-                .flatMap { path -> path.listFiles()?.map { file -> file.name } ?: emptyList() }
-                .flatMap { packageName ->
-                    analysisResult.moduleDescriptor.getSubPackagesOf(FqName(packageName)) { true }.flatMap { name ->
-                        val packageView = analysisResult.moduleDescriptor.getPackage(name).memberScope
-                        getAllDescriptors(packageView).filterIsInstance<ClassDescriptor>().filter { descriptor -> descriptor !is JavaClassDescriptor }
-                    }
-                }
-
-        println("Kotlin classes")
-
-//        kotlinClasses.forEach { classDescriptor ->
-//            println(classDescriptor.fqNameSafe)
-//            println("Fields:" + getAllDescriptors(classDescriptor.defaultType.memberScope).filterIsInstance<VariableDescriptorWithAccessors>())
-//            println("Methods:" + getAllDescriptors(classDescriptor.defaultType.memberScope).filterIsInstance<FunctionDescriptor>())
-//            println("Constructors:" + classDescriptor.constructors)
+//        val configuration = CompilerConfiguration()
+//        configuration.put(MESSAGE_COLLECTOR_KEY, generatorCollector)
+//        configuration.put(MODULE_NAME, COMPILER_MODULE_NAME)
+//        configuration.put(REPORT_OUTPUT_FILES, false)
+//        configuration.put(JVM_TARGET, JVM_1_8)
+//        configuration.put(RETAIN_OUTPUT_IN_MEMORY, true)
+//        configuration.put(DISABLE_INLINE, true)
+//        configuration.put(DISABLE_OPTIMIZATION, true)
+//        configuration.put(NO_RESET_JAR_TIMESTAMPS, true)
+//        configuration.put(NO_OPTIMIZED_CALLABLE_REFERENCES, true)
+//        configuration.put(PARAMETERS_METADATA, true)
+//        configuration.put(EMIT_JVM_TYPE_ANNOTATIONS, true)
+//        configuration.put(USE_FIR, true)
+//        configuration.put(IR, true)
+//        configuration.put(USE_FIR_EXTENDED_CHECKERS, false)
+//        configuration.put(COMPILE_JAVA, true)
+//        configuration.put(USE_JAVAC, true)
+//
+//        val sourcesRoot = generatorConfiguration.sourcesRoot.map { path -> path.toFile() }
+//        val classpath = generatorConfiguration.classpath.map { path -> path.toFile() }
+//
+//        configuration.addKotlinSourceRoots(sourcesRoot.map { file -> file.absolutePath })
+//        configuration.addJvmClasspathRoots(classpath)
+//        sourcesRoot.forEach(configuration::addJavaSourceRoot)
+//
+//        val kotlinCoreEnvironment = createForProduction(EMPTY_DISPOSABLE, configuration, JVM_CONFIG_FILES).apply {
+//            registerJavac(
+//                    javaFiles = generatorConfiguration.sources.filter { source -> source.isJava }.map { source -> source.toFile() },
+//                    bootClasspath = classpath,
+//                    sourcePath = sourcesRoot
+//            )
 //        }
-
-        println()
+//
+//        val analysisResult = KotlinToJVMBytecodeCompiler.analyze(kotlinCoreEnvironment) ?: return
+//        if (analysisResult.isError()) return
+//
+//        val kotlinClasses = sourcesRoot
+//                .flatMap { path -> path.listFiles()?.map { file -> file.name } ?: emptyList() }
+//                .flatMap { packageName ->
+//                    analysisResult.moduleDescriptor.getSubPackagesOf(FqName(packageName)) { true }.flatMap { name ->
+//                        val packageView = analysisResult.moduleDescriptor.getPackage(name).memberScope
+//                        getAllDescriptors(packageView).filterIsInstance<ClassDescriptor>().filter { descriptor -> descriptor !is JavaClassDescriptor }
+//                    }
+//                }
+//
+//        println("Kotlin classes")
+//
+////        kotlinClasses.forEach { classDescriptor ->
+////            println(classDescriptor.fqNameSafe)
+////            println("Fields:" + getAllDescriptors(classDescriptor.defaultType.memberScope).filterIsInstance<VariableDescriptorWithAccessors>())
+////            println("Methods:" + getAllDescriptors(classDescriptor.defaultType.memberScope).filterIsInstance<FunctionDescriptor>())
+////            println("Constructors:" + classDescriptor.constructors)
+////        }
+//
+//        println()
     }
 }

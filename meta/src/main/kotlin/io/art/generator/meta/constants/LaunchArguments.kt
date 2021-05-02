@@ -18,16 +18,18 @@
 
 package io.art.generator.meta.constants
 
-const val JAVA = "java"
-const val KOTLIN = "kt"
-const val KOTLIN_SCRIPT = "kts"
-const val CLASS = "class"
-const val JAR = "jar"
+data class LaunchArgument(
+        val name: String,
+        val short: String,
+        val long: String,
+        val help: String
+)
 
-const val JAVA_MODULE_SUPPRESSION = "JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE"
-
-const val COMPILER_MODULE_NAME = "art-generator"
-
-val EMPTY_DISPOSABLE = {}
-
-const val EXIT_CODE_ERROR = -1
+val CONFIGURATION_PATH_ARGUMENT = LaunchArgument(
+        name = "CONFIGURATION_PATH",
+        short = "-c",
+        long = "--configuration",
+        help = """
+        Specify ART generator configuration path to *.yml file
+    """.trimIndent()
+)

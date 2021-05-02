@@ -21,39 +21,17 @@
 package io.art.generator.meta
 
 import io.art.core.extensions.ThreadExtensions.block
-import io.art.generator.meta.configuration.loadConfiguration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
-import io.art.generator.meta.extension.path
-import io.art.generator.meta.model.generateSource
-import io.art.generator.meta.service.JavaAnalyzingService
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
-import io.art.generator.meta.service.KotlinAnalyzingService.analyzeKotlinSources
-import net.sourceforge.argparse4j.ArgumentParsers
-import net.sourceforge.argparse4j.inf.ArgumentParserException
-import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
-import kotlin.system.exitProcess
+import io.art.generator.meta.service.asPoetFile
+import io.art.generator.meta.service.generateJavaStubs
+import io.art.generator.meta.service.initialize
 
 object MetaGenerator {
     @JvmStatic
     fun main(arguments: Array<String>) {
-        setIdeaIoUseFallback()
-        val parser = ArgumentParsers.newFor(MetaGenerator::class.simpleName)
-                .cjkWidthHack(true)
-                .build()
-                .apply {
-                    addArgument("-c", "--config")
-                            .required(true)
-                            .dest("CONFIGURATION_PATH")
-                }
-        try {
-            loadConfiguration(parser.parseArgs(arguments).get<String>("CONFIGURATION_PATH").path)
-        } catch (exception: ArgumentParserException) {
-            parser.handleError(exception)
-            exitProcess(-1)
-        }
-
-        analyzeKotlinSources()
-        analyzeJavaSources().map { it.generateSource() }.forEach { println(it) }
+        initialize(arguments)
+        generateJavaStubs(analyzeJavaSources())
         block()
     }
 }

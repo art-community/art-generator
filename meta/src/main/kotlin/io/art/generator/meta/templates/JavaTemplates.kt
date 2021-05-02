@@ -16,18 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.meta.constants
+package io.art.generator.meta.templates
 
-const val JAVA = "java"
-const val KOTLIN = "kt"
-const val KOTLIN_SCRIPT = "kts"
-const val CLASS = "class"
-const val JAR = "jar"
-
-const val JAVA_MODULE_SUPPRESSION = "JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE"
-
-const val COMPILER_MODULE_NAME = "art-generator"
-
-val EMPTY_DISPOSABLE = {}
-
-const val EXIT_CODE_ERROR = -1
+const val THROW_EXCEPTION_STATEMENT = "throw new \$T(\$S)"
+const val STUB_METHOD_STRING = "stub method"

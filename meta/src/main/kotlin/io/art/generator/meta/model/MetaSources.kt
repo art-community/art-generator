@@ -16,52 +16,46 @@
  * limitations under the License.
  */
 
+@file:Suppress(JAVA_MODULE_SUPPRESSION)
+
 package io.art.generator.meta.model
 
-import com.squareup.javapoet.*
-import com.squareup.javapoet.TypeSpec.classBuilder
-import org.jetbrains.kotlin.load.java.structure.JavaClass
+import com.sun.tools.javac.code.Symbol.*
+import io.art.core.constants.StringConstants.DOT
+import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
+import javax.lang.model.element.TypeElement
 
-data class MetaType(val fullName: String, val packageName: String = fullName.substringBeforeLast("."), val className: String = fullName.substringAfterLast("."))
+data class JavaMetaType(
+        val element: TypeElement,
+        val fullName: String,
+        val className: String,
+        val packageName: String
+)
 
 data class MetaJavaClass(
-        val descriptor: JavaClass,
-        val type: MetaType,
+        val symbol: ClassSymbol,
+        val type: JavaMetaType,
         val fields: Map<String, MetaJavaField>,
-        val methods: Map<String, MetaJavaMethod>
+        val constructors: Set<MetaJavaMethod>,
+        val innerClasses: Map<String, MetaJavaClass>,
+        val methods: Set<MetaJavaMethod>
 )
 
 data class MetaJavaField(
+        val symbol: VarSymbol,
         val name: String,
-        val type: MetaType
+        val type: JavaMetaType
 )
 
 data class MetaJavaParameter(
+        val symbol: VarSymbol,
         val name: String,
-        val type: MetaType
+        val type: JavaMetaType
 )
 
 data class MetaJavaMethod(
         val name: String,
-        val returnType: MetaType,
+        val symbol: MethodSymbol,
+        val returnType: JavaMetaType,
         val parameters: Map<String, MetaJavaParameter>
 )
-
-fun MetaJavaClass.generateSource() = JavaFile.builder(type.packageName, classBuilder(type.fullName)
-        .addFields(
-                fields.map { field ->
-                    FieldSpec
-                            .builder(ClassName.get(field.value.type.packageName, field.value.type.className), field.key)
-                            .build()
-                }
-        )
-        .addMethod(
-                MethodSpec.methodBuilder("toMap")
-                        .returns(TypeName.VOID)
-                        .addCode(CodeBlock.builder()
-                                .build())
-                        .build()
-        )
-        .build())
-        .build()
-        .toString()

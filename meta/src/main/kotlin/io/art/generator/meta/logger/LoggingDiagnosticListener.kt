@@ -16,18 +16,14 @@
  * limitations under the License.
  */
 
-package io.art.generator.meta.constants
+package io.art.generator.meta.logger
 
-const val JAVA = "java"
-const val KOTLIN = "kt"
-const val KOTLIN_SCRIPT = "kts"
-const val CLASS = "class"
-const val JAR = "jar"
+import io.art.generator.meta.service.JavaAnalyzingService
+import io.art.logging.LoggingModule.logger
+import java.util.Locale.getDefault
+import javax.tools.Diagnostic
+import javax.tools.DiagnosticListener
 
-const val JAVA_MODULE_SUPPRESSION = "JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE"
-
-const val COMPILER_MODULE_NAME = "art-generator"
-
-val EMPTY_DISPOSABLE = {}
-
-const val EXIT_CODE_ERROR = -1
+object LoggingDiagnosticListener : DiagnosticListener<Any> {
+    override fun report(diagnostic: Diagnostic<out Any>) = logger(JavaAnalyzingService::class.java).trace(diagnostic.getMessage(getDefault()))
+}

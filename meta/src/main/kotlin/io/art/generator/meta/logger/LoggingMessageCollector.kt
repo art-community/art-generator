@@ -33,4 +33,4 @@ class LoggingMessageCollector(private val logger: ExtendedLogger = logger(Loggin
                               private val printer: MessageCollector = PrintingMessageCollector(stream, WITHOUT_PATHS, true)
 ) : MessageCollector by printer
 
-val generatorCollector = LoggingMessageCollector()
+val loggingMessageCollector = LoggingMessageCollector()

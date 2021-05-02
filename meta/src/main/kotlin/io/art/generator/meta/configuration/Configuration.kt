@@ -21,30 +21,30 @@ package io.art.generator.meta.configuration
 import io.art.configuration.yaml.source.YamlConfigurationSource
 import io.art.configurator.constants.ConfiguratorModuleConstants.ConfigurationSourceType.CUSTOM_FILE
 import io.art.core.constants.StringConstants.EMPTY_STRING
-import io.art.core.extensions.FileExtensions.fileInputStream
 import io.art.generator.meta.extension.path
-import io.art.logging.LoggingModule.logger
+import java.io.InputStream
 import java.nio.file.Path
 import java.time.Duration
 
 
 data class Configuration(val sourcesRoot: Set<Path>,
-                         val stubRoot: Set<Path>,
+                         val stubRoot: Path,
                          val sources: Set<Path>,
                          val classpath: Set<Path>,
+                         val moduleName: String,
                          val watcherPeriod: Duration
 )
 
 lateinit var generatorConfiguration: Configuration
 
-fun loadConfiguration(file: Path) {
-    logger(Configuration::class.java).info("Loading configuration from: $file")
-    with(YamlConfigurationSource(EMPTY_STRING, CUSTOM_FILE) { fileInputStream(file) }) {
+fun loadConfiguration(stream: InputStream) {
+    with(YamlConfigurationSource(EMPTY_STRING, CUSTOM_FILE) { stream }) {
         generatorConfiguration = Configuration(
                 sourcesRoot = getStringArray("paths.sources").map { file -> file.path }.toSet(),
-                stubRoot = getStringArray("paths.stubs").map { file -> file.path }.toSet(),
+                stubRoot = getString("paths.stubs").path,
                 sources = getStringArray("sources").map { file -> file.path }.toSet(),
                 classpath = getStringArray("classpath").map { file -> file.path }.toSet(),
+                moduleName = getString("moduleName"),
                 watcherPeriod = getDuration("watcher.period")
         )
     }

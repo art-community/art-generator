@@ -1,10 +1,9 @@
+moduleName: Example
 paths:
+  stubs: "D:/Development/Projects/art/art-environment/local/projects/sandbox/build/stubs"
   sources:
     - "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/java"
     - "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/kotlin"
-  stubs:
-    - "D:/Development/Projects/art/art-environment/local/projects/sandbox/build/stubs/main/java"
-    - "D:/Development/Projects/art/art-environment/local/projects/sandbox/build/stubs/main/kotlin"
 sources:
   - "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/java/module/ExampleConfigurator.java"
   - "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/kotlin/module/ExampleKotlin.kt"
