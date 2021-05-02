@@ -108,7 +108,7 @@ private fun Type.ClassType.asMetaType(): MetaJavaType = MetaJavaType(
         typeName = tsym.qualifiedName.toString(),
         className = tsym.simpleName.toString(),
         classPackageName = tsym.qualifiedName.toString().substringBeforeLast(DOT),
-        classTypeArguments = typeArguments
+        classTypeParameters = typeArguments
                 .map { argument -> argument.asMetaType() }
                 .filter { argument -> argument.kind != UNKNOWN_KIND }
                 .associateBy { argument -> argument.typeName },
@@ -168,7 +168,9 @@ private fun MethodSymbol.asMetaMethod() = MetaJavaMethod(
         name = name.toString(),
         modifiers = modifiers,
         returnType = returnType.asMetaType(),
-        parameters = parameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() }
+        parameters = parameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
+        typeParameters = typeParameters.map { typeParameter -> typeParameter.type.asMetaType() }.associateBy { type -> type.typeName },
+        exceptions = thrownTypes.map { exception -> exception.asMetaType() }
 )
 
 private fun VarSymbol.asMetaField() = MetaJavaField(

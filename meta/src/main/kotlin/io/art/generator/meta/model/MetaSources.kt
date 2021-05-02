@@ -47,7 +47,7 @@ data class MetaJavaType(
         val classFullName: String? = null,
         val className: String? = null,
         val classPackageName: String? = null,
-        val classTypeArguments: Map<String, MetaJavaType> = emptyMap(),
+        val classTypeParameters: Map<String, MetaJavaType> = emptyMap(),
         val classSuperClass: MetaJavaType? = null,
         val classSuperInterfaces: List<MetaJavaType> = emptyList(),
 
@@ -84,5 +84,7 @@ data class MetaJavaMethod(
         val name: String,
         val returnType: MetaJavaType,
         val parameters: Map<String, MetaJavaParameter>,
-        val modifiers: Set<Modifier>
+        val modifiers: Set<Modifier>,
+        val typeParameters: Map<String, MetaJavaType> = emptyMap(),
+        val exceptions: List<MetaJavaType> = emptyList(),
 )
