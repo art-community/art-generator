@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
-package io.art.generator.meta.exception
+package io.art.generator.meta.constants
 
-class MetaGeneratorException : RuntimeException {
-    constructor(message: String) : super(message)
-    constructor(message: String, cause: Throwable) : super(message, cause)
-    constructor(cause: Throwable) : super(cause)
-    constructor(message: String, cause: Throwable, enableSuppression: Boolean, writableStackTrace: Boolean) : super(message, cause, enableSuppression, writableStackTrace)
-}
+import io.art.generator.meta.exception.MetaGeneratorException
+import io.art.generator.meta.model.MetaJavaClass
+import io.art.generator.meta.model.MetaJavaType
+
+fun MetaJavaClass.throwInvalidTypeException(): Nothing = throw MetaGeneratorException("Invalid type: $type")
