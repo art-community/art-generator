@@ -46,12 +46,10 @@ private fun MetaJavaType.asPoetType(): TypeName = when (kind) {
             ?.let(TypeName::get)
             ?: TypeName.get(reflectionType!!)
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.asPoetType())
-    WILDCARD_KIND -> wildcardSuperBound
-            ?.let { bound -> WildcardTypeName.subtypeOf(bound.asPoetType()) }
-            ?: wildcardExtendsBound?.asPoetType()?.let(WildcardTypeName::supertypeOf)
+    WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> WildcardTypeName.subtypeOf(bound.asPoetType()) }
+            ?: wildcardSuperBound?.asPoetType()?.let(WildcardTypeName::supertypeOf)
             ?: WildcardTypeName.get(originalType as? WildcardType ?: reflectionType as WildcardType)
-    INTERSECTION_KIND -> TypeVariableName.get(typeName, *intersectionBounds.toList().map { bound -> bound.asPoetType() }.toTypedArray())
-    VARIABLE_KIND -> TypeVariableName.get(typeName, *arrayOf(variableUpperBounds, variableLowerBounds).filterNotNull().map { bound -> bound.asPoetType() }.toTypedArray())
+    VARIABLE_KIND -> TypeVariableName.get(typeName, *typeVariableBounds.values.map { bound -> bound.asPoetType() }.toTypedArray())
     CLASS_KIND, INTERFACE_KIND -> when {
         classTypeArguments.isNotEmpty() -> ParameterizedTypeName.get(ClassName.get(classPackageName!!, className), *classTypeArguments.values.map { parameter -> parameter.asPoetType() }.toTypedArray())
         else -> ClassName.get(classPackageName!!, className)
@@ -62,7 +60,7 @@ private fun MetaJavaClass.asPoetClass(): TypeSpec = classBuilder(type.className)
         .apply {
             type.classSuperClass?.let { superClass -> superclass(superClass.asPoetType()) }
             type.classSuperInterfaces.forEach { interfaceType -> addSuperinterface(interfaceType.asPoetType()) }
-            type.classTypeArguments.forEach { parameter ->
+            type.classTypeArguments.filter { parameter -> parameter.value.kind == VARIABLE_KIND }.forEach { parameter ->
                 addTypeVariable(parameter.value.asPoetType() as TypeVariableName)
             }
             fields.forEach { field ->

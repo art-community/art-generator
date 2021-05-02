@@ -28,7 +28,6 @@ enum class MetaJavaTypeKind {
     CLASS_KIND,
     ENUM_KIND,
     WILDCARD_KIND,
-    INTERSECTION_KIND,
     INTERFACE_KIND,
     JDK_KIND,
     PRIMITIVE_KIND,
@@ -49,25 +48,22 @@ data class MetaJavaType(
         val classPackageName: String? = null,
         val classTypeArguments: Map<String, MetaJavaType> = emptyMap(),
         val classSuperClass: MetaJavaType? = null,
-        val classSuperInterfaces: Set<MetaJavaType> = emptySet(),
+        val classSuperInterfaces: List<MetaJavaType> = emptyList(),
 
         val arrayComponentType: MetaJavaType? = null,
 
         val wildcardExtendsBound: MetaJavaType? = null,
         val wildcardSuperBound: MetaJavaType? = null,
 
-        val intersectionBounds: Set<MetaJavaType> = emptySet(),
-
-        val variableLowerBounds: MetaJavaType? = null,
-        val variableUpperBounds: MetaJavaType? = null,
+        val typeVariableBounds: Map<String, MetaJavaType> = emptyMap(),
 )
 
 data class MetaJavaClass(
         val type: MetaJavaType,
         val fields: Map<String, MetaJavaField>,
-        val constructors: Set<MetaJavaMethod>,
+        val constructors: List<MetaJavaMethod>,
         val innerClasses: Map<String, MetaJavaClass>,
-        val methods: Set<MetaJavaMethod>
+        val methods: List<MetaJavaMethod>
 )
 
 data class MetaJavaField(

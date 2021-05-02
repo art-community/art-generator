@@ -40,6 +40,7 @@ import java.io.StringWriter
 import java.nio.charset.Charset.defaultCharset
 import java.util.Locale.getDefault
 import javax.lang.model.element.ElementKind.ENUM
+import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeMirror
 import javax.tools.StandardLocation.CLASS_PATH
 import javax.tools.StandardLocation.SOURCE_PATH
@@ -84,7 +85,6 @@ private fun TypeMirror.asMetaType(): MetaJavaType = when (this) {
     is Type.TypeVar -> asMetaType()
     is Type.ArrayType -> asMetaType()
     is Type.WildcardType -> asMetaType()
-    is Type.IntersectionClassType -> asMetaType()
     is Type.ClassType -> when {
         tsym.qualifiedName.startsWith(JAVA_PACKAGE_PREFIX) -> MetaJavaType(originalType = this, kind = JDK_KIND, typeName = tsym.qualifiedName.toString())
         else -> asMetaType()
@@ -108,39 +108,43 @@ private fun Type.ClassType.asMetaType(): MetaJavaType = MetaJavaType(
         typeName = tsym.qualifiedName.toString(),
         className = tsym.simpleName.toString(),
         classPackageName = tsym.qualifiedName.toString().substringBeforeLast(DOT),
-        classTypeArguments = allparams().associate { argument -> argument.toString() to argument.asMetaType() }.filterValues { argument -> argument.kind != UNKNOWN_KIND },
+        classTypeArguments = typeArguments
+                .map { argument -> argument.asMetaType() }
+                .filter { argument -> argument.kind != UNKNOWN_KIND }
+                .associateBy { argument -> argument.typeName },
         classSuperClass = supertype_field?.asMetaType(),
         classSuperInterfaces = interfaces_field
-                ?.map { interfaceField -> interfaceField.asMetaType() }?.toSet()
-                ?: emptySet()
-)
-
-private fun Type.IntersectionClassType.asMetaType(): MetaJavaType = MetaJavaType(
-        originalType = this,
-        kind = INTERSECTION_KIND,
-        typeName = tsym.qualifiedName.toString(),
-        intersectionBounds = bounds.map { bound -> bound.asMetaType() }.filter { type -> type.kind != UNKNOWN_KIND }.toSet()
+                ?.map { interfaceField -> interfaceField.asMetaType() }
+                ?: emptyList()
 )
 
 private fun Type.TypeVar.asMetaType(): MetaJavaType = MetaJavaType(
         originalType = this,
         kind = VARIABLE_KIND,
-        typeName = tsym.qualifiedName.toString(),
-        variableLowerBounds = lowerBound?.asMetaType()?.takeIf { type -> type.kind != UNKNOWN_KIND },
-        variableUpperBounds = upperBound?.asMetaType()?.takeIf { type -> type.kind != UNKNOWN_KIND },
+        typeName = tsym.name.toString(),
+        typeVariableBounds = upperBound
+                .let { bound ->
+                    when (bound) {
+                        is IntersectionType -> bound.bounds
+                        else -> listOf(bound)
+                    }
+                }
+                .map { argument -> argument.asMetaType() }
+                .filter { argument -> argument.kind != UNKNOWN_KIND }
+                .associateBy { argument -> argument.typeName },
 )
 
 private fun Type.ArrayType.asMetaType(): MetaJavaType = MetaJavaType(
         originalType = this,
         kind = ARRAY_KIND,
-        typeName = tsym.qualifiedName.toString(),
+        typeName = componentType.toString(),
         arrayComponentType = componentType.asMetaType().takeIf { type -> type.kind != UNKNOWN_KIND }
 )
 
 private fun Type.WildcardType.asMetaType(): MetaJavaType = MetaJavaType(
         originalType = this,
         kind = WILDCARD_KIND,
-        typeName = tsym.qualifiedName.toString(),
+        typeName = type.toString(),
         wildcardSuperBound = superBound?.asMetaType()?.takeIf { type -> type.kind != UNKNOWN_KIND },
         wildcardExtendsBound = extendsBound?.asMetaType()?.takeIf { type -> type.kind != UNKNOWN_KIND }
 )
@@ -152,12 +156,10 @@ private fun ClassSymbol.asMetaClass(): MetaJavaClass = MetaJavaClass(
         fields = members().symbols.filterIsInstance<VarSymbol>().associate { symbol -> symbol.name.toString() to symbol.asMetaField() },
         constructors = members().symbols.filterIsInstance<MethodSymbol>()
                 .filter { method -> method.isConstructor }
-                .map { method -> method.asMetaMethod() }
-                .toSet(),
+                .map { method -> method.asMetaMethod() },
         methods = members().symbols.filterIsInstance<MethodSymbol>()
                 .filter { method -> !method.isConstructor }
-                .map { method -> method.asMetaMethod() }
-                .toSet(),
+                .map { method -> method.asMetaMethod() },
         innerClasses = members().symbols.filterIsInstance<ClassSymbol>().associate { symbol -> symbol.name.toString() to symbol.asMetaClass() }
 )
 
