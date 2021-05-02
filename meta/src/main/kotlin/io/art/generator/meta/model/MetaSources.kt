@@ -22,6 +22,7 @@ package io.art.generator.meta.model
 
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import java.lang.reflect.Type
+import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeMirror
 
 enum class MetaJavaTypeKind {
@@ -63,21 +64,25 @@ data class MetaJavaClass(
         val fields: Map<String, MetaJavaField>,
         val constructors: List<MetaJavaMethod>,
         val innerClasses: Map<String, MetaJavaClass>,
-        val methods: List<MetaJavaMethod>
+        val methods: List<MetaJavaMethod>,
+        val modifiers: Set<Modifier>
 )
 
 data class MetaJavaField(
         val name: String,
-        val type: MetaJavaType
+        val type: MetaJavaType,
+        val modifiers: Set<Modifier>
 )
 
 data class MetaJavaParameter(
         val name: String,
-        val type: MetaJavaType
+        val type: MetaJavaType,
+        val modifiers: Set<Modifier>
 )
 
 data class MetaJavaMethod(
         val name: String,
         val returnType: MetaJavaType,
-        val parameters: Map<String, MetaJavaParameter>
+        val parameters: Map<String, MetaJavaParameter>,
+        val modifiers: Set<Modifier>
 )

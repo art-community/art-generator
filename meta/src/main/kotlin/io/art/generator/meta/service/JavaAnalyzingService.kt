@@ -153,6 +153,7 @@ private fun ClassSymbol.asMetaType(): MetaJavaType = type.asMetaType()
 
 private fun ClassSymbol.asMetaClass(): MetaJavaClass = MetaJavaClass(
         type = asMetaType(),
+        modifiers = modifiers,
         fields = members().symbols.filterIsInstance<VarSymbol>().associate { symbol -> symbol.name.toString() to symbol.asMetaField() },
         constructors = members().symbols.filterIsInstance<MethodSymbol>()
                 .filter { method -> method.isConstructor }
@@ -165,16 +166,19 @@ private fun ClassSymbol.asMetaClass(): MetaJavaClass = MetaJavaClass(
 
 private fun MethodSymbol.asMetaMethod() = MetaJavaMethod(
         name = name.toString(),
+        modifiers = modifiers,
         returnType = returnType.asMetaType(),
         parameters = parameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() }
 )
 
 private fun VarSymbol.asMetaField() = MetaJavaField(
         name = name.toString(),
+        modifiers = modifiers,
         type = type.asMetaType()
 )
 
 private fun VarSymbol.asMetaParameter() = MetaJavaParameter(
         name = name.toString(),
+        modifiers = modifiers,
         type = type.asMetaType()
 )

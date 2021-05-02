@@ -23,7 +23,7 @@ package io.art.generator.meta.service
 import com.squareup.javapoet.*
 import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
-import com.squareup.javapoet.TypeSpec.classBuilder
+import com.squareup.javapoet.TypeSpec.*
 import io.art.core.exception.NotImplementedException
 import io.art.generator.meta.configuration.generatorConfiguration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
@@ -32,6 +32,8 @@ import io.art.generator.meta.model.MetaJavaType
 import io.art.generator.meta.model.MetaJavaTypeKind.*
 import io.art.generator.meta.templates.STUB_METHOD_STRING
 import io.art.generator.meta.templates.THROW_EXCEPTION_STATEMENT
+import javax.lang.model.element.Modifier
+import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.type.WildcardType
 
 fun generateJavaStubs(classes: Set<MetaJavaClass>) {
@@ -56,30 +58,70 @@ private fun MetaJavaType.asPoetType(): TypeName = when (kind) {
     }
 }
 
-private fun MetaJavaClass.asPoetClass(): TypeSpec = classBuilder(type.className)
-        .apply {
-            type.classSuperClass?.let { superClass -> superclass(superClass.asPoetType()) }
-            type.classSuperInterfaces.forEach { interfaceType -> addSuperinterface(interfaceType.asPoetType()) }
-            type.classTypeArguments.filter { parameter -> parameter.value.kind == VARIABLE_KIND }.forEach { parameter ->
-                addTypeVariable(parameter.value.asPoetType() as TypeVariableName)
+private fun MetaJavaClass.asPoetClass(): TypeSpec = when {
+    type.kind == INTERFACE_KIND -> interfaceBuilder(type.className)
+            .apply {
+                addModifiers(*this@asPoetClass.modifiers.toTypedArray())
+                type.classSuperInterfaces.forEach { interfaceType -> addSuperinterface(interfaceType.asPoetType()) }
+                type.classTypeArguments.filter { parameter -> parameter.value.kind == VARIABLE_KIND }.forEach { parameter ->
+                    addTypeVariable(parameter.value.asPoetType() as TypeVariableName)
+                }
+                methods.forEach { method ->
+                    addMethod(methodBuilder(method.name)
+                            .addModifiers(*method.modifiers.toTypedArray())
+                            .returns(method.returnType.asPoetType())
+                            .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.value.type.asPoetType(), parameter.key).build() })
+                            .apply { addCode(THROW_EXCEPTION_STATEMENT, NotImplementedException::class.java, STUB_METHOD_STRING) }
+                            .build())
+                }
+                innerClasses.forEach { inner ->
+                    addType(inner.value.asPoetClass())
+                }
             }
-            fields.forEach { field ->
-                addField(field.value.type.asPoetType(), field.key)
+            .build()
+    type.kind == CLASS_KIND -> classBuilder(type.className)
+            .apply {
+                addModifiers(*this@asPoetClass.modifiers.toTypedArray())
+                type.classSuperClass?.let { superClass -> superclass(superClass.asPoetType()) }
+                type.classSuperInterfaces.forEach { interfaceType -> addSuperinterface(interfaceType.asPoetType()) }
+                type.classTypeArguments.filter { parameter -> parameter.value.kind == VARIABLE_KIND }.forEach { parameter ->
+                    addTypeVariable(parameter.value.asPoetType() as TypeVariableName)
+                }
+                fields.forEach { field ->
+                    addField(field.value.type.asPoetType(), field.key, *field.value.modifiers.filter { modifier -> modifier != FINAL }.toTypedArray())
+                }
+                methods.forEach { method ->
+                    addMethod(methodBuilder(method.name)
+                            .addModifiers(*method.modifiers.toTypedArray())
+                            .returns(method.returnType.asPoetType())
+                            .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.value.type.asPoetType(), parameter.key).build() })
+                            .apply { addCode(THROW_EXCEPTION_STATEMENT, NotImplementedException::class.java, STUB_METHOD_STRING) }
+                            .build())
+                }
+                innerClasses.forEach { inner ->
+                    addType(inner.value.asPoetClass())
+                }
             }
-            methods.forEach { method ->
-                addMethod(methodBuilder(method.name)
-                        .returns(method.returnType.asPoetType())
-                        .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.value.type.asPoetType(), parameter.key).build() })
-                        .apply { addCode(THROW_EXCEPTION_STATEMENT, NotImplementedException::class.java, STUB_METHOD_STRING) }
-                        .build())
+            .build()
+    type.kind == ENUM_KIND -> enumBuilder(type.className)
+            .apply {
+                addModifiers(*this@asPoetClass.modifiers.toTypedArray())
+                fields.forEach { field ->
+                    addField(field.value.type.asPoetType(), field.key, *field.value.modifiers.filter { modifier -> modifier != FINAL }.toTypedArray())
+                }
+                methods.forEach { method ->
+                    addMethod(methodBuilder(method.name)
+                            .addModifiers(*method.modifiers.toTypedArray())
+                            .returns(method.returnType.asPoetType())
+                            .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.value.type.asPoetType(), parameter.key).build() })
+                            .apply { addCode(THROW_EXCEPTION_STATEMENT, NotImplementedException::class.java, STUB_METHOD_STRING) }
+                            .build())
+                }
+                innerClasses.forEach { inner ->
+                    addType(inner.value.asPoetClass())
+                }
             }
-            constructors.forEach { constructor ->
-                addMethod(constructorBuilder()
-                        .addParameters(constructor.parameters.map { parameter -> ParameterSpec.builder(parameter.value.type.asPoetType(), parameter.key).build() })
-                        .build())
-            }
-            innerClasses.forEach { inner ->
-                addType(inner.value.asPoetClass())
-            }
-        }
-        .build()
+            .build()
+
+    else -> TODO()
+}
