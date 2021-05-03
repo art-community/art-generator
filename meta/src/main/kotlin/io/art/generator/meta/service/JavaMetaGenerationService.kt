@@ -55,47 +55,7 @@ fun generateMetaJavaSources(classes: Set<MetaJavaClass>) {
 }
 
 private fun TypeSpec.Builder.generateMetaClasses(javaClasses: List<MetaJavaClass>) = apply {
-//    val tree = mutableMapOf<String, TypeSpec>()
-//    javaClasses
-//            .groupBy { javaClass -> javaClass.type.classPackageName ?: EMPTY_STRING }
-//            .asSequence()
-//            .forEach { packagedClass -> generatePackageTree(packagedClass.key, tree) }
     PackageTree().addAll(javaClasses).build().forEach(::addType)
-}
-
-private fun TypeSpec.Builder.generatePackageTree(classesPackage: String, tree: MutableMap<String, TypeSpec>) {
-    val moduleName = generatorConfiguration.moduleName
-    val packageParts = classesPackage.split(DOT)
-    var currentPackage: String = EMPTY_STRING
-    val passedParts = mutableListOf<String>()
-    packageParts
-            .filter { packagePart -> packagePart.isNotEmpty() }
-            .forEach { packagePart ->
-                val previousPackage = currentPackage
-                currentPackage += if (currentPackage.isEmpty()) packagePart else DOT + packagePart
-                passedParts += packagePart
-                if (tree.containsKey(currentPackage)) {
-                    return@forEach
-                }
-
-                val selfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *passedParts.toTypedArray())
-                println(passedParts)
-                val newScope = classBuilder(packagePart)
-                        .addModifiers(PUBLIC, STATIC)
-                        .addField(FieldSpec.builder(selfType, SELF_FIELD, PUBLIC, FINAL, STATIC)
-                                .initializer("new \$T()", selfType)
-                                .build())
-                        .build()
-
-                if (tree.containsKey(previousPackage)) {
-                    tree[previousPackage] = tree[previousPackage]!!.toBuilder().addType(newScope).build()
-                    tree[currentPackage] = newScope
-                    return@forEach
-                }
-
-                tree[previousPackage] = addType(newScope).build()
-                tree[currentPackage] = newScope
-            }
 }
 
 private fun TypeSpec.Builder.generatePackageTree(packageTree: List<String>, javaClass: MetaJavaClass) {
@@ -176,8 +136,8 @@ private class PackageTree {
                             val classSelfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *(packageFullName.split(DOT) + javaClass.type.className!!).toTypedArray())
                             addType(classBuilder(javaClass.type.className)
                                     .addModifiers(PUBLIC, STATIC)
-                                    .addField(FieldSpec.builder(selfType, SELF_FIELD, PUBLIC, FINAL, STATIC)
-                                            .initializer("new \$T()", selfType)
+                                    .addField(FieldSpec.builder(classSelfType, SELF_FIELD, PUBLIC, FINAL, STATIC)
+                                            .initializer("new \$T()", classSelfType)
                                             .build())
                                     .apply {
                                         javaClass.fields.forEach { field ->
