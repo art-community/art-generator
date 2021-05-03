@@ -173,26 +173,36 @@ private class PackageTree {
                             .build())
                     .apply {
                         classes.forEach { javaClass ->
-                            javaClass.fields.forEach { field ->
-                                val metaFieldType = ParameterizedTypeName.get(ClassName.get(MetaField::class.java), field.value.type.asPoetType())
-                                addField(FieldSpec.builder(metaFieldType, field.key, PRIVATE, FINAL)
-                                        .initializer("\$T.metaField(\$S,\$T.class)", ClassName.get(MetaField::class.java), field.key, field.value.type.asPoetType())
-                                        .build())
-                                addMethod(methodBuilder(field.key)
-                                        .returns(metaFieldType)
-                                        .addCode("return \$L;", field.key)
-                                        .build())
-                            }
-                            javaClass.methods.forEach { method ->
-                                val metaMethodType = ParameterizedTypeName.get(ClassName.get(MetaMethod::class.java), method.returnType.asPoetType())
-                                addField(FieldSpec.builder(metaMethodType, method.name, PRIVATE, FINAL)
-                                        .initializer("\$T.metaMethod(\$S,\$T.class)", ClassName.get(MetaMethod::class.java), method.name, method.returnType.asPoetType())
-                                        .build())
-                                addMethod(methodBuilder(method.name)
-                                        .returns(metaMethodType)
-                                        .addCode("return \$L;", method.name)
-                                        .build())
-                            }
+                            val classSelfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *(packageFullName.split(DOT) + javaClass.type.className!!).toTypedArray())
+                            addType(classBuilder(javaClass.type.className)
+                                    .addModifiers(PUBLIC, STATIC)
+                                    .addField(FieldSpec.builder(selfType, SELF_FIELD, PUBLIC, FINAL, STATIC)
+                                            .initializer("new \$T()", selfType)
+                                            .build())
+                                    .apply {
+                                        javaClass.fields.forEach { field ->
+                                            val metaFieldType = ParameterizedTypeName.get(ClassName.get(MetaField::class.java), field.value.type.asPoetType())
+                                            addField(FieldSpec.builder(metaFieldType, field.key, PRIVATE, FINAL)
+                                                    .initializer("\$T.metaField(\$S,\$T.class)", ClassName.get(MetaField::class.java), field.key, field.value.type.asPoetType())
+                                                    .build())
+                                            addMethod(methodBuilder(field.key)
+                                                    .returns(metaFieldType)
+                                                    .addCode("return \$L;", field.key)
+                                                    .build())
+                                        }
+                                        javaClass.methods.forEach { method ->
+                                            val metaMethodType = ParameterizedTypeName.get(ClassName.get(MetaMethod::class.java), method.returnType.asPoetType())
+                                            addField(FieldSpec.builder(metaMethodType, method.name, PRIVATE, FINAL)
+                                                    .initializer("\$T.metaMethod(\$S,\$T.class)", ClassName.get(MetaMethod::class.java), method.name, method.returnType.asPoetType())
+                                                    .build())
+                                            addMethod(methodBuilder(method.name)
+                                                    .returns(metaMethodType)
+                                                    .addCode("return \$L;", method.name)
+                                                    .build())
+                                        }
+                                    }
+                                    .build()
+                            )
                         }
                     }
             childPackages.values.forEach { child -> newScope.addType(child.build()) }
