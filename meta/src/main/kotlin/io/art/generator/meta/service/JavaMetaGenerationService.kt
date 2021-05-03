@@ -55,11 +55,12 @@ fun generateMetaJavaSources(classes: Set<MetaJavaClass>) {
 }
 
 private fun TypeSpec.Builder.generateMetaClasses(javaClasses: List<MetaJavaClass>) = apply {
-    val tree = mutableMapOf<String, TypeSpec>()
-    javaClasses
-            .groupBy { javaClass -> javaClass.type.classPackageName ?: EMPTY_STRING }
-            .asSequence()
-            .forEach { packagedClass -> generatePackageTree(packagedClass.key, tree) }
+//    val tree = mutableMapOf<String, TypeSpec>()
+//    javaClasses
+//            .groupBy { javaClass -> javaClass.type.classPackageName ?: EMPTY_STRING }
+//            .asSequence()
+//            .forEach { packagedClass -> generatePackageTree(packagedClass.key, tree) }
+    PackageTree().addAll(javaClasses).build().forEach(::addType)
 }
 
 private fun TypeSpec.Builder.generatePackageTree(classesPackage: String, tree: MutableMap<String, TypeSpec>) {
@@ -76,6 +77,7 @@ private fun TypeSpec.Builder.generatePackageTree(classesPackage: String, tree: M
                 if (tree.containsKey(currentPackage)) {
                     return@forEach
                 }
+
                 val selfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *passedParts.toTypedArray())
                 println(passedParts)
                 val newScope = classBuilder(packagePart)
@@ -84,11 +86,13 @@ private fun TypeSpec.Builder.generatePackageTree(classesPackage: String, tree: M
                                 .initializer("new \$T()", selfType)
                                 .build())
                         .build()
+
                 if (tree.containsKey(previousPackage)) {
                     tree[previousPackage] = tree[previousPackage]!!.toBuilder().addType(newScope).build()
                     tree[currentPackage] = newScope
                     return@forEach
                 }
+
                 tree[previousPackage] = addType(newScope).build()
                 tree[currentPackage] = newScope
             }
@@ -103,27 +107,98 @@ private fun TypeSpec.Builder.generatePackageTree(packageTree: List<String>, java
                     .initializer("new \$T()", self)
                     .build())
             .apply {
-                javaClass.fields.forEach { field ->
-                    val metaFieldType = ParameterizedTypeName.get(ClassName.get(MetaField::class.java), field.value.type.asPoetType())
-                    addField(FieldSpec.builder(metaFieldType, field.key, PRIVATE, FINAL)
-                            .initializer("\$T.metaField(\$S,\$T.class)", ClassName.get(MetaField::class.java), field.key, field.value.type.asPoetType())
-                            .build())
-                    addMethod(methodBuilder(field.key)
-                            .returns(metaFieldType)
-                            .addCode("return \$L;", field.key)
-                            .build())
-                }
-                javaClass.methods.forEach { method ->
-                    val metaMethodType = ParameterizedTypeName.get(ClassName.get(MetaMethod::class.java), method.returnType.asPoetType())
-                    addField(FieldSpec.builder(metaMethodType, method.name, PRIVATE, FINAL)
-                            .initializer("\$T.metaMethod(\$S,\$T.class)", ClassName.get(MetaMethod::class.java), method.name, method.returnType.asPoetType())
-                            .build())
-                    addMethod(methodBuilder(method.name)
-                            .returns(metaMethodType)
-                            .addCode("return \$L;", method.name)
-                            .build())
-                }
+
             }
             .build()
             .let(::addType)
 }
+
+
+private class PackageTree {
+    val rootPackages = mutableMapOf<String, PackageTreeNode>()
+
+    fun addAll(childClasses: Collection<MetaJavaClass>): PackageTree {
+        childClasses.forEach(this::addClass)
+        return this
+    }
+
+    fun addClass(metaClass: MetaJavaClass): PackageTree {
+        val rootPackageShortName = metaClass.type.classPackageName?.substringBefore(DOT)
+                ?: throw IllegalArgumentException("Null package")
+
+        if (!rootPackages.contains(rootPackageShortName)) {
+            rootPackages[rootPackageShortName] = PackageTreeNode(rootPackageShortName)
+        }
+        rootPackages[rootPackageShortName]!!.addClass(metaClass);
+
+        return this
+    }
+
+    fun build(): Set<TypeSpec> {
+        val rootTypes = mutableSetOf<TypeSpec>()
+        rootPackages.values.forEach { item ->
+            rootTypes.add(item.build())
+        }
+        return rootTypes
+    }
+
+    private data class PackageTreeNode(val packageFullName: String) {
+        val packageShortName = packageFullName.substringAfterLast(DOT)
+        val classes = mutableSetOf<MetaJavaClass>()
+        val childPackages = mutableMapOf<String, PackageTreeNode>()
+
+        fun addClass(childClass: MetaJavaClass) {
+            val childPackage = childClass.type.classPackageName;
+            if (childPackage == packageFullName) {
+                classes.add(childClass)
+                return
+            }
+            if (childPackage == null || !childPackage.startsWith(packageFullName))
+                throw IllegalArgumentException("Tree insertion into wrong package")
+
+            val nextPackageShortName = childPackage.removePrefix(packageFullName + DOT).substringBefore(DOT)
+            val nextPackageFullName = packageFullName + DOT + nextPackageShortName
+            childPackages.putIfAbsent(nextPackageShortName, PackageTreeNode(nextPackageFullName))
+            childPackages[nextPackageShortName]!!.addClass(childClass)
+        }
+
+        fun build(): TypeSpec {
+            val moduleName = generatorConfiguration.moduleName
+            val selfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *packageFullName.split(DOT).toTypedArray())
+            println(packageFullName)
+            val newScope = classBuilder(packageShortName)
+                    .addModifiers(PUBLIC, STATIC)
+                    .addField(FieldSpec.builder(selfType, SELF_FIELD, PUBLIC, FINAL, STATIC)
+                            .initializer("new \$T()", selfType)
+                            .build())
+                    .apply {
+                        classes.forEach { javaClass ->
+                            javaClass.fields.forEach { field ->
+                                val metaFieldType = ParameterizedTypeName.get(ClassName.get(MetaField::class.java), field.value.type.asPoetType())
+                                addField(FieldSpec.builder(metaFieldType, field.key, PRIVATE, FINAL)
+                                        .initializer("\$T.metaField(\$S,\$T.class)", ClassName.get(MetaField::class.java), field.key, field.value.type.asPoetType())
+                                        .build())
+                                addMethod(methodBuilder(field.key)
+                                        .returns(metaFieldType)
+                                        .addCode("return \$L;", field.key)
+                                        .build())
+                            }
+                            javaClass.methods.forEach { method ->
+                                val metaMethodType = ParameterizedTypeName.get(ClassName.get(MetaMethod::class.java), method.returnType.asPoetType())
+                                addField(FieldSpec.builder(metaMethodType, method.name, PRIVATE, FINAL)
+                                        .initializer("\$T.metaMethod(\$S,\$T.class)", ClassName.get(MetaMethod::class.java), method.name, method.returnType.asPoetType())
+                                        .build())
+                                addMethod(methodBuilder(method.name)
+                                        .returns(metaMethodType)
+                                        .addCode("return \$L;", method.name)
+                                        .build())
+                            }
+                        }
+                    }
+            childPackages.values.forEach { child -> newScope.addType(child.build()) }
+            return newScope.build()
+        }
+    }
+}
+
+
