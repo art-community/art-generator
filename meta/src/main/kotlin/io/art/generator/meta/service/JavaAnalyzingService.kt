@@ -50,12 +50,12 @@ object JavaAnalyzingService {
         val compiler = JavacTool.create()
         val writer = StringWriter()
         val context = Context().apply { Options.instance(this).let(::setUTF8Encoding) }
-        val sourceRoots = generatorConfiguration.sourcesRoot.map { path -> path.toFile() }
-        val sources = generatorConfiguration.sourcesRoot.flatMap { root -> root.toFile().walkTopDown().filter { file -> file.isJava } }.toTypedArray()
+        val sourceRoots = generatorConfiguration.sourcesRoot.toFile()
+        val sources = generatorConfiguration.sourcesRoot.toFile().walkTopDown().filter { file -> file.isJava }.toList().toTypedArray()
         val classpath = generatorConfiguration.classpath.map { path -> path.toFile() }
         val fileManager = compiler.getStandardFileManager(LoggingDiagnosticListener, getDefault(), defaultCharset()).apply {
             setContext(context)
-            setLocation(SOURCE_PATH, sourceRoots)
+            setLocation(SOURCE_PATH, listOf(sourceRoots))
             setLocation(CLASS_PATH, classpath)
             isSymbolFileEnabled = false
         }

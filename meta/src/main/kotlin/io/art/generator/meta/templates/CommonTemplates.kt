@@ -19,3 +19,5 @@
 package io.art.generator.meta.templates
 
 const val RETURN_NULL_STATEMENT = "return null"
+const val META_FIELD_METHOD = "metaField"
+const val META_METHOD_METHOD = "metaMethod"

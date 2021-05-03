@@ -24,74 +24,86 @@ import com.squareup.javapoet.*
 import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.constants.StringConstants.DOT
+import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.meta.configuration.generatorConfiguration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
+import io.art.generator.meta.constants.META_PACKAGE
+import io.art.generator.meta.constants.SELF_FIELD
 import io.art.generator.meta.model.MetaJavaClass
 import io.art.generator.meta.model.MetaJavaTypeKind.CLASS_KIND
 import io.art.generator.meta.model.MetaJavaTypeKind.INTERFACE_KIND
+import io.art.generator.meta.templates.META_FIELD_METHOD
+import io.art.generator.meta.templates.META_METHOD_METHOD
 import io.art.meta.MetaField
 import io.art.meta.MetaMethod
 import javax.lang.model.element.Modifier.*
 
+
 fun generateMetaJavaSources(classes: Set<MetaJavaClass>) {
     val javaClasses = classes.filter { javaClass -> javaClass.type.kind == CLASS_KIND || javaClass.type.kind == INTERFACE_KIND }
-    val root = generatorConfiguration.sourcesRoot.first().toFile()
+    val root = generatorConfiguration.sourcesRoot.toFile()
     val moduleName = generatorConfiguration.moduleName
-    JavaFile.builder("meta", classBuilder("Meta$moduleName")
+    JavaFile.builder(META_PACKAGE, classBuilder("Meta$moduleName")
             .addModifiers(PUBLIC)
-            .apply {
-                javaClasses
-                        .filter { javaClass -> javaClass.type.classPackageName?.contains(DOT) == false }
-                        .map { javaClass -> javaClass.type.classPackageName }
-                        .toSet()
-                        .forEach { basePackage ->
-                            basePackage
-                                    ?.let { baseNotEmptyPackage -> generateMetaPackage(emptySet(), baseNotEmptyPackage, javaClasses) }
-                                    ?: generateMetaPackage(emptySet(), "", javaClasses)
-                        }
-            }
+            .generateMetaClasses(javaClasses)
             .build())
-            .addStaticImport(ClassName.get(MetaField::class.java), "metaField")
-            .addStaticImport(ClassName.get(MetaMethod::class.java), "metaMethod")
+            .addStaticImport(ClassName.get(MetaField::class.java), META_FIELD_METHOD)
+            .addStaticImport(ClassName.get(MetaMethod::class.java), META_METHOD_METHOD)
             .skipJavaLangImports(true)
             .build()
             .writeTo(root)
 }
 
-private fun TypeSpec.Builder.generateMetaPackage(parentPackages: Set<String>, packageName: String, javaClasses: List<MetaJavaClass>) {
-    val moduleName = generatorConfiguration.moduleName
-    val currentPackageTree = if (packageName.isEmpty()) parentPackages else (parentPackages + packageName).filter { packageName -> packageName.isNotEmpty() }.toSet()
-    val currentPackage = if (currentPackageTree.isEmpty()) packageName else currentPackageTree.joinToString { "." }
-    println(currentPackage)
-    val self = ClassName.get("meta", "Meta$moduleName", *currentPackageTree.toTypedArray())
-    addType(classBuilder(packageName)
-            .addModifiers(PUBLIC, STATIC)
-            .addField(FieldSpec.builder(self, "self", PUBLIC, FINAL, STATIC).initializer("new \$T()", self).build())
-            .apply {
-                javaClasses
-                        .filter { javaClass -> currentPackage == javaClass.type.classPackageName }
-                        .forEach { javaClass -> addType(javaClass.generateMetaClass(currentPackageTree)) }
-                javaClasses
-                        .filter { javaClass -> javaClass.type.classPackageName?.contains(DOT) == true && javaClass.type.classPackageName.startsWith(currentPackage) }
-                        .forEach { javaClass ->
-                            javaClass.type.classPackageName!!.split(DOT).forEach { nestedPackage ->
-                                println(nestedPackage)
-                                generateMetaPackage(parentPackages + packageName, nestedPackage, javaClasses)
-                            }
-                        }
-            }
-            .build())
+private fun TypeSpec.Builder.generateMetaClasses(javaClasses: List<MetaJavaClass>) = apply {
+    val tree = mutableMapOf<String, TypeSpec>()
+    javaClasses
+            .groupBy { javaClass -> javaClass.type.classPackageName ?: EMPTY_STRING }
+            .asSequence()
+            .forEach { packagedClass -> generatePackageTree(packagedClass.key, tree) }
 }
 
-private fun MetaJavaClass.generateMetaClass(packageTree: Set<String>): TypeSpec? {
-    val self = ClassName.get("meta", "Meta${generatorConfiguration.moduleName}", *(packageTree + type.className).toTypedArray())
-    return classBuilder(type.className)
+private fun TypeSpec.Builder.generatePackageTree(classesPackage: String, tree: MutableMap<String, TypeSpec>) {
+    val moduleName = generatorConfiguration.moduleName
+    val packageParts = classesPackage.split(DOT)
+    var currentPackage: String = EMPTY_STRING
+    val passedParts = mutableListOf<String>()
+    packageParts
+            .filter { packagePart -> packagePart.isNotEmpty() }
+            .forEach { packagePart ->
+                val previousPackage = currentPackage
+                currentPackage += if (currentPackage.isEmpty()) packagePart else DOT + packagePart
+                passedParts += packagePart
+                if (tree.containsKey(currentPackage)) {
+                    return@forEach
+                }
+                val selfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *passedParts.toTypedArray())
+                println(passedParts)
+                val newScope = classBuilder(packagePart)
+                        .addModifiers(PUBLIC, STATIC)
+                        .addField(FieldSpec.builder(selfType, SELF_FIELD, PUBLIC, FINAL, STATIC)
+                                .initializer("new \$T()", selfType)
+                                .build())
+                        .build()
+                if (tree.containsKey(previousPackage)) {
+                    tree[previousPackage] = tree[previousPackage]!!.toBuilder().addType(newScope).build()
+                    tree[currentPackage] = newScope
+                    return@forEach
+                }
+                tree[previousPackage] = addType(newScope).build()
+                tree[currentPackage] = newScope
+            }
+}
+
+private fun TypeSpec.Builder.generatePackageTree(packageTree: List<String>, javaClass: MetaJavaClass) {
+    val moduleName = generatorConfiguration.moduleName
+    val self = ClassName.get(META_PACKAGE, "Meta$moduleName", *packageTree.toTypedArray())
+    classBuilder(javaClass.type.className)
             .addModifiers(PUBLIC, STATIC)
-            .addField(FieldSpec.builder(self, "self", PUBLIC, FINAL, STATIC)
+            .addField(FieldSpec.builder(self, SELF_FIELD, PUBLIC, FINAL, STATIC)
                     .initializer("new \$T()", self)
                     .build())
             .apply {
-                fields.forEach { field ->
+                javaClass.fields.forEach { field ->
                     val metaFieldType = ParameterizedTypeName.get(ClassName.get(MetaField::class.java), field.value.type.asPoetType())
                     addField(FieldSpec.builder(metaFieldType, field.key, PRIVATE, FINAL)
                             .initializer("\$T.metaField(\$S,\$T.class)", ClassName.get(MetaField::class.java), field.key, field.value.type.asPoetType())
@@ -101,7 +113,7 @@ private fun MetaJavaClass.generateMetaClass(packageTree: Set<String>): TypeSpec?
                             .addCode("return \$L;", field.key)
                             .build())
                 }
-                methods.forEach { method ->
+                javaClass.methods.forEach { method ->
                     val metaMethodType = ParameterizedTypeName.get(ClassName.get(MetaMethod::class.java), method.returnType.asPoetType())
                     addField(FieldSpec.builder(metaMethodType, method.name, PRIVATE, FINAL)
                             .initializer("\$T.metaMethod(\$S,\$T.class)", ClassName.get(MetaMethod::class.java), method.name, method.returnType.asPoetType())
@@ -113,4 +125,5 @@ private fun MetaJavaClass.generateMetaClass(packageTree: Set<String>): TypeSpec?
                 }
             }
             .build()
+            .let(::addType)
 }

@@ -32,7 +32,7 @@ object MetaGenerator {
     fun main(arguments: Array<String>) {
         initialize(arguments)
         analyzeJavaSources().apply {
-            generateJavaStubs(this)
+            //generateJavaStubs(this)
             generateMetaJavaSources(this)
         }
         block()

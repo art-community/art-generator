@@ -27,7 +27,7 @@ import java.nio.file.Path
 import java.time.Duration
 
 
-data class Configuration(val sourcesRoot: Set<Path>,
+data class Configuration(val sourcesRoot: Path,
                          val stubRoot: Path,
                          val sources: Set<Path>,
                          val classpath: Set<Path>,
@@ -40,7 +40,7 @@ lateinit var generatorConfiguration: Configuration
 fun loadConfiguration(stream: InputStream) {
     with(YamlConfigurationSource(EMPTY_STRING, CUSTOM_FILE) { stream }) {
         generatorConfiguration = Configuration(
-                sourcesRoot = getStringArray("paths.sources").map { file -> file.path }.toSet(),
+                sourcesRoot = getString("paths.sources").path,
                 stubRoot = getString("paths.stubs").path,
                 sources = getStringArray("sources").map { file -> file.path }.toSet(),
                 classpath = getStringArray("classpath").map { file -> file.path }.toSet(),
