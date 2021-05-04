@@ -27,7 +27,6 @@ import io.art.core.constants.StringConstants.DOT
 import io.art.generator.meta.configuration.generatorConfiguration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.constants.META_PACKAGE
-import io.art.generator.meta.constants.SELF_FIELD
 import io.art.generator.meta.model.MetaJavaClass
 import io.art.generator.meta.model.MetaJavaField
 import io.art.generator.meta.model.MetaJavaMethod
@@ -46,9 +45,17 @@ fun generateMetaJavaSources(classes: Set<MetaJavaClass>) {
     val moduleName = generatorConfiguration.moduleName
     classBuilder("Meta$moduleName")
             .addModifiers(PUBLIC)
-            .addField(selfField())
-            .apply { PackagesTree(javaClasses).generate().forEach(::addType) }
-            .addMethod(selfMethod("meta$moduleName"))
+            .addField(containerField("meta$moduleName"))
+            .apply {
+                PackagesTree(javaClasses).apply {
+                    rootPackages.values.forEach { rootPackage ->
+                        addField(containerField(rootPackage.packageShortName, listOf(rootPackage.packageShortName)))
+                        addMethod(containerMethod(rootPackage.packageShortName, listOf(rootPackage.packageShortName)))
+                    }
+                    generate().forEach(::addType)
+                }
+            }
+            .addMethod(containerMethod("meta$moduleName"))
             .build()
             .let { metaClass ->
                 JavaFile.builder(META_PACKAGE, metaClass)
@@ -62,27 +69,27 @@ fun generateMetaJavaSources(classes: Set<MetaJavaClass>) {
 
 private fun String.packages() = split(DOT)
 
-private fun selfField(classes: List<String> = emptyList()): FieldSpec {
+private fun containerField(name: String, classes: List<String> = emptyList()): FieldSpec {
     val moduleName = generatorConfiguration.moduleName
     val classSelfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *classes.toTypedArray())
-    return FieldSpec.builder(classSelfType, SELF_FIELD, PUBLIC, FINAL, STATIC)
+    return FieldSpec.builder(classSelfType, name, PRIVATE, FINAL, STATIC)
             .initializer("new \$T()", classSelfType)
             .build()
 }
 
-private fun selfMethod(name: String, classes: List<String> = emptyList()): MethodSpec? {
+private fun containerMethod(name: String, classes: List<String> = emptyList()): MethodSpec? {
     val moduleName = generatorConfiguration.moduleName
     val classSelfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *classes.toTypedArray())
     return methodBuilder(name)
             .addModifiers(PUBLIC, STATIC)
             .returns(classSelfType)
-            .addCode("return \$L;", "self")
+            .addCode("return \$L;", name)
             .build()
 }
 
 
 private class PackagesTree(classes: List<MetaJavaClass>) {
-    private val rootPackages = mutableMapOf<String, Node>()
+    val rootPackages = mutableMapOf<String, Node>()
 
     init {
         classes.forEach { metaClass ->
@@ -98,10 +105,10 @@ private class PackagesTree(classes: List<MetaJavaClass>) {
 
     fun generate(): List<TypeSpec> = rootPackages.values.map(Node::generate)
 
-    private data class Node(val packageFullName: String) {
-        private val packageShortName = packageFullName.substringAfterLast(DOT)
+    data class Node(val packageFullName: String) {
         private val classes = mutableSetOf<MetaJavaClass>()
         private val children = mutableMapOf<String, Node>()
+        val packageShortName = packageFullName.substringAfterLast(DOT)
 
         fun add(childClass: MetaJavaClass) {
             val childPackage = childClass.type.classPackageName ?: return
@@ -118,16 +125,19 @@ private class PackagesTree(classes: List<MetaJavaClass>) {
 
         fun generate(): TypeSpec = classBuilder(packageShortName)
                 .addModifiers(PUBLIC, STATIC)
-                .addField(selfField(packageFullName.packages()))
-                .apply { classes.forEach { javaClass -> generate(javaClass) } }
-                .apply { children.values.forEach { child -> addType(child.generate()) } }
-                .addMethod(selfMethod(packageShortName, packageFullName.packages()))
+                .apply {
+                    classes.forEach { javaClass -> generate(javaClass) }
+                    children.values.forEach { child ->
+                        addField(containerField(child.packageShortName, packageFullName.packages() + child.packageShortName))
+                        addType(child.generate())
+                        addMethod(containerMethod(child.packageShortName, packageFullName.packages() + child.packageShortName))
+                    }
+                }
                 .build()
 
         private fun TypeSpec.Builder.generate(javaClass: MetaJavaClass) {
             addType(classBuilder(javaClass.type.className)
                     .addModifiers(PUBLIC, STATIC)
-                    .addField(selfField(packageFullName.packages() + javaClass.type.className!!))
                     .apply {
                         javaClass.fields
                                 .asSequence()
@@ -144,7 +154,6 @@ private class PackagesTree(classes: List<MetaJavaClass>) {
                                 .filter { method -> method.returnType.classTypeParameters.isEmpty() }
                                 .filter { method -> method.name !in setOf("builder", "toString") }
                                 .forEach { method -> addMetaMethod(method) }
-                        addMethod(selfMethod(javaClass.type.className, packageFullName.packages() + javaClass.type.className))
                     }
                     .build()
             )
