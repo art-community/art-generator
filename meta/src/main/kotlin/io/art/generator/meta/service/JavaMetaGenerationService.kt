@@ -31,15 +31,12 @@ import io.art.generator.meta.constants.SELF_FIELD
 import io.art.generator.meta.model.MetaJavaClass
 import io.art.generator.meta.model.MetaJavaField
 import io.art.generator.meta.model.MetaJavaMethod
-import io.art.generator.meta.model.MetaJavaTypeKind.CLASS_KIND
-import io.art.generator.meta.model.MetaJavaTypeKind.INTERFACE_KIND
+import io.art.generator.meta.model.MetaJavaTypeKind.*
 import io.art.generator.meta.templates.META_FIELD_METHOD
 import io.art.generator.meta.templates.META_METHOD_METHOD
 import io.art.meta.MetaField
 import io.art.meta.MetaMethod
 import javax.lang.model.element.Modifier.*
-
-private fun String.packages() = split(DOT)
 
 fun generateMetaJavaSources(classes: Set<MetaJavaClass>) {
     val javaClasses = classes.filter { javaClass ->
@@ -49,7 +46,9 @@ fun generateMetaJavaSources(classes: Set<MetaJavaClass>) {
     val moduleName = generatorConfiguration.moduleName
     classBuilder("Meta$moduleName")
             .addModifiers(PUBLIC)
+            .addField(selfField())
             .apply { PackagesTree(javaClasses).generate().forEach(::addType) }
+            .addMethod(selfMethod("meta$moduleName"))
             .build()
             .let { metaClass ->
                 JavaFile.builder(META_PACKAGE, metaClass)
@@ -60,6 +59,27 @@ fun generateMetaJavaSources(classes: Set<MetaJavaClass>) {
                         .writeTo(root)
             }
 }
+
+private fun String.packages() = split(DOT)
+
+private fun selfField(classes: List<String> = emptyList()): FieldSpec {
+    val moduleName = generatorConfiguration.moduleName
+    val classSelfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *classes.toTypedArray())
+    return FieldSpec.builder(classSelfType, SELF_FIELD, PUBLIC, FINAL, STATIC)
+            .initializer("new \$T()", classSelfType)
+            .build()
+}
+
+private fun selfMethod(name: String, classes: List<String> = emptyList()): MethodSpec? {
+    val moduleName = generatorConfiguration.moduleName
+    val classSelfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *classes.toTypedArray())
+    return methodBuilder(name)
+            .addModifiers(PUBLIC, STATIC)
+            .returns(classSelfType)
+            .addCode("return \$L;", "self")
+            .build()
+}
+
 
 private class PackagesTree(classes: List<MetaJavaClass>) {
     private val rootPackages = mutableMapOf<String, Node>()
@@ -101,6 +121,7 @@ private class PackagesTree(classes: List<MetaJavaClass>) {
                 .addField(selfField(packageFullName.packages()))
                 .apply { classes.forEach { javaClass -> generate(javaClass) } }
                 .apply { children.values.forEach { child -> addType(child.generate()) } }
+                .addMethod(selfMethod(packageShortName, packageFullName.packages()))
                 .build()
 
         private fun TypeSpec.Builder.generate(javaClass: MetaJavaClass) {
@@ -108,8 +129,22 @@ private class PackagesTree(classes: List<MetaJavaClass>) {
                     .addModifiers(PUBLIC, STATIC)
                     .addField(selfField(packageFullName.packages() + javaClass.type.className!!))
                     .apply {
-                        javaClass.fields.forEach { field -> addMetaField(field.value) }
-                        javaClass.methods.forEach { method -> addMetaMethod(method) }
+                        javaClass.fields
+                                .asSequence()
+                                .filter { field -> field.value.type.kind !in setOf(WILDCARD_KIND, UNKNOWN_KIND, VARIABLE_KIND) }
+                                .filter { field -> field.value.type.classTypeParameters.isEmpty() }
+                                .forEach { field -> addMetaField(field.value) }
+                        javaClass.methods
+                                .asSequence()
+                                .filter { method -> method.returnType.kind !in setOf(WILDCARD_KIND, UNKNOWN_KIND, VARIABLE_KIND) }
+                                .filter { method -> method.parameters.values.none { parameter -> parameter.type.kind in setOf(WILDCARD_KIND, UNKNOWN_KIND, VARIABLE_KIND) } }
+                                .filter { method -> javaClass.fields.none { field -> method.name == "get${field.key.capitalize()}" } }
+                                .filter { method -> javaClass.fields.none { field -> method.name == "set${field.key.capitalize()}" } }
+                                .filter { method -> javaClass.fields.none { field -> method.name == "is${field.key.capitalize()}" } }
+                                .filter { method -> method.returnType.classTypeParameters.isEmpty() }
+                                .filter { method -> method.name !in setOf("builder", "toString") }
+                                .forEach { method -> addMetaMethod(method) }
+                        addMethod(selfMethod(javaClass.type.className, packageFullName.packages() + javaClass.type.className))
                     }
                     .build()
             )
@@ -121,6 +156,7 @@ private class PackagesTree(classes: List<MetaJavaClass>) {
                     .initializer("\$T.metaField(\$S,\$T.class)", ClassName.get(MetaField::class.java), field.name, field.type.asPoetType())
                     .build())
             addMethod(methodBuilder(field.name)
+                    .addModifiers(PUBLIC)
                     .returns(metaFieldType)
                     .addCode("return \$L;", field.name)
                     .build())
@@ -132,18 +168,10 @@ private class PackagesTree(classes: List<MetaJavaClass>) {
                     .initializer("\$T.metaMethod(\$S,\$T.class)", ClassName.get(MetaMethod::class.java), method.name, method.returnType.asPoetType())
                     .build())
             addMethod(methodBuilder(method.name)
+                    .addModifiers(PUBLIC)
                     .returns(metaMethodType)
                     .addCode("return \$L;", method.name)
                     .build())
         }
-
-        private fun selfField(classes: List<String>): FieldSpec {
-            val moduleName = generatorConfiguration.moduleName
-            val classSelfType = ClassName.get(META_PACKAGE, "Meta$moduleName", *classes.toTypedArray())
-            return FieldSpec.builder(classSelfType, SELF_FIELD, PUBLIC, FINAL, STATIC)
-                    .initializer("new \$T()", classSelfType)
-                    .build()
-        }
     }
 }
-
