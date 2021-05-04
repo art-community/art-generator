@@ -37,7 +37,6 @@ import io.art.generator.meta.templates.META_FIELD_METHOD
 import io.art.generator.meta.templates.META_METHOD_METHOD
 import io.art.meta.MetaField
 import io.art.meta.MetaMethod
-import org.jetbrains.kotlin.utils.addToStdlib.getOrPut
 import javax.lang.model.element.Modifier.*
 
 private fun String.packages() = split(DOT)
@@ -70,10 +69,8 @@ private class PackagesTree(classes: List<MetaJavaClass>) {
             metaClass.type.classPackageName
                     ?.substringBefore(DOT)
                     ?.let { packageName ->
-                        rootPackages.getOrPut(packageName,
-                                { name -> Node(name) },
-                                { node -> node.add(metaClass) }
-                        )
+                        rootPackages[packageName]?.add(metaClass)?.let { return@forEach }
+                        rootPackages[packageName] = Node(packageName).apply { add(metaClass) }
                     }
         }
 
@@ -95,10 +92,8 @@ private class PackagesTree(classes: List<MetaJavaClass>) {
             if (childPackage.isEmpty()) return
             val nextPackageShortName = childPackage.removePrefix(packageFullName + DOT).substringBefore(DOT)
             val nextPackageFullName = packageFullName + DOT + nextPackageShortName
-            children.getOrPut(nextPackageShortName,
-                    { Node(nextPackageFullName) },
-                    { node -> node.add(childClass) }
-            )
+            children[nextPackageFullName]?.add(childClass)?.let { return }
+            children[nextPackageFullName] = Node(nextPackageFullName).apply { add(childClass) }
         }
 
         fun generate(): TypeSpec = classBuilder(packageShortName)
