@@ -92,8 +92,8 @@ private class PackagesTree(classes: List<MetaJavaClass>) {
             if (childPackage.isEmpty()) return
             val nextPackageShortName = childPackage.removePrefix(packageFullName + DOT).substringBefore(DOT)
             val nextPackageFullName = packageFullName + DOT + nextPackageShortName
-            children[nextPackageFullName]?.add(childClass)?.let { return }
-            children[nextPackageFullName] = Node(nextPackageFullName).apply { add(childClass) }
+            children[nextPackageShortName]?.add(childClass)?.let { return }
+            children[nextPackageShortName] = Node(nextPackageFullName).apply { add(childClass) }
         }
 
         fun generate(): TypeSpec = classBuilder(packageShortName)
