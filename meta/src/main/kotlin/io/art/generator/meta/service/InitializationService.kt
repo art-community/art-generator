@@ -21,24 +21,27 @@ package io.art.generator.meta.service
 import io.art.core.extensions.FileExtensions
 import io.art.generator.meta.MetaGenerator
 import io.art.generator.meta.configuration.loadConfiguration
+import io.art.generator.meta.constants.CONFIGURATION_ARGUMENTS
 import io.art.generator.meta.constants.CONFIGURATION_PATH_ARGUMENT
 import io.art.generator.meta.constants.DEFAULT_CONFIGURATION_PATH
 import io.art.generator.meta.constants.EXIT_CODE_ERROR
 import io.art.generator.meta.extension.path
-import net.sourceforge.argparse4j.ArgumentParsers
+import net.sourceforge.argparse4j.ArgumentParsers.newFor
 import net.sourceforge.argparse4j.inf.ArgumentParserException
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 import kotlin.system.exitProcess
 
 fun initialize(arguments: Array<String>) {
     setIdeaIoUseFallback()
-    ArgumentParsers.newFor(MetaGenerator::class.simpleName)
+    newFor(MetaGenerator::class.simpleName)
             .cjkWidthHack(true)
             .build()
             .apply {
-                addArgument(CONFIGURATION_PATH_ARGUMENT.short, CONFIGURATION_PATH_ARGUMENT.long)
-                        .help(CONFIGURATION_PATH_ARGUMENT.help)
-                        .dest(CONFIGURATION_PATH_ARGUMENT.name)
+                CONFIGURATION_ARGUMENTS.forEach { argument ->
+                    addArgument(argument.short, argument.long)
+                            .help(argument.help)
+                            .dest(argument.name)
+                }
                 try {
                     val stream = parseArgs(arguments).get<String>(CONFIGURATION_PATH_ARGUMENT.name)
                             ?.path

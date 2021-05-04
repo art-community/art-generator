@@ -18,3 +18,12 @@
 
 package io.art.generator.meta.service
 
+import io.art.generator.meta.configuration.generatorConfiguration
+import io.art.generator.meta.constants.META_PACKAGE
+import io.art.generator.meta.extension.isJava
+
+fun collectJavaSources() = generatorConfiguration.sourcesRoot.toFile()
+        .walkTopDown()
+        .onEnter { directory -> directory.name != META_PACKAGE }
+        .filter { file -> file.isJava }
+        .map { file -> file.toPath() }

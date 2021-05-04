@@ -24,19 +24,32 @@ import io.art.generator.meta.model.MetaJavaTypeKind.*
 import javax.lang.model.type.WildcardType
 
 fun MetaJavaType.asPoetType(): TypeName = when (kind) {
-    JDK_KIND, PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> originalType
-            ?.let(TypeName::get)
-            ?.let(TypeName::box)
-            ?: TypeName
-                    .get(reflectionType!!)
-                    .let(TypeName::box)
+    JDK_KIND, PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> {
+        originalType?.let(TypeName::get)?.let(TypeName::box) ?: TypeName.get(reflectionType!!).let(TypeName::box)
+    }
+
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.asPoetType())
+
     WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> WildcardTypeName.subtypeOf(bound.asPoetType()) }
             ?: wildcardSuperBound?.asPoetType()?.let(WildcardTypeName::supertypeOf)
             ?: WildcardTypeName.get(originalType as? WildcardType ?: reflectionType as WildcardType)
-    VARIABLE_KIND -> TypeVariableName.get(typeName, *typeVariableBounds.values.map { bound -> bound.asPoetType() }.toTypedArray())
-    CLASS_KIND, INTERFACE_KIND -> when {
-        classTypeParameters.isNotEmpty() -> ParameterizedTypeName.get(ClassName.get(classPackageName!!, className), *classTypeParameters.values.map { parameter -> parameter.asPoetType() }.toTypedArray())
-        else -> ClassName.get(classPackageName!!, className)
+
+    VARIABLE_KIND -> {
+        val bounds = typeVariableBounds.values.map(MetaJavaType::asPoetType).toTypedArray()
+        TypeVariableName.get(typeName, *bounds)
+    }
+
+    CLASS_KIND, INTERFACE_KIND -> {
+        val rawType = ClassName.get(classPackageName!!, className)
+        when {
+            classTypeParameters.isNotEmpty() -> {
+                val parameters = classTypeParameters
+                        .values
+                        .map(MetaJavaType::asPoetType)
+                        .toTypedArray()
+                ParameterizedTypeName.get(rawType, *parameters)
+            }
+            else -> rawType
+        }
     }
 }

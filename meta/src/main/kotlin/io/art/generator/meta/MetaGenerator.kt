@@ -21,25 +21,18 @@
 package io.art.generator.meta
 
 import io.art.core.extensions.ThreadExtensions.block
+import io.art.generator.meta.configuration.generatorConfiguration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
-import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
-import io.art.generator.meta.service.generateMetaJavaSources
+import io.art.generator.meta.service.SourceWatchingService.watchJavaSources
 import io.art.generator.meta.service.initialize
 import io.art.scheduler.manager.SchedulersManager.scheduleDelayed
-import java.time.Duration.ofSeconds
 
 object MetaGenerator {
     @JvmStatic
     fun main(arguments: Array<String>) {
         initialize(arguments)
-        scheduleDelayed(::processJavaSources, ofSeconds(30))
+        scheduleDelayed(::watchJavaSources, generatorConfiguration.watcherPeriod)
         block()
     }
 
-    private fun processJavaSources() {
-        analyzeJavaSources().apply {
-            if (error) return
-            generateMetaJavaSources(classes)
-        }
-    }
 }

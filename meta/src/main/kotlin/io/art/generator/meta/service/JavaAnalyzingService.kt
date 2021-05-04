@@ -29,7 +29,6 @@ import com.sun.tools.javac.util.Options
 import io.art.core.constants.StringConstants.DOT
 import io.art.generator.meta.configuration.generatorConfiguration
 import io.art.generator.meta.constants.*
-import io.art.generator.meta.extension.isJava
 import io.art.generator.meta.logger.CollectingDiagnosticListener
 import io.art.generator.meta.model.*
 import io.art.generator.meta.model.MetaJavaTypeKind.*
@@ -37,6 +36,8 @@ import io.art.logging.LoggingModule.logger
 import org.jetbrains.kotlin.javac.JavacOptionsMapper.setUTF8Encoding
 import java.io.StringWriter
 import java.nio.charset.Charset.defaultCharset
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.Locale.getDefault
 import javax.lang.model.element.ElementKind.ENUM
 import javax.lang.model.type.IntersectionType
@@ -45,13 +46,19 @@ import javax.tools.JavaFileManager
 import javax.tools.StandardLocation.CLASS_PATH
 import javax.tools.StandardLocation.SOURCE_PATH
 
-data class JavaAnalyzingResult(val error: Boolean = false, val classes: List<MetaJavaClass> = emptyList())
+data class JavaAnalyzingResult(val error: Boolean = false,
+                               val classes: Map<Path, MetaJavaClass> = emptyMap()) {
+    fun success(action: (result: JavaAnalyzingResult) -> Unit): JavaAnalyzingResult {
+        if (!error) action(this)
+        return this
+    }
+}
 
 object JavaAnalyzingService {
     private val logger = logger(JavaAnalyzingService::class.java)
 
-    fun analyzeJavaSources(): JavaAnalyzingResult {
-        logger.info("[java]: Analyzing")
+    fun analyzeJavaSources(sources: List<Path>): JavaAnalyzingResult {
+        JAVA_LOGGER.info("Analyzing $sources")
 
         val tool = JavacTool.create()
 
@@ -60,11 +67,6 @@ object JavaAnalyzingService {
         val sourceRoots = generatorConfiguration.sourcesRoot.toFile().listFiles()
                 ?.filter { source -> source.name != META_PACKAGE }
                 ?: emptyList()
-
-        val sources = generatorConfiguration.sourcesRoot.toFile()
-                .walkTopDown()
-                .onEnter { directory -> directory.name != META_PACKAGE }
-                .filter { file -> file.isJava }.toList().toTypedArray()
 
         val classpath = generatorConfiguration.classpath.map { path -> path.toFile() }
 
@@ -79,7 +81,7 @@ object JavaAnalyzingService {
                 NO_WARN_OPTION,
         )
 
-        val files = fileManager.getJavaFileObjects(*sources)
+        val files = fileManager.getJavaFileObjects(*sources.toTypedArray())
 
         val context = Context().apply { put(JavaFileManager::class.java, fileManager) }
         val compilerInstance = JavaCompiler.instance(context)
@@ -107,7 +109,7 @@ object JavaAnalyzingService {
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
                     .map { element -> (element as ClassSymbol).asMetaClass() }
                     .filter { input -> input.type.classPackageName?.split(DOT)?.firstOrNull() != META_PACKAGE }
-                    .let { metaClasses -> JavaAnalyzingResult(classes = metaClasses.toList()) }
+                    .let { metaClasses -> JavaAnalyzingResult(classes = metaClasses.associateBy { metaClass -> metaClass.source }) }
         } finally {
             fileManager.close()
             compilerInstance.close()
@@ -187,6 +189,7 @@ private fun ClassSymbol.asMetaType(): MetaJavaType = type.asMetaType()
 
 private fun ClassSymbol.asMetaClass(): MetaJavaClass = MetaJavaClass(
         type = asMetaType(),
+        source = Paths.get(sourcefile.toUri()),
         modifiers = modifiers,
         fields = members().symbols.filterIsInstance<VarSymbol>().associate { symbol -> symbol.name.toString() to symbol.asMetaField() },
         constructors = members().symbols.filterIsInstance<MethodSymbol>()

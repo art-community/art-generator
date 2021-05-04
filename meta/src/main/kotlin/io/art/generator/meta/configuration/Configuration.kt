@@ -32,7 +32,8 @@ data class Configuration(val sourcesRoot: Path,
                          val sources: Set<Path>,
                          val classpath: Set<Path>,
                          val moduleName: String,
-                         val watcherPeriod: Duration
+                         val watcherPeriod: Duration,
+                         val analyzerDelay: Duration
 )
 
 lateinit var generatorConfiguration: Configuration
@@ -45,7 +46,8 @@ fun loadConfiguration(stream: InputStream) {
                 sources = getStringArray("sources").map { file -> file.path }.toSet(),
                 classpath = getStringArray("classpath").map { file -> file.path }.toSet(),
                 moduleName = getString("moduleName"),
-                watcherPeriod = getDuration("watcher.period")
+                watcherPeriod = getDuration("watcher.period"),
+                analyzerDelay = getDuration("analyzer.delay")
         )
     }
 }

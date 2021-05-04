@@ -33,3 +33,7 @@ val CONFIGURATION_PATH_ARGUMENT = LaunchArgument(
         Specify ART generator configuration path to *.yml file
     """.trimIndent()
 )
+
+val CONFIGURATION_ARGUMENTS = arrayOf(
+        CONFIGURATION_PATH_ARGUMENT
+)

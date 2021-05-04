@@ -18,9 +18,15 @@
 
 package io.art.generator.meta.constants
 
+import io.art.logging.LoggingModule
+import io.art.logging.LoggingModule.*
+import org.apache.logging.log4j.core.Logger
+
 const val KOTLIN_EXTENSION = "kt"
 const val KOTLIN_SCRIPT_EXTENSION = "kts"
 
 const val JAVA_MODULE_SUPPRESSION = "JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE"
 
 const val EXIT_CODE_ERROR = -1
+
+val JAVA_LOGGER: Logger = logger(JAVA)

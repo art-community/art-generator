@@ -79,4 +79,6 @@ classpath:
   - D:\Development\Gradle\caches\modules-2\files-2.1\com.google.api.grpc\proto-google-common-protos\1.12.0\1140cc74df039deb044ed0e320035e674dc13062\proto-google-common-protos-1.12.0.jar
   - D:\Development\Gradle\caches\modules-2\files-2.1\io.grpc\grpc-context\1.24.0\abfd83c3b1a8a0fbc12db3529a339b693056f496\grpc-context-1.24.0.jar
 watcher:
-  period: 1s
+  period: 300ms
+analyzer:
+  delay: 300ms

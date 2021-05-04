@@ -25,6 +25,7 @@ import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.constants.StringConstants.DOT
 import io.art.generator.meta.configuration.generatorConfiguration
+import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.constants.META_PACKAGE
 import io.art.generator.meta.model.MetaJavaClass
@@ -33,14 +34,12 @@ import io.art.generator.meta.model.MetaJavaMethod
 import io.art.generator.meta.model.MetaJavaTypeKind.*
 import io.art.generator.meta.templates.META_FIELD_METHOD
 import io.art.generator.meta.templates.META_METHOD_METHOD
-import io.art.logging.LoggingModule.logger
 import io.art.meta.MetaField
 import io.art.meta.MetaMethod
 import javax.lang.model.element.Modifier.*
 
 fun generateMetaJavaSources(classes: List<MetaJavaClass>) {
-    val logger = logger()
-    logger.info("[java]: Generating meta")
+    JAVA_LOGGER.info("Generating meta")
     val javaClasses = classes.filter { javaClass ->
         javaClass.type.classPackageName != null && (javaClass.type.kind == CLASS_KIND || javaClass.type.kind == INTERFACE_KIND)
     }

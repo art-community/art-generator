@@ -21,7 +21,9 @@
 package io.art.generator.meta.model
 
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
+import java.io.File
 import java.lang.reflect.Type
+import java.nio.file.Path
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeMirror
 
@@ -61,6 +63,7 @@ data class MetaJavaType(
 
 data class MetaJavaClass(
         val type: MetaJavaType,
+        val source: Path,
         val fields: Map<String, MetaJavaField>,
         val constructors: List<MetaJavaMethod>,
         val innerClasses: Map<String, MetaJavaClass>,

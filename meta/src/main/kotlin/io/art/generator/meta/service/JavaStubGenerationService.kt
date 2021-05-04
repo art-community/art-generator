@@ -28,6 +28,7 @@ import com.squareup.javapoet.TypeSpec.*
 import com.squareup.javapoet.TypeVariableName
 import io.art.core.exception.NotImplementedException
 import io.art.generator.meta.configuration.generatorConfiguration
+import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.constants.throwInvalidTypeException
 import io.art.generator.meta.model.MetaJavaClass
@@ -40,6 +41,7 @@ import io.art.generator.meta.templates.THROW_EXCEPTION_STATEMENT
 import javax.lang.model.element.Modifier.FINAL
 
 fun generateJavaStubs(classes: List<MetaJavaClass>) {
+    JAVA_LOGGER.info("Generating stubs")
     val root = generatorConfiguration.stubRoot
     classes.forEach { metaJavaClass -> metaJavaClass.asPoetFile().writeTo(root) }
 }
