@@ -20,9 +20,12 @@
 
 package io.art.generator.meta.service
 
-import com.squareup.javapoet.*
+import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec.methodBuilder
+import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.TypeSpec.*
+import com.squareup.javapoet.TypeVariableName
 import io.art.core.exception.NotImplementedException
 import io.art.generator.meta.configuration.generatorConfiguration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
@@ -35,9 +38,8 @@ import io.art.generator.meta.model.MetaJavaTypeKind.*
 import io.art.generator.meta.templates.STUB_METHOD_STRING
 import io.art.generator.meta.templates.THROW_EXCEPTION_STATEMENT
 import javax.lang.model.element.Modifier.FINAL
-import javax.lang.model.type.WildcardType
 
-fun generateJavaStubs(classes: Set<MetaJavaClass>) {
+fun generateJavaStubs(classes: List<MetaJavaClass>) {
     val root = generatorConfiguration.stubRoot
     classes.forEach { metaJavaClass -> metaJavaClass.asPoetFile().writeTo(root) }
 }

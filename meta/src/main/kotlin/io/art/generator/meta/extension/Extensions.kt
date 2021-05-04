@@ -43,10 +43,10 @@ val File.isJava: Boolean
     get() = parseExtension(this.toString()) == JAVA
 
 val File.isKotlin: Boolean
-    get() = parseExtension(this.toString()) == KOTLIN || isKotlinScript
+    get() = parseExtension(this.toString()) == KOTLIN_EXTENSION || isKotlinScript
 
 val File.isKotlinScript: Boolean
-    get() = parseExtension(this.toString()) == KOTLIN_SCRIPT
+    get() = parseExtension(this.toString()) == KOTLIN_SCRIPT_EXTENSION
 
 val File.isClass: Boolean
     get() = parseExtension(this.toString()) == CLASS

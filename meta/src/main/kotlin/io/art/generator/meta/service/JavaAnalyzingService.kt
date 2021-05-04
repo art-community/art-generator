@@ -23,18 +23,17 @@ package io.art.generator.meta.service
 import com.sun.tools.javac.api.JavacTool
 import com.sun.tools.javac.code.Symbol.*
 import com.sun.tools.javac.code.Type
+import com.sun.tools.javac.main.JavaCompiler
 import com.sun.tools.javac.util.Context
 import com.sun.tools.javac.util.Options
 import io.art.core.constants.StringConstants.DOT
 import io.art.generator.meta.configuration.generatorConfiguration
-import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
-import io.art.generator.meta.constants.JAVA_PACKAGE_PREFIX
-import io.art.generator.meta.constants.NO_WARN_OPTION
-import io.art.generator.meta.constants.PARAMETERS_OPTION
+import io.art.generator.meta.constants.*
 import io.art.generator.meta.extension.isJava
-import io.art.generator.meta.logger.LoggingDiagnosticListener
+import io.art.generator.meta.logger.CollectingDiagnosticListener
 import io.art.generator.meta.model.*
 import io.art.generator.meta.model.MetaJavaTypeKind.*
+import io.art.logging.LoggingModule.logger
 import org.jetbrains.kotlin.javac.JavacOptionsMapper.setUTF8Encoding
 import java.io.StringWriter
 import java.nio.charset.Charset.defaultCharset
@@ -42,45 +41,77 @@ import java.util.Locale.getDefault
 import javax.lang.model.element.ElementKind.ENUM
 import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeMirror
+import javax.tools.JavaFileManager
 import javax.tools.StandardLocation.CLASS_PATH
 import javax.tools.StandardLocation.SOURCE_PATH
 
+data class JavaAnalyzingResult(val error: Boolean = false, val classes: List<MetaJavaClass> = emptyList())
+
 object JavaAnalyzingService {
-    fun analyzeJavaSources(): Set<MetaJavaClass> {
-        val compiler = JavacTool.create()
-        val writer = StringWriter()
-        val context = Context().apply { Options.instance(this).let(::setUTF8Encoding) }
-        val sourceRoots = generatorConfiguration.sourcesRoot.toFile()
+    private val logger = logger(JavaAnalyzingService::class.java)
+
+    fun analyzeJavaSources(): JavaAnalyzingResult {
+        logger.info("[java]: Analyzing")
+
+        val tool = JavacTool.create()
+
+        val listener = CollectingDiagnosticListener()
+
+        val sourceRoots = generatorConfiguration.sourcesRoot.toFile().listFiles()
+                ?.filter { source -> source.name != META_PACKAGE }
+                ?: emptyList()
+
         val sources = generatorConfiguration.sourcesRoot.toFile()
                 .walkTopDown()
-                .onEnter { directory -> directory.name != "meta" }
+                .onEnter { directory -> directory.name != META_PACKAGE }
                 .filter { file -> file.isJava }.toList().toTypedArray()
+
         val classpath = generatorConfiguration.classpath.map { path -> path.toFile() }
-        val fileManager = compiler.getStandardFileManager(LoggingDiagnosticListener, getDefault(), defaultCharset()).apply {
-            setContext(context)
-            setLocation(SOURCE_PATH, listOf(sourceRoots))
+
+        val fileManager = tool.getStandardFileManager(listener, getDefault(), defaultCharset()).apply {
+            setLocation(SOURCE_PATH, sourceRoots)
             setLocation(CLASS_PATH, classpath)
             isSymbolFileEnabled = false
         }
+
         val options = listOf(
                 PARAMETERS_OPTION,
                 NO_WARN_OPTION,
         )
-        val files = fileManager.getJavaFileObjects(*sources)
-        val task = compiler.getTask(
-                writer,
-                fileManager,
-                LoggingDiagnosticListener,
-                options,
-                emptyList(),
-                files,
-                context
-        )
 
-        return task.analyze().toList()
-                .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
-                .map { element -> (element as ClassSymbol).asMetaClass() }
-                .toSet()
+        val files = fileManager.getJavaFileObjects(*sources)
+
+        val context = Context().apply { put(JavaFileManager::class.java, fileManager) }
+        val compilerInstance = JavaCompiler.instance(context)
+        try {
+            Options.instance(context).let(::setUTF8Encoding)
+
+            val task = tool.getTask(
+                    StringWriter(),
+                    fileManager,
+                    listener,
+                    options,
+                    emptyList(),
+                    files,
+                    context
+            )
+
+            val classes = task.analyze()
+
+            if (compilerInstance.errorCount() != 0) {
+                return JavaAnalyzingResult(error = true)
+            }
+
+            return classes
+                    .asSequence()
+                    .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
+                    .map { element -> (element as ClassSymbol).asMetaClass() }
+                    .filter { input -> input.type.classPackageName?.split(DOT)?.firstOrNull() != META_PACKAGE }
+                    .let { metaClasses -> JavaAnalyzingResult(classes = metaClasses.toList()) }
+        } finally {
+            fileManager.close()
+            compilerInstance.close()
+        }
     }
 }
 

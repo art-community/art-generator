@@ -6,4 +6,6 @@ const val CONSTRUCTOR_NAME = "<init>"
 const val THIS_NAME = "this"
 const val META_PACKAGE = "meta"
 const val SELF_FIELD = "self"
-val OBJECT_CLASS_NAME: String = Object::class.java.name
+const val JAVA = "java"
+const val CLASS = "class"
+const val JAR = "jar"

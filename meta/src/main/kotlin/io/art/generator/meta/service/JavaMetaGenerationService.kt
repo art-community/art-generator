@@ -33,11 +33,14 @@ import io.art.generator.meta.model.MetaJavaMethod
 import io.art.generator.meta.model.MetaJavaTypeKind.*
 import io.art.generator.meta.templates.META_FIELD_METHOD
 import io.art.generator.meta.templates.META_METHOD_METHOD
+import io.art.logging.LoggingModule.logger
 import io.art.meta.MetaField
 import io.art.meta.MetaMethod
 import javax.lang.model.element.Modifier.*
 
-fun generateMetaJavaSources(classes: Set<MetaJavaClass>) {
+fun generateMetaJavaSources(classes: List<MetaJavaClass>) {
+    val logger = logger()
+    logger.info("[java]: Generating meta")
     val javaClasses = classes.filter { javaClass ->
         javaClass.type.classPackageName != null && (javaClass.type.kind == CLASS_KIND || javaClass.type.kind == INTERFACE_KIND)
     }

@@ -32,12 +32,14 @@ object MetaGenerator {
     @JvmStatic
     fun main(arguments: Array<String>) {
         initialize(arguments)
-        scheduleDelayed({
-            analyzeJavaSources().apply {
-                //generateJavaStubs(this)
-                generateMetaJavaSources(this)
-            }
-        }, ofSeconds(10))
+        scheduleDelayed(::processJavaSources, ofSeconds(30))
         block()
+    }
+
+    private fun processJavaSources() {
+        analyzeJavaSources().apply {
+            if (error) return
+            generateMetaJavaSources(classes)
+        }
     }
 }

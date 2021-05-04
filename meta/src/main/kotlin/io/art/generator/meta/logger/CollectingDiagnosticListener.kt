@@ -18,14 +18,13 @@
 
 package io.art.generator.meta.logger
 
-import io.art.generator.meta.service.JavaAnalyzingService
-import io.art.logging.LoggingModule.logger
-import java.util.Locale.getDefault
 import javax.tools.Diagnostic
 import javax.tools.DiagnosticListener
 
-object LoggingDiagnosticListener : DiagnosticListener<Any> {
-    private val logger = logger(JavaAnalyzingService::class.java)
+class CollectingDiagnosticListener : DiagnosticListener<Any> {
+    val diagnostics = mutableListOf<Diagnostic<out Any>>()
 
-    override fun report(diagnostic: Diagnostic<out Any>) = logger.trace(diagnostic.getMessage(getDefault()))
+    override fun report(diagnostic: Diagnostic<out Any>) {
+        diagnostics += diagnostic
+    }
 }
