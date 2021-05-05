@@ -22,6 +22,7 @@ package io.art.generator.meta.service
 
 import com.squareup.javapoet.*
 import com.squareup.javapoet.MethodSpec.methodBuilder
+import com.squareup.javapoet.MethodSpec.overriding
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.constants.StringConstants.DOT
 import io.art.generator.meta.configuration.configuration
@@ -127,7 +128,7 @@ object JavaMetaGenerationService {
             }
 
             fun generate(): TypeSpec = classBuilder(packageShortName)
-                    .addModifiers(PUBLIC)
+                    .addModifiers(PUBLIC, STATIC)
                     .apply {
                         classes.forEach { javaClass ->
                             val className = META_CLASS(javaClass.type.className!!)
@@ -147,7 +148,7 @@ object JavaMetaGenerationService {
 
             private fun TypeSpec.Builder.generate(javaClass: JavaMetaClass) {
                 addType(classBuilder(META_CLASS(javaClass.type.className!!))
-                        .addModifiers(PUBLIC)
+                        .addModifiers(PUBLIC, STATIC)
                         .apply {
                             javaClass.fields
                                     .asSequence()
