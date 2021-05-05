@@ -25,6 +25,7 @@ import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
 import io.art.generator.meta.service.JavaMetaGenerationService.generateJavaMeta
+import io.art.generator.meta.service.JavaStubGenerationService.generateJavaStubs
 import io.art.scheduler.manager.SchedulersManager.schedule
 import java.nio.file.Path
 import java.security.MessageDigest

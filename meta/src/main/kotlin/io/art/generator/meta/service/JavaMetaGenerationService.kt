@@ -33,7 +33,8 @@ import io.art.generator.meta.extension.packages
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaField
 import io.art.generator.meta.model.JavaMetaMethod
-import io.art.generator.meta.model.JavaMetaTypeKind.*
+import io.art.generator.meta.model.JavaMetaTypeKind.UNKNOWN_KIND
+import io.art.generator.meta.model.JavaMetaTypeKind.VARIABLE_KIND
 import io.art.generator.meta.templates.*
 import io.art.meta.MetaField
 import io.art.meta.MetaMethod
@@ -48,16 +49,17 @@ object JavaMetaGenerationService {
                 .addModifiers(PUBLIC)
                 .addField(metaPackageField(META_PACKAGE_REFERENCE, static = true))
                 .apply {
-                    MetaPackagesTree(classes).apply {
-                        rootPackages.values
-                                .asSequence()
-                                .map { rootPackage -> rootPackage.packageShortName }
-                                .forEach { name ->
-                                    addField(metaPackageField(name, innerNames = listOf(name)))
-                                    addMethod(metaPackageMethod(name, innerNames = listOf(name)))
-                                }
-                        generate().forEach(::addType)
-                    }
+                    MetaPackagesTree(classes.filter { metaClass -> META_CLASS(metaClass.type.className!!) != META_CLASS(moduleName) })
+                            .apply {
+                                rootPackages.values
+                                        .asSequence()
+                                        .map { rootPackage -> rootPackage.packageShortName }
+                                        .forEach { name ->
+                                            addField(metaPackageField(name, innerNames = listOf(name)))
+                                            addMethod(metaPackageMethod(name, innerNames = listOf(name)))
+                                        }
+                                generate().forEach(::addType)
+                            }
                 }
                 .addMethod(metaPackageMethod(META_PACKAGE_REFERENCE, static = true))
                 .build()
@@ -128,7 +130,7 @@ object JavaMetaGenerationService {
                     .addModifiers(PUBLIC)
                     .apply {
                         classes.forEach { javaClass ->
-                            val className = javaClass.type.className!!
+                            val className = META_CLASS(javaClass.type.className!!)
                             val reference = javaClass.type.className.decapitalize()
                             addField(metaPackageField(reference, innerNames = packageFullName.packages + className))
                             addMethod(metaPackageMethod(reference, innerNames = packageFullName.packages + className))
@@ -144,23 +146,21 @@ object JavaMetaGenerationService {
                     .build()
 
             private fun TypeSpec.Builder.generate(javaClass: JavaMetaClass) {
-                addType(classBuilder(javaClass.type.className)
+                addType(classBuilder(META_CLASS(javaClass.type.className!!))
                         .addModifiers(PUBLIC)
                         .apply {
                             javaClass.fields
                                     .asSequence()
-                                    .filter { field -> field.value.type.kind !in setOf(WILDCARD_KIND, UNKNOWN_KIND, VARIABLE_KIND) }
-                                    .filter { field -> field.value.type.classTypeParameters.isEmpty() }
-                                    .forEach { field -> addMetaField(field.value) }
+                                    .filter { field -> field.value.type.kind !in setOf(UNKNOWN_KIND) }
+                                    .forEach { field -> addMetaField(javaClass, field.value) }
 
                             javaClass.methods
                                     .asSequence()
-                                    .filter { method -> method.returnType.kind !in setOf(WILDCARD_KIND, UNKNOWN_KIND, VARIABLE_KIND) }
-                                    .filter { method -> method.parameters.values.none { parameter -> parameter.type.kind in setOf(WILDCARD_KIND, UNKNOWN_KIND, VARIABLE_KIND) } }
+                                    .filter { method -> method.returnType.kind !in setOf(UNKNOWN_KIND) }
+                                    .filter { method -> method.parameters.values.none { parameter -> parameter.type.kind in setOf(UNKNOWN_KIND) } }
                                     .filter { method -> javaClass.fields.none { field -> method.name == GETTER(field.key) } }
                                     .filter { method -> javaClass.fields.none { field -> method.name == GETTER_BOOLEAN(field.key) } }
                                     .filter { method -> javaClass.fields.none { field -> method.name == SETTER(field.key) } }
-                                    .filter { method -> method.returnType.classTypeParameters.isEmpty() }
                                     .filter { method -> method.name !in configuration.metaMethodExclusions }
                                     .forEach { method -> addMetaMethod(method) }
                         }
@@ -168,16 +168,40 @@ object JavaMetaGenerationService {
                 )
             }
 
-            private fun TypeSpec.Builder.addMetaField(field: JavaMetaField) {
+            private fun TypeSpec.Builder.addMetaField(owner: JavaMetaClass, field: JavaMetaField) {
                 val ownerFieldType = field.type.asPoetType()
-                val metaFieldType = ParameterizedTypeName.get(ClassName.get(MetaField::class.java), ownerFieldType)
+                val classClassName = ClassName.get(Class::class.java)
+                val objectClassName = ClassName.get(Object::class.java)
+                val rawType = ClassName.get(MetaField::class.java)
+                val metaFieldType = when (field.type.kind) {
+                    VARIABLE_KIND -> ParameterizedTypeName.get(rawType, objectClassName)
+                    else -> ParameterizedTypeName.get(rawType, ownerFieldType)
+                }
                 addField(FieldSpec.builder(metaFieldType, field.name, PRIVATE, FINAL)
-                        .initializer(META_FIELD_INITIALIZER, ClassName.get(MetaField::class.java), field.name, ownerFieldType)
+                        .apply {
+                            when (field.type.kind) {
+                                VARIABLE_KIND -> initializer(META_GENERIC_FIELD_INITIALIZER, rawType, field.name)
+                                else -> initializer(META_FIELD_INITIALIZER, rawType, field.name, ownerFieldType)
+                            }
+                        }
                         .build())
                 addMethod(methodBuilder(field.name)
                         .addModifiers(PUBLIC)
-                        .returns(metaFieldType)
-                        .addCode(RETURN_STATEMENT, field.name)
+                        .apply {
+                            when (field.type.kind) {
+                                VARIABLE_KIND -> {
+                                    val typeVariable = owner.type.classTypeParameters[field.type.typeName]!!.asPoetType() as TypeVariableName
+                                    returns(ParameterizedTypeName.get(rawType, ownerFieldType))
+                                    addTypeVariable(typeVariable)
+                                    addParameter(ParameterizedTypeName.get(classClassName, typeVariable), META_FIELD_METHOD_REIFIED_PARAMETER)
+                                    addCode(META_FIELD_METHOD_REIFIED_STATEMENT, field.name)
+                                }
+                                else -> {
+                                    returns(metaFieldType)
+                                    addCode(RETURN_STATEMENT, field.name)
+                                }
+                            }
+                        }
                         .build())
             }
 
