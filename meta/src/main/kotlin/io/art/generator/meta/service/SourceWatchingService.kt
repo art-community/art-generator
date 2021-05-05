@@ -23,13 +23,8 @@ import io.art.generator.meta.configuration.generatorConfiguration
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
 import io.art.scheduler.manager.SchedulersManager.schedule
 import java.nio.file.Path
+import java.security.MessageDigest
 import java.time.LocalDateTime.now
-
-data class JavaSourcesChanges(val existed: List<Path>, val changed: List<Path>) {
-    fun changed(action: JavaSourcesChanges.() -> Unit) {
-        if (changed.isNotEmpty()) action(this)
-    }
-}
 
 object SourceWatchingService {
     private var state = mapOf<Path, ByteArray>()
@@ -46,7 +41,7 @@ object SourceWatchingService {
         sources.forEach { source ->
             val currentModified = existed[source]
             val newModified = md5(source)
-            if (!currentModified.contentEquals(newModified)) {
+            if (!MessageDigest.isEqual(currentModified, newModified)) {
                 changed.add(source)
             }
             existed[source] = newModified
@@ -55,7 +50,13 @@ object SourceWatchingService {
         return JavaSourcesChanges(existed.keys.toList(), changed)
     }
 
-    private fun JavaSourcesChanges.handle() = analyzeJavaSources(existed)
-            .success { changes -> generateJavaStubs(changes.classes.filterKeys(changed::contains).values.toList()) }
-            .success { changes -> generateMetaJavaSources(changes.classes.values.toList()) }
+    private data class JavaSourcesChanges(val existed: List<Path>, val changed: List<Path>) {
+        fun changed(action: JavaSourcesChanges.() -> Unit) {
+            if (changed.isNotEmpty()) action(this)
+        }
+
+        fun handle() = analyzeJavaSources(existed)
+                .success { changes -> generateMetaJavaSources(changes.classes.values.toList()) }
+                .success { changes -> generateJavaStubs(changes.classes.filterKeys(changed::contains).values.toList()) }
+    }
 }

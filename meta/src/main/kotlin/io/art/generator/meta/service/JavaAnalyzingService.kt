@@ -32,7 +32,6 @@ import io.art.generator.meta.constants.*
 import io.art.generator.meta.logger.CollectingDiagnosticListener
 import io.art.generator.meta.model.*
 import io.art.generator.meta.model.MetaJavaTypeKind.*
-import io.art.logging.LoggingModule.logger
 import org.jetbrains.kotlin.javac.JavacOptionsMapper.setUTF8Encoding
 import java.io.StringWriter
 import java.nio.charset.Charset.defaultCharset
@@ -55,8 +54,6 @@ data class JavaAnalyzingResult(val error: Boolean = false,
 }
 
 object JavaAnalyzingService {
-    private val logger = logger(JavaAnalyzingService::class.java)
-
     fun analyzeJavaSources(sources: List<Path>): JavaAnalyzingResult {
         JAVA_LOGGER.info("Analyzing $sources")
 
