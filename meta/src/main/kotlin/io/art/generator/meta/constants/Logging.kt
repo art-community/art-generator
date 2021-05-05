@@ -22,7 +22,9 @@ import io.art.logging.LoggingModule
 import org.apache.logging.log4j.core.Logger
 
 val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)
-const val GENERATION_TRIGGERED = "Sources were changed. Triggering generation"
+const val SOURCES_CHANGED = "Sources changed"
+const val CLASSES_CHANGED = "Classes changed. Process generation"
+const val CLASSES_NOT_CHANGED = "Classes not changed. Skip Generation"
 const val ANALYZING_MESSAGE = "Analyzing sources"
 const val GENERATING_METAS_MESSAGE = "Generating meta classes"
 const val GENERATING_STUBS_MESSAGE = "Generating stub classes"

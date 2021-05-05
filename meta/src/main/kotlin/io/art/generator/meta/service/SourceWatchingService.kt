@@ -18,29 +18,37 @@
 
 package io.art.generator.meta.service
 
+import io.art.core.constants.StringConstants.DOT
 import io.art.core.extensions.HashExtensions.md5
+import io.art.core.factory.MapFactory.concurrentMap
+import io.art.core.factory.MapFactory.concurrentMapOf
+import io.art.core.factory.SetFactory.copyOnWriteSet
+import io.art.core.factory.SetFactory.copyOnWriteSetOf
 import io.art.generator.meta.configuration.configuration
-import io.art.generator.meta.constants.GENERATION_TRIGGERED
-import io.art.generator.meta.constants.JAVA_LOGGER
+import io.art.generator.meta.constants.*
+import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
 import io.art.generator.meta.service.JavaMetaGenerationService.generateJavaMeta
 import io.art.scheduler.manager.SchedulersManager.schedule
 import java.nio.file.Path
 import java.security.MessageDigest
 import java.time.LocalDateTime.now
+import kotlin.collections.set
+
+data class JavaSourcesState(@Volatile var files: Map<Path, ByteArray>, @Volatile var classes: Set<JavaMetaClass>)
 
 object SourceWatchingService {
-    private var state = mapOf<Path, ByteArray>()
+    private val state = JavaSourcesState(concurrentMap(), copyOnWriteSet())
 
     fun watchJavaSources() = collectJavaChanges().changed {
-        JAVA_LOGGER.info(GENERATION_TRIGGERED)
+        JAVA_LOGGER.info(SOURCES_CHANGED)
         val triggerTime = now().plusSeconds(configuration.analyzerDelay.toSeconds())
         schedule(::handle, triggerTime)
     }
 
     private fun collectJavaChanges(): JavaSourcesChanges {
-        val sources = collectJavaSources()
-        val existed = state.filterKeys(sources::contains).toMutableMap()
+        val sources = collectJavaSources().filter { path -> path.parent.toFile().name != META_PACKAGE }
+        val existed = concurrentMapOf(state.files.filterKeys(sources::contains))
         val changed = mutableListOf<Path>()
         sources.forEach { source ->
             val currentModified = existed[source]
@@ -50,7 +58,7 @@ object SourceWatchingService {
             }
             existed[source] = newModified
         }
-        state = existed
+        state.files = existed
         return JavaSourcesChanges(existed.keys, changed)
     }
 
@@ -59,19 +67,23 @@ object SourceWatchingService {
             if (changed.isNotEmpty()) action(this)
         }
 
-        fun handle() = analyzeJavaSources(existed.asSequence())
-                .success { changes ->
-                    changes.classes
-                            .values
-                            .asSequence()
-                            .let(::generateJavaMeta)
-                }
-                .success { changes ->
-                    changes.classes
-                            .asSequence()
-                            .filter { entry -> existed.contains(entry.key) }
-                            .map { entry -> entry.value }
-                            .let(::generateJavaStubs)
-                }
+        fun handle() = analyzeJavaSources(existed.asSequence()).success { changes ->
+            changes
+                    .classes
+                    .filterValues { javaClass -> javaClass.type.classPackageName?.substringAfterLast(DOT) != META_PACKAGE }
+                    .filterValues { javaClass -> !state.classes.contains(javaClass) }
+                    .ifEmpty {
+                        JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
+                        return@success
+                    }
+
+            JAVA_LOGGER.info(CLASSES_CHANGED)
+            state.classes = copyOnWriteSetOf(changes.classes.values)
+            state.classes
+                    .asSequence()
+                    .apply(::generateJavaMeta)
+                    .filter { javaClass -> existed.contains(javaClass.source) }
+                    .apply(::generateJavaStubs)
+        }
     }
 }

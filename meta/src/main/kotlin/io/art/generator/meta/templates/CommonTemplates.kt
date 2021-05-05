@@ -27,4 +27,4 @@ val GETTER_BOOLEAN = { field: String -> "is${field.capitalize()}" }
 val SETTER = { field: String -> "set${field.capitalize()}" }
 
 val META_CLASS = { className: String -> "Meta$className" }
-val META_PACKAGE_REFERENCE = { className: String -> "meta$className" }
+const val META_PACKAGE_REFERENCE = "meta"

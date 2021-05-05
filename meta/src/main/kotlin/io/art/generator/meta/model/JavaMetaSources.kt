@@ -58,7 +58,45 @@ data class JavaMetaType(
         val wildcardSuperBound: JavaMetaType? = null,
 
         val typeVariableBounds: Map<String, JavaMetaType> = emptyMap(),
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as JavaMetaType
+
+        if (typeName != other.typeName) return false
+        if (kind != other.kind) return false
+        if (classFullName != other.classFullName) return false
+        if (className != other.className) return false
+        if (classPackageName != other.classPackageName) return false
+        if (classTypeParameters != other.classTypeParameters) return false
+        if (classSuperClass != other.classSuperClass) return false
+        if (classSuperInterfaces != other.classSuperInterfaces) return false
+        if (arrayComponentType != other.arrayComponentType) return false
+        if (wildcardExtendsBound != other.wildcardExtendsBound) return false
+        if (wildcardSuperBound != other.wildcardSuperBound) return false
+        if (typeVariableBounds != other.typeVariableBounds) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = typeName.hashCode()
+        result = 31 * result + kind.hashCode()
+        result = 31 * result + (classFullName?.hashCode() ?: 0)
+        result = 31 * result + (className?.hashCode() ?: 0)
+        result = 31 * result + (classPackageName?.hashCode() ?: 0)
+        result = 31 * result + classTypeParameters.hashCode()
+        result = 31 * result + (classSuperClass?.hashCode() ?: 0)
+        result = 31 * result + classSuperInterfaces.hashCode()
+        result = 31 * result + (arrayComponentType?.hashCode() ?: 0)
+        result = 31 * result + (wildcardExtendsBound?.hashCode() ?: 0)
+        result = 31 * result + (wildcardSuperBound?.hashCode() ?: 0)
+        result = 31 * result + typeVariableBounds.hashCode()
+        return result
+    }
+}
 
 data class JavaMetaClass(
         val type: JavaMetaType,

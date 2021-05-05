@@ -42,17 +42,12 @@ object JavaAnalyzingService {
         val sourceRoots = configuration.sourcesRoot.toFile()
                 .listFiles()
                 ?.asSequence()
-                ?.filter { source -> source.name != META_PACKAGE }
                 ?.map(File::toPath)
                 ?.toList()
                 ?: emptyList()
 
         return useJavaCompiler(sources, sourceRoots) { task ->
             val classes = task.analyze()
-
-            if (errorCount() != 0) {
-                return@useJavaCompiler JavaAnalyzingResult(error = true)
-            }
 
             classes.asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }

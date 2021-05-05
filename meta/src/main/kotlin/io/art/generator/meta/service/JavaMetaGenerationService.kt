@@ -46,20 +46,20 @@ object JavaMetaGenerationService {
         val moduleName = configuration.moduleName
         classBuilder(META_CLASS(moduleName))
                 .addModifiers(PUBLIC)
-                .addField(metaPackageField(META_PACKAGE_REFERENCE(moduleName)))
+                .addField(metaPackageField(META_PACKAGE_REFERENCE, static = true))
                 .apply {
-                    PackagesTree(classes).apply {
+                    MetaPackagesTree(classes).apply {
                         rootPackages.values
                                 .asSequence()
                                 .map { rootPackage -> rootPackage.packageShortName }
                                 .forEach { name ->
-                                    addField(metaPackageField(name, listOf(name)))
-                                    addMethod(metaPackageMethod(name, listOf(name)))
+                                    addField(metaPackageField(name, innerNames = listOf(name)))
+                                    addMethod(metaPackageMethod(name, innerNames = listOf(name)))
                                 }
                         generate().forEach(::addType)
                     }
                 }
-                .addMethod(metaPackageMethod(META_PACKAGE_REFERENCE(moduleName)))
+                .addMethod(metaPackageMethod(META_PACKAGE_REFERENCE, static = true))
                 .build()
                 .let { metaClass ->
                     JavaFile.builder(META_PACKAGE, metaClass)
@@ -71,25 +71,25 @@ object JavaMetaGenerationService {
                 }
     }
 
-    private fun metaPackageField(name: String, innerNames: List<String> = emptyList()): FieldSpec {
+    private fun metaPackageField(name: String, static: Boolean = false, innerNames: List<String> = emptyList()): FieldSpec {
         val moduleName = configuration.moduleName
         val type = ClassName.get(META_PACKAGE, META_CLASS(moduleName), *innerNames.toTypedArray())
-        return FieldSpec.builder(type, name, PRIVATE, FINAL, STATIC)
+        return FieldSpec.builder(type, name, PRIVATE, FINAL).apply { if (static) addModifiers(STATIC) }
                 .initializer(NEW_STATEMENT, type)
                 .build()
     }
 
-    private fun metaPackageMethod(name: String, innerNames: List<String> = emptyList()): MethodSpec {
+    private fun metaPackageMethod(name: String, static: Boolean = false, innerNames: List<String> = emptyList()): MethodSpec {
         val moduleName = configuration.moduleName
         val type = ClassName.get(META_PACKAGE, META_CLASS(moduleName), *innerNames.toTypedArray())
         return methodBuilder(name)
-                .addModifiers(PUBLIC, STATIC)
+                .addModifiers(PUBLIC).apply { if (static) addModifiers(STATIC) }
                 .returns(type)
                 .addCode(RETURN_STATEMENT, name)
                 .build()
     }
 
-    private class PackagesTree(classes: Sequence<JavaMetaClass>) {
+    private class MetaPackagesTree(classes: Sequence<JavaMetaClass>) {
         val rootPackages = mutableMapOf<String, Node>()
 
         init {
@@ -125,20 +125,27 @@ object JavaMetaGenerationService {
             }
 
             fun generate(): TypeSpec = classBuilder(packageShortName)
-                    .addModifiers(PUBLIC, STATIC)
+                    .addModifiers(PUBLIC)
                     .apply {
-                        classes.forEach { javaClass -> generate(javaClass) }
+                        classes.forEach { javaClass ->
+                            val className = javaClass.type.className!!
+                            val reference = javaClass.type.className.decapitalize()
+                            addField(metaPackageField(reference, innerNames = packageFullName.packages + className))
+                            addMethod(metaPackageMethod(reference, innerNames = packageFullName.packages + className))
+                            generate(javaClass)
+                        }
                         children.values.forEach { child ->
-                            addField(metaPackageField(child.packageShortName, packageFullName.packages + child.packageShortName))
+                            val name = child.packageShortName
+                            addField(metaPackageField(name, innerNames = packageFullName.packages + name))
+                            addMethod(metaPackageMethod(name, innerNames = packageFullName.packages + name))
                             addType(child.generate())
-                            addMethod(metaPackageMethod(child.packageShortName, packageFullName.packages + child.packageShortName))
                         }
                     }
                     .build()
 
             private fun TypeSpec.Builder.generate(javaClass: JavaMetaClass) {
                 addType(classBuilder(javaClass.type.className)
-                        .addModifiers(PUBLIC, STATIC)
+                        .addModifiers(PUBLIC)
                         .apply {
                             javaClass.fields
                                     .asSequence()
@@ -154,7 +161,16 @@ object JavaMetaGenerationService {
                                     .filter { method -> javaClass.fields.none { field -> method.name == GETTER_BOOLEAN(field.key) } }
                                     .filter { method -> javaClass.fields.none { field -> method.name == SETTER(field.key) } }
                                     .filter { method -> method.returnType.classTypeParameters.isEmpty() }
-                                    .filter { method -> method.name !in setOf("builder", "toString") }
+                                    .filter { method ->
+                                        method.name !in setOf(
+                                                "builder",
+                                                "toString",
+                                                "equals",
+                                                "canEqual",
+                                                "hashCode",
+                                                "clone"
+                                        )
+                                    }
                                     .forEach { method -> addMetaMethod(method) }
                         }
                         .build()
@@ -183,7 +199,7 @@ object JavaMetaGenerationService {
                 addMethod(methodBuilder(method.name)
                         .addModifiers(PUBLIC)
                         .returns(metaMethodType)
-                        .addCode(RETURN_NULL_STATEMENT, method.name)
+                        .addCode(RETURN_STATEMENT, method.name)
                         .build())
             }
         }

@@ -19,11 +19,9 @@
 package io.art.generator.meta.service
 
 import io.art.generator.meta.configuration.configuration
-import io.art.generator.meta.constants.META_PACKAGE
 import io.art.generator.meta.extension.isJava
 
 fun collectJavaSources() = configuration.sourcesRoot.toFile()
         .walkTopDown()
-        .onEnter { directory -> directory.name != META_PACKAGE }
         .filter { file -> file.isJava }
         .map { file -> file.toPath() }
