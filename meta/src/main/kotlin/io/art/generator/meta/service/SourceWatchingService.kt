@@ -22,6 +22,7 @@ import io.art.core.constants.StringConstants.DOT
 import io.art.core.extensions.HashExtensions.md5
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
+import io.art.generator.meta.model.JavaAnalyzingResult
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
 import io.art.generator.meta.service.JavaMetaGenerationService.generateJavaMeta
@@ -30,16 +31,21 @@ import io.art.scheduler.manager.SchedulersManager.schedule
 import java.nio.file.Path
 import java.security.MessageDigest
 import java.time.LocalDateTime.now
+import java.util.concurrent.ForkJoinTask
 
 data class JavaSourcesState(@Volatile var files: Map<Path, ByteArray>, @Volatile var classes: Set<JavaMetaClass>)
 
 object SourceWatchingService {
     private val state = JavaSourcesState(emptyMap(), emptySet())
 
+    @Volatile
+    private var lastTask: ForkJoinTask<out JavaAnalyzingResult>? = null
+
     fun watchJavaSources() = collectJavaChanges().changed {
         JAVA_LOGGER.info(SOURCES_CHANGED)
         val triggerTime = now().plusSeconds(configuration.analyzerDelay.toSeconds())
-        schedule(::handle, triggerTime)
+        lastTask?.cancel(false)
+        lastTask = schedule(::handle, triggerTime)
     }
 
     private fun collectJavaChanges(): JavaSourcesChanges {

@@ -82,4 +82,4 @@ classpath:
 watcher:
   period: 300ms
 analyzer:
-  delay: 300ms
+  delay: 1s
