@@ -22,7 +22,6 @@ import io.art.core.constants.StringConstants.DOT
 import io.art.core.extensions.HashExtensions.md5
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
-import io.art.generator.meta.model.JavaAnalyzingResult
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
 import io.art.generator.meta.service.JavaMetaGenerationService.generateJavaMeta
@@ -33,24 +32,23 @@ import java.security.MessageDigest
 import java.time.LocalDateTime.now
 import java.util.concurrent.ForkJoinTask
 
-data class JavaSourcesState(@Volatile var files: Map<Path, ByteArray>, @Volatile var classes: Set<JavaMetaClass>)
 
-object SourceWatchingService {
-    private val state = JavaSourcesState(emptyMap(), emptySet())
-
+object JavaSourceWatchingService {
     @Volatile
-    private var lastTask: ForkJoinTask<out JavaAnalyzingResult>? = null
+    private var lastTask: ForkJoinTask<*>? = null
 
-    fun watchJavaSources() = collectJavaChanges().changed {
+    private val cache = Cache(emptyMap(), emptySet())
+
+    fun watchJavaSources() = collectChanges().changed {
         JAVA_LOGGER.info(SOURCES_CHANGED)
         val triggerTime = now().plusSeconds(configuration.analyzerDelay.toSeconds())
         lastTask?.cancel(false)
         lastTask = schedule(::handle, triggerTime)
     }
 
-    private fun collectJavaChanges(): JavaSourcesChanges {
+    private fun collectChanges(): SourcesChanges {
         val sources = collectJavaSources().filter { path -> path.parent.toFile().name != META_PACKAGE }
-        val existed = state.files.filterKeys(sources::contains).toMutableMap()
+        val existed = cache.files.filterKeys(sources::contains).toMutableMap()
         val changed = mutableListOf<Path>()
         sources.forEach { source ->
             val currentModified = existed[source]
@@ -60,28 +58,31 @@ object SourceWatchingService {
             }
             existed[source] = newModified
         }
-        state.files = existed
-        return JavaSourcesChanges(existed.keys, changed)
+        cache.files = existed
+        return SourcesChanges(existed.keys, changed)
     }
 
-    private data class JavaSourcesChanges(val existed: Set<Path>, val changed: List<Path>) {
-        fun changed(action: JavaSourcesChanges.() -> Unit) {
+    private data class Cache(
+            @Volatile var files: Map<Path, ByteArray>,
+            @Volatile var classes: Set<JavaMetaClass>
+    )
+
+    private data class SourcesChanges(val existed: Set<Path>, val changed: List<Path>) {
+        fun changed(action: SourcesChanges.() -> Unit) {
             if (changed.isNotEmpty()) action(this)
         }
 
-        fun handle() = analyzeJavaSources(existed.asSequence()).success { changes ->
-            changes
-                    .classes
-                    .filterValues { javaClass -> javaClass.type.classPackageName?.substringAfterLast(DOT) != META_PACKAGE }
-                    .filterValues { javaClass -> !state.classes.contains(javaClass) }
-                    .ifEmpty {
-                        JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
-                        return@success
-                    }
+        fun handle() = analyzeJavaSources(existed.asSequence()).apply {
+            filterValues { javaClass ->
+                javaClass.type.classPackageName?.substringAfterLast(DOT) != META_PACKAGE && !cache.classes.contains(javaClass)
+            }.ifEmpty {
+                JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
+                return@apply
+            }
 
             JAVA_LOGGER.info(CLASSES_CHANGED)
-            state.classes = changes.classes.values.toSet()
-            state.classes
+            cache.classes = values.toSet()
+            cache.classes
                     .asSequence()
                     .apply(::generateJavaMeta)
                     .filter { javaClass -> existed.contains(javaClass.source) }

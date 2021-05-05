@@ -23,7 +23,7 @@ package io.art.generator.meta
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
-import io.art.generator.meta.service.SourceWatchingService.watchJavaSources
+import io.art.generator.meta.service.JavaSourceWatchingService.watchJavaSources
 import io.art.generator.meta.service.initialize
 import io.art.scheduler.manager.SchedulersManager.scheduleDelayed
 

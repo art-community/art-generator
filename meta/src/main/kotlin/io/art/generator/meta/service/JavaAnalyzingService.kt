@@ -36,7 +36,7 @@ import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeMirror
 
 object JavaAnalyzingService {
-    fun analyzeJavaSources(sources: Sequence<Path>): JavaAnalyzingResult {
+    fun analyzeJavaSources(sources: Sequence<Path>): Map<Path, JavaMetaClass> {
         JAVA_LOGGER.info(ANALYZING_MESSAGE)
 
         val sourceRoots = configuration.sourcesRoot.toFile()
@@ -47,13 +47,12 @@ object JavaAnalyzingService {
                 ?: emptyList()
 
         return useJavaCompiler(sources, sourceRoots) { task ->
-            val classes = task.analyze()
-
-            classes.asSequence()
+            task.analyze()
+                    .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
                     .map { element -> (element as ClassSymbol).asMetaClass() }
                     .filter { input -> input.type.classPackageName?.split(DOT)?.firstOrNull() != META_PACKAGE }
-                    .let { metaClasses -> JavaAnalyzingResult(classes = metaClasses.associateBy { metaClass -> metaClass.source }) }
+                    .associateBy { metaClass -> metaClass.source }
         }
     }
 }
