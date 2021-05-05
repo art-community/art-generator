@@ -31,7 +31,7 @@ object SourceWatchingService {
 
     fun watchJavaSources() = collectJavaChanges().changed {
         val triggerTime = now().plusSeconds(generatorConfiguration.analyzerDelay.toSeconds())
-        schedule({ handle() }, triggerTime)
+        schedule(::handle, triggerTime)
     }
 
     private fun collectJavaChanges(): JavaSourcesChanges {
