@@ -19,7 +19,7 @@
 package io.art.generator.meta.service
 
 import io.art.core.extensions.HashExtensions.md5
-import io.art.generator.meta.configuration.generatorConfiguration
+import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
 import io.art.scheduler.manager.SchedulersManager.schedule
 import java.nio.file.Path
@@ -30,7 +30,7 @@ object SourceWatchingService {
     private var state = mapOf<Path, ByteArray>()
 
     fun watchJavaSources() = collectJavaChanges().changed {
-        val triggerTime = now().plusSeconds(generatorConfiguration.analyzerDelay.toSeconds())
+        val triggerTime = now().plusSeconds(configuration.analyzerDelay.toSeconds())
         schedule(::handle, triggerTime)
     }
 
@@ -47,16 +47,27 @@ object SourceWatchingService {
             existed[source] = newModified
         }
         state = existed
-        return JavaSourcesChanges(existed.keys.toList(), changed)
+        return JavaSourcesChanges(existed.keys, changed)
     }
 
-    private data class JavaSourcesChanges(val existed: List<Path>, val changed: List<Path>) {
+    private data class JavaSourcesChanges(val existed: Set<Path>, val changed: List<Path>) {
         fun changed(action: JavaSourcesChanges.() -> Unit) {
             if (changed.isNotEmpty()) action(this)
         }
 
-        fun handle() = analyzeJavaSources(existed)
-                .success { changes -> generateMetaJavaSources(changes.classes.values.toList()) }
-                .success { changes -> generateJavaStubs(changes.classes.filterKeys(changed::contains).values.toList()) }
+        fun handle() = analyzeJavaSources(existed.asSequence())
+                .success { changes ->
+                    changes.classes
+                            .values
+                            .asSequence()
+                            .let(::generateJavaMeta)
+                }
+                .success { changes ->
+                    changes.classes
+                            .asSequence()
+                            .filter { entry -> existed.contains(entry.key) }
+                            .map { entry -> entry.value }
+                            .let(::generateJavaStubs)
+                }
     }
 }

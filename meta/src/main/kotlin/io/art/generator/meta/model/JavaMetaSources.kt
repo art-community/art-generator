@@ -21,13 +21,12 @@
 package io.art.generator.meta.model
 
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
-import java.io.File
 import java.lang.reflect.Type
 import java.nio.file.Path
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeMirror
 
-enum class MetaJavaTypeKind {
+enum class JavaMetaTypeKind {
     CLASS_KIND,
     ENUM_KIND,
     WILDCARD_KIND,
@@ -39,55 +38,55 @@ enum class MetaJavaTypeKind {
     UNKNOWN_KIND
 }
 
-data class MetaJavaType(
+data class JavaMetaType(
         val originalType: TypeMirror? = null,
         val reflectionType: Type? = null,
 
         val typeName: String,
-        val kind: MetaJavaTypeKind,
+        val kind: JavaMetaTypeKind,
 
         val classFullName: String? = null,
         val className: String? = null,
         val classPackageName: String? = null,
-        val classTypeParameters: Map<String, MetaJavaType> = emptyMap(),
-        val classSuperClass: MetaJavaType? = null,
-        val classSuperInterfaces: List<MetaJavaType> = emptyList(),
+        val classTypeParameters: Map<String, JavaMetaType> = emptyMap(),
+        val classSuperClass: JavaMetaType? = null,
+        val classSuperInterfaces: List<JavaMetaType> = emptyList(),
 
-        val arrayComponentType: MetaJavaType? = null,
+        val arrayComponentType: JavaMetaType? = null,
 
-        val wildcardExtendsBound: MetaJavaType? = null,
-        val wildcardSuperBound: MetaJavaType? = null,
+        val wildcardExtendsBound: JavaMetaType? = null,
+        val wildcardSuperBound: JavaMetaType? = null,
 
-        val typeVariableBounds: Map<String, MetaJavaType> = emptyMap(),
+        val typeVariableBounds: Map<String, JavaMetaType> = emptyMap(),
 )
 
-data class MetaJavaClass(
-        val type: MetaJavaType,
+data class JavaMetaClass(
+        val type: JavaMetaType,
         val source: Path,
-        val fields: Map<String, MetaJavaField>,
-        val constructors: List<MetaJavaMethod>,
-        val innerClasses: Map<String, MetaJavaClass>,
-        val methods: List<MetaJavaMethod>,
+        val fields: Map<String, JavaMetaField>,
+        val constructors: List<JavaMetaMethod>,
+        val innerClasses: Map<String, JavaMetaClass>,
+        val methods: List<JavaMetaMethod>,
         val modifiers: Set<Modifier>
 )
 
-data class MetaJavaField(
+data class JavaMetaField(
         val name: String,
-        val type: MetaJavaType,
+        val type: JavaMetaType,
         val modifiers: Set<Modifier>
 )
 
-data class MetaJavaParameter(
+data class JavaMetaParameter(
         val name: String,
-        val type: MetaJavaType,
+        val type: JavaMetaType,
         val modifiers: Set<Modifier>
 )
 
-data class MetaJavaMethod(
+data class JavaMetaMethod(
         val name: String,
-        val returnType: MetaJavaType,
-        val parameters: Map<String, MetaJavaParameter>,
+        val returnType: JavaMetaType,
+        val parameters: Map<String, JavaMetaParameter>,
         val modifiers: Set<Modifier>,
-        val typeParameters: Map<String, MetaJavaType> = emptyMap(),
-        val exceptions: List<MetaJavaType> = emptyList(),
+        val typeParameters: Map<String, JavaMetaType> = emptyMap(),
+        val exceptions: List<JavaMetaType> = emptyList(),
 )

@@ -22,7 +22,7 @@ import javax.tools.Diagnostic
 import javax.tools.DiagnosticListener
 
 class CollectingDiagnosticListener : DiagnosticListener<Any> {
-    val diagnostics = mutableListOf<Diagnostic<out Any>>()
+    private val diagnostics = mutableListOf<Diagnostic<out Any>>()
 
     override fun report(diagnostic: Diagnostic<out Any>) {
         diagnostics += diagnostic

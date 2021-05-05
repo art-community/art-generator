@@ -16,10 +16,14 @@
  * limitations under the License.
  */
 
-package io.art.generator.meta.constants
+package io.art.generator.meta.model
 
-import io.art.generator.meta.exception.MetaGeneratorException
-import io.art.generator.meta.model.MetaJavaClass
-import io.art.generator.meta.model.MetaJavaType
+import java.nio.file.Path
 
-fun MetaJavaClass.throwInvalidTypeException(): Nothing = throw MetaGeneratorException("Invalid type: $type")
+data class JavaAnalyzingResult(val error: Boolean = false,
+                               val classes: Map<Path, JavaMetaClass> = emptyMap()) {
+    fun success(action: (result: JavaAnalyzingResult) -> Unit): JavaAnalyzingResult {
+        if (!error) action(this)
+        return this
+    }
+}

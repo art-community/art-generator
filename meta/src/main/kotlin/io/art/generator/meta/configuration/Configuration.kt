@@ -36,16 +36,16 @@ data class Configuration(val sourcesRoot: Path,
                          val analyzerDelay: Duration
 )
 
-lateinit var generatorConfiguration: Configuration
+lateinit var configuration: Configuration
 
 fun loadConfiguration(stream: InputStream) {
     with(YamlConfigurationSource(EMPTY_STRING, CUSTOM_FILE) { stream }) {
-        generatorConfiguration = Configuration(
+        io.art.generator.meta.configuration.configuration = Configuration(
                 sourcesRoot = getString("paths.sources").path,
                 stubRoot = getString("paths.stubs").path,
                 sources = getStringArray("sources").map { file -> file.path }.toSet(),
                 classpath = getStringArray("classpath").map { file -> file.path }.toSet(),
-                moduleName = getString("moduleName"),
+                moduleName = getString("module.name"),
                 watcherPeriod = getDuration("watcher.period"),
                 analyzerDelay = getDuration("analyzer.delay")
         )

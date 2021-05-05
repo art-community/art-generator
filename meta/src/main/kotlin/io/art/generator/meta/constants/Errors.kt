@@ -16,11 +16,9 @@
  * limitations under the License.
  */
 
-package io.art.generator.meta.templates
+package io.art.generator.meta.constants
 
-const val RETURN_NULL_STATEMENT = "return null"
-const val META_FIELD_METHOD = "metaField"
-const val META_METHOD_METHOD = "metaMethod"
+import io.art.generator.meta.exception.MetaGeneratorException
+import io.art.generator.meta.model.JavaMetaClass
 
-val META_CLASS = { className: String -> "Meta$className" }
-val META_CLASS_REFERENCE = { className: String -> "meta$className" }
+fun JavaMetaClass.throwInvalidTypeException(): Nothing = throw MetaGeneratorException("Invalid type: $type")

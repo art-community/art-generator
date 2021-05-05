@@ -16,8 +16,13 @@
  * limitations under the License.
  */
 
-package io.art.generator.meta.state
+package io.art.generator.meta.constants
 
-object State {
+import io.art.logging.LoggingModule
+import org.apache.logging.log4j.core.Logger
 
-}
+val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)
+val ANALYZING_MESSAGE = { input: String -> "Analyzing $input" }
+
+const val GENERATING_METAS_MESSAGE = "Generating meta classes"
+const val GENERATING_STUBS_MESSAGE = "Generating stubs"

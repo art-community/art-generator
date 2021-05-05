@@ -19,11 +19,11 @@
 package io.art.generator.meta.service
 
 import com.squareup.javapoet.*
-import io.art.generator.meta.model.MetaJavaType
-import io.art.generator.meta.model.MetaJavaTypeKind.*
+import io.art.generator.meta.model.JavaMetaType
+import io.art.generator.meta.model.JavaMetaTypeKind.*
 import javax.lang.model.type.WildcardType
 
-fun MetaJavaType.asPoetType(): TypeName = when (kind) {
+fun JavaMetaType.asPoetType(): TypeName = when (kind) {
     JDK_KIND, PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> {
         originalType?.let(TypeName::get)?.let(TypeName::box) ?: TypeName.get(reflectionType!!).let(TypeName::box)
     }
@@ -35,7 +35,7 @@ fun MetaJavaType.asPoetType(): TypeName = when (kind) {
             ?: WildcardTypeName.get(originalType as? WildcardType ?: reflectionType as WildcardType)
 
     VARIABLE_KIND -> {
-        val bounds = typeVariableBounds.values.map(MetaJavaType::asPoetType).toTypedArray()
+        val bounds = typeVariableBounds.values.map(JavaMetaType::asPoetType).toTypedArray()
         TypeVariableName.get(typeName, *bounds)
     }
 
@@ -45,7 +45,7 @@ fun MetaJavaType.asPoetType(): TypeName = when (kind) {
             classTypeParameters.isNotEmpty() -> {
                 val parameters = classTypeParameters
                         .values
-                        .map(MetaJavaType::asPoetType)
+                        .map(JavaMetaType::asPoetType)
                         .toTypedArray()
                 ParameterizedTypeName.get(rawType, *parameters)
             }

@@ -27,73 +27,76 @@ import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.TypeSpec.*
 import com.squareup.javapoet.TypeVariableName
 import io.art.core.exception.NotImplementedException
-import io.art.generator.meta.configuration.generatorConfiguration
+import io.art.generator.meta.configuration.configuration
+import io.art.generator.meta.constants.GENERATING_STUBS_MESSAGE
 import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.constants.throwInvalidTypeException
-import io.art.generator.meta.model.MetaJavaClass
-import io.art.generator.meta.model.MetaJavaField
-import io.art.generator.meta.model.MetaJavaMethod
-import io.art.generator.meta.model.MetaJavaType
-import io.art.generator.meta.model.MetaJavaTypeKind.*
+import io.art.generator.meta.model.JavaMetaClass
+import io.art.generator.meta.model.JavaMetaField
+import io.art.generator.meta.model.JavaMetaMethod
+import io.art.generator.meta.model.JavaMetaType
+import io.art.generator.meta.model.JavaMetaTypeKind.*
 import io.art.generator.meta.templates.STUB_METHOD_STRING
 import io.art.generator.meta.templates.THROW_EXCEPTION_STATEMENT
 import javax.lang.model.element.Modifier.FINAL
 
-fun generateJavaStubs(classes: List<MetaJavaClass>) {
-    JAVA_LOGGER.info("Generating stubs")
-    val root = generatorConfiguration.stubRoot
+fun generateJavaStubs(classes: Sequence<JavaMetaClass>) {
+    JAVA_LOGGER.info(GENERATING_STUBS_MESSAGE)
+    val root = configuration.stubRoot
     classes.forEach { metaJavaClass -> metaJavaClass.asPoetFile().writeTo(root) }
 }
 
-private fun MetaJavaClass.asPoetFile(): JavaFile = JavaFile.builder(type.classPackageName!!, asPoetClass()).build()
+private fun JavaMetaClass.asPoetFile(): JavaFile = JavaFile.builder(type.classPackageName!!, asPoetClass()).build()
 
+private fun JavaMetaClass.asPoetClass(): TypeSpec = when (type.kind) {
+    INTERFACE_KIND -> with(interfaceBuilder(type.className)) {
+        addModifiers(*this@asPoetClass.modifiers.toTypedArray())
+        type.classSuperInterfaces.forEach { interfaceType -> addSuperinterface(interfaceType.asPoetType()) }
+        writeTypeParameters(type.classTypeParameters.values.asSequence())
+        writeMethods(methods.asSequence())
+        writeClasses(innerClasses.values.asSequence())
+        build()
+    }
 
-private fun MetaJavaClass.asPoetClass(): TypeSpec = when (type.kind) {
-    INTERFACE_KIND -> interfaceBuilder(type.className)
-            .apply {
-                addModifiers(*this@asPoetClass.modifiers.toTypedArray())
-                type.classSuperInterfaces.forEach { interfaceType -> addSuperinterface(interfaceType.asPoetType()) }
-                writeTypeParameters(type.classTypeParameters.values.toList())
-                writeMethods(methods)
-                writeClasses(innerClasses.values.toList())
-            }
-            .build()
-    CLASS_KIND -> classBuilder(type.className)
-            .apply {
-                addModifiers(*this@asPoetClass.modifiers.toTypedArray())
-                type.classSuperClass?.let { superClass -> superclass(superClass.asPoetType()) }
-                type.classSuperInterfaces.forEach { interfaceType -> addSuperinterface(interfaceType.asPoetType()) }
-                writeTypeParameters(type.classTypeParameters.values.toList())
-                writeFields(fields.values.toList())
-                writeMethods(methods)
-                writeClasses(innerClasses.values.toList())
-            }
-            .build()
-    ENUM_KIND -> enumBuilder(type.className)
-            .apply {
-                addModifiers(*this@asPoetClass.modifiers.toTypedArray())
-                writeClasses(innerClasses.values.toList())
-                writeFields(fields.values.toList())
-                writeMethods(methods)
-            }
-            .build()
+    CLASS_KIND -> with(classBuilder(type.className)) {
+        addModifiers(*this@asPoetClass.modifiers.toTypedArray())
+        type.classSuperClass?.let { superClass -> superclass(superClass.asPoetType()) }
+        type.classSuperInterfaces.forEach { interfaceType -> addSuperinterface(interfaceType.asPoetType()) }
+        writeTypeParameters(type.classTypeParameters.values.asSequence())
+        writeFields(fields.values.asSequence())
+        writeMethods(methods.asSequence())
+        writeClasses(innerClasses.values.asSequence())
+        build()
+    }
+
+    ENUM_KIND -> with(enumBuilder(type.className)) {
+        addModifiers(*this@asPoetClass.modifiers.toTypedArray())
+        writeClasses(innerClasses.values.asSequence())
+        writeFields(fields.values.asSequence())
+        writeMethods(methods.asSequence())
+        build()
+    }
+
     else -> throwInvalidTypeException()
 }
 
-private fun Builder.writeTypeParameters(parameters: List<MetaJavaType>) = parameters.filter { parameter -> parameter.kind == VARIABLE_KIND }.forEach { parameter ->
-    addTypeVariable(parameter.asPoetType() as TypeVariableName)
-}
+private fun Builder.writeTypeParameters(parameters: Sequence<JavaMetaType>) = parameters
+        .filter { parameter -> parameter.kind == VARIABLE_KIND }
+        .forEach { parameter ->
+            addTypeVariable(parameter.asPoetType() as TypeVariableName)
+        }
 
-private fun Builder.writeFields(fields: List<MetaJavaField>) = fields.forEach { field ->
-    addField(field.type.asPoetType(), field.name, *field.modifiers.filter { modifier -> modifier != FINAL }.toTypedArray())
-}
+private fun Builder.writeFields(fields: Sequence<JavaMetaField>) = fields
+        .forEach { field ->
+            addField(field.type.asPoetType(), field.name, *field.modifiers.filter { modifier -> modifier != FINAL }.toTypedArray())
+        }
 
-private fun Builder.writeClasses(classes: List<MetaJavaClass>) = classes.forEach { inner ->
+private fun Builder.writeClasses(classes: Sequence<JavaMetaClass>) = classes.forEach { inner ->
     addType(inner.asPoetClass())
 }
 
-private fun Builder.writeMethods(methods: List<MetaJavaMethod>) = methods.forEach { method ->
+private fun Builder.writeMethods(methods: Sequence<JavaMetaMethod>) = methods.forEach { method ->
     addMethod(methodBuilder(method.name)
             .addModifiers(*method.modifiers.toTypedArray())
             .addTypeVariables(method.typeParameters

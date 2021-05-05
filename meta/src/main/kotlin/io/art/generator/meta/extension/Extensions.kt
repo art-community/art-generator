@@ -53,3 +53,4 @@ val File.isClass: Boolean
 
 val File.isJar: Boolean
     get() = parseExtension(this.toString()) == JAR
+

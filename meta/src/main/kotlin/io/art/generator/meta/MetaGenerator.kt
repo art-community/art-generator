@@ -21,7 +21,7 @@
 package io.art.generator.meta
 
 import io.art.core.extensions.ThreadExtensions.block
-import io.art.generator.meta.configuration.generatorConfiguration
+import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.service.SourceWatchingService.watchJavaSources
 import io.art.generator.meta.service.initialize
@@ -31,8 +31,7 @@ object MetaGenerator {
     @JvmStatic
     fun main(arguments: Array<String>) {
         initialize(arguments)
-        scheduleDelayed(::watchJavaSources, generatorConfiguration.watcherPeriod)
+        scheduleDelayed(::watchJavaSources, configuration.watcherPeriod)
         block()
     }
-
 }
