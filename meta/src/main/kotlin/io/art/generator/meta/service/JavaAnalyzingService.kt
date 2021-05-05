@@ -37,7 +37,7 @@ import javax.lang.model.type.TypeMirror
 
 object JavaAnalyzingService {
     fun analyzeJavaSources(sources: Sequence<Path>): JavaAnalyzingResult {
-        JAVA_LOGGER.info(ANALYZING_MESSAGE(sources.toString()))
+        JAVA_LOGGER.info(ANALYZING_MESSAGE)
 
         val sourceRoots = configuration.sourcesRoot.toFile()
                 .listFiles()

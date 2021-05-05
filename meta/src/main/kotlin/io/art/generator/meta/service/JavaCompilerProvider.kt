@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+@file:Suppress(JAVA_MODULE_SUPPRESSION)
+
 package io.art.generator.meta.service
 
 import com.sun.source.util.JavacTask
@@ -24,6 +26,7 @@ import com.sun.tools.javac.main.JavaCompiler
 import com.sun.tools.javac.util.Context
 import com.sun.tools.javac.util.Options
 import io.art.generator.meta.configuration.configuration
+import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.constants.NO_WARN_OPTION
 import io.art.generator.meta.constants.PARAMETERS_OPTION
 import io.art.generator.meta.logger.CollectingDiagnosticListener

@@ -20,7 +20,10 @@ package io.art.generator.meta.service
 
 import io.art.core.extensions.HashExtensions.md5
 import io.art.generator.meta.configuration.configuration
+import io.art.generator.meta.constants.GENERATION_TRIGGERED
+import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
+import io.art.generator.meta.service.JavaMetaGenerationService.generateJavaMeta
 import io.art.scheduler.manager.SchedulersManager.schedule
 import java.nio.file.Path
 import java.security.MessageDigest
@@ -30,6 +33,7 @@ object SourceWatchingService {
     private var state = mapOf<Path, ByteArray>()
 
     fun watchJavaSources() = collectJavaChanges().changed {
+        JAVA_LOGGER.info(GENERATION_TRIGGERED)
         val triggerTime = now().plusSeconds(configuration.analyzerDelay.toSeconds())
         schedule(::handle, triggerTime)
     }
