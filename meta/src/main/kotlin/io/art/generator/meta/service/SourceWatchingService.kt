@@ -20,10 +20,6 @@ package io.art.generator.meta.service
 
 import io.art.core.constants.StringConstants.DOT
 import io.art.core.extensions.HashExtensions.md5
-import io.art.core.factory.MapFactory.concurrentMap
-import io.art.core.factory.MapFactory.concurrentMapOf
-import io.art.core.factory.SetFactory.copyOnWriteSet
-import io.art.core.factory.SetFactory.copyOnWriteSetOf
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.JavaMetaClass
@@ -33,12 +29,11 @@ import io.art.scheduler.manager.SchedulersManager.schedule
 import java.nio.file.Path
 import java.security.MessageDigest
 import java.time.LocalDateTime.now
-import kotlin.collections.set
 
 data class JavaSourcesState(@Volatile var files: Map<Path, ByteArray>, @Volatile var classes: Set<JavaMetaClass>)
 
 object SourceWatchingService {
-    private val state = JavaSourcesState(concurrentMap(), copyOnWriteSet())
+    private val state = JavaSourcesState(emptyMap(), emptySet())
 
     fun watchJavaSources() = collectJavaChanges().changed {
         JAVA_LOGGER.info(SOURCES_CHANGED)
@@ -48,7 +43,7 @@ object SourceWatchingService {
 
     private fun collectJavaChanges(): JavaSourcesChanges {
         val sources = collectJavaSources().filter { path -> path.parent.toFile().name != META_PACKAGE }
-        val existed = concurrentMapOf(state.files.filterKeys(sources::contains))
+        val existed = state.files.filterKeys(sources::contains).toMutableMap()
         val changed = mutableListOf<Path>()
         sources.forEach { source ->
             val currentModified = existed[source]
@@ -78,7 +73,7 @@ object SourceWatchingService {
                     }
 
             JAVA_LOGGER.info(CLASSES_CHANGED)
-            state.classes = copyOnWriteSetOf(changes.classes.values)
+            state.classes = changes.classes.values.toSet()
             state.classes
                     .asSequence()
                     .apply(::generateJavaMeta)

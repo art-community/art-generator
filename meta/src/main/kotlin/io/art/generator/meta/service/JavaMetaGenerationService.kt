@@ -161,16 +161,7 @@ object JavaMetaGenerationService {
                                     .filter { method -> javaClass.fields.none { field -> method.name == GETTER_BOOLEAN(field.key) } }
                                     .filter { method -> javaClass.fields.none { field -> method.name == SETTER(field.key) } }
                                     .filter { method -> method.returnType.classTypeParameters.isEmpty() }
-                                    .filter { method ->
-                                        method.name !in setOf(
-                                                "builder",
-                                                "toString",
-                                                "equals",
-                                                "canEqual",
-                                                "hashCode",
-                                                "clone"
-                                        )
-                                    }
+                                    .filter { method -> method.name !in configuration.metaMethodExclusions }
                                     .forEach { method -> addMetaMethod(method) }
                         }
                         .build()

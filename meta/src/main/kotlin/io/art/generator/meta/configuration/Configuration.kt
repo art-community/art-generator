@@ -21,33 +21,37 @@ package io.art.generator.meta.configuration
 import io.art.configuration.yaml.source.YamlConfigurationSource
 import io.art.configurator.constants.ConfiguratorModuleConstants.ConfigurationSourceType.CUSTOM_FILE
 import io.art.core.constants.StringConstants.EMPTY_STRING
+import io.art.generator.meta.constants.DEFAULT_META_METHOD_EXCLUSIONS
 import io.art.generator.meta.extension.path
 import java.io.InputStream
 import java.nio.file.Path
 import java.time.Duration
 
 
-data class Configuration(val sourcesRoot: Path,
-                         val stubRoot: Path,
-                         val sources: Set<Path>,
-                         val classpath: Set<Path>,
-                         val moduleName: String,
-                         val watcherPeriod: Duration,
-                         val analyzerDelay: Duration
+data class Configuration(
+        val sourcesRoot: Path,
+        val stubRoot: Path,
+        val sources: Set<Path>,
+        val classpath: Set<Path>,
+        val moduleName: String,
+        val watcherPeriod: Duration,
+        val analyzerDelay: Duration,
+        val metaMethodExclusions: Set<String>,
 )
 
 lateinit var configuration: Configuration
 
 fun loadConfiguration(stream: InputStream) {
-    with(YamlConfigurationSource(EMPTY_STRING, CUSTOM_FILE) { stream }) {
-        io.art.generator.meta.configuration.configuration = Configuration(
+    configuration = with(YamlConfigurationSource(EMPTY_STRING, CUSTOM_FILE) { stream }) {
+        Configuration(
                 sourcesRoot = getString("paths.sources").path,
                 stubRoot = getString("paths.stubs").path,
                 sources = getStringArray("sources").map { file -> file.path }.toSet(),
                 classpath = getStringArray("classpath").map { file -> file.path }.toSet(),
                 moduleName = getString("module.name"),
                 watcherPeriod = getDuration("watcher.period"),
-                analyzerDelay = getDuration("analyzer.delay")
+                analyzerDelay = getDuration("analyzer.delay"),
+                metaMethodExclusions = getStringArray("meta.method.exclusions").toSet().ifEmpty { DEFAULT_META_METHOD_EXCLUSIONS },
         )
     }
 }

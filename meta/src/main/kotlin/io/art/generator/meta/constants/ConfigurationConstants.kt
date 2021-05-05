@@ -20,3 +20,12 @@ package io.art.generator.meta.constants
 
 
 const val DEFAULT_CONFIGURATION_PATH = "configuration.yml"
+
+val DEFAULT_META_METHOD_EXCLUSIONS = setOf(
+        "builder",
+        "toString",
+        "equals",
+        "canEqual",
+        "hashCode",
+        "clone"
+)
