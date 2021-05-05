@@ -22,5 +22,9 @@ const val RETURN_NULL_STATEMENT = "return null"
 const val META_FIELD_METHOD = "metaField"
 const val META_METHOD_METHOD = "metaMethod"
 
+val GETTER = { field: String -> "get${field.capitalize()}" }
+val GETTER_BOOLEAN = { field: String -> "is${field.capitalize()}" }
+val SETTER = { field: String -> "set${field.capitalize()}" }
+
 val META_CLASS = { className: String -> "Meta$className" }
-val META_CLASS_REFERENCE = { className: String -> "meta$className" }
+val META_PACKAGE_REFERENCE = { className: String -> "meta$className" }

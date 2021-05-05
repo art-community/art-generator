@@ -18,6 +18,7 @@
 
 package io.art.generator.meta.extension
 
+import io.art.core.constants.StringConstants.DOT
 import io.art.core.extensions.FileExtensions.parseExtension
 import io.art.generator.meta.constants.*
 import java.io.File
@@ -54,3 +55,5 @@ val File.isClass: Boolean
 val File.isJar: Boolean
     get() = parseExtension(this.toString()) == JAR
 
+val String.packages: List<String>
+    get() = split(DOT)

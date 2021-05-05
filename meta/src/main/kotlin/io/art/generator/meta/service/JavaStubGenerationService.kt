@@ -37,7 +37,7 @@ import io.art.generator.meta.model.JavaMetaField
 import io.art.generator.meta.model.JavaMetaMethod
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
-import io.art.generator.meta.templates.STUB_METHOD_STRING
+import io.art.generator.meta.templates.STUB_METHOD_LITERAL
 import io.art.generator.meta.templates.THROW_EXCEPTION_STATEMENT
 import javax.lang.model.element.Modifier.FINAL
 
@@ -106,6 +106,6 @@ private fun Builder.writeMethods(methods: Sequence<JavaMetaMethod>) = methods.fo
             .addExceptions(method.exceptions.map { exception -> exception.asPoetType() })
             .returns(method.returnType.asPoetType())
             .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.value.type.asPoetType(), parameter.key).build() })
-            .apply { addCode(THROW_EXCEPTION_STATEMENT, NotImplementedException::class.java, STUB_METHOD_STRING) }
+            .apply { addCode(THROW_EXCEPTION_STATEMENT, NotImplementedException::class.java, STUB_METHOD_LITERAL) }
             .build())
 }
