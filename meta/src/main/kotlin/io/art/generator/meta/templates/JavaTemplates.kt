@@ -22,8 +22,14 @@ const val THROW_EXCEPTION_STATEMENT = "throw new \$T(\$S);"
 const val STUB_METHOD_LITERAL = "stub method"
 const val NEW_STATEMENT = "new \$T()"
 const val RETURN_STATEMENT = "return \$L;"
-const val META_FIELD_INITIALIZER = "\$T.metaField(\$S,\$T.class)"
-const val META_GENERIC_FIELD_INITIALIZER = "\$T.metaField(\$S)"
+
+const val META_FIELD_INITIALIZER = "add(\$T.metaField(\$S,\$T.class))"
+const val META_GENERIC_FIELD_INITIALIZER = "add(\$T.metaField(\$S))"
+const val META_METHOD_INITIALIZER = "add(\$T.metaMethod(\$S,\$T.class))"
+
 const val META_FIELD_METHOD_REIFIED_PARAMETER = "type"
 const val META_FIELD_METHOD_REIFIED_STATEMENT = "return \$L.reified(type);"
-const val META_METHOD_INITIALIZER = "\$T.metaMethod(\$S,\$T.class)"
+const val META_TYPE_REGISTER_STATEMENT = "\$T.register(provide());"
+const val META_TYPE_OF_STATEMENT = "metaTypeOf(\$T.class)"
+
+const val META_TYPE_OF_NAME = "metaTypeOf"

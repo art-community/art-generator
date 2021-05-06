@@ -21,15 +21,12 @@
 package io.art.generator.meta.service
 
 import com.squareup.javapoet.*
+import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
-import com.squareup.javapoet.MethodSpec.overriding
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.constants.StringConstants.DOT
 import io.art.generator.meta.configuration.configuration
-import io.art.generator.meta.constants.GENERATING_METAS_MESSAGE
-import io.art.generator.meta.constants.JAVA_LOGGER
-import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
-import io.art.generator.meta.constants.META_PACKAGE
+import io.art.generator.meta.constants.*
 import io.art.generator.meta.extension.packages
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaField
@@ -37,8 +34,6 @@ import io.art.generator.meta.model.JavaMetaMethod
 import io.art.generator.meta.model.JavaMetaTypeKind.UNKNOWN_KIND
 import io.art.generator.meta.model.JavaMetaTypeKind.VARIABLE_KIND
 import io.art.generator.meta.templates.*
-import io.art.meta.MetaField
-import io.art.meta.MetaMethod
 import javax.lang.model.element.Modifier.*
 
 object JavaMetaGenerationService {
@@ -49,29 +44,32 @@ object JavaMetaGenerationService {
         classBuilder(META_CLASS(moduleName))
                 .addModifiers(PUBLIC)
                 .addField(metaPackageField(META_PACKAGE_REFERENCE, static = true))
-                .apply {
-                    MetaPackagesTree(classes.filter { metaClass -> META_CLASS(metaClass.type.className!!) != META_CLASS(moduleName) })
-                            .apply {
-                                rootPackages.values
-                                        .asSequence()
-                                        .map { rootPackage -> rootPackage.packageShortName }
-                                        .forEach { name ->
-                                            addField(metaPackageField(name, innerNames = listOf(name)))
-                                            addMethod(metaPackageMethod(name, innerNames = listOf(name)))
-                                        }
-                                generate().forEach(::addType)
-                            }
-                }
+                .apply { generatePackageTree(classes) }
                 .addMethod(metaPackageMethod(META_PACKAGE_REFERENCE, static = true))
                 .build()
                 .let { metaClass ->
                     JavaFile.builder(META_PACKAGE, metaClass)
-                            .addStaticImport(ClassName.get(MetaField::class.java), META_FIELD_METHOD)
-                            .addStaticImport(ClassName.get(MetaMethod::class.java), META_METHOD_METHOD)
+                            .addStaticImport(META_TYPE_BUILDER_CLASS_NAME, META_TYPE_OF_NAME)
+                            .addStaticImport(META_TYPE_REGISTRY_CLASS_NAME, REGISTER_NAME)
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)
                 }
+    }
+
+    private fun TypeSpec.Builder.generatePackageTree(classes: Sequence<JavaMetaClass>) {
+        val moduleName = configuration.moduleName
+        val tree = classes
+                .filter { metaClass -> META_CLASS(metaClass.type.className!!) != META_CLASS(moduleName) }
+                .let(::MetaPackagesTree)
+        tree.rootPackages.values
+                .asSequence()
+                .map { rootPackage -> rootPackage.packageShortName }
+                .forEach { name ->
+                    addField(metaPackageField(name, innerNames = listOf(name)))
+                    addMethod(metaPackageMethod(name, innerNames = listOf(name)))
+                }
+        tree.generate().forEach(::addType)
     }
 
     private fun metaPackageField(name: String, static: Boolean = false, innerNames: List<String> = emptyList()): FieldSpec {
@@ -104,7 +102,6 @@ object JavaMetaGenerationService {
                             rootPackages[packageName] = Node(packageName).apply { add(metaClass) }
                         }
             }
-
         }
 
         fun generate(): List<TypeSpec> = rootPackages.values.map(Node::generate)
@@ -135,7 +132,7 @@ object JavaMetaGenerationService {
                             val reference = javaClass.type.className.decapitalize()
                             addField(metaPackageField(reference, innerNames = packageFullName.packages + className))
                             addMethod(metaPackageMethod(reference, innerNames = packageFullName.packages + className))
-                            generate(javaClass)
+                            generateClass(javaClass)
                         }
                         children.values.forEach { child ->
                             val name = child.packageShortName
@@ -146,10 +143,23 @@ object JavaMetaGenerationService {
                     }
                     .build()
 
-            private fun TypeSpec.Builder.generate(javaClass: JavaMetaClass) {
+            private fun TypeSpec.Builder.generateClass(javaClass: JavaMetaClass) {
                 addType(classBuilder(META_CLASS(javaClass.type.className!!))
                         .addModifiers(PUBLIC, STATIC)
                         .apply {
+                            addSuperinterface(META_TYPE_PROVIDER_CLASS_NAME)
+
+                            addField(FieldSpec.builder(META_TYPE_BUILDER_CLASS_NAME, BUILDER_NAME)
+                                    .addModifiers(PRIVATE, FINAL)
+                                    .initializer(META_TYPE_OF_STATEMENT, ClassName.get(javaClass.type.classPackageName, javaClass.type.className))
+                                    .build())
+
+                            addMethod(methodBuilder(BUILDER_NAME)
+                                    .returns(META_TYPE_BUILDER_CLASS_NAME)
+                                    .addModifiers(PUBLIC)
+                                    .addCode(RETURN_STATEMENT, BUILDER_NAME)
+                                    .build())
+
                             javaClass.fields
                                     .asSequence()
                                     .filter { field -> field.value.type.kind !in setOf(UNKNOWN_KIND) }
@@ -164,6 +174,10 @@ object JavaMetaGenerationService {
                                     .filter { method -> javaClass.fields.none { field -> method.name == SETTER(field.key) } }
                                     .filter { method -> method.name !in configuration.metaMethodExclusions }
                                     .forEach { method -> addMetaMethod(method) }
+
+                            addMethod(constructorBuilder()
+                                    .addModifiers(PRIVATE)
+                                    .addCode(META_TYPE_REGISTER_STATEMENT, META_TYPE_REGISTRY_CLASS_NAME).build())
                         }
                         .build()
                 )
@@ -171,46 +185,45 @@ object JavaMetaGenerationService {
 
             private fun TypeSpec.Builder.addMetaField(owner: JavaMetaClass, field: JavaMetaField) {
                 val ownerFieldType = field.type.asPoetType()
-                val classClassName = ClassName.get(Class::class.java)
-                val objectClassName = ClassName.get(Object::class.java)
-                val rawType = ClassName.get(MetaField::class.java)
                 val metaFieldType = when (field.type.kind) {
-                    VARIABLE_KIND -> ParameterizedTypeName.get(rawType, objectClassName)
-                    else -> ParameterizedTypeName.get(rawType, ownerFieldType)
+                    VARIABLE_KIND -> ParameterizedTypeName.get(META_FIELD_CLASS_NAME, OBJECT_CLASS_NAME)
+                    else -> ParameterizedTypeName.get(META_FIELD_CLASS_NAME, ownerFieldType)
                 }
+
+                fun FieldSpec.Builder.metaFieldInitializer() = when (field.type.kind) {
+                    VARIABLE_KIND -> initializer(META_GENERIC_FIELD_INITIALIZER, META_FIELD_CLASS_NAME, field.name)
+                    else -> initializer(META_FIELD_INITIALIZER, META_FIELD_CLASS_NAME, field.name, ownerFieldType)
+                }
+
+                fun MethodSpec.Builder.metaMethodContent() = when (field.type.kind) {
+                    VARIABLE_KIND -> {
+                        val typeVariable = owner.type.classTypeParameters[field.type.typeName]!!.asPoetType() as TypeVariableName
+                        returns(ParameterizedTypeName.get(META_FIELD_CLASS_NAME, ownerFieldType))
+                        addTypeVariable(typeVariable)
+                        addParameter(ParameterizedTypeName.get(CLASS_CLASS_NAME, typeVariable), META_FIELD_METHOD_REIFIED_PARAMETER)
+                        addCode(META_FIELD_METHOD_REIFIED_STATEMENT, field.name)
+                    }
+                    else -> {
+                        returns(metaFieldType)
+                        addCode(RETURN_STATEMENT, field.name)
+                    }
+                }
+
                 addField(FieldSpec.builder(metaFieldType, field.name, PRIVATE, FINAL)
-                        .apply {
-                            when (field.type.kind) {
-                                VARIABLE_KIND -> initializer(META_GENERIC_FIELD_INITIALIZER, rawType, field.name)
-                                else -> initializer(META_FIELD_INITIALIZER, rawType, field.name, ownerFieldType)
-                            }
-                        }
+                        .apply { metaFieldInitializer() }
                         .build())
+
                 addMethod(methodBuilder(field.name)
                         .addModifiers(PUBLIC)
-                        .apply {
-                            when (field.type.kind) {
-                                VARIABLE_KIND -> {
-                                    val typeVariable = owner.type.classTypeParameters[field.type.typeName]!!.asPoetType() as TypeVariableName
-                                    returns(ParameterizedTypeName.get(rawType, ownerFieldType))
-                                    addTypeVariable(typeVariable)
-                                    addParameter(ParameterizedTypeName.get(classClassName, typeVariable), META_FIELD_METHOD_REIFIED_PARAMETER)
-                                    addCode(META_FIELD_METHOD_REIFIED_STATEMENT, field.name)
-                                }
-                                else -> {
-                                    returns(metaFieldType)
-                                    addCode(RETURN_STATEMENT, field.name)
-                                }
-                            }
-                        }
+                        .apply { metaMethodContent() }
                         .build())
             }
 
             private fun TypeSpec.Builder.addMetaMethod(method: JavaMetaMethod) {
                 val ownerMethodType = method.returnType.asPoetType()
-                val metaMethodType = ParameterizedTypeName.get(ClassName.get(MetaMethod::class.java), ownerMethodType)
+                val metaMethodType = ParameterizedTypeName.get(META_METHOD_CLASS_NAME, ownerMethodType)
                 addField(FieldSpec.builder(metaMethodType, method.name, PRIVATE, FINAL)
-                        .initializer(META_METHOD_INITIALIZER, ClassName.get(MetaMethod::class.java), method.name, ownerMethodType)
+                        .initializer(META_METHOD_INITIALIZER, META_METHOD_CLASS_NAME, method.name, ownerMethodType)
                         .build())
                 addMethod(methodBuilder(method.name)
                         .addModifiers(PUBLIC)
