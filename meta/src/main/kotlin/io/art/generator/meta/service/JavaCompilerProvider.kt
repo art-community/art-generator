@@ -24,7 +24,6 @@ import com.sun.source.util.JavacTask
 import com.sun.tools.javac.api.JavacTool
 import com.sun.tools.javac.comp.CompileStates.CompileState.FLOW
 import com.sun.tools.javac.main.JavaCompiler
-import com.sun.tools.javac.util.Context
 import com.sun.tools.javac.util.Log.WriterKind
 import com.sun.tools.javac.util.Options
 import io.art.generator.meta.configuration.configuration
@@ -32,6 +31,7 @@ import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.constants.NO_WARN_OPTION
 import io.art.generator.meta.constants.PARAMETERS_OPTION
 import io.art.generator.meta.logger.CollectingDiagnosticListener
+import io.art.generator.meta.model.JavaCompilerContext
 import org.jetbrains.kotlin.javac.JavacOptionsMapper
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -58,7 +58,11 @@ object JavaCompilerProvider {
         )
 
         val files = fileManager.getJavaFileObjects(*sources.map { path -> path.toFile() }.toList().toTypedArray())
-        val context = Context().apply { put(JavaFileManager::class.java, fileManager) }
+
+        val context = JavaCompilerContext().apply {
+            put(JavaFileManager::class.java, fileManager)
+        }
+
         val compilerInstance = JavaCompiler.instance(context).apply {
             log.setWriter(WriterKind.ERROR, PrintWriter(StringWriter()))
             shouldStopPolicyIfError = FLOW
@@ -66,7 +70,7 @@ object JavaCompilerProvider {
         try {
             Options.instance(context).let(JavacOptionsMapper::setUTF8Encoding)
             return tool.getTask(
-                    StringWriter(),
+                    null,
                     fileManager,
                     listener,
                     options,
