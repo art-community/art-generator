@@ -49,7 +49,6 @@ object JavaMetaGenerationService {
                 .build()
                 .let { metaClass ->
                     JavaFile.builder(META_PACKAGE, metaClass)
-                            .addStaticImport(META_TYPE_BUILDER_CLASS_NAME, META_TYPE_OF_NAME)
                             .addStaticImport(META_TYPE_REGISTRY_CLASS_NAME, REGISTER_NAME)
                             .skipJavaLangImports(true)
                             .build()
