@@ -41,7 +41,7 @@ object JavaSourceWatchingService {
 
     fun watchJavaSources() = collectChanges().changed {
         JAVA_LOGGER.info(SOURCES_CHANGED)
-        val triggerTime = now().plusSeconds(configuration.analyzerDelay.toSeconds())
+        val triggerTime = now().plusSeconds(configuration.analyzerDelay.seconds)
         lastTask?.cancel(false)
         lastTask = schedule(::handle, triggerTime)
     }

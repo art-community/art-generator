@@ -20,6 +20,7 @@
 
 package io.art.generator.meta.service
 
+import com.sun.tools.javac.code.Symbol
 import com.sun.tools.javac.code.Symbol.*
 import com.sun.tools.javac.code.Type
 import io.art.core.constants.StringConstants.DOT
@@ -31,6 +32,8 @@ import io.art.generator.meta.service.JavaCompilerProvider.useJavaCompiler
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
+import javax.lang.model.SourceVersion.RELEASE_8
+import javax.lang.model.SourceVersion.latest
 import javax.lang.model.element.ElementKind.ENUM
 import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeMirror
@@ -151,26 +154,26 @@ private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
         source = Paths.get(sourcefile.toUri()),
         modifiers = modifiers,
 
-        fields = members().symbols
+        fields = getMembers()
                 .asSequence()
                 .filterIsInstance<VarSymbol>()
                 .associate { symbol -> symbol.name.toString() to symbol.asMetaField() },
 
-        constructors = members().symbols
+        constructors = getMembers()
                 .asSequence()
                 .filterIsInstance<MethodSymbol>()
                 .filter { method -> method.isConstructor }
                 .map { method -> method.asMetaMethod() }
                 .toList(),
 
-        methods = members().symbols
+        methods = getMembers()
                 .asSequence()
                 .filterIsInstance<MethodSymbol>()
                 .filter { method -> !method.isConstructor }
                 .map { method -> method.asMetaMethod() }
                 .toList(),
 
-        innerClasses = members().symbols
+        innerClasses = getMembers()
                 .asSequence()
                 .filterIsInstance<ClassSymbol>()
                 .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() }
@@ -199,3 +202,9 @@ private fun VarSymbol.asMetaParameter() = JavaMetaParameter(
         modifiers = modifiers,
         type = type.asMetaType()
 )
+
+@Suppress("UNCHECKED_CAST")
+private fun Symbol.getMembers(): Iterable<Symbol> = when (latest()) {
+    RELEASE_8 -> members().javaClass.getMethod(GET_ELEMENTS_NAME).invoke(members()) as Iterable<Symbol>
+    else -> members().javaClass.getMethod(GET_SYMBOLS_NAME).invoke(members()) as Iterable<Symbol>
+}

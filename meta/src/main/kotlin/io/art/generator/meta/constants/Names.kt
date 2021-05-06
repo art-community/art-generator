@@ -16,3 +16,6 @@ const val REGISTER_NAME = "register"
 
 const val TO_STRING_NAME = "toString"
 
+
+const val GET_ELEMENTS_NAME = "getElements"
+const val GET_SYMBOLS_NAME = "getSymbols"

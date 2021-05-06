@@ -50,7 +50,6 @@ object JavaCompilerProvider {
         val fileManager = tool.getStandardFileManager(listener, getDefault(), defaultCharset()).apply {
             setLocation(SOURCE_PATH, sourceRoots.map(Path::toFile))
             setLocation(CLASS_PATH, classpath)
-            isSymbolFileEnabled = false
         }
 
         val options = listOf(
@@ -58,7 +57,7 @@ object JavaCompilerProvider {
                 NO_WARN_OPTION,
         )
 
-        val files = fileManager.getJavaFileObjects(*sources.toList().toTypedArray())
+        val files = fileManager.getJavaFileObjects(*sources.map { path -> path.toFile() }.toList().toTypedArray())
         val context = Context().apply { put(JavaFileManager::class.java, fileManager) }
         val compilerInstance = JavaCompiler.instance(context).apply {
             log.setWriter(WriterKind.ERROR, PrintWriter(StringWriter()))
