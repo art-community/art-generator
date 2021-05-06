@@ -16,9 +16,12 @@
  * limitations under the License.
  */
 
+@file:Suppress(JAVA_MODULE_SUPPRESSION)
+
 package io.art.generator.meta.model
 
 import com.sun.tools.javac.util.Context
+import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 
 class JavaCompilerContext : Context() {
     override fun <T> put(key: Key<T>, factory: Factory<T>) {
