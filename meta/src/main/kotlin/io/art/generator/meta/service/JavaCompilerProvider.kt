@@ -23,11 +23,11 @@ package io.art.generator.meta.service
 import com.sun.source.util.JavacTask
 import com.sun.tools.javac.api.JavacTool
 import com.sun.tools.javac.main.JavaCompiler
-import com.sun.tools.javac.main.Option.PARAMETERS
 import com.sun.tools.javac.util.Log.WriterKind.ERROR
 import com.sun.tools.javac.util.Options
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
+import io.art.generator.meta.constants.PARAMETERS_OPTION
 import io.art.generator.meta.logger.CollectingDiagnosticListener
 import io.art.generator.meta.model.JavaCompilerContext
 import org.jetbrains.kotlin.javac.JavacOptionsMapper.setUTF8Encoding
@@ -68,7 +68,7 @@ object JavaCompilerProvider {
         }
 
         val options = listOf(
-                PARAMETERS.text,
+                PARAMETERS_OPTION,
         )
 
         val files = fileManager.getJavaFileObjects(*sources.map { path -> path.toFile() }.toList().toTypedArray())
