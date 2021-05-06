@@ -6,6 +6,10 @@ paths:
 sources:
   - "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/java/module/ExampleConfigurator.java"
   - "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/kotlin/module/ExampleKotlin.kt"
+watcher:
+  period: 300ms
+analyzer:
+  delay: 1s
 classpath:
   - D:\Development\Gradle\caches\modules-2\files-2.1\org.projectlombok\lombok\1.18.20\18bcea7d5df4d49227b4a0743a536208ce4825bb\lombok-1.18.20.jar
   - D:\Development\Gradle\caches\modules-2\files-2.1\org.jetbrains.kotlin\kotlin-stdlib-jdk8\1.4.32\3302f9ec8a5c1ed220781dbd37770072549bd333\kotlin-stdlib-jdk8-1.4.32.jar
@@ -79,7 +83,3 @@ classpath:
   - D:\Development\Gradle\caches\modules-2\files-2.1\com.google.protobuf\protobuf-java\3.9.0\2adef7d20542c18530c46295b32bc26371dfd9b1\protobuf-java-3.9.0.jar
   - D:\Development\Gradle\caches\modules-2\files-2.1\com.google.api.grpc\proto-google-common-protos\1.12.0\1140cc74df039deb044ed0e320035e674dc13062\proto-google-common-protos-1.12.0.jar
   - D:\Development\Gradle\caches\modules-2\files-2.1\io.grpc\grpc-context\1.24.0\abfd83c3b1a8a0fbc12db3529a339b693056f496\grpc-context-1.24.0.jar
-watcher:
-  period: 300ms
-analyzer:
-  delay: 1s
