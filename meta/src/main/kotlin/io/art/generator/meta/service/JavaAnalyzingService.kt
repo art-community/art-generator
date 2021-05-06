@@ -23,6 +23,7 @@ package io.art.generator.meta.service
 import com.sun.tools.javac.code.Symbol
 import com.sun.tools.javac.code.Symbol.*
 import com.sun.tools.javac.code.Type
+import io.art.core.constants.CompilerSuppressingWarnings.UNCHECKED_CAST
 import io.art.core.constants.StringConstants.DOT
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
@@ -203,7 +204,7 @@ private fun VarSymbol.asMetaParameter() = JavaMetaParameter(
         type = type.asMetaType()
 )
 
-@Suppress("UNCHECKED_CAST")
+@Suppress(UNCHECKED_CAST)
 private fun Symbol.getMembers(): Iterable<Symbol> = when (latest()) {
     RELEASE_8 -> members().javaClass.getMethod(GET_ELEMENTS_NAME).invoke(members()) as Iterable<Symbol>
     else -> members().javaClass.getMethod(GET_SYMBOLS_NAME).invoke(members()) as Iterable<Symbol>
