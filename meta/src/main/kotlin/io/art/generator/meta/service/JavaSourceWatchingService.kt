@@ -47,7 +47,7 @@ object JavaSourceWatchingService {
     }
 
     private fun collectChanges(): SourcesChanges {
-        val sources = collectJavaSources().filter { path -> path.parent.toFile().name != META_PACKAGE }
+        val sources = collectJavaSources()
         val existed = cache.files.filterKeys(sources::contains).toMutableMap()
         val changed = mutableListOf<Path>()
         sources.forEach { source ->

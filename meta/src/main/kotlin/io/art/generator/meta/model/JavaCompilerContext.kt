@@ -19,59 +19,34 @@
 package io.art.generator.meta.model
 
 import com.sun.tools.javac.util.Context
-import io.art.core.constants.CompilerSuppressingWarnings.UNCHECKED_CAST
 
 class JavaCompilerContext : Context() {
-    private var values: MutableMap<Key<*>, Any> = mutableMapOf()
-    private var factories: MutableMap<Key<*>, Factory<*>> = mutableMapOf()
-    private var keys: MutableMap<Class<*>, Key<*>> = mutableMapOf()
-
-    override fun <T : Any?> put(key: Key<T>, factory: Factory<T>) {
-        this.values[key] = factory
-        this.factories[key] = factory
+    override fun <T> put(key: Key<T>, factory: Factory<T>) {
+        runCatching { super.put(key, factory) }.onFailure {
+            if (it is AssertionError) return
+            else throw it
+        }
     }
 
     override fun <T> put(key: Key<T>, value: T) {
-        this.values[key] = value!!
+        runCatching { super.put(key, value) }.onFailure {
+            if (it is AssertionError) return
+            else throw it
+        }
     }
 
-    override fun <T> put(var1: Class<T>, var2: T) {
-        this.put(key(var1), var2)
+    override fun <T> put(key: Class<T>, value: T) {
+        runCatching { super.put(key, value) }.onFailure {
+            if (it is AssertionError) return
+            else throw it
+        }
     }
 
     override fun <T> put(key: Class<T>, factory: Factory<T>) {
-        this.put(key(key), factory)
-    }
-
-    @Suppress(UNCHECKED_CAST)
-    override operator fun <T> get(key: Key<T>): T {
-        var value = this.values[key]
-        if (value is Factory<*>) {
-            value = value.make(this)
+        runCatching { super.put(key, factory) }.onFailure {
+            if (it is AssertionError) return
+            else throw it
         }
-        return value as T
-    }
-
-    override fun <T> get(var1: Class<T>): T {
-        return this[key(var1)]
-    }
-
-    override fun dump() = values.values.forEach { value -> System.err.println(value.javaClass) }
-
-    override fun clear() {
-        values.clear()
-        keys.clear()
-        factories.clear()
-    }
-
-    @Suppress(UNCHECKED_CAST)
-    private fun <T> key(keyClass: Class<T>): Key<T> {
-        var current = this.keys[keyClass]
-        if (current == null) {
-            current = Key<Any>()
-            this.keys[keyClass] = current
-        }
-        return current as Key<T>
     }
 
 }
