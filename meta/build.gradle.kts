@@ -1,4 +1,4 @@
-import org.gradle.api.file.DuplicatesStrategy.*
+import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import org.gradle.internal.jvm.Jvm
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -7,10 +7,7 @@ plugins {
     kotlin("jvm")
 }
 
-val embedded: Configuration by configurations.creating {
-    configurations.implementation.get().extendsFrom(this)
-    configurations.api.get().extendsFrom(this)
-}
+val embedded: Configuration by configurations.creating { configurations.compileClasspath.get().extendsFrom(this) }
 
 val kotlinVersion: String by project
 
