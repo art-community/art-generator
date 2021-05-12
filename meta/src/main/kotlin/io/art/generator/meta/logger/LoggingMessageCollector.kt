@@ -18,7 +18,6 @@
 
 package io.art.generator.meta.logger
 
-import io.art.logging.LoggingModule.logger
 import org.apache.logging.log4j.Level.TRACE
 import org.apache.logging.log4j.io.LoggerPrintStream
 import org.apache.logging.log4j.spi.ExtendedLogger

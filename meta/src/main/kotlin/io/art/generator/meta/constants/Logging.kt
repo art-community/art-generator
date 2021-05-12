@@ -18,7 +18,7 @@
 
 package io.art.generator.meta.constants
 
-import io.art.logging.LoggingModule
+import io.art.logging.module.LoggingModule
 import org.apache.logging.log4j.core.Logger
 
 val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)

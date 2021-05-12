@@ -11,7 +11,7 @@ const val META_PACKAGE = "meta"
 
 const val CONSTRUCTOR_NAME = "<init>"
 
-const val BUILDER_NAME = "builder"
+const val BUILDER_NAME = "deferredExecutor"
 const val REGISTER_NAME = "register"
 
 const val TO_STRING_NAME = "toString"

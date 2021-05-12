@@ -11,7 +11,7 @@ public interface Names {
     String IMPLEMENT_NAME = "implement";
     String IMPLEMENTATION_NAME = "implementation";
     String COMMUNICATE_METHOD_NAME = "communicate";
-    String BUILDER_METHOD_NAME = "builder";
+    String BUILDER_METHOD_NAME = "deferredExecutor";
     String BUILD_METHOD_NAME = "build";
     String CUSTOMIZER_NAME = "customizer";
     String MAIN_NAME = "main";
