@@ -60,7 +60,7 @@ import java.util.function.*;
 import java.util.stream.*;
 
 public interface Imports {
-    ImportModel NOT_IMPLEMENTED_EXCEPTION_MODEL = new ImportModel("io.art.core.exception.NotImplementedException", false, false);
+    ImportModel NOT_IMPLEMENTED_EXCEPTION_MODEL = new ImportModel("io.activator.core.exception.NotImplementedException", false, false);
 
     String[] IMPORTING_CLASSES = new String[]{
             NotImplementedException.class.getName(),
