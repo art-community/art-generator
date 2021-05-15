@@ -123,26 +123,26 @@ public interface Imports {
             ServiceSpecificationRegistry.class.getName(),
             ServiceValidationDecorator.class.getName(),
 
-            ModuleLauncher.class.getName(),
+            Launcher.class.getName(),
 
             ModuleModel.class.getName(),
             ModuleModelConfigurator.class.getName(),
             ServerModuleModel.class.getName(),
             ServerModelConfigurator.class.getName(),
 
-            ModuleCustomizer.class.getName(),
-            ValueCustomizer.class.getName(),
-            ServerCustomizer.class.getName(),
+            ModulesInitializer.class.getName(),
+            ValueInitializer.class.getName(),
+            ServerInitializer.class.getName(),
 
             ConfigurationSource.class.getName(),
             CustomConfigurationRegistry.class.getName(),
             CustomConfigurator.class.getName(),
-            ConfiguratorCustomizer.class.getName(),
+            ConfiguratorInitializer.class.getName(),
             ConfiguratorModuleModel.class.getName(),
 
             CommunicatorProxyRegistry.class.getName(),
             CommunicatorModuleModel.class.getName(),
-            CommunicatorCustomizer.class.getName(),
+            CommunicatorInitializer.class.getName(),
             CommunicatorAction.class.getName(),
             CommunicatorProxy.class.getName(),
             CommunicatorProtocol.class.getName(),
@@ -155,7 +155,7 @@ public interface Imports {
 
             StorageSpacesRegistry.class.getName(),
             StorageModuleModel.class.getName(),
-            StorageCustomizer.class.getName(),
+            StorageInitializer.class.getName(),
             TarantoolSpaceImplementation.class.getName(),
             TarantoolRecord.class.getName(),
             TarantoolTransactionDependency.class.getName(),

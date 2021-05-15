@@ -65,13 +65,13 @@ public interface TypeModels {
 
     TypeModel MODULE_CONFIGURATOR_TYPE = type(ModuleModelConfigurator.class);
 
-    TypeModel CONFIGURATOR_CUSTOMIZER_TYPE = type(ConfiguratorCustomizer.class);
-    TypeModel VALUE_CUSTOMIZER_TYPE = type(ValueCustomizer.class);
-    TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerCustomizer.class);
-    TypeModel COMMUNICATOR_CUSTOMIZER_TYPE = type(CommunicatorCustomizer.class);
-    TypeModel MODULE_CUSTOMIZER_TYPE = type(ModuleCustomizer.class);
+    TypeModel CONFIGURATOR_CUSTOMIZER_TYPE = type(ConfiguratorInitializer.class);
+    TypeModel VALUE_CUSTOMIZER_TYPE = type(ValueInitializer.class);
+    TypeModel SERVER_CUSTOMIZER_TYPE = type(ServerInitializer.class);
+    TypeModel COMMUNICATOR_CUSTOMIZER_TYPE = type(CommunicatorInitializer.class);
+    TypeModel MODULE_CUSTOMIZER_TYPE = type(ModulesInitializer.class);
 
-    TypeModel MODULE_LAUNCHER_TYPE = type(ModuleLauncher.class);
+    TypeModel MODULE_LAUNCHER_TYPE = type(Launcher.class);
 
     TypeModel CUSTOM_CONFIGURATION_REGISTRY_TYPE = type(CustomConfigurationRegistry.class);
     TypeModel CONFIGURATOR_MODULE_MODEL_TYPE = type(ConfiguratorModuleModel.class);
@@ -94,7 +94,7 @@ public interface TypeModels {
     TypeModel COMMUNICATOR_ACTION_IDENTIFIER_TYPE = type(CommunicatorActionIdentifier.class);
 
     TypeModel STORAGE_MODULE_MODEL_TYPE = type(StorageModuleModel.class);
-    TypeModel STORAGE_CUSTOMIZER_TYPE = type(StorageCustomizer.class);
+    TypeModel STORAGE_CUSTOMIZER_TYPE = type(StorageInitializer.class);
     TypeModel STORAGE_REGISTRY_TYPE = type(StorageSpacesRegistry.class);
     TypeModel TARANTOOL_FIELD_TYPE = type(TarantoolField.class);
 

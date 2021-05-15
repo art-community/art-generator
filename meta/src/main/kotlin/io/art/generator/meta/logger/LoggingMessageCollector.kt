@@ -18,17 +18,16 @@
 
 package io.art.generator.meta.logger
 
-import org.apache.logging.log4j.Level.TRACE
-import org.apache.logging.log4j.io.LoggerPrintStream
-import org.apache.logging.log4j.spi.ExtendedLogger
+import io.art.logging.logger.Logger
+import io.art.logging.module.LoggingModule.logger
+import io.art.logging.stream.LoggerStream
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer.WITHOUT_PATHS
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import java.io.PrintStream
-import java.nio.charset.Charset.defaultCharset
 
-class LoggingMessageCollector(private val logger: ExtendedLogger = logger(LoggingMessageCollector::class.java),
-                              private val stream: PrintStream = object : LoggerPrintStream(logger, false, defaultCharset(), null, TRACE, null) {},
+class LoggingMessageCollector(private val logger: Logger = logger(LoggingMessageCollector::class.java),
+                              private val stream: PrintStream = LoggerStream(logger),
                               private val printer: MessageCollector = PrintingMessageCollector(stream, WITHOUT_PATHS, true)
 ) : MessageCollector by printer
 
