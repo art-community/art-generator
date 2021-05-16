@@ -35,8 +35,7 @@ object MetaGenerator {
     @JvmStatic
     fun main(arguments: Array<String>) {
         activator(arguments)
-                .module(logging(LoggingInitializer::colored))
-                .module(scheduler())
+                .module(scheduler().with(logging(LoggingInitializer::colored)))
                 .launch()
         initialize(arguments)
         scheduleDelayed(::watchJavaSources, configuration.watcherPeriod)
