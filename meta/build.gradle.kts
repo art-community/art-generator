@@ -7,44 +7,45 @@ plugins {
     kotlin("jvm")
 }
 
-val embedded: Configuration by configurations.creating { configurations.compileClasspath.get().extendsFrom(this) }
+val included: Configuration by configurations.creating { configurations.implementation.get().extendsFrom(this) }
 
 val kotlinVersion: String by project
 
 dependencies {
     if (JavaVersion.current().isJava8) {
-        embedded(files(Jvm.current().toolsJar))
+        included(files(Jvm.current().toolsJar))
     }
 
-    embedded(kotlin("stdlib-jdk8"))
-    embedded(kotlin("compiler-embeddable"))
-    embedded(kotlin("reflect"))
+    included(kotlin("stdlib-jdk8"))
+    included(kotlin("compiler-embeddable"))
+    included(kotlin("reflect"))
 
-    embedded("io.art.java:launcher:main")
-    embedded("io.art.java:core:main")
-    embedded("io.art.java:configurator:main")
-    embedded("io.art.java:yaml-configuration:main")
-    embedded("io.art.java:server:main")
-    embedded("io.art.java:communicator:main")
-    embedded("io.art.java:value:main")
-    embedded("io.art.java:model:main")
-    embedded("io.art.java:rsocket:main")
-    embedded("io.art.java:http:main")
-    embedded("io.art.java:json:main")
-    embedded("io.art.java:yaml:main")
-    embedded("io.art.java:message-pack:main")
-    embedded("io.art.java:protobuf:main")
-    embedded("io.art.java:scheduler:main")
-    embedded("io.art.java:logging:main")
-    embedded("io.art.java:rocks-db:main")
-    embedded("io.art.java:storage:main")
-    embedded("io.art.java:tarantool:main")
-    embedded("io.art.java:meta:main")
+    included("io.art.java:core:main")
+    included("io.art.java:launcher:main")
+    included("io.art.java:configurator:main")
+    included("io.art.java:yaml-configuration:main")
+    included("io.art.java:server:main")
+    included("io.art.java:communicator:main")
+    included("io.art.java:value:main")
+    included("io.art.java:model:main")
+    included("io.art.java:rsocket:main")
+    included("io.art.java:http:main")
+    included("io.art.java:json:main")
+    included("io.art.java:yaml:main")
+    included("io.art.java:xml:main")
+    included("io.art.java:message-pack:main")
+    included("io.art.java:protobuf:main")
+    included("io.art.java:scheduler:main")
+    included("io.art.java:logging:main")
+    included("io.art.java:rocks-db:main")
+    included("io.art.java:storage:main")
+    included("io.art.java:tarantool:main")
+    included("io.art.java:meta:main")
 
-    embedded("com.squareup", "javapoet", "+")
-    embedded("com.squareup", "kotlinpoet", "+")
-    embedded("net.sourceforge.argparse4j", "argparse4j", "+")
-    embedded("org.projectlombok", "lombok", "+")
+    included("com.squareup", "javapoet", "+")
+    included("com.squareup", "kotlinpoet", "+")
+    included("net.sourceforge.argparse4j", "argparse4j", "+")
+    included("org.projectlombok", "lombok", "+")
 }
 
 val compileKotlin by tasks.getting(KotlinCompile::class) {
@@ -71,12 +72,12 @@ tasks.register("executable-jar", Jar::class.java) {
 
     from(processResources.outputs.files)
     from(compileKotlin.outputs.files)
-    from(embedded.filter { it.extension != "gz" }.map { if (it.isDirectory) it else zipTree(it) })
+    from(included.filter { it.extension != "gz" }.map { if (it.isDirectory) it else zipTree(it) })
 }
 
 tasks.register("print-classpath") {
     doLast {
-        embedded.files.forEach {
+        included.files.forEach {
             println("- $it")
         }
     }
