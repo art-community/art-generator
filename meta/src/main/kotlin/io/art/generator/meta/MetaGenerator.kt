@@ -35,6 +35,7 @@ object MetaGenerator {
     @JvmStatic
     fun main(arguments: Array<String>) {
         activator(arguments)
+                .quiet(true)
                 .module(scheduler().with(logging(LoggingInitializer::colored)))
                 .launch()
         initialize(arguments)
