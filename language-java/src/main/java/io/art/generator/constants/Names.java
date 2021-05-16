@@ -17,8 +17,8 @@ public interface Names {
     String MAIN_NAME = "main";
     String LAUNCH_NAME = "launch";
     String DECORATE_NAME = "decorate";
-    String CUSTOMIZE_NAME = "initialize";
-    String CONFIGURE_NAME = "initialize";
+    String CUSTOMIZE_NAME = "processInitialization";
+    String CONFIGURE_NAME = "processInitialization";
     String SERVER_NAME = "server";
     String COMMUNICATOR_NAME = "communicator";
     String VALUE_NAME = "value";

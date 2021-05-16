@@ -1,7 +1,7 @@
 package io.art.generator.constants;
 
 public interface ExceptionMessages {
-    String COULD_NOT_CREATE_JAVAC_INSTANCE = "Could not create Javac instance";
+    String COULD_NOT_CREATE_JAVAC_INSTANCE = "Could not createLogger Javac instance";
     String MODULE_CONFIGURATOR_NOT_FOUND = "Module configurator method not found";
     String MORE_THAN_ONE_PARAMETER = "More than one parameter not supported";
     String UNSUPPORTED_TYPE = "Unsupported type: {0}";
