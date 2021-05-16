@@ -1,5 +1,7 @@
 package io.art.generator.meta.constants
 
+const val GENERATOR = "generator"
+
 const val JAVA = "java"
 const val CLASS = "class"
 const val JAR = "jar"

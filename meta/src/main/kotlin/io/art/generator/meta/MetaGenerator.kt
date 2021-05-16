@@ -22,22 +22,21 @@ package io.art.generator.meta
 
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.meta.configuration.configuration
+import io.art.generator.meta.constants.COMMON_LOGGER
+import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.service.JavaSourceWatchingService.watchJavaSources
 import io.art.generator.meta.service.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
-import io.art.logging.module.LoggingInitializer
 import io.art.scheduler.manager.SchedulersManager.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
 
 object MetaGenerator {
     @JvmStatic
     fun main(arguments: Array<String>) {
-        activator(arguments)
-                .quiet(true)
-                .module(scheduler().with(logging(LoggingInitializer::colored)))
-                .launch()
+        activator(arguments).quiet(true).module(scheduler().with(logging())).launch()
+        COMMON_LOGGER.info("Started")
         initialize(arguments)
         scheduleDelayed(::watchJavaSources, configuration.watcherPeriod)
         block()
