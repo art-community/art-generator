@@ -146,7 +146,7 @@ object JavaMetaGenerationService {
                 addType(classBuilder(META_CLASS(javaClass.type.className!!))
                         .addModifiers(PUBLIC, STATIC)
                         .apply {
-                            addSuperinterface(META_TYPE_PROVIDER_CLASS_NAME)
+                            superclass(META_TYPE_PROVIDER_CLASS_NAME)
 
                             addField(FieldSpec.builder(META_TYPE_BUILDER_CLASS_NAME, BUILDER_NAME)
                                     .addModifiers(PRIVATE, FINAL)
@@ -155,7 +155,7 @@ object JavaMetaGenerationService {
 
                             addMethod(methodBuilder(BUILDER_NAME)
                                     .returns(META_TYPE_BUILDER_CLASS_NAME)
-                                    .addModifiers(PUBLIC)
+                                    .addModifiers(PROTECTED)
                                     .addCode(RETURN_STATEMENT, BUILDER_NAME)
                                     .build())
 
