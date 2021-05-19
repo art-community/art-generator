@@ -1,7 +1,7 @@
 package io.art.generator.logger;
 
-import io.art.core.colorizer.*;
 import io.art.generator.model.*;
+import io.art.logging.colorizer.*;
 import lombok.*;
 import static io.art.core.checker.NullityChecker.*;
 import static io.art.core.constants.DateTimeConstants.*;
