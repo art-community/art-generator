@@ -18,17 +18,15 @@
 
 package io.art.generator.meta.configuration
 
-import io.art.configuration.yaml.source.YamlConfigurationSource
-import io.art.configurator.constants.ConfiguratorModuleConstants.ConfigurationSourceType.CUSTOM_FILE
-import io.art.core.constants.StringConstants.EMPTY_STRING
+import io.art.configurator.module.ConfiguratorModule.configuration
 import io.art.generator.meta.constants.DEFAULT_META_METHOD_EXCLUSIONS
 import io.art.generator.meta.extension.path
-import java.io.InputStream
 import java.nio.file.Path
 import java.time.Duration
 
 
 data class Configuration(
+        val configurationPath: String,
         val sourcesRoot: Path,
         val stubRoot: Path,
         val sources: Set<Path>,
@@ -39,11 +37,10 @@ data class Configuration(
         val metaMethodExclusions: Set<String>,
 )
 
-lateinit var configuration: Configuration
-
-fun loadConfiguration(stream: InputStream) {
-    configuration = with(YamlConfigurationSource(EMPTY_STRING, CUSTOM_FILE) { stream }) {
+val configuration: Configuration by lazy {
+    with(configuration()) {
         Configuration(
+                configurationPath = path,
                 sourcesRoot = getString("paths.sources").path,
                 stubRoot = getString("paths.stubs").path,
                 sources = getStringArray("sources").map { file -> file.path }.toSet(),

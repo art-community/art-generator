@@ -18,40 +18,11 @@
 
 package io.art.generator.meta.service
 
-import io.art.core.extensions.FileExtensions
-import io.art.generator.meta.MetaGenerator
-import io.art.generator.meta.configuration.loadConfiguration
-import io.art.generator.meta.constants.CONFIGURATION_ARGUMENTS
-import io.art.generator.meta.constants.CONFIGURATION_PATH_ARGUMENT
-import io.art.generator.meta.constants.DEFAULT_CONFIGURATION_PATH
-import io.art.generator.meta.constants.EXIT_CODE_ERROR
-import io.art.generator.meta.extension.path
-import net.sourceforge.argparse4j.ArgumentParsers.newFor
-import net.sourceforge.argparse4j.inf.ArgumentParserException
+import io.art.generator.meta.configuration.configuration
+import io.art.generator.meta.constants.COMMON_LOGGER
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
-import kotlin.system.exitProcess
 
-fun initialize(arguments: Array<String>) {
+fun initialize() {
     setIdeaIoUseFallback()
-    newFor(MetaGenerator::class.simpleName)
-            .cjkWidthHack(true)
-            .build()
-            .apply {
-                CONFIGURATION_ARGUMENTS.forEach { argument ->
-                    addArgument(argument.short, argument.long)
-                            .help(argument.help)
-                            .dest(argument.name)
-                }
-                try {
-                    val stream = parseArgs(arguments).get<String>(CONFIGURATION_PATH_ARGUMENT.name)
-                            ?.path
-                            ?.let(FileExtensions::fileInputStream)
-                            ?: MetaGenerator::class.java.classLoader.getResourceAsStream(DEFAULT_CONFIGURATION_PATH)!!
-                    loadConfiguration(stream)
-                } catch (exception: ArgumentParserException) {
-                    handleError(exception)
-                    exitProcess(EXIT_CODE_ERROR)
-                }
-            }
-
+    COMMON_LOGGER.info("Configured by: ${configuration.configurationPath}")
 }

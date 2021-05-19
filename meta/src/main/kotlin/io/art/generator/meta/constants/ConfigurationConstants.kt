@@ -19,7 +19,7 @@
 package io.art.generator.meta.constants
 
 
-const val DEFAULT_CONFIGURATION_PATH = "configuration.yml"
+const val DEFAULT_CONFIGURATION_PATH = "module.yml"
 
 val DEFAULT_META_METHOD_EXCLUSIONS = setOf(
         "deferredExecutor",
