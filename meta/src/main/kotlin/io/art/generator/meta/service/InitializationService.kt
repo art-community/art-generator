@@ -18,11 +18,8 @@
 
 package io.art.generator.meta.service
 
-import io.art.generator.meta.configuration.configuration
-import io.art.generator.meta.constants.COMMON_LOGGER
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 
 fun initialize() {
     setIdeaIoUseFallback()
-    COMMON_LOGGER.info("Configured by: ${configuration.configurationPath}")
 }
