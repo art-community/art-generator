@@ -20,16 +20,16 @@ package io.art.generator.meta.constants
 import com.squareup.javapoet.ClassName
 import io.art.meta.MetaField
 import io.art.meta.MetaMethod
-import io.art.meta.MetaType
-import io.art.meta.MetaType.MetaTypeBuilder
-import io.art.meta.MetaType.MetaTypeProvider
+import io.art.meta.MetaClass
+import io.art.meta.MetaClass.Builder
+import io.art.meta.MetaClass.Provider
 import io.art.meta.MetaTypeRegistry
 
 val CLASS_CLASS_NAME = ClassName.get(Class::class.java)!!
 val OBJECT_CLASS_NAME = ClassName.get(Object::class.java)!!
 val META_FIELD_CLASS_NAME = ClassName.get(MetaField::class.java)!!
 val META_METHOD_CLASS_NAME = ClassName.get(MetaMethod::class.java)!!
-val META_TYPE_PROVIDER_CLASS_NAME = ClassName.get(MetaTypeProvider::class.java)!!
-val META_TYPE_CLASS_NAME = ClassName.get(MetaType::class.java)!!
-val META_TYPE_BUILDER_CLASS_NAME = ClassName.get(MetaTypeBuilder::class.java)!!
+val META_TYPE_PROVIDER_CLASS_NAME = ClassName.get(Provider::class.java)!!
+val META_TYPE_CLASS_NAME = ClassName.get(MetaClass::class.java)!!
+val META_TYPE_BUILDER_CLASS_NAME = ClassName.get(Builder::class.java)!!
 val META_TYPE_REGISTRY_CLASS_NAME = ClassName.get(MetaTypeRegistry::class.java)!!
