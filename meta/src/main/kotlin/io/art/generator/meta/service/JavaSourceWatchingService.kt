@@ -31,13 +31,14 @@ import java.util.concurrent.Future
 
 object JavaSourceWatchingService {
     @Volatile
-    private var watcher: Future<*>? = null
+    private var generate: Future<*>? = null
 
     fun watchJavaSources() = detectJavaChanges().changed {
         JAVA_LOGGER.info(SOURCES_CHANGED)
-        val triggerTime = now().plusSeconds(configuration.analyzerDelay.seconds)
-        watcher?.cancel(false)
-        watcher = schedule({ handle { classes -> handleJavaChanges(classes) } }, triggerTime)
+        generate = schedule(now().plusSeconds(configuration.analyzerDelay.seconds)) {
+            generate?.cancel(false)
+            handle { classes -> handleJavaChanges(classes) }
+        }
     }
 
     private fun JavaSourcesChanges.handleJavaChanges(classes: Set<JavaMetaClass>) = classes.asSequence()
