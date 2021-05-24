@@ -25,7 +25,7 @@ import javax.lang.model.type.WildcardType
 
 fun JavaMetaType.asPoetType(): TypeName = when (kind) {
     JDK_KIND, PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> {
-        originalType?.let(TypeName::get)?.let(TypeName::box) ?: TypeName.get(reflectionType!!).let(TypeName::box)
+        originalType?.let(TypeName::get) ?: TypeName.get(reflectionType!!)
     }
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.asPoetType())
