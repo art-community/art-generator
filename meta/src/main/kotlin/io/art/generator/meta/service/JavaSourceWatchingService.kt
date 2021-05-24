@@ -22,6 +22,7 @@ import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.SOURCES_CHANGED
 import io.art.generator.meta.model.JavaMetaClass
+import io.art.generator.meta.service.JavaMetaGenerationService.generateJavaMeta
 import io.art.generator.meta.service.JavaSourceChangesDetector.JavaSourcesChanges
 import io.art.generator.meta.service.JavaSourceChangesDetector.detectJavaChanges
 import io.art.scheduler.manager.SchedulersManager.schedule
@@ -41,8 +42,5 @@ object JavaSourceWatchingService {
         }
     }
 
-    private fun JavaSourcesChanges.handleJavaChanges(classes: Set<JavaMetaClass>) = classes.asSequence()
-            .apply(JavaMetaGenerationService::generateJavaMeta)
-            .filter { javaClass -> existed.contains(javaClass.source) }
-            .apply(JavaStubGenerationService::generateJavaStubs)
+    private fun JavaSourcesChanges.handleJavaChanges(classes: Set<JavaMetaClass>) = generateJavaMeta(classes.asSequence())
 }

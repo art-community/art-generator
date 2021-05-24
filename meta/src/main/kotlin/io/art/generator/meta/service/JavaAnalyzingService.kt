@@ -120,7 +120,7 @@ private fun Type.TypeVar.asMetaType(): JavaMetaType = JavaMetaType(
         originalType = this,
         kind = VARIABLE_KIND,
         typeName = tsym.name.toString(),
-        typeVariableBounds = upperBound
+        typeVariables = upperBound
                 .let { bound ->
                     when (bound) {
                         is IntersectionType -> bound.bounds

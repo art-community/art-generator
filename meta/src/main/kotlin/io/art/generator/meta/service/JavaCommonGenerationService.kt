@@ -35,7 +35,7 @@ fun JavaMetaType.asPoetType(): TypeName = when (kind) {
             ?: WildcardTypeName.get(originalType as? WildcardType ?: reflectionType as WildcardType)
 
     VARIABLE_KIND -> {
-        val bounds = typeVariableBounds.values.map(JavaMetaType::asPoetType).toTypedArray()
+        val bounds = typeVariables.values.map(JavaMetaType::asPoetType).toTypedArray()
         TypeVariableName.get(typeName, *bounds)
     }
 
