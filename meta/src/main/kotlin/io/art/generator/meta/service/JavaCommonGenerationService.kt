@@ -24,15 +24,13 @@ import io.art.generator.meta.model.JavaMetaTypeKind.*
 import javax.lang.model.type.WildcardType
 
 fun JavaMetaType.asPoetType(): TypeName = when (kind) {
-    JDK_KIND, PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> {
-        originalType?.let(TypeName::get) ?: TypeName.get(reflectionType!!)
-    }
+    JDK_KIND, PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> TypeName.get(originalType)
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.asPoetType())
 
     WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> WildcardTypeName.subtypeOf(bound.asPoetType()) }
             ?: wildcardSuperBound?.asPoetType()?.let(WildcardTypeName::supertypeOf)
-            ?: WildcardTypeName.get(originalType as? WildcardType ?: reflectionType as WildcardType)
+            ?: WildcardTypeName.get(originalType as? WildcardType)
 
     VARIABLE_KIND -> {
         val bounds = typeVariables.values.map(JavaMetaType::asPoetType).toTypedArray()

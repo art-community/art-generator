@@ -21,9 +21,7 @@ package io.art.generator.meta.service
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.SOURCES_CHANGED
-import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.JavaMetaGenerationService.generateJavaMeta
-import io.art.generator.meta.service.JavaSourceChangesDetector.JavaSourcesChanges
 import io.art.generator.meta.service.JavaSourceChangesDetector.detectJavaChanges
 import io.art.scheduler.manager.SchedulersManager.schedule
 import java.time.LocalDateTime.now
@@ -38,9 +36,7 @@ object JavaSourceWatchingService {
         JAVA_LOGGER.info(SOURCES_CHANGED)
         generate = schedule(now().plusSeconds(configuration.analyzerDelay.seconds)) {
             generate?.cancel(false)
-            handle { classes -> handleJavaChanges(classes) }
+            handle { classes -> generateJavaMeta(classes.asSequence()) }
         }
     }
-
-    private fun JavaSourcesChanges.handleJavaChanges(classes: Set<JavaMetaClass>) = generateJavaMeta(classes.asSequence())
 }

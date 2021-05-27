@@ -21,7 +21,6 @@
 package io.art.generator.meta.model
 
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
-import java.lang.reflect.Type
 import java.nio.file.Path
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeMirror
@@ -39,8 +38,7 @@ enum class JavaMetaTypeKind {
 }
 
 data class JavaMetaType(
-        val originalType: TypeMirror? = null,
-        val reflectionType: Type? = null,
+        val originalType: TypeMirror,
 
         val typeName: String,
         val kind: JavaMetaTypeKind,

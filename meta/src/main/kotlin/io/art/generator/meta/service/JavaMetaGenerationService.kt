@@ -21,7 +21,6 @@
 package io.art.generator.meta.service
 
 import com.squareup.javapoet.*
-import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.constants.StringConstants.DOT
@@ -31,7 +30,6 @@ import io.art.generator.meta.extension.packages
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaField
 import io.art.generator.meta.model.JavaMetaMethod
-import io.art.generator.meta.model.JavaMetaTypeKind.UNKNOWN_KIND
 import io.art.generator.meta.model.JavaMetaTypeKind.VARIABLE_KIND
 import io.art.generator.meta.templates.*
 import javax.lang.model.element.Modifier.*
@@ -49,7 +47,6 @@ object JavaMetaGenerationService {
                 .build()
                 .let { metaClass ->
                     JavaFile.builder(META_PACKAGE, metaClass)
-                            .addStaticImport(META_TYPE_REGISTRY_CLASS_NAME, REGISTER_NAME)
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)
@@ -88,6 +85,73 @@ object JavaMetaGenerationService {
                 .addCode(RETURN_STATEMENT, name)
                 .build()
     }
+
+
+    private fun TypeSpec.Builder.generateClass(javaClass: JavaMetaClass) {
+        addType(classBuilder(META_CLASS(javaClass.type.className!!))
+                .addModifiers(PUBLIC, STATIC)
+                .apply {
+
+                }
+                .build()
+        )
+    }
+
+
+    private fun TypeSpec.Builder.addMetaConstructor(method: JavaMetaMethod) {
+
+    }
+
+    private fun TypeSpec.Builder.addMetaField(owner: JavaMetaClass, field: JavaMetaField) {
+        val ownerFieldType = field.type.asPoetType()
+        val metaFieldType = when (field.type.kind) {
+            VARIABLE_KIND -> ParameterizedTypeName.get(META_FIELD_CLASS_NAME, OBJECT_CLASS_NAME)
+            else -> ParameterizedTypeName.get(META_FIELD_CLASS_NAME, ownerFieldType)
+        }
+
+        fun FieldSpec.Builder.metaFieldInitializer() = when (field.type.kind) {
+            VARIABLE_KIND -> initializer(META_GENERIC_FIELD_INITIALIZER, META_FIELD_CLASS_NAME, field.name)
+            else -> initializer(META_FIELD_INITIALIZER, META_FIELD_CLASS_NAME, field.name, ownerFieldType)
+        }
+
+        fun MethodSpec.Builder.metaMethodContent() = when (field.type.kind) {
+            VARIABLE_KIND -> {
+                val typeVariable = owner.type.classTypeParameters[field.type.typeName]!!.asPoetType() as TypeVariableName
+                returns(ParameterizedTypeName.get(META_FIELD_CLASS_NAME, ownerFieldType))
+                addTypeVariable(typeVariable)
+                addParameter(ParameterizedTypeName.get(CLASS_CLASS_NAME, typeVariable), META_FIELD_METHOD_REIFIED_PARAMETER)
+                addCode(META_FIELD_METHOD_REIFIED_STATEMENT, field.name)
+            }
+            else -> {
+                returns(metaFieldType)
+                addCode(RETURN_STATEMENT, field.name)
+            }
+        }
+
+        addField(FieldSpec.builder(metaFieldType, field.name, PRIVATE, FINAL)
+                .apply { metaFieldInitializer() }
+                .build())
+
+        addMethod(methodBuilder(field.name)
+                .addModifiers(PUBLIC)
+                .apply { metaMethodContent() }
+                .build())
+    }
+
+
+    private fun TypeSpec.Builder.addMetaMethod(method: JavaMetaMethod) {
+        val ownerMethodType = method.returnType.asPoetType()
+        val metaMethodType = ParameterizedTypeName.get(META_METHOD_CLASS_NAME, ownerMethodType)
+        addField(FieldSpec.builder(metaMethodType, method.name, PRIVATE, FINAL)
+                .initializer(META_METHOD_INITIALIZER, META_METHOD_CLASS_NAME, method.name, ownerMethodType)
+                .build())
+        addMethod(methodBuilder(method.name)
+                .addModifiers(PUBLIC)
+                .returns(metaMethodType)
+                .addCode(RETURN_STATEMENT, method.name)
+                .build())
+    }
+
 
     private class MetaPackagesTree(classes: Sequence<JavaMetaClass>) {
         val rootPackages = mutableMapOf<String, Node>()
@@ -141,95 +205,6 @@ object JavaMetaGenerationService {
                         }
                     }
                     .build()
-
-            private fun TypeSpec.Builder.generateClass(javaClass: JavaMetaClass) {
-                addType(classBuilder(META_CLASS(javaClass.type.className!!))
-                        .addModifiers(PUBLIC, STATIC)
-                        .apply {
-                            superclass(META_TYPE_PROVIDER_CLASS_NAME)
-
-                            addField(FieldSpec.builder(META_TYPE_BUILDER_CLASS_NAME, BUILDER_NAME)
-                                    .addModifiers(PRIVATE, FINAL)
-                                    .initializer(META_TYPE_OF_STATEMENT, ClassName.get(javaClass.type.classPackageName, javaClass.type.className))
-                                    .build())
-
-                            addMethod(methodBuilder(BUILDER_NAME)
-                                    .returns(META_TYPE_BUILDER_CLASS_NAME)
-                                    .addModifiers(PROTECTED)
-                                    .addCode(RETURN_STATEMENT, BUILDER_NAME)
-                                    .build())
-
-                            javaClass.fields
-                                    .asSequence()
-                                    .filter { field -> field.value.type.kind !in setOf(UNKNOWN_KIND) }
-                                    .forEach { field -> addMetaField(javaClass, field.value) }
-
-                            javaClass.methods
-                                    .asSequence()
-                                    .filter { method -> method.returnType.kind !in setOf(UNKNOWN_KIND) }
-                                    .filter { method -> method.parameters.values.none { parameter -> parameter.type.kind in setOf(UNKNOWN_KIND) } }
-                                    .filter { method -> javaClass.fields.none { field -> method.name == GETTER(field.key) } }
-                                    .filter { method -> javaClass.fields.none { field -> method.name == GETTER_BOOLEAN(field.key) } }
-                                    .filter { method -> javaClass.fields.none { field -> method.name == SETTER(field.key) } }
-                                    .filter { method -> method.name !in configuration.metaMethodExclusions }
-                                    .forEach { method -> addMetaMethod(method) }
-
-                            addMethod(constructorBuilder()
-                                    .addModifiers(PRIVATE)
-                                    .addCode(META_TYPE_REGISTER_STATEMENT, META_TYPE_REGISTRY_CLASS_NAME).build())
-                        }
-                        .build()
-                )
-            }
-
-            private fun TypeSpec.Builder.addMetaField(owner: JavaMetaClass, field: JavaMetaField) {
-                val ownerFieldType = field.type.asPoetType()
-                val metaFieldType = when (field.type.kind) {
-                    VARIABLE_KIND -> ParameterizedTypeName.get(META_FIELD_CLASS_NAME, OBJECT_CLASS_NAME)
-                    else -> ParameterizedTypeName.get(META_FIELD_CLASS_NAME, ownerFieldType)
-                }
-
-                fun FieldSpec.Builder.metaFieldInitializer() = when (field.type.kind) {
-                    VARIABLE_KIND -> initializer(META_GENERIC_FIELD_INITIALIZER, META_FIELD_CLASS_NAME, field.name)
-                    else -> initializer(META_FIELD_INITIALIZER, META_FIELD_CLASS_NAME, field.name, ownerFieldType)
-                }
-
-                fun MethodSpec.Builder.metaMethodContent() = when (field.type.kind) {
-                    VARIABLE_KIND -> {
-                        val typeVariable = owner.type.classTypeParameters[field.type.typeName]!!.asPoetType() as TypeVariableName
-                        returns(ParameterizedTypeName.get(META_FIELD_CLASS_NAME, ownerFieldType))
-                        addTypeVariable(typeVariable)
-                        addParameter(ParameterizedTypeName.get(CLASS_CLASS_NAME, typeVariable), META_FIELD_METHOD_REIFIED_PARAMETER)
-                        addCode(META_FIELD_METHOD_REIFIED_STATEMENT, field.name)
-                    }
-                    else -> {
-                        returns(metaFieldType)
-                        addCode(RETURN_STATEMENT, field.name)
-                    }
-                }
-
-                addField(FieldSpec.builder(metaFieldType, field.name, PRIVATE, FINAL)
-                        .apply { metaFieldInitializer() }
-                        .build())
-
-                addMethod(methodBuilder(field.name)
-                        .addModifiers(PUBLIC)
-                        .apply { metaMethodContent() }
-                        .build())
-            }
-
-            private fun TypeSpec.Builder.addMetaMethod(method: JavaMetaMethod) {
-                val ownerMethodType = method.returnType.asPoetType()
-                val metaMethodType = ParameterizedTypeName.get(META_METHOD_CLASS_NAME, ownerMethodType)
-                addField(FieldSpec.builder(metaMethodType, method.name, PRIVATE, FINAL)
-                        .initializer(META_METHOD_INITIALIZER, META_METHOD_CLASS_NAME, method.name, ownerMethodType)
-                        .build())
-                addMethod(methodBuilder(method.name)
-                        .addModifiers(PUBLIC)
-                        .returns(metaMethodType)
-                        .addCode(RETURN_STATEMENT, method.name)
-                        .build())
-            }
         }
     }
 }

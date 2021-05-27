@@ -20,7 +20,7 @@ package io.art.generator.meta.constants
 
 
 val DEFAULT_META_METHOD_EXCLUSIONS = setOf(
-        "deferredExecutor",
+        "builder",
         "toString",
         "equals",
         "canEqual",

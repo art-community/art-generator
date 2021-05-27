@@ -18,10 +18,7 @@
 package io.art.generator.meta.constants
 
 import com.squareup.javapoet.ClassName
-import io.art.meta.MetaClass
-import io.art.meta.MetaField
-import io.art.meta.MetaMethod
-import io.art.meta.MetaType
+import io.art.meta.model.*
 
 val CLASS_CLASS_NAME = ClassName.get(Class::class.java)!!
 val OBJECT_CLASS_NAME = ClassName.get(Object::class.java)!!
@@ -29,3 +26,9 @@ val META_FIELD_CLASS_NAME = ClassName.get(MetaField::class.java)!!
 val META_METHOD_CLASS_NAME = ClassName.get(MetaMethod::class.java)!!
 val META_CLASS_CLASS_NAME = ClassName.get(MetaClass::class.java)!!
 val META_TYPE_CLASS_NAME = ClassName.get(MetaType::class.java)!!
+val META_PACKAGE_CLASS_NAME = ClassName.get(MetaPackage::class.java)!!
+val META_MODULE_CLASS_NAME = ClassName.get(MetaModule::class.java)!!
+val INSTANCE_META_METHOD_CLASS_NAME = ClassName.get(InstanceMetaMethod::class.java)!!
+val STATIC_META_METHOD_CLASS_NAME = ClassName.get(StaticMetaMethod::class.java)!!
+val META_PARAMETER_CLASS_NAME = ClassName.get(MetaParameter::class.java)!!
+val META_CONSTRUCTOR_CLASS_NAME = ClassName.get(MetaConstructor::class.java)!!
