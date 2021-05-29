@@ -18,9 +18,12 @@
 
 package io.art.generator.meta.templates
 
+import com.squareup.javapoet.ClassName
+import io.art.generator.meta.constants.META_NAME
+
 val GETTER = { field: String -> "get${field.capitalize()}" }
 val GETTER_BOOLEAN = { field: String -> "is${field.capitalize()}" }
 val SETTER = { field: String -> "set${field.capitalize()}" }
 
-val META_CLASS = { className: String -> "Meta$className" }
+val META_CLASS_NAME = { className: String -> ClassName.get(META_NAME, "Meta$className") }
 const val META_PACKAGE_REFERENCE = "meta"

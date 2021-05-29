@@ -25,30 +25,30 @@ import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 
 class JavaCompilerContext : Context() {
     override fun <T> put(key: Key<T>, factory: Factory<T>) {
-        runCatching { super.put(key, factory) }.onFailure {
-            if (it is AssertionError) return
-            else throw it
+        runCatching { super.put(key, factory) }.onFailure { throwable ->
+            if (throwable is AssertionError) return
+            else throw throwable
         }
     }
 
     override fun <T> put(key: Key<T>, value: T) {
-        runCatching { super.put(key, value) }.onFailure {
-            if (it is AssertionError) return
-            else throw it
+        runCatching { super.put(key, value) }.onFailure { throwable ->
+            if (throwable is AssertionError) return
+            else throw throwable
         }
     }
 
     override fun <T> put(key: Class<T>, value: T) {
-        runCatching { super.put(key, value) }.onFailure {
-            if (it is AssertionError) return
-            else throw it
+        runCatching { super.put(key, value) }.onFailure { throwable ->
+            if (throwable is AssertionError) return
+            else throw throwable
         }
     }
 
     override fun <T> put(key: Class<T>, factory: Factory<T>) {
-        runCatching { super.put(key, factory) }.onFailure {
-            if (it is AssertionError) return
-            else throw it
+        runCatching { super.put(key, factory) }.onFailure { throwable ->
+            if (throwable is AssertionError) return
+            else throw throwable
         }
     }
 

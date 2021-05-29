@@ -23,6 +23,8 @@ const val STUB_METHOD_LITERAL = "stub method"
 const val NEW_STATEMENT = "new \$T()"
 const val RETURN_STATEMENT = "return \$L;"
 
+const val COMPUTE_STATEMENT = "compute();"
+
 const val META_FIELD_INITIALIZER = "register(\$T.metaField(\$S,\$T.class))"
 const val META_GENERIC_FIELD_INITIALIZER = "register(\$T.metaField(\$S))"
 const val META_METHOD_INITIALIZER = "register(\$T.metaMethod(\$S,\$T.class))"

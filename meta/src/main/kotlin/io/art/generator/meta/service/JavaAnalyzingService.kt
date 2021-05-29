@@ -55,7 +55,7 @@ object JavaAnalyzingService {
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
                     .map { element -> (element as ClassSymbol).asMetaClass() }
-                    .filter { input -> input.type.classPackageName?.split(DOT)?.firstOrNull() != META_PACKAGE }
+                    .filter { input -> input.type.classPackageName?.split(DOT)?.firstOrNull() != META_NAME }
                     .associateBy { metaClass -> metaClass.source }
         }
     }
