@@ -25,6 +25,6 @@ const val NEW_STATEMENT = "new \$T()"
 const val RETURN_STATEMENT = "return \$L;"
 const val REGISTER_NEW_STATEMENT = "register(new \$T());"
 val REGISTER_META_PARAMETER_STATEMENT = { index: Int, name: String, type: TypeName ->
-    CodeBlock.of("register(new MetaParameter<>($index, \$S, metaType(\$T.class, \$T[]::new)))", name, type)
+    CodeBlock.of("register(new MetaParameter<>($index, \$S, metaType(\$T.class, \$T[]::new)))", name, type, type)
 }
 const val COMPUTE_STATEMENT = "compute();"

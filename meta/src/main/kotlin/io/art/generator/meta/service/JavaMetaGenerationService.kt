@@ -34,13 +34,14 @@ object JavaMetaGenerationService {
     fun generateJavaMeta(classes: Sequence<JavaMetaClass>) {
         JAVA_LOGGER.info(GENERATING_METAS_MESSAGE)
         val root = configuration.sourcesRoot.toFile()
+        root.parentFile.mkdirs()
         val moduleName = configuration.moduleName
         classBuilder(metaClassName(moduleName))
                 .addModifiers(PUBLIC)
                 .superclass(META_MODULE_CLASS_NAME)
                 .addField(FieldSpec.builder(metaClassName(moduleName), META_NAME)
                         .addModifiers(PRIVATE, FINAL, STATIC)
-                        .initializer(NEW_STATEMENT, metaClassName(moduleName), META_NAME)
+                        .initializer(NEW_STATEMENT, metaClassName(moduleName))
                         .build())
                 .addMethod(methodBuilder(META_NAME)
                         .addModifiers(PUBLIC, STATIC)
@@ -185,7 +186,7 @@ object JavaMetaGenerationService {
             val fieldType = ParameterizedTypeName.get(META_FIELD_CLASS_NAME, field.value.type.asGenericPoetType())
             FieldSpec.builder(fieldType, field.key)
                     .addModifiers(PRIVATE, FINAL)
-                    .initializer(REGISTER_NEW_STATEMENT, field)
+                    .initializer(REGISTER_NEW_STATEMENT, fieldType)
                     .build()
                     .apply(::addField)
         }

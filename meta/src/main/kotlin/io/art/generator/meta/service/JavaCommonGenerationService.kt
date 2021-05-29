@@ -19,7 +19,7 @@
 package io.art.generator.meta.service
 
 import com.squareup.javapoet.*
-import io.art.generator.meta.constants.OBJECT_CLASS_NAME
+import com.squareup.javapoet.WildcardTypeName.subtypeOf
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import javax.lang.model.type.WildcardType
@@ -29,7 +29,7 @@ fun JavaMetaType.asPoetType(): TypeName = when (kind) {
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.asPoetType())
 
-    WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> WildcardTypeName.subtypeOf(bound.asPoetType()) }
+    WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> subtypeOf(bound.asPoetType()) }
             ?: wildcardSuperBound?.asPoetType()?.let(WildcardTypeName::supertypeOf)
             ?: WildcardTypeName.get(originalType as? WildcardType)
 
@@ -54,12 +54,5 @@ fun JavaMetaType.asPoetType(): TypeName = when (kind) {
 }
 
 fun JavaMetaType.asGenericPoetType(): TypeName {
-    val wildcards = classTypeParameters
-            .values
-            .map { WildcardTypeName.subtypeOf(OBJECT_CLASS_NAME) }
-    val className = asPoetType() as ClassName
-    return when {
-        wildcards.isEmpty() -> className
-        else -> ParameterizedTypeName.get(className, *wildcards.toTypedArray())
-    }
+    return asPoetType().box()
 }

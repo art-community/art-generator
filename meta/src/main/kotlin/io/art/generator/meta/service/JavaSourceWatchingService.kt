@@ -36,7 +36,9 @@ object JavaSourceWatchingService {
         JAVA_LOGGER.info(SOURCES_CHANGED)
         generate = schedule(now().plusSeconds(configuration.analyzerDelay.seconds)) {
             generate?.cancel(false)
-            handle { classes -> generateJavaMeta(classes.asSequence()) }
+            handle { classes ->
+                generateJavaMeta(classes.asSequence())
+            }
         }
     }
 }
