@@ -25,5 +25,5 @@ val GETTER = { field: String -> "get${field.capitalize()}" }
 val GETTER_BOOLEAN = { field: String -> "is${field.capitalize()}" }
 val SETTER = { field: String -> "set${field.capitalize()}" }
 
-val META_CLASS_NAME = { className: String -> ClassName.get(META_NAME, "Meta$className") }
+fun metaClassName(name: String, vararg nested: String): ClassName = ClassName.get(META_NAME, "Meta$name", *nested)
 const val META_PACKAGE_REFERENCE = "meta"

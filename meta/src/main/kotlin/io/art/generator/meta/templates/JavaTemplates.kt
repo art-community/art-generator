@@ -18,20 +18,13 @@
 
 package io.art.generator.meta.templates
 
-const val THROW_EXCEPTION_STATEMENT = "throw new \$T(\$S);"
-const val STUB_METHOD_LITERAL = "stub method"
+import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.TypeName
+
 const val NEW_STATEMENT = "new \$T()"
 const val RETURN_STATEMENT = "return \$L;"
-
+const val REGISTER_NEW_STATEMENT = "register(new \$T());"
+val REGISTER_META_PARAMETER_STATEMENT = { index: Int, name: String, type: TypeName ->
+    CodeBlock.of("register(new MetaParameter<>($index, \$S, metaType(\$T.class, \$T[]::new)))", name, type)
+}
 const val COMPUTE_STATEMENT = "compute();"
-
-const val META_FIELD_INITIALIZER = "register(\$T.metaField(\$S,\$T.class))"
-const val META_GENERIC_FIELD_INITIALIZER = "register(\$T.metaField(\$S))"
-const val META_METHOD_INITIALIZER = "register(\$T.metaMethod(\$S,\$T.class))"
-
-const val META_FIELD_METHOD_REIFIED_PARAMETER = "type"
-const val META_FIELD_METHOD_REIFIED_STATEMENT = "return \$L.reify(type);"
-const val META_TYPE_REGISTER_STATEMENT = "\$T.register(provide());"
-const val META_TYPE_OF_STATEMENT = "of(\$T.class)"
-
-const val META_TYPE_OF_NAME = "of"
