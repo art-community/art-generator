@@ -23,7 +23,7 @@ import io.art.core.extensions.HashExtensions.md5
 import io.art.generator.meta.constants.CLASSES_CHANGED
 import io.art.generator.meta.constants.CLASSES_NOT_CHANGED
 import io.art.generator.meta.constants.JAVA_LOGGER
-import io.art.generator.meta.constants.META_PACKAGE
+import io.art.generator.meta.constants.META_NAME
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
 import java.nio.file.Path
@@ -60,7 +60,7 @@ object JavaSourceChangesDetector {
         }
 
         fun handle(handler: (Set<JavaMetaClass>) -> Unit) = analyzeJavaSources(existed.asSequence()).apply {
-            filterValues { javaClass -> javaClass.type.classPackageName?.substringAfterLast(DOT) != META_PACKAGE }
+            filterValues { javaClass -> javaClass.type.classPackageName?.substringAfterLast(DOT) != META_NAME }
             filterValues { javaClass -> !cache.classes.contains(javaClass) }.ifEmpty {
                 JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
                 return@apply

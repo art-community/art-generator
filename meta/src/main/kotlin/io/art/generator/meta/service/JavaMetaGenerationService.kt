@@ -80,9 +80,8 @@ object JavaMetaGenerationService {
                 .addCode(RETURN_STATEMENT, node.packageShortName)
                 .build()
                 .let(::addMethod)
-        node.classes.forEach { metaClass ->
-            generateClass(metaClass)
-        }
+        node.classes.forEach { metaClass -> generateClass(metaClass) }
+        node.children.values.forEach { child -> generateTree(child) }
     }
 
     private fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
