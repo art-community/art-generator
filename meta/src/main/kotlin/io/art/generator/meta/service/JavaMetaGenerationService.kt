@@ -28,6 +28,7 @@ import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.*
 import io.art.generator.meta.templates.*
+import io.art.meta.model.MetaType
 import javax.lang.model.element.Modifier.*
 
 object JavaMetaGenerationService {
@@ -56,6 +57,7 @@ object JavaMetaGenerationService {
                 .build()
                 .let { metaClass ->
                     JavaFile.builder(META_NAME, metaClass)
+                            .addStaticImport(MetaType::class.java, "metaType", "metaArray", "metaVariable")
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)
@@ -99,7 +101,7 @@ object JavaMetaGenerationService {
                 )
             }
         }
-        val constructorBody = constructorBuilder.add(")").build()
+        val constructorBody = constructorBuilder.add(");").build()
         classBuilder(metaClassName(metaClass.type.className!!))
                 .addModifiers(PUBLIC, FINAL, STATIC)
                 .superclass(ParameterizedTypeName.get(META_CLASS_CLASS_NAME, type))
