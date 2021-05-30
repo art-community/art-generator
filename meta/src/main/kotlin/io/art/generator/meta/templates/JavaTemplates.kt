@@ -22,13 +22,21 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.TypeName
 import io.art.core.caster.Caster
+import io.art.core.constants.StringConstants.SPACE
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.asPoetType
 
-const val NEW_STATEMENT = "new \$T()"
-const val RETURN_STATEMENT = "return \$L;"
-const val REGISTER_NEW_STATEMENT = "register(new \$T())"
-const val COMPUTE_STATEMENT = "compute();"
+fun newStatement() = "new \$T()"
+
+fun returnStatement() = "return \$L;"
+
+fun returnStatement(block: CodeBlock) = CodeBlock.join(listOf(CodeBlock.of("return"), block), SPACE)
+
+fun returnNullStatement() = "return null;"
+
+fun registerNewStatement() = "register(new \$T())"
+
+fun computeStatement() = "compute();"
 
 fun invokeInstanceStatement(method: String, argumentsCount: Int): CodeBlock {
     val format = "instance.$method(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
@@ -51,6 +59,14 @@ fun registerMetaFieldStatement(index: Int, name: String, type: TypeName): CodeBl
 
 fun registerMetaParameterStatement(index: Int, name: String, type: TypeName): CodeBlock {
     return CodeBlock.of("register(new MetaParameter<>($index, \$S, metaType(\$T.class, \$T[]::new)))", name, type, type)
+}
+
+fun registerMetaMethodStatement(name: String, type: TypeName): CodeBlock {
+    return CodeBlock.of("register(new MetaMethod<>(\$S, metaType(\$T.class, \$T[]::new)))", name, type, type)
+}
+
+fun registerMetaConstructorStatement(type: TypeName): CodeBlock {
+    return CodeBlock.of("register(new MetaConstructor<>(metaType(\$T.class, \$T[]::new)))", type, type)
 }
 
 fun metaTypeSuperStatement(metaClass: JavaMetaClass, className: TypeName): CodeBlock {

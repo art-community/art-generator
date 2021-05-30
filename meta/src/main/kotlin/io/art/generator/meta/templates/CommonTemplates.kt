@@ -20,6 +20,8 @@ package io.art.generator.meta.templates
 
 import com.squareup.javapoet.ClassName
 
+fun metaName(name: String): String = "Meta${name.capitalize()}"
+
 fun metaName(packageName: String, name: String, vararg nested: String): ClassName =
         ClassName.get(packageName, "Meta${name.capitalize()}", *nested)
 
