@@ -215,14 +215,14 @@ object JavaMetaGenerationService {
                     grouped.value.forEachIndexed { methodIndex, method ->
                         var name = method.name
                         if (methodIndex > 0) name += methodIndex
-                        val returnType = method.returnType.asGenericPoetType()
+                        val returnType = method.returnType.asPoetType()
                         val static = method.modifiers.contains(STATIC)
                         val parent = when {
                             static -> {
-                                ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnType)
+                                ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnType.box())
                             }
                             else -> {
-                                ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, type, returnType)
+                                ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, type, returnType.box())
                             }
                         }
                         classBuilder(name)
@@ -254,12 +254,12 @@ object JavaMetaGenerationService {
     }
 
     private fun TypeSpec.Builder.generateMethodInvocations(type: TypeName, name: String, method: JavaMetaMethod) {
-        val returnType = method.returnType.asGenericPoetType()
+        val returnType = method.returnType.asPoetType()
         val static = method.modifiers.contains(STATIC)
         val template = methodBuilder(INVOKE_NAME)
                 .addModifiers(PUBLIC)
                 .addAnnotation(Override::class.java)
-                .returns(returnType)
+                .returns(returnType.box())
                 .apply { if (!static) addParameter(type, INSTANCE_NAME) }
                 .build()
         template.toBuilder().apply {
