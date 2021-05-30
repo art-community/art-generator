@@ -1,7 +1,6 @@
 module:
   name: Example
 paths:
-  stubs: "D:/Development/Projects/art/art-environment/local/projects/sandbox/build/stubs"
   sources: "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/java"
 sources:
   - "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/java/module/ExampleConfigurator.java"

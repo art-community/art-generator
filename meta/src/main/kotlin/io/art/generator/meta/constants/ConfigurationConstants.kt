@@ -26,5 +26,6 @@ val DEFAULT_META_METHOD_EXCLUSIONS = setOf(
         "canEqual",
         "hashCode",
         "clone",
-        "builder"
+        "builder",
+        "main"
 )

@@ -22,6 +22,7 @@ package io.art.generator.meta.service
 
 import com.sun.source.util.JavacTask
 import com.sun.tools.javac.api.JavacTool
+import com.sun.tools.javac.comp.CompileStates
 import com.sun.tools.javac.main.JavaCompiler
 import com.sun.tools.javac.util.Log.WriterKind.ERROR
 import com.sun.tools.javac.util.Options
@@ -74,7 +75,7 @@ object JavaCompilerProvider {
         val files = fileManager.getJavaFileObjects(*sources.map { path -> path.toFile() }.toList().toTypedArray())
 
         val compilerInstance = JavaCompiler.instance(context).apply { log.setWriter(ERROR, emptyWriter) }
-
+        compilerInstance.shouldStopPolicyIfError = CompileStates.CompileState.GENERATE
         try {
             val javacTask = tool.getTask(
                     emptyWriter,
