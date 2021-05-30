@@ -34,8 +34,7 @@ import javax.lang.model.element.Modifier.*
 object JavaMetaGenerationService {
     fun generateJavaMeta(classes: Sequence<JavaMetaClass>) {
         JAVA_LOGGER.info(GENERATING_METAS_MESSAGE)
-        val root = configuration.sourcesRoot.toFile()
-        root.parentFile.mkdirs()
+        val root = configuration.sourcesRoot.toFile().apply { parentFile.mkdirs() }
         val moduleName = configuration.moduleName
         classBuilder(metaClassName(moduleName))
                 .addModifiers(PUBLIC)
@@ -90,34 +89,23 @@ object JavaMetaGenerationService {
     private fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
         val className = ClassName.get(metaClass.type.classPackageName, metaClass.type.className)
         val type = metaClass.type.asGenericPoetType()
-        val constructorBuilder = CodeBlock.of("super(metaType(\$T.class, \$T[]::new)", className, className).toBuilder()
-        if (metaClass.type.typeVariables.isNotEmpty()) {
-            constructorBuilder.add(", ")
-            metaClass.type.typeVariables.forEach { variable ->
-                constructorBuilder.add("metaVariable(\$S, metaType(\$T.class, \$T[]::new))",
-                        variable.key,
-                        variable.value.asPoetType(),
-                        variable.value.asPoetType()
-                )
-            }
-        }
-        val constructorBody = constructorBuilder.add(");").build()
+        val constructorStatement = metaTypeSuperStatement(metaClass, className)
         classBuilder(metaClassName(metaClass.type.className!!))
                 .addModifiers(PUBLIC, FINAL, STATIC)
                 .superclass(ParameterizedTypeName.get(META_CLASS_CLASS_NAME, type))
                 .addMethod(constructorBuilder()
                         .addModifiers(PRIVATE)
-                        .addCode(constructorBody)
+                        .addCode(constructorStatement)
                         .build())
-                .apply { generateConstructors(metaClass.constructors, type, constructorBody) }
+                .apply { generateConstructors(metaClass.constructors, type) }
                 .apply { generateFields(metaClass.fields) }
-                .apply { generateMethods(metaClass.methods, type, constructorBody) }
+                .apply { generateMethods(metaClass.methods, type) }
                 .build()
                 .apply(::addType)
         metaClass.innerClasses.values.forEach { inner -> generateClass(inner) }
     }
 
-    private fun TypeSpec.Builder.generateConstructors(constructors: List<JavaMetaMethod>, type: TypeName, typeConstructor: CodeBlock) {
+    private fun TypeSpec.Builder.generateConstructors(constructors: List<JavaMetaMethod>, type: TypeName) {
         constructors.mapIndexed { index, constructor ->
             var name = "constructor"
             if (index > 0) name += index
@@ -126,13 +114,13 @@ object JavaMetaGenerationService {
                     .superclass(ParameterizedTypeName.get(META_CONSTRUCTOR_CLASS_NAME, type))
                     .addMethod(constructorBuilder()
                             .addModifiers(PRIVATE)
-                            .addCode(typeConstructor)
+                            .addCode(metaSuperStatement(type))
                             .build())
             constructor.parameters.entries.forEachIndexed { parameterIndex, parameter ->
                 val parameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameter.value.type.asGenericPoetType())
                 FieldSpec.builder(parameterType, parameter.key)
                         .addModifiers(PRIVATE, FINAL)
-                        .initializer(REGISTER_META_PARAMETER_STATEMENT(parameterIndex, parameter.key, parameterType))
+                        .initializer(registerMetaParameterStatement(parameterIndex, parameter.key, parameterType))
                         .build()
                         .apply(constructorClassBuilder::addField)
                 methodBuilder(parameter.key)
@@ -147,7 +135,7 @@ object JavaMetaGenerationService {
         }
     }
 
-    private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type: TypeName, typeConstructor: CodeBlock) {
+    private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type: TypeName) {
         methods.groupBy { method -> method.name }.map { grouped ->
             grouped.value.forEachIndexed { index, method ->
                 var name = method.name
@@ -161,13 +149,13 @@ object JavaMetaGenerationService {
                         .superclass(parent)
                         .addMethod(constructorBuilder()
                                 .addModifiers(PRIVATE)
-                                .addCode(typeConstructor)
+                                .addCode(metaNamedSuperStatement(name, type))
                                 .build())
                 method.parameters.entries.forEachIndexed { parameterIndex, parameter ->
                     val parameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameter.value.type.asGenericPoetType())
                     FieldSpec.builder(parameterType, parameter.key)
                             .addModifiers(PRIVATE, FINAL)
-                            .initializer(REGISTER_META_PARAMETER_STATEMENT(parameterIndex, parameter.key, parameterType))
+                            .initializer(registerMetaParameterStatement(parameterIndex, parameter.key, parameterType))
                             .build()
                             .apply(methodClassBuilder::addField)
                     methodBuilder(parameter.key)
