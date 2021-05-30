@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import java.io.PrintStream
 
 class LoggingMessageCollector(private val logger: Logger = logger(LoggingMessageCollector::class.java),
-                              private val stream: PrintStream = LoggerStream(logger),
+                              private val stream: PrintStream = LoggerStream(logger, Logger::info),
                               private val printer: MessageCollector = PrintingMessageCollector(stream, WITHOUT_PATHS, true)
 ) : MessageCollector by printer
 
