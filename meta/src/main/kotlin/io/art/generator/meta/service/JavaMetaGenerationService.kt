@@ -153,9 +153,8 @@ object JavaMetaGenerationService {
                         .addCode(RETURN_STATEMENT, parameter.key)
                         .build()
                         .let(constructorClassBuilder::addMethod)
-
-                addType(constructorClassBuilder.build())
             }
+            addType(constructorClassBuilder.build())
         }
     }
 
@@ -192,7 +191,7 @@ object JavaMetaGenerationService {
                                         else -> invokeInstanceStatement(name, method.parameters.size)
                                     }
                                     when (method.returnType.originalType.kind) {
-                                        VOID -> addCode(invoke).addCode("return null;")
+                                        VOID -> addCode(invoke).addCode("\nreturn null;")
                                         else -> addCode(CodeBlock.join(listOf(CodeBlock.of("return"), invoke), " "))
                                     }
 
@@ -212,8 +211,8 @@ object JavaMetaGenerationService {
                             .addCode(RETURN_STATEMENT, parameter.key)
                             .build()
                             .let(methodClassBuilder::addMethod)
-                    addType(methodClassBuilder.build())
                 }
+                addType(methodClassBuilder.build())
             }
 
         }
