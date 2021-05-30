@@ -18,8 +18,10 @@
 
 package io.art.generator.meta.templates
 
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.TypeName
+import io.art.core.caster.Caster
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.asPoetType
 
@@ -27,6 +29,21 @@ const val NEW_STATEMENT = "new \$T()"
 const val RETURN_STATEMENT = "return \$L;"
 const val REGISTER_NEW_STATEMENT = "register(new \$T())"
 const val COMPUTE_STATEMENT = "compute();"
+
+fun invokeInstanceStatement(method: String, argumentsCount: Int): CodeBlock {
+    val format = "instance.$method(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
+    return CodeBlock.of(format, *(0 until argumentsCount).map { ClassName.get(Caster::class.java) }.toTypedArray())
+}
+
+fun invokeStaticStatement(method: String, type: TypeName, argumentsCount: Int): CodeBlock {
+    val format = "\$T.$method(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
+    return CodeBlock.of(format, type, *(0 until argumentsCount).map { ClassName.get(Caster::class.java) }.toTypedArray())
+}
+
+fun returnInvokeConstructorStatement(type: TypeName, argumentsCount: Int): CodeBlock {
+    val format = "return new \$T(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
+    return CodeBlock.of(format, type, *(0 until argumentsCount).map { ClassName.get(Caster::class.java) }.toTypedArray())
+}
 
 fun registerMetaFieldStatement(index: Int, name: String, type: TypeName): CodeBlock {
     return CodeBlock.of("register(new MetaField<>($index, \$S, metaType(\$T.class, \$T[]::new)))", name, type, type)

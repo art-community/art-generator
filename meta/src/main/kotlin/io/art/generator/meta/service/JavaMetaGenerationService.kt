@@ -24,6 +24,7 @@ import com.squareup.javapoet.*
 import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
+import io.art.core.caster.Caster
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
@@ -31,6 +32,7 @@ import io.art.generator.meta.model.*
 import io.art.generator.meta.templates.*
 import io.art.meta.model.MetaType
 import javax.lang.model.element.Modifier.*
+import javax.lang.model.type.TypeKind.VOID
 
 object JavaMetaGenerationService {
     fun generateJavaMeta(classes: Sequence<JavaMetaClass>) {
@@ -60,6 +62,7 @@ object JavaMetaGenerationService {
                 .let { metaClass ->
                     JavaFile.builder(META_NAME, metaClass)
                             .addStaticImport(MetaType::class.java, "metaType", "metaArray", "metaVariable")
+                            .addStaticImport(Caster::class.java, "cast")
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)
@@ -130,6 +133,12 @@ object JavaMetaGenerationService {
                             .addModifiers(PRIVATE)
                             .addCode(metaSuperStatement(type))
                             .build())
+                    .addMethod(methodBuilder("invoke")
+                            .addModifiers(PUBLIC)
+                            .returns(type)
+                            .addParameter(ArrayTypeName.of(Object::class.java), "arguments")
+                            .addCode(returnInvokeConstructorStatement(type, constructor.parameters.size))
+                            .build())
             constructor.parameters.entries.forEachIndexed { parameterIndex, parameter ->
                 val parameterType = parameter.value.type.asGenericPoetType()
                 val metaParameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameterType)
@@ -156,8 +165,9 @@ object JavaMetaGenerationService {
                 var name = method.name
                 if (index > 0) name += index
                 val returnType = method.returnType.asGenericPoetType()
+                val static = method.modifiers.contains(STATIC)
                 val parent = when {
-                    method.modifiers.contains(STATIC) -> {
+                    static -> {
                         ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnType)
                     }
                     else -> {
@@ -170,6 +180,23 @@ object JavaMetaGenerationService {
                         .addMethod(constructorBuilder()
                                 .addModifiers(PRIVATE)
                                 .addCode(metaNamedSuperStatement(name, type))
+                                .build())
+                        .addMethod(methodBuilder("invoke")
+                                .addModifiers(PUBLIC)
+                                .returns(returnType)
+                                .apply { if (!static) addParameter(type, "instance") }
+                                .addParameter(ArrayTypeName.of(Object::class.java), "arguments")
+                                .apply {
+                                    val invoke = when {
+                                        static -> invokeStaticStatement(name, type, method.parameters.size)
+                                        else -> invokeInstanceStatement(name, method.parameters.size)
+                                    }
+                                    when (method.returnType.originalType.kind) {
+                                        VOID -> addCode(invoke).addCode("return null;")
+                                        else -> addCode(CodeBlock.join(listOf(CodeBlock.of("return"), invoke), " "))
+                                    }
+
+                                }
                                 .build())
                 method.parameters.entries.forEachIndexed { parameterIndex, parameter ->
                     val parameterType = parameter.value.type.asGenericPoetType()
