@@ -23,7 +23,7 @@ import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.SOURCES_CHANGED
 import io.art.generator.meta.service.JavaMetaGenerationService.generateJavaMeta
 import io.art.generator.meta.service.JavaSourceChangesDetector.detectJavaChanges
-import io.art.scheduler.manager.SchedulersManager.schedule
+import io.art.scheduler.manager.Scheduling.schedule
 import java.time.LocalDateTime.now
 import java.util.concurrent.Future
 
