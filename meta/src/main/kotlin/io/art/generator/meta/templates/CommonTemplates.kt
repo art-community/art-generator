@@ -19,11 +19,12 @@
 package io.art.generator.meta.templates
 
 import com.squareup.javapoet.ClassName
-import io.art.generator.meta.constants.META_NAME
 
-val GETTER = { field: String -> "get${field.capitalize()}" }
-val GETTER_BOOLEAN = { field: String -> "is${field.capitalize()}" }
-val SETTER = { field: String -> "set${field.capitalize()}" }
+fun metaName(packageName: String, name: String, vararg nested: String): ClassName =
+        ClassName.get(packageName, "Meta${name.capitalize()}", *nested)
 
-fun metaClassName(name: String, vararg nested: String): ClassName = ClassName.get(META_NAME, "Meta${name.capitalize()}", *nested)
-const val META_PACKAGE_REFERENCE = "meta"
+fun metaClassName(packageName: String, name: String, vararg nested: String): ClassName =
+        ClassName.get(packageName, "Meta${name.capitalize()}Class", *nested)
+
+fun metaPackageName(packageName: String, name: String, vararg nested: String): ClassName =
+        ClassName.get(packageName, "Meta${name.capitalize()}Package", *nested)

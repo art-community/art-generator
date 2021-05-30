@@ -18,7 +18,6 @@
 
 package io.art.generator.meta.templates
 
-import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.TypeName
 import io.art.generator.meta.model.JavaMetaClass
@@ -28,6 +27,10 @@ const val NEW_STATEMENT = "new \$T()"
 const val RETURN_STATEMENT = "return \$L;"
 const val REGISTER_NEW_STATEMENT = "register(new \$T())"
 const val COMPUTE_STATEMENT = "compute();"
+
+fun registerMetaFieldStatement(index: Int, name: String, type: TypeName): CodeBlock {
+    return CodeBlock.of("register(new MetaField<>($index, \$S, metaType(\$T.class, \$T[]::new)))", name, type, type)
+}
 
 fun registerMetaParameterStatement(index: Int, name: String, type: TypeName): CodeBlock {
     return CodeBlock.of("register(new MetaParameter<>($index, \$S, metaType(\$T.class, \$T[]::new)))", name, type, type)
@@ -54,4 +57,8 @@ fun metaNamedSuperStatement(name: String, className: TypeName): CodeBlock {
 
 fun metaSuperStatement(className: TypeName): CodeBlock {
     return CodeBlock.of("super(metaType(\$T.class, \$T[]::new));", className, className)
+}
+
+fun namedSuperStatement(name: String): CodeBlock {
+    return CodeBlock.of("super(\$S);", name)
 }
