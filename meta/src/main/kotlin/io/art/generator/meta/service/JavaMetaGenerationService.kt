@@ -110,7 +110,7 @@ object JavaMetaGenerationService {
         val className = ClassName.get(metaClass.type.classPackageName, metaClass.type.className)
         val type = metaClass.type.asGenericPoetType()
         val constructorStatement = metaTypeSuperStatement(metaClass, className)
-        classBuilder(metaClassName)
+        val apply = classBuilder(metaClassName)
                 .addModifiers(PUBLIC, FINAL, STATIC)
                 .superclass(ParameterizedTypeName.get(META_CLASS_CLASS_NAME, type))
                 .addMethod(constructorBuilder()
@@ -120,6 +120,7 @@ object JavaMetaGenerationService {
                 .apply { generateConstructors(metaClass.constructors, type) }
                 .apply { generateFields(metaClass.fields) }
                 .apply { generateMethods(metaClass.methods, type) }
+                .apply { metaClass.innerClasses.values.forEach { inner -> generateClass(inner) } }
                 .build()
                 .apply(::addType)
         FieldSpec.builder(metaClassNameReference, metaName)
@@ -133,7 +134,6 @@ object JavaMetaGenerationService {
                 .addCode(returnStatement(), metaName)
                 .build()
                 .let(::addMethod)
-        metaClass.innerClasses.values.forEach { inner -> generateClass(inner) }
     }
 
     private fun TypeSpec.Builder.generateFields(fields: Map<String, JavaMetaField>) {
