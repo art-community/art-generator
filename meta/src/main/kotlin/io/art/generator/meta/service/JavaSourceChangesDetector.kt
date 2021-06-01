@@ -20,7 +20,7 @@ package io.art.generator.meta.service
 
 import io.art.core.constants.StringConstants.DOT
 import io.art.core.extensions.FileExtensions.readFileBytes
-import io.art.core.extensions.HashExtensions.md5
+import io.art.core.extensions.HashExtensions.xx64
 import io.art.generator.meta.constants.CLASSES_CHANGED
 import io.art.generator.meta.constants.CLASSES_NOT_CHANGED
 import io.art.generator.meta.constants.JAVA_LOGGER
@@ -28,12 +28,11 @@ import io.art.generator.meta.constants.META_NAME
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
 import java.nio.file.Path
-import java.security.MessageDigest
 
 
 object JavaSourceChangesDetector {
     private data class Cache(
-            @Volatile var files: Map<Path, ByteArray>,
+            @Volatile var hashes: Map<Path, Long>,
             @Volatile var classes: Set<JavaMetaClass>
     )
 
@@ -41,17 +40,17 @@ object JavaSourceChangesDetector {
 
     fun detectJavaChanges(): JavaSourcesChanges {
         val sources = collectJavaSources()
-        val existed = cache.files.filterKeys(sources::contains).toMutableMap()
+        val existed = cache.hashes.filterKeys(sources::contains).toMutableMap()
         val changed = mutableListOf<Path>()
         sources.forEach { source ->
             val currentModified = existed[source]
-            val newModified = md5(readFileBytes(source))
-            if (!MessageDigest.isEqual(currentModified, newModified)) {
+            val newModified = xx64(readFileBytes(source))
+            if (currentModified != newModified) {
                 changed.add(source)
             }
             existed[source] = newModified
         }
-        cache.files = existed
+        cache.hashes = existed
         return JavaSourcesChanges(existed.keys, changed)
     }
 

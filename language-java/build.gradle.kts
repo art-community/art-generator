@@ -19,7 +19,6 @@ dependencies {
     implementation("io.art.java:http:main")
     implementation("io.art.java:json:main")
     implementation("io.art.java:message-pack:main")
-    implementation("io.art.java:protobuf:main")
     implementation("io.art.java:scheduler:main")
     implementation("io.art.java:logging:main")
     implementation("io.art.java:rocks-db:main")
