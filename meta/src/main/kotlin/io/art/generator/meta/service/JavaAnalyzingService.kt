@@ -149,6 +149,7 @@ private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
         modifiers = modifiers,
 
         fields = getMembers()
+                .reversed()
                 .asSequence()
                 .filterIsInstance<VarSymbol>()
                 .associate { symbol -> symbol.name.toString() to symbol.asMetaField() },

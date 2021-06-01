@@ -23,13 +23,16 @@ import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.CodeBlock.join
 import com.squareup.javapoet.CodeBlock.of
 import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.WildcardTypeName
 import io.art.core.constants.CompilerSuppressingWarnings.ALL
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.constants.StringConstants.SPACE
 import io.art.generator.meta.constants.CASTER_CLASS_NAME
+import io.art.generator.meta.constants.OBJECT_CLASS_NAME
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import io.art.generator.meta.service.extractClass
+import io.art.generator.meta.service.withoutVariables
 
 fun suppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnings::class.java)
         .addMember("value", "\$S", ALL)
@@ -118,8 +121,12 @@ fun namedSuperStatement(name: String): CodeBlock {
     return of("super(\$S);", name)
 }
 
-private fun metaTypeBlock(pattern: String, className: TypeName, vararg parameters: JavaMetaType): CodeBlock {
-    val builder = of(pattern, className, className).toBuilder()
+private const val metaVariablePattern = "metaVariable(\$S"
+private const val metaTypePattern = "metaType(\$T.class, \$T[]::new"
+private const val metaArrayTypePattern = "metaArray(\$T.class, \$T[]::new, "
+
+private fun metaTypeBlock(className: TypeName, vararg parameters: JavaMetaType): CodeBlock {
+    val builder = of(metaTypePattern, className, className).toBuilder()
     parameters.forEach { parameter ->
         builder.add(", ").add(metaTypeStatement(parameter))
     }
@@ -129,19 +136,18 @@ private fun metaTypeBlock(pattern: String, className: TypeName, vararg parameter
 private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
     val poetClass = type.extractClass()
 
-    val metaVariablePattern = "metaVariable(\$S"
-    val metaTypePattern = "metaType(\$T.class, \$T[]::new"
-    val metaArrayPattern = "metaArray(\$T.class, \$T[]::new"
-
     return when (type.kind) {
-        PRIMITIVE_KIND, WILDCARD_KIND, ENUM_KIND, UNKNOWN_KIND -> metaTypeBlock(metaTypePattern, poetClass)
+        PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> metaTypeBlock(poetClass)
         ARRAY_KIND -> {
             val componentType = type.arrayComponentType!!
-            metaTypeBlock(metaArrayPattern, componentType.extractClass(), *type.typeParameters.values.toTypedArray())
+            join(listOf(of(metaArrayTypePattern, poetClass, poetClass), metaTypeStatement(componentType), of(")")), EMPTY_STRING)
         }
         CLASS_KIND, INTERFACE_KIND -> {
-            metaTypeBlock(metaTypePattern, poetClass, *type.typeParameters.values.toTypedArray())
+            metaTypeBlock(poetClass, *type.typeParameters.values.toTypedArray())
         }
         VARIABLE_KIND -> join(listOf(of(metaVariablePattern, type.typeName), of(")")), EMPTY_STRING)
+        WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)
+                ?: type.wildcardSuperBound?.let(::metaTypeStatement)
+                ?: metaTypeBlock(OBJECT_CLASS_NAME)
     }
 }

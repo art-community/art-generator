@@ -29,7 +29,7 @@ fun JavaMetaType.toPoet(): TypeName = when (kind) {
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.toPoet())
 
-    WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> subtypeOf(bound.toPoet()) }
+    WILDCARD_KIND -> wildcardExtendsBound?.toPoet().let(WildcardTypeName::subtypeOf)
             ?: wildcardSuperBound?.toPoet()?.let(WildcardTypeName::supertypeOf)
             ?: WildcardTypeName.get(originalType)
 
@@ -69,7 +69,7 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
         }
     }
     VARIABLE_KIND -> OBJECT_CLASS_NAME
-    WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> subtypeOf(bound.withoutVariables()) }
+    WILDCARD_KIND -> wildcardExtendsBound?.withoutVariables()?.let(WildcardTypeName::subtypeOf)
             ?: wildcardSuperBound?.withoutVariables()?.let(WildcardTypeName::supertypeOf)
             ?: subtypeOf(Object::class.java)
 }
