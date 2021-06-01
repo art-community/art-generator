@@ -96,7 +96,7 @@ private fun TypeSpec.Builder.generateConstructors(constructors: List<JavaMetaMet
                 .superclass(ParameterizedTypeName.get(META_CONSTRUCTOR_CLASS_NAME, typeName.box()))
                 .addMethod(constructorBuilder()
                         .addModifiers(PRIVATE)
-                        .addCode(metaTypeSuperStatement(type))
+                        .addCode(metaConstructorSuperStatement(type, constructor.modifiers))
                         .build())
                 .apply { generateConstructorInvocations(type, constructor) }
                 .apply { generateParameters(constructor) }
@@ -171,7 +171,7 @@ private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type
                             .superclass(parent)
                             .addMethod(constructorBuilder()
                                     .addModifiers(PRIVATE)
-                                    .addCode(metaNamedSuperStatement(method.name, method.returnType))
+                                    .addCode(metaMethodSuperStatement(method.name, method.returnType, method.modifiers))
                                     .build())
                             .apply { generateMethodInvocations(type, method.name, method) }
                             .apply { generateParameters(method) }

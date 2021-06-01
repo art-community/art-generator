@@ -23,7 +23,6 @@ import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.CodeBlock.join
 import com.squareup.javapoet.CodeBlock.of
 import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.WildcardTypeName
 import io.art.core.constants.CompilerSuppressingWarnings.ALL
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.constants.StringConstants.SPACE
@@ -32,7 +31,7 @@ import io.art.generator.meta.constants.OBJECT_CLASS_NAME
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import io.art.generator.meta.service.extractClass
-import io.art.generator.meta.service.withoutVariables
+import javax.lang.model.element.Modifier
 
 fun suppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnings::class.java)
         .addMember("value", "\$S", ALL)
@@ -109,8 +108,12 @@ fun registerMetaParameterStatement(index: Int, name: String, type: JavaMetaType)
 }
 
 
-fun metaNamedSuperStatement(name: String, type: JavaMetaType): CodeBlock {
-    return join(listOf(of("super(\$S,", name), metaTypeStatement(type), of(");")), EMPTY_STRING)
+fun metaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock {
+    return join(listOf(of("super(\$S,", name), metaTypeStatement(type), of(","), join(modifiers.map { modifier -> of("\$S", modifier) }, ","), of(");")), EMPTY_STRING)
+}
+
+fun metaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock {
+    return join(listOf(of("super("), metaTypeStatement(type), of(","), join(modifiers.map { modifier -> of("\$S", modifier) }, ","), of(");")), EMPTY_STRING)
 }
 
 fun metaTypeSuperStatement(type: JavaMetaType): CodeBlock {
