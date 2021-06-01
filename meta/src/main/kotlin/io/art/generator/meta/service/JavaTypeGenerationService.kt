@@ -77,7 +77,7 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
 fun JavaMetaType.extractClass(): TypeName = when (kind) {
     PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> toPoet()
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())
-    CLASS_KIND, INTERFACE_KIND -> ClassName.get(classPackageName, classFullName)
+    CLASS_KIND, INTERFACE_KIND -> ClassName.get(classPackageName, className)
     VARIABLE_KIND -> OBJECT_CLASS_NAME
     WILDCARD_KIND -> wildcardExtendsBound?.extractClass()
             ?: wildcardSuperBound?.extractClass()

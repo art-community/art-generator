@@ -18,16 +18,22 @@
 
 package io.art.generator.meta.templates
 
+import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.CodeBlock.join
 import com.squareup.javapoet.CodeBlock.of
 import com.squareup.javapoet.TypeName
+import io.art.core.constants.CompilerSuppressingWarnings.ALL
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.constants.StringConstants.SPACE
 import io.art.generator.meta.constants.CASTER_CLASS_NAME
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import io.art.generator.meta.service.extractClass
+
+fun suppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnings::class.java)
+        .addMember("value", "\$S", ALL)
+        .build()
 
 fun newStatement() = "new \$T()"
 
@@ -82,6 +88,10 @@ fun returnInvokeOneArgumentConstructorStatement(type: JavaMetaType): CodeBlock {
 }
 
 fun returnInvokeConstructorStatement(type: JavaMetaType, argumentsCount: Int): CodeBlock {
+    if (type.typeParameters.isNotEmpty()) {
+        val format = "return new \$T<>(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
+        return of(format, type.extractClass(), *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
+    }
     val format = "return new \$T(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
     return of(format, type.extractClass(), *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
 }
