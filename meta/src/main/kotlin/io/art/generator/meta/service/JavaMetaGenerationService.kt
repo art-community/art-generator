@@ -118,7 +118,7 @@ object JavaMetaGenerationService {
                         .build())
                 .apply { generateConstructors(metaClass.constructors, metaClass.type, typeName) }
                 .apply { generateFields(metaClass.fields) }
-                .apply { generateMethods(metaClass.methods, typeName) }
+                .apply { generateMethods(metaClass.methods, metaClass.type) }
                 .apply { metaClass.innerClasses.values.forEach { inner -> generateClass(inner) } }
                 .build()
                 .apply(::addType)
@@ -138,7 +138,7 @@ object JavaMetaGenerationService {
     private fun TypeSpec.Builder.generateFields(fields: Map<String, JavaMetaField>) {
         fields.entries.forEach { field ->
             val fieldType = field.value.type
-            val fieldTypeName = field.value.type.asPoetType()
+            val fieldTypeName = field.value.type.asPoetTypeWithoutVariables()
             val fieldMetaType = ParameterizedTypeName.get(META_FIELD_CLASS_NAME, fieldTypeName.box())
             FieldSpec.builder(fieldMetaType, field.key)
                     .addModifiers(PRIVATE, FINAL)
@@ -160,7 +160,7 @@ object JavaMetaGenerationService {
                             .addModifiers(PRIVATE)
                             .addCode(metaTypeSuperStatement(type))
                             .build())
-                    .apply { generateConstructorInvocations(typeName, constructor) }
+                    .apply { generateConstructorInvocations(type, constructor) }
                     .apply { generateParameters(constructor) }
                     .build()
                     .apply(::addType)
@@ -179,28 +179,28 @@ object JavaMetaGenerationService {
         }
     }
 
-    private fun TypeSpec.Builder.generateConstructorInvocations(type: TypeName, constructor: JavaMetaMethod) {
+    private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, constructor: JavaMetaMethod) {
         val template = methodBuilder(INVOKE_NAME)
                 .addModifiers(PUBLIC)
                 .addAnnotation(Override::class.java)
-                .returns(type)
+                .returns(type.asPoetTypeWithoutVariables())
                 .build()
         template.toBuilder()
                 .addParameter(ArrayTypeName.of(Object::class.java), ARGUMENTS_NAME)
-                .addCode(returnInvokeConstructorStatement(type, constructor.parameters.size))
+                .addCode(returnInvokeConstructorStatement(type.extractPoetClass(), constructor.parameters.size))
                 .build()
                 .apply(::addMethod)
         when (constructor.parameters.size) {
             0 -> {
                 template.toBuilder()
-                        .addCode(returnInvokeWithoutArgumentsConstructorStatement(type))
+                        .addCode(returnInvokeWithoutArgumentsConstructorStatement(type.extractPoetClass()))
                         .build()
                         .apply(::addMethod)
             }
             1 -> {
                 template.toBuilder()
                         .addParameter(ArrayTypeName.of(Object::class.java), ARGUMENT_NAME)
-                        .addCode(returnInvokeOneArgumentConstructorStatement(type))
+                        .addCode(returnInvokeOneArgumentConstructorStatement(type.extractPoetClass()))
                         .build()
                         .apply(::addMethod)
             }
@@ -208,21 +208,21 @@ object JavaMetaGenerationService {
     }
 
 
-    private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type: TypeName) {
+    private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type: JavaMetaType) {
         methods.filter { method -> !configuration.metaMethodExclusions.contains(method.name) }
                 .groupBy { method -> method.name }
                 .map { grouped ->
                     grouped.value.forEachIndexed { methodIndex, method ->
                         var name = method.name
                         if (methodIndex > 0) name += methodIndex
-                        val returnTypeName = method.returnType.asPoetType()
+                        val returnTypeName = method.returnType.asPoetTypeWithoutVariables()
                         val static = method.modifiers.contains(STATIC)
                         val parent = when {
                             static -> {
                                 ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnTypeName.box())
                             }
                             else -> {
-                                ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, type, returnTypeName.box())
+                                ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, type.asPoetTypeWithoutVariables(), returnTypeName.box())
                             }
                         }
                         classBuilder(name)
@@ -253,18 +253,18 @@ object JavaMetaGenerationService {
                 }
     }
 
-    private fun TypeSpec.Builder.generateMethodInvocations(type: TypeName, name: String, method: JavaMetaMethod) {
-        val returnType = method.returnType.asPoetType()
+    private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name: String, method: JavaMetaMethod) {
+        val returnType = method.returnType.asPoetTypeWithoutVariables()
         val static = method.modifiers.contains(STATIC)
         val template = methodBuilder(INVOKE_NAME)
                 .addModifiers(PUBLIC)
                 .addAnnotation(Override::class.java)
                 .returns(returnType.box())
-                .apply { if (!static) addParameter(type, INSTANCE_NAME) }
+                .apply { if (!static) addParameter(type.asPoetTypeWithoutVariables(), INSTANCE_NAME) }
                 .build()
         template.toBuilder().apply {
             val invoke = when {
-                static -> invokeStaticStatement(name, type, method.parameters.size)
+                static -> invokeStaticStatement(name, type.extractPoetClass(), method.parameters.size)
                 else -> invokeInstanceStatement(name, method.parameters.size)
             }
             when (method.returnType.originalType.kind) {
@@ -277,7 +277,7 @@ object JavaMetaGenerationService {
         when (method.parameters.size) {
             0 -> template.toBuilder().apply {
                 val invoke = when {
-                    static -> invokeWithoutArgumentsStaticStatement(name, type)
+                    static -> invokeWithoutArgumentsStaticStatement(name, type.extractPoetClass())
                     else -> invokeWithoutArgumentsInstanceStatement(name)
                 }
                 when (method.returnType.originalType.kind) {
@@ -289,7 +289,7 @@ object JavaMetaGenerationService {
             1 -> template.toBuilder().apply {
                 addParameter(ClassName.get(Object::class.java), ARGUMENT_NAME)
                 val invoke = when {
-                    static -> invokeOneArgumentStaticStatement(name, type)
+                    static -> invokeOneArgumentStaticStatement(name, type.extractPoetClass())
                     else -> invokeOneArgumentInstanceStatement(name)
                 }
                 when (method.returnType.originalType.kind) {
@@ -305,7 +305,7 @@ object JavaMetaGenerationService {
     private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
         method.parameters.entries.forEachIndexed { parameterIndex, parameter ->
             val parameterType = parameter.value.type
-            val parameterTypeName = parameter.value.type.asPoetType()
+            val parameterTypeName = parameter.value.type.asPoetTypeWithoutVariables()
             val metaParameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameterTypeName.box())
             FieldSpec.builder(metaParameterType, parameter.key)
                     .addModifiers(PRIVATE, FINAL)

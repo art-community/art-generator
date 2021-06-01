@@ -41,13 +41,11 @@ fun registerNewStatement() = "register(new \$T())"
 fun computeStatement() = "compute();"
 
 fun invokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
-    val format = "instance.$method();"
-    return CodeBlock.of(format)
+    return CodeBlock.of("instance.$method();")
 }
 
 fun invokeWithoutArgumentsStaticStatement(method: String, type: TypeName): CodeBlock {
-    val format = "\$T.$method();"
-    return CodeBlock.of(format, type)
+    return CodeBlock.of("\$T.$method();", type)
 }
 
 
@@ -89,11 +87,11 @@ fun returnInvokeConstructorStatement(type: TypeName, argumentsCount: Int): CodeB
 }
 
 fun registerMetaFieldStatement(name: String, type: JavaMetaType): CodeBlock {
-    return CodeBlock.join(listOf(CodeBlock.of("register(new MetaField<>(\$S,", name), metaTypeStatement(type), CodeBlock.of(")))")), EMPTY_STRING)
+    return CodeBlock.join(listOf(CodeBlock.of("register(new MetaField<>(\$S,", name), metaTypeStatement(type), CodeBlock.of("))")), EMPTY_STRING)
 }
 
 fun registerMetaParameterStatement(index: Int, name: String, type: JavaMetaType): CodeBlock {
-    return CodeBlock.join(listOf(CodeBlock.of("register(new MetaParameter<>($index, \$S,", name), metaTypeStatement(type), CodeBlock.of(")))")), EMPTY_STRING)
+    return CodeBlock.join(listOf(CodeBlock.of("register(new MetaParameter<>($index, \$S,", name), metaTypeStatement(type), CodeBlock.of("))")), EMPTY_STRING)
 }
 
 fun metaTypeStatement(type: JavaMetaType): CodeBlock {
@@ -104,11 +102,9 @@ fun metaTypeStatement(type: JavaMetaType): CodeBlock {
     val metaArrayPattern = "metaArray(\$T.class, \$T[]::new"
 
     fun metaTypeBlock(pattern: String, className: TypeName, vararg parameters: JavaMetaType): CodeBlock {
-        val base = CodeBlock.of(pattern, className, className)
-        if (parameters.isEmpty()) return base
-        val builder = base.toBuilder()
+        val builder = CodeBlock.of(pattern, className, className).toBuilder()
         parameters.forEach { parameter ->
-            builder.add(", ").add(metaTypeStatement(parameter))
+            builder.add(", ").add(metaTypeStatement(parameter)).add(")")
         }
         return builder.add(")").build()
     }

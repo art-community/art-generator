@@ -68,7 +68,7 @@ fun JavaMetaType.asPoetTypeWithoutVariables(): TypeName = when (kind) {
     VARIABLE_KIND -> subtypeOf(Object::class.java)
     WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> subtypeOf(bound.asPoetTypeWithoutVariables()) }
             ?: wildcardSuperBound?.asPoetTypeWithoutVariables()?.let(WildcardTypeName::supertypeOf)
-            ?: OBJECT_CLASS_NAME
+            ?: subtypeOf(Object::class.java)
 }
 
 fun JavaMetaType.extractPoetClass(): TypeName = when (kind) {
