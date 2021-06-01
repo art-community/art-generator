@@ -19,6 +19,7 @@
 package io.art.generator.meta.service
 
 import io.art.core.constants.StringConstants.DOT
+import io.art.core.extensions.FileExtensions.readFileBytes
 import io.art.core.extensions.HashExtensions.md5
 import io.art.generator.meta.constants.CLASSES_CHANGED
 import io.art.generator.meta.constants.CLASSES_NOT_CHANGED
@@ -44,7 +45,7 @@ object JavaSourceChangesDetector {
         val changed = mutableListOf<Path>()
         sources.forEach { source ->
             val currentModified = existed[source]
-            val newModified = md5(source)
+            val newModified = md5(readFileBytes(source))
             if (!MessageDigest.isEqual(currentModified, newModified)) {
                 changed.add(source)
             }
