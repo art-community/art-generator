@@ -29,7 +29,6 @@ import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaField
 import io.art.generator.meta.model.JavaMetaMethod
 import io.art.generator.meta.model.JavaMetaType
-import io.art.generator.meta.service.extractClass
 import io.art.generator.meta.service.withoutVariables
 import io.art.generator.meta.templates.*
 import javax.lang.model.element.Modifier.*
@@ -118,20 +117,20 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
             .build()
     template.toBuilder()
             .addParameter(ArrayTypeName.of(Object::class.java), ARGUMENTS_NAME)
-            .addCode(returnInvokeConstructorStatement(type.extractClass(), constructor.parameters.size))
+            .addCode(returnInvokeConstructorStatement(type, constructor.parameters.size))
             .build()
             .apply(::addMethod)
     when (constructor.parameters.size) {
         0 -> {
             template.toBuilder()
-                    .addCode(returnInvokeWithoutArgumentsConstructorStatement(type.extractClass()))
+                    .addCode(returnInvokeWithoutArgumentsConstructorStatement(type))
                     .build()
                     .apply(::addMethod)
         }
         1 -> {
             template.toBuilder()
                     .addParameter(ArrayTypeName.of(Object::class.java), ARGUMENT_NAME)
-                    .addCode(returnInvokeOneArgumentConstructorStatement(type.extractClass()))
+                    .addCode(returnInvokeOneArgumentConstructorStatement(type))
                     .build()
                     .apply(::addMethod)
         }
@@ -194,7 +193,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             .build()
     template.toBuilder().apply {
         val invoke = when {
-            static -> invokeStaticStatement(name, type.extractClass(), method.parameters.size)
+            static -> invokeStaticStatement(name, type, method.parameters.size)
             else -> invokeInstanceStatement(name, method.parameters.size)
         }
         when (method.returnType.originalType.kind) {
@@ -207,7 +206,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
     when (method.parameters.size) {
         0 -> template.toBuilder().apply {
             val invoke = when {
-                static -> invokeWithoutArgumentsStaticStatement(name, type.extractClass())
+                static -> invokeWithoutArgumentsStaticStatement(name, type)
                 else -> invokeWithoutArgumentsInstanceStatement(name)
             }
             when (method.returnType.originalType.kind) {
@@ -219,7 +218,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
         1 -> template.toBuilder().apply {
             addParameter(ClassName.get(Object::class.java), ARGUMENT_NAME)
             val invoke = when {
-                static -> invokeOneArgumentStaticStatement(name, type.extractClass())
+                static -> invokeOneArgumentStaticStatement(name, type)
                 else -> invokeOneArgumentInstanceStatement(name)
             }
             when (method.returnType.originalType.kind) {

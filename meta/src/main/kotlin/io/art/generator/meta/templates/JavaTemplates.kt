@@ -46,19 +46,17 @@ fun invokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
     return of("instance.$method();")
 }
 
-fun invokeWithoutArgumentsStaticStatement(method: String, type: TypeName): CodeBlock {
-    return of("\$T.$method();", type)
+fun invokeWithoutArgumentsStaticStatement(method: String, type: JavaMetaType): CodeBlock {
+    return of("\$T.$method();", type.extractClass())
 }
 
 
 fun invokeOneArgumentInstanceStatement(method: String): CodeBlock {
-    val format = "instance.$method(\$T.cast(argument));"
-    return of(format, CASTER_CLASS_NAME)
+    return of("instance.$method(\$T.cast(argument));", CASTER_CLASS_NAME)
 }
 
-fun invokeOneArgumentStaticStatement(method: String, type: TypeName): CodeBlock {
-    val format = "\$T.$method(\$T.cast(argument));"
-    return of(format, type, CASTER_CLASS_NAME)
+fun invokeOneArgumentStaticStatement(method: String, type: JavaMetaType): CodeBlock {
+    return of("\$T.$method(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
 }
 
 
@@ -67,25 +65,25 @@ fun invokeInstanceStatement(method: String, argumentsCount: Int): CodeBlock {
     return of(format, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
 }
 
-fun invokeStaticStatement(method: String, type: TypeName, argumentsCount: Int): CodeBlock {
+fun invokeStaticStatement(method: String, type: JavaMetaType, argumentsCount: Int): CodeBlock {
     val format = "\$T.$method(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
-    return of(format, type, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
+    return of(format, type.extractClass(), *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
 }
 
 
-fun returnInvokeWithoutArgumentsConstructorStatement(type: TypeName): CodeBlock {
-    val format = "return new \$T();"
-    return of(format, type)
+fun returnInvokeWithoutArgumentsConstructorStatement(type: JavaMetaType): CodeBlock {
+    if (type.typeParameters.isNotEmpty()) return of("return new \$T<>();", type.extractClass())
+    return of("return new \$T();", type.extractClass())
 }
 
-fun returnInvokeOneArgumentConstructorStatement(type: TypeName): CodeBlock {
-    val format = "return new \$T(\$T.cast(argument));"
-    return of(format, type, CASTER_CLASS_NAME)
+fun returnInvokeOneArgumentConstructorStatement(type: JavaMetaType): CodeBlock {
+    if (type.typeParameters.isNotEmpty()) return of("return new \$T<>(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
+    return of("return new \$T(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
 }
 
-fun returnInvokeConstructorStatement(type: TypeName, argumentsCount: Int): CodeBlock {
+fun returnInvokeConstructorStatement(type: JavaMetaType, argumentsCount: Int): CodeBlock {
     val format = "return new \$T(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
-    return of(format, type, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
+    return of(format, type.extractClass(), *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
 }
 
 
