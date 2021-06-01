@@ -19,20 +19,21 @@
 package io.art.generator.meta.templates
 
 import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.CodeBlock.join
+import com.squareup.javapoet.CodeBlock.of
 import com.squareup.javapoet.TypeName
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.constants.StringConstants.SPACE
 import io.art.generator.meta.constants.CASTER_CLASS_NAME
-import io.art.generator.meta.constants.OBJECT_CLASS_NAME
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
-import io.art.generator.meta.service.extractPoetClass
+import io.art.generator.meta.service.extractClass
 
 fun newStatement() = "new \$T()"
 
 fun returnStatement() = "return \$L;"
 
-fun returnStatement(block: CodeBlock): CodeBlock = CodeBlock.join(listOf(CodeBlock.of("return"), block), SPACE)
+fun returnStatement(block: CodeBlock): CodeBlock = join(listOf(of("return"), block), SPACE)
 
 fun returnNullStatement() = "return null;"
 
@@ -40,100 +41,99 @@ fun registerNewStatement() = "register(new \$T())"
 
 fun computeStatement() = "compute();"
 
+
 fun invokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
-    return CodeBlock.of("instance.$method();")
+    return of("instance.$method();")
 }
 
 fun invokeWithoutArgumentsStaticStatement(method: String, type: TypeName): CodeBlock {
-    return CodeBlock.of("\$T.$method();", type)
+    return of("\$T.$method();", type)
 }
 
 
 fun invokeOneArgumentInstanceStatement(method: String): CodeBlock {
     val format = "instance.$method(\$T.cast(argument));"
-    return CodeBlock.of(format, CASTER_CLASS_NAME)
+    return of(format, CASTER_CLASS_NAME)
 }
 
 fun invokeOneArgumentStaticStatement(method: String, type: TypeName): CodeBlock {
     val format = "\$T.$method(\$T.cast(argument));"
-    return CodeBlock.of(format, type, CASTER_CLASS_NAME)
+    return of(format, type, CASTER_CLASS_NAME)
 }
 
 
 fun invokeInstanceStatement(method: String, argumentsCount: Int): CodeBlock {
     val format = "instance.$method(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
-    return CodeBlock.of(format, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
+    return of(format, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
 }
 
 fun invokeStaticStatement(method: String, type: TypeName, argumentsCount: Int): CodeBlock {
     val format = "\$T.$method(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
-    return CodeBlock.of(format, type, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
+    return of(format, type, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
 }
 
 
 fun returnInvokeWithoutArgumentsConstructorStatement(type: TypeName): CodeBlock {
     val format = "return new \$T();"
-    return CodeBlock.of(format, type)
+    return of(format, type)
 }
 
 fun returnInvokeOneArgumentConstructorStatement(type: TypeName): CodeBlock {
     val format = "return new \$T(\$T.cast(argument));"
-    return CodeBlock.of(format, type, CASTER_CLASS_NAME)
+    return of(format, type, CASTER_CLASS_NAME)
 }
 
 fun returnInvokeConstructorStatement(type: TypeName, argumentsCount: Int): CodeBlock {
     val format = "return new \$T(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
-    return CodeBlock.of(format, type, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
+    return of(format, type, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
 }
 
+
 fun registerMetaFieldStatement(name: String, type: JavaMetaType): CodeBlock {
-    return CodeBlock.join(listOf(CodeBlock.of("register(new MetaField<>(\$S,", name), metaTypeStatement(type), CodeBlock.of("))")), EMPTY_STRING)
+    return join(listOf(of("register(new MetaField<>(\$S,", name), metaTypeStatement(type), of("))")), EMPTY_STRING)
 }
 
 fun registerMetaParameterStatement(index: Int, name: String, type: JavaMetaType): CodeBlock {
-    return CodeBlock.join(listOf(CodeBlock.of("register(new MetaParameter<>($index, \$S,", name), metaTypeStatement(type), CodeBlock.of("))")), EMPTY_STRING)
+    return join(listOf(of("register(new MetaParameter<>($index, \$S,", name), metaTypeStatement(type), of("))")), EMPTY_STRING)
 }
 
-fun metaTypeStatement(type: JavaMetaType): CodeBlock {
-    val poetClass = type.extractPoetClass()
+
+fun metaNamedSuperStatement(name: String, type: JavaMetaType): CodeBlock {
+    return join(listOf(of("super(\$S,", name), metaTypeStatement(type), of(");")), EMPTY_STRING)
+}
+
+fun metaTypeSuperStatement(type: JavaMetaType): CodeBlock {
+    return join(listOf(of("super("), metaTypeStatement(type), of(");")), EMPTY_STRING)
+}
+
+fun namedSuperStatement(name: String): CodeBlock {
+    return of("super(\$S);", name)
+}
+
+private fun metaTypeBlock(pattern: String, className: TypeName, vararg parameters: JavaMetaType): CodeBlock {
+    val builder = of(pattern, className, className).toBuilder()
+    parameters.forEach { parameter ->
+        builder.add(", ").add(metaTypeStatement(parameter))
+    }
+    return builder.add(")").build()
+}
+
+private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
+    val poetClass = type.extractClass()
 
     val metaVariablePattern = "metaVariable(\$S"
     val metaTypePattern = "metaType(\$T.class, \$T[]::new"
     val metaArrayPattern = "metaArray(\$T.class, \$T[]::new"
 
-    fun metaTypeBlock(pattern: String, className: TypeName, vararg parameters: JavaMetaType): CodeBlock {
-        val builder = CodeBlock.of(pattern, className, className).toBuilder()
-        parameters.forEach { parameter ->
-            builder.add(", ").add(metaTypeStatement(parameter)).add(")")
-        }
-        return builder.add(")").build()
-    }
-
     return when (type.kind) {
-        PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> metaTypeBlock(metaTypePattern, poetClass)
+        PRIMITIVE_KIND, WILDCARD_KIND, ENUM_KIND, UNKNOWN_KIND -> metaTypeBlock(metaTypePattern, poetClass)
         ARRAY_KIND -> {
             val componentType = type.arrayComponentType!!
-            metaTypeBlock(metaArrayPattern, componentType.extractPoetClass(), *componentType.classTypeParameters.values.toTypedArray())
+            metaTypeBlock(metaArrayPattern, componentType.extractClass(), *type.typeParameters.values.toTypedArray())
         }
         CLASS_KIND, INTERFACE_KIND -> {
-            metaTypeBlock(metaTypePattern, poetClass, *type.classTypeParameters.values.toTypedArray())
+            metaTypeBlock(metaTypePattern, poetClass, *type.typeParameters.values.toTypedArray())
         }
-        VARIABLE_KIND -> CodeBlock.of(metaVariablePattern, type.typeName)
-        WILDCARD_KIND -> type.wildcardExtendsBound
-                ?.let { bound -> metaTypeBlock(metaTypePattern, bound.extractPoetClass()) }
-                ?: type.wildcardSuperBound?.let { bound -> metaTypeBlock(metaTypePattern, bound.extractPoetClass()) }
-                ?: metaTypeBlock(metaTypePattern, OBJECT_CLASS_NAME)
+        VARIABLE_KIND -> join(listOf(of(metaVariablePattern, type.typeName), of(")")), EMPTY_STRING)
     }
-}
-
-fun metaNamedSuperStatement(name: String, type: JavaMetaType): CodeBlock {
-    return CodeBlock.join(listOf(CodeBlock.of("super(\$S,", name), metaTypeStatement(type), CodeBlock.of(");")), EMPTY_STRING)
-}
-
-fun metaTypeSuperStatement(type: JavaMetaType): CodeBlock {
-    return CodeBlock.join(listOf(CodeBlock.of("super("), metaTypeStatement(type), CodeBlock.of(");")), EMPTY_STRING)
-}
-
-fun namedSuperStatement(name: String): CodeBlock {
-    return CodeBlock.of("super(\$S);", name)
 }

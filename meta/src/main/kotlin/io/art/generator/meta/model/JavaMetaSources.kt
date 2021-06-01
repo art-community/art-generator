@@ -38,6 +38,7 @@ enum class JavaMetaTypeKind {
 
 data class JavaMetaType(
         val originalType: TypeMirror,
+        val typeParameters: Map<String, JavaMetaType> = emptyMap(),
 
         val typeName: String,
         val kind: JavaMetaTypeKind,
@@ -45,7 +46,6 @@ data class JavaMetaType(
         val classFullName: String? = null,
         val className: String? = null,
         val classPackageName: String? = null,
-        val classTypeParameters: Map<String, JavaMetaType> = emptyMap(),
         val classSuperClass: JavaMetaType? = null,
         val classSuperInterfaces: List<JavaMetaType> = emptyList(),
 
@@ -67,7 +67,7 @@ data class JavaMetaType(
         if (classFullName != other.classFullName) return false
         if (className != other.className) return false
         if (classPackageName != other.classPackageName) return false
-        if (classTypeParameters != other.classTypeParameters) return false
+        if (typeParameters != other.typeParameters) return false
         if (classSuperClass != other.classSuperClass) return false
         if (classSuperInterfaces != other.classSuperInterfaces) return false
         if (arrayComponentType != other.arrayComponentType) return false
@@ -84,7 +84,7 @@ data class JavaMetaType(
         result = 31 * result + (classFullName?.hashCode() ?: 0)
         result = 31 * result + (className?.hashCode() ?: 0)
         result = 31 * result + (classPackageName?.hashCode() ?: 0)
-        result = 31 * result + classTypeParameters.hashCode()
+        result = 31 * result + typeParameters.hashCode()
         result = 31 * result + (classSuperClass?.hashCode() ?: 0)
         result = 31 * result + classSuperInterfaces.hashCode()
         result = 31 * result + (arrayComponentType?.hashCode() ?: 0)

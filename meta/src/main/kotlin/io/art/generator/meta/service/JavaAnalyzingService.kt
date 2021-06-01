@@ -20,7 +20,6 @@
 
 package io.art.generator.meta.service
 
-import com.squareup.kotlinpoet.typeNameOf
 import com.sun.tools.javac.code.Symbol
 import com.sun.tools.javac.code.Symbol.*
 import com.sun.tools.javac.code.Type
@@ -99,7 +98,7 @@ private fun Type.ClassType.asMetaType(): JavaMetaType = JavaMetaType(
         typeName = tsym.name.toString(),
         className = tsym.simpleName.toString(),
         classPackageName = tsym.qualifiedName.toString().substringBeforeLast(DOT),
-        classTypeParameters = typeArguments
+        typeParameters = typeArguments
                 .asSequence()
                 .map { argument -> argument.asMetaType() }
                 .filter { argument -> argument.kind != UNKNOWN_KIND }
