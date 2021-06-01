@@ -20,6 +20,7 @@ package io.art.generator.meta.templates
 
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.TypeName
+import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.constants.StringConstants.SPACE
 import io.art.generator.meta.constants.CASTER_CLASS_NAME
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
@@ -87,12 +88,12 @@ fun returnInvokeConstructorStatement(type: TypeName, argumentsCount: Int): CodeB
     return CodeBlock.of(format, type, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
 }
 
-fun registerMetaFieldStatement(name: String, type: TypeName): CodeBlock {
-    return CodeBlock.of("register(new MetaField<>(\$S, metaType(\$T.class, \$T[]::new)))", name, type, type)
+fun registerMetaFieldStatement(name: String, type: JavaMetaType): CodeBlock {
+    return CodeBlock.join(listOf(CodeBlock.of("register(new MetaField<>(\$S,", name), metaTypeStatement(type), CodeBlock.of(")))")), EMPTY_STRING)
 }
 
-fun registerMetaParameterStatement(index: Int, name: String, type: TypeName): CodeBlock {
-    return CodeBlock.of("register(new MetaParameter<>($index, \$S, metaType(\$T.class, \$T[]::new)))", name, type, type)
+fun registerMetaParameterStatement(index: Int, name: String, type: JavaMetaType): CodeBlock {
+    return CodeBlock.join(listOf(CodeBlock.of("register(new MetaParameter<>($index, \$S,", name), metaTypeStatement(type), CodeBlock.of(")))")), EMPTY_STRING)
 }
 
 fun metaTypeStatement(type: JavaMetaType): CodeBlock {
@@ -130,11 +131,11 @@ fun metaTypeStatement(type: JavaMetaType): CodeBlock {
 }
 
 fun metaNamedSuperStatement(name: String, type: JavaMetaType): CodeBlock {
-    return CodeBlock.join(listOf(CodeBlock.of("super(\$S", name), metaTypeStatement(type), CodeBlock.of(");")), SPACE)
+    return CodeBlock.join(listOf(CodeBlock.of("super(\$S,", name), metaTypeStatement(type), CodeBlock.of(");")), EMPTY_STRING)
 }
 
 fun metaTypeSuperStatement(type: JavaMetaType): CodeBlock {
-    return CodeBlock.join(listOf(CodeBlock.of("super("), metaTypeStatement(type), CodeBlock.of(");")), SPACE)
+    return CodeBlock.join(listOf(CodeBlock.of("super("), metaTypeStatement(type), CodeBlock.of(");")), EMPTY_STRING)
 }
 
 fun namedSuperStatement(name: String): CodeBlock {

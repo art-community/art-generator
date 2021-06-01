@@ -137,8 +137,9 @@ object JavaMetaGenerationService {
 
     private fun TypeSpec.Builder.generateFields(fields: Map<String, JavaMetaField>) {
         fields.entries.forEach { field ->
-            val fieldType = field.value.type.asPoetType()
-            val fieldMetaType = ParameterizedTypeName.get(META_FIELD_CLASS_NAME, fieldType.box())
+            val fieldType = field.value.type
+            val fieldTypeName = field.value.type.asPoetType()
+            val fieldMetaType = ParameterizedTypeName.get(META_FIELD_CLASS_NAME, fieldTypeName.box())
             FieldSpec.builder(fieldMetaType, field.key)
                     .addModifiers(PRIVATE, FINAL)
                     .initializer(registerMetaFieldStatement(field.key, fieldType))
@@ -303,8 +304,9 @@ object JavaMetaGenerationService {
 
     private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
         method.parameters.entries.forEachIndexed { parameterIndex, parameter ->
-            val parameterType = parameter.value.type.asPoetType()
-            val metaParameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameterType.box())
+            val parameterType = parameter.value.type
+            val parameterTypeName = parameter.value.type.asPoetType()
+            val metaParameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameterTypeName.box())
             FieldSpec.builder(metaParameterType, parameter.key)
                     .addModifiers(PRIVATE, FINAL)
                     .initializer(registerMetaParameterStatement(parameterIndex, parameter.key, parameterType))
