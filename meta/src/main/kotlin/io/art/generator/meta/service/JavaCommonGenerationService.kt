@@ -20,8 +20,6 @@ package io.art.generator.meta.service
 
 import com.squareup.javapoet.*
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
-import io.art.core.constants.StringConstants.DOT
-import io.art.generator.meta.constants.JAVA_PACKAGE_PREFIX
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
@@ -56,7 +54,15 @@ fun JavaMetaType.asPoetType(): TypeName = when (kind) {
 
 fun JavaMetaType.asPoetTypeWithoutVariables(): TypeName = when (kind) {
     PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> asPoetType()
-    ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.asPoetTypeWithoutVariables())
+    ARRAY_KIND -> {
+        when (arrayComponentType!!.kind) {
+            VARIABLE_KIND -> ArrayTypeName.of(OBJECT_CLASS_NAME)
+            WILDCARD_KIND -> ArrayTypeName.of(wildcardExtendsBound?.let { bound -> subtypeOf(bound.asPoetTypeWithoutVariables()) })
+                    ?: ArrayTypeName.of(wildcardSuperBound?.asPoetTypeWithoutVariables()?.let(WildcardTypeName::supertypeOf))
+                    ?: ArrayTypeName.of(OBJECT_CLASS_NAME)
+            else -> ArrayTypeName.of(arrayComponentType.extractPoetClass())
+        }
+    }
     CLASS_KIND, INTERFACE_KIND -> when {
         classTypeParameters.isEmpty() -> asPoetType().box()
         else -> {
@@ -65,7 +71,7 @@ fun JavaMetaType.asPoetTypeWithoutVariables(): TypeName = when (kind) {
             ParameterizedTypeName.get(rawType, *parameters.toTypedArray())
         }
     }
-    VARIABLE_KIND -> subtypeOf(Object::class.java)
+    VARIABLE_KIND -> OBJECT_CLASS_NAME
     WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> subtypeOf(bound.asPoetTypeWithoutVariables()) }
             ?: wildcardSuperBound?.asPoetTypeWithoutVariables()?.let(WildcardTypeName::supertypeOf)
             ?: subtypeOf(Object::class.java)
