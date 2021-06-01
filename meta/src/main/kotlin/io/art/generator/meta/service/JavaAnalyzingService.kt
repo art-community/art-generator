@@ -20,6 +20,7 @@
 
 package io.art.generator.meta.service
 
+import com.squareup.kotlinpoet.typeNameOf
 import com.sun.tools.javac.code.Symbol
 import com.sun.tools.javac.code.Symbol.*
 import com.sun.tools.javac.code.Type
@@ -68,14 +69,7 @@ private fun TypeMirror.asMetaType(): JavaMetaType = when (this) {
 
     is Type.WildcardType -> asMetaType()
 
-    is Type.ClassType -> when {
-        tsym.qualifiedName.startsWith(JAVA_PACKAGE_PREFIX) -> JavaMetaType(
-                originalType = this,
-                kind = JDK_KIND,
-                typeName = tsym.qualifiedName.toString()
-        )
-        else -> asMetaType()
-    }
+    is Type.ClassType -> asMetaType()
 
     is Type -> when {
         isPrimitiveOrVoid -> JavaMetaType(
@@ -86,7 +80,7 @@ private fun TypeMirror.asMetaType(): JavaMetaType = when (this) {
         else -> JavaMetaType(
                 originalType = this,
                 kind = UNKNOWN_KIND,
-                typeName = tsym.qualifiedName.toString()
+                typeName = tsym?.qualifiedName?.toString() ?: toString()
         )
     }
 

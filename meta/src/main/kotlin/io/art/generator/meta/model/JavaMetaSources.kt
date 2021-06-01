@@ -30,7 +30,6 @@ enum class JavaMetaTypeKind {
     ENUM_KIND,
     WILDCARD_KIND,
     INTERFACE_KIND,
-    JDK_KIND,
     PRIMITIVE_KIND,
     VARIABLE_KIND,
     ARRAY_KIND,

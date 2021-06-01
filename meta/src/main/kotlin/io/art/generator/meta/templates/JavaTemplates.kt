@@ -118,7 +118,7 @@ fun metaTypeStatement(type: JavaMetaType): CodeBlock {
             val componentType = type.arrayComponentType!!
             metaTypeBlock(metaArrayPattern, componentType.extractPoetClass(), *componentType.classTypeParameters.values.toTypedArray())
         }
-        CLASS_KIND, INTERFACE_KIND, JDK_KIND -> {
+        CLASS_KIND, INTERFACE_KIND -> {
             metaTypeBlock(metaTypePattern, poetClass, *type.classTypeParameters.values.toTypedArray())
         }
         VARIABLE_KIND -> CodeBlock.of(metaVariablePattern, type.typeName)
@@ -130,7 +130,7 @@ fun metaTypeStatement(type: JavaMetaType): CodeBlock {
 }
 
 fun metaNamedSuperStatement(name: String, type: JavaMetaType): CodeBlock {
-    return CodeBlock.join(listOf(CodeBlock.of("super(\$S"), CodeBlock.of(name), metaTypeStatement(type), CodeBlock.of(");")), SPACE)
+    return CodeBlock.join(listOf(CodeBlock.of("super(\$S", name), metaTypeStatement(type), CodeBlock.of(");")), SPACE)
 }
 
 fun metaTypeSuperStatement(type: JavaMetaType): CodeBlock {
