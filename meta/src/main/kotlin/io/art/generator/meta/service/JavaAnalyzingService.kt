@@ -120,7 +120,7 @@ private fun Type.TypeVar.asMetaType(): JavaMetaType = JavaMetaType(
         originalType = this,
         kind = VARIABLE_KIND,
         typeName = tsym.name.toString(),
-        typeVariables = upperBound
+        typeVariableBounds = upperBound
                 .let { bound ->
                     when (bound) {
                         is IntersectionType -> bound.bounds
@@ -130,7 +130,7 @@ private fun Type.TypeVar.asMetaType(): JavaMetaType = JavaMetaType(
                 .asSequence()
                 .map { argument -> argument.asMetaType() }
                 .filter { argument -> argument.kind != UNKNOWN_KIND }
-                .associateBy { argument -> argument.typeName },
+                .toList(),
 )
 
 private fun Type.ArrayType.asMetaType(): JavaMetaType = JavaMetaType(

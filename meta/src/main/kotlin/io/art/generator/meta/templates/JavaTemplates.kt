@@ -22,14 +22,16 @@ import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.TypeName
 import io.art.core.constants.StringConstants.SPACE
 import io.art.generator.meta.constants.CASTER_CLASS_NAME
-import io.art.generator.meta.model.JavaMetaClass
-import io.art.generator.meta.service.asPoetType
+import io.art.generator.meta.constants.OBJECT_CLASS_NAME
+import io.art.generator.meta.model.JavaMetaType
+import io.art.generator.meta.model.JavaMetaTypeKind.*
+import io.art.generator.meta.service.extractPoetClass
 
 fun newStatement() = "new \$T()"
 
 fun returnStatement() = "return \$L;"
 
-fun returnStatement(block: CodeBlock) = CodeBlock.join(listOf(CodeBlock.of("return"), block), SPACE)
+fun returnStatement(block: CodeBlock): CodeBlock = CodeBlock.join(listOf(CodeBlock.of("return"), block), SPACE)
 
 fun returnNullStatement() = "return null;"
 
@@ -93,27 +95,46 @@ fun registerMetaParameterStatement(index: Int, name: String, type: TypeName): Co
     return CodeBlock.of("register(new MetaParameter<>($index, \$S, metaType(\$T.class, \$T[]::new)))", name, type, type)
 }
 
-fun metaTypeSuperStatement(metaClass: JavaMetaClass, className: TypeName): CodeBlock {
-    val constructorBuilder = CodeBlock.of("super(metaType(\$T.class, \$T[]::new)", className, className).toBuilder()
-    if (metaClass.type.typeVariables.isNotEmpty()) {
-        constructorBuilder.add(", ")
-        metaClass.type.typeVariables.forEach { variable ->
-            constructorBuilder.add("metaVariable(\$S, metaType(\$T.class, \$T[]::new))",
-                    variable.key,
-                    variable.value.asPoetType(),
-                    variable.value.asPoetType()
-            )
+fun metaTypeStatement(type: JavaMetaType): CodeBlock {
+    val poetClass = type.extractPoetClass()
+
+    val metaVariablePattern = "metaVariable(\$S)"
+    val metaTypePattern = "metaType(\$T.class, \$T[]::new"
+    val metaArrayPattern = "metaArray(\$T.class, \$T[]::new"
+
+    fun metaTypeBlock(pattern: String, className: TypeName, vararg parameters: JavaMetaType): CodeBlock {
+        val base = CodeBlock.of(pattern, className, className)
+        if (parameters.isEmpty()) return base
+        val builder = base.toBuilder()
+        parameters.forEach { parameter ->
+            builder.add(", ").add(metaTypeStatement(parameter))
         }
+        return builder.add(")").build()
     }
-    return constructorBuilder.add(");").build()
+
+    return when (type.kind) {
+        PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> metaTypeBlock(metaTypePattern, poetClass)
+        ARRAY_KIND -> {
+            val componentType = type.arrayComponentType!!
+            metaTypeBlock(metaArrayPattern, componentType.extractPoetClass(), *componentType.classTypeParameters.values.toTypedArray())
+        }
+        CLASS_KIND, INTERFACE_KIND, JDK_KIND -> {
+            metaTypeBlock(metaTypePattern, poetClass, *type.classTypeParameters.values.toTypedArray())
+        }
+        VARIABLE_KIND -> CodeBlock.of(metaVariablePattern, type.typeName)
+        WILDCARD_KIND -> type.wildcardExtendsBound
+                ?.let { bound -> metaTypeBlock(metaTypePattern, bound.extractPoetClass()) }
+                ?: type.wildcardSuperBound?.let { bound -> metaTypeBlock(metaTypePattern, bound.extractPoetClass()) }
+                ?: metaTypeBlock(metaTypePattern, OBJECT_CLASS_NAME)
+    }
 }
 
-fun metaNamedSuperStatement(name: String, className: TypeName): CodeBlock {
-    return CodeBlock.of("super(\$S, metaType(\$T.class, \$T[]::new));", name, className, className)
+fun metaNamedSuperStatement(name: String, type: JavaMetaType): CodeBlock {
+    return CodeBlock.join(listOf(CodeBlock.of("super(\$S"), CodeBlock.of(name), metaTypeStatement(type), CodeBlock.of(");")), SPACE)
 }
 
-fun metaSuperStatement(className: TypeName): CodeBlock {
-    return CodeBlock.of("super(metaType(\$T.class, \$T[]::new));", className, className)
+fun metaTypeSuperStatement(type: JavaMetaType): CodeBlock {
+    return CodeBlock.join(listOf(CodeBlock.of("super("), metaTypeStatement(type), CodeBlock.of(");")), SPACE)
 }
 
 fun namedSuperStatement(name: String): CodeBlock {

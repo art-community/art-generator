@@ -55,7 +55,7 @@ data class JavaMetaType(
         val wildcardExtendsBound: JavaMetaType? = null,
         val wildcardSuperBound: JavaMetaType? = null,
 
-        val typeVariables: Map<String, JavaMetaType> = emptyMap(),
+        val typeVariableBounds: List<JavaMetaType> = emptyList(),
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -74,7 +74,7 @@ data class JavaMetaType(
         if (arrayComponentType != other.arrayComponentType) return false
         if (wildcardExtendsBound != other.wildcardExtendsBound) return false
         if (wildcardSuperBound != other.wildcardSuperBound) return false
-        if (typeVariables != other.typeVariables) return false
+        if (typeVariableBounds != other.typeVariableBounds) return false
 
         return true
     }
@@ -91,7 +91,7 @@ data class JavaMetaType(
         result = 31 * result + (arrayComponentType?.hashCode() ?: 0)
         result = 31 * result + (wildcardExtendsBound?.hashCode() ?: 0)
         result = 31 * result + (wildcardSuperBound?.hashCode() ?: 0)
-        result = 31 * result + typeVariables.hashCode()
+        result = 31 * result + typeVariableBounds.hashCode()
         return result
     }
 }

@@ -107,19 +107,18 @@ object JavaMetaGenerationService {
         val metaClassName = metaClassName(META_NAME, metaClass.type.className!!)
         val metaName = metaName(metaClass.type.className)
         val metaClassNameReference = metaClassName(EMPTY_STRING, metaClass.type.className)
-        val className = ClassName.get(metaClass.type.classPackageName, metaClass.type.className)
-        val type = metaClass.type.asGenericPoetType()
-        val constructorStatement = metaTypeSuperStatement(metaClass, className)
-        val apply = classBuilder(metaClassName)
+        val typeName = metaClass.type.asPoetTypeWithoutVariables()
+        val constructorStatement = metaTypeSuperStatement(metaClass.type)
+        classBuilder(metaClassName)
                 .addModifiers(PUBLIC, FINAL, STATIC)
-                .superclass(ParameterizedTypeName.get(META_CLASS_CLASS_NAME, type))
+                .superclass(ParameterizedTypeName.get(META_CLASS_CLASS_NAME, typeName))
                 .addMethod(constructorBuilder()
                         .addModifiers(PRIVATE)
                         .addCode(constructorStatement)
                         .build())
-                .apply { generateConstructors(metaClass.constructors, type) }
+                .apply { generateConstructors(metaClass.constructors, metaClass.type, typeName) }
                 .apply { generateFields(metaClass.fields) }
-                .apply { generateMethods(metaClass.methods, type) }
+                .apply { generateMethods(metaClass.methods, typeName) }
                 .apply { metaClass.innerClasses.values.forEach { inner -> generateClass(inner) } }
                 .build()
                 .apply(::addType)
@@ -149,18 +148,18 @@ object JavaMetaGenerationService {
     }
 
 
-    private fun TypeSpec.Builder.generateConstructors(constructors: List<JavaMetaMethod>, type: TypeName) {
+    private fun TypeSpec.Builder.generateConstructors(constructors: List<JavaMetaMethod>, type: JavaMetaType, typeName: TypeName) {
         constructors.mapIndexed { index, constructor ->
             var name = CONSTRUCTOR_NAME
             if (index > 0) name += index
             classBuilder(name)
                     .addModifiers(PUBLIC, FINAL, STATIC)
-                    .superclass(ParameterizedTypeName.get(META_CONSTRUCTOR_CLASS_NAME, type))
+                    .superclass(ParameterizedTypeName.get(META_CONSTRUCTOR_CLASS_NAME, typeName))
                     .addMethod(constructorBuilder()
                             .addModifiers(PRIVATE)
-                            .addCode(metaSuperStatement(type))
+                            .addCode(metaTypeSuperStatement(type))
                             .build())
-                    .apply { generateConstructorInvocations(type, constructor) }
+                    .apply { generateConstructorInvocations(typeName, constructor) }
                     .apply { generateParameters(constructor) }
                     .build()
                     .apply(::addType)
@@ -215,14 +214,14 @@ object JavaMetaGenerationService {
                     grouped.value.forEachIndexed { methodIndex, method ->
                         var name = method.name
                         if (methodIndex > 0) name += methodIndex
-                        val returnType = method.returnType.asPoetType()
+                        val returnTypeName = method.returnType.asPoetType()
                         val static = method.modifiers.contains(STATIC)
                         val parent = when {
                             static -> {
-                                ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnType.box())
+                                ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnTypeName.box())
                             }
                             else -> {
-                                ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, type, returnType.box())
+                                ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, type, returnTypeName.box())
                             }
                         }
                         classBuilder(name)
@@ -230,7 +229,7 @@ object JavaMetaGenerationService {
                                 .superclass(parent)
                                 .addMethod(constructorBuilder()
                                         .addModifiers(PRIVATE)
-                                        .addCode(metaNamedSuperStatement(name, returnType))
+                                        .addCode(metaNamedSuperStatement(name, method.returnType))
                                         .build())
                                 .apply { generateMethodInvocations(type, name, method) }
                                 .apply { generateParameters(method) }

@@ -20,6 +20,7 @@ package io.art.generator.meta.service
 
 import com.squareup.javapoet.*
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
+import io.art.generator.meta.constants.OBJECT_CLASS_NAME
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import javax.lang.model.type.WildcardType
@@ -34,7 +35,7 @@ fun JavaMetaType.asPoetType(): TypeName = when (kind) {
             ?: WildcardTypeName.get(originalType as? WildcardType)
 
     VARIABLE_KIND -> {
-        val bounds = typeVariables.values.map(JavaMetaType::asPoetType).toTypedArray()
+        val bounds = typeVariableBounds.map(JavaMetaType::asPoetType).toTypedArray()
         TypeVariableName.get(typeName, *bounds)
     }
 
@@ -53,6 +54,27 @@ fun JavaMetaType.asPoetType(): TypeName = when (kind) {
     }
 }
 
-fun JavaMetaType.asGenericPoetType(): TypeName {
-    return asPoetType().box()
+fun JavaMetaType.asPoetTypeWithoutVariables(): TypeName = when (kind) {
+    PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> asPoetType()
+    ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.asPoetTypeWithoutVariables())
+    CLASS_KIND, INTERFACE_KIND, JDK_KIND -> {
+        if (classTypeParameters.isEmpty()) asPoetType().box()
+        val parameters = classTypeParameters.values.map { parameter -> parameter.asPoetTypeWithoutVariables() }
+        val rawType = ClassName.get(classPackageName!!, className)
+        ParameterizedTypeName.get(rawType, *parameters.toTypedArray())
+    }
+    VARIABLE_KIND -> subtypeOf(Object::class.java)
+    WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> subtypeOf(bound.asPoetTypeWithoutVariables()) }
+            ?: wildcardSuperBound?.asPoetTypeWithoutVariables()?.let(WildcardTypeName::supertypeOf)
+            ?: OBJECT_CLASS_NAME
+}
+
+fun JavaMetaType.extractPoetClass(): TypeName = when (kind) {
+    PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> asPoetType()
+    ARRAY_KIND -> arrayComponentType!!.extractPoetClass()
+    CLASS_KIND, INTERFACE_KIND, JDK_KIND -> ClassName.get(classPackageName!!, className)
+    VARIABLE_KIND -> OBJECT_CLASS_NAME
+    WILDCARD_KIND -> wildcardExtendsBound?.let { bound -> subtypeOf(bound.extractPoetClass()) }
+            ?: wildcardSuperBound?.extractPoetClass()?.let(WildcardTypeName::supertypeOf)
+            ?: OBJECT_CLASS_NAME
 }
