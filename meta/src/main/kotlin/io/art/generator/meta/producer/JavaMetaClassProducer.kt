@@ -153,7 +153,9 @@ private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type
                 grouped.value.forEachIndexed { methodIndex, method ->
                     var name = method.name
                     if (methodIndex > 0) name += methodIndex
-                    name = metaMethodName(name)
+                    val methodName = metaMethodName(name)
+                    val methodClassName = name.capitalize()
+                    val reference = ClassName.get(EMPTY_STRING, methodClassName)
                     val returnTypeName = method.returnType.withoutVariables()
                     val static = method.modifiers.contains(STATIC)
                     val parent = when {
@@ -164,7 +166,7 @@ private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type
                             ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, type.withoutVariables(), returnTypeName.box())
                         }
                     }
-                    classBuilder(name)
+                    classBuilder(methodClassName)
                             .addModifiers(PUBLIC, FINAL, STATIC)
                             .superclass(parent)
                             .addMethod(constructorBuilder()
@@ -175,16 +177,15 @@ private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type
                             .apply { generateParameters(method) }
                             .build()
                             .apply(::addType)
-                    val methodClassName = ClassName.get(EMPTY_STRING, name)
-                    FieldSpec.builder(methodClassName, name)
+                    FieldSpec.builder(reference, methodName)
                             .addModifiers(PRIVATE, FINAL)
-                            .initializer(registerNewStatement(), methodClassName)
+                            .initializer(registerNewStatement(), reference)
                             .build()
                             .apply(::addField)
-                    methodBuilder(name.decapitalize())
+                    methodBuilder(methodName)
                             .addModifiers(PUBLIC)
-                            .returns(methodClassName)
-                            .addCode(returnStatement(), name)
+                            .returns(reference)
+                            .addCode(returnStatement(), methodName)
                             .build()
                             .let(::addMethod)
                 }
