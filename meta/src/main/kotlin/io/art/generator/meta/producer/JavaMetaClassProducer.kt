@@ -58,7 +58,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
             .initializer(registerNewStatement(), reference)
             .build()
             .apply(::addField)
-    methodBuilder(className)
+    methodBuilder(className.decapitalize())
             .addModifiers(PUBLIC)
             .returns(reference)
             .addCode(returnStatement(), className)
@@ -71,11 +71,18 @@ private fun TypeSpec.Builder.generateFields(fields: Map<String, JavaMetaField>) 
         val fieldType = field.value.type
         val fieldTypeName = field.value.type.withoutVariables()
         val fieldMetaType = ParameterizedTypeName.get(META_FIELD_CLASS_NAME, fieldTypeName.box())
-        FieldSpec.builder(fieldMetaType, field.key)
+        val fieldName = metaFieldName(field.key)
+        FieldSpec.builder(fieldMetaType, fieldName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerMetaFieldStatement(field.key, fieldType))
+                .initializer(registerMetaFieldStatement(fieldName, fieldType))
                 .build()
                 .apply(::addField)
+        methodBuilder(fieldName.decapitalize())
+                .addModifiers(PUBLIC)
+                .returns(fieldMetaType)
+                .addCode(returnStatement(), fieldName)
+                .build()
+                .let(::addMethod)
     }
 }
 
@@ -146,6 +153,7 @@ private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type
                 grouped.value.forEachIndexed { methodIndex, method ->
                     var name = method.name
                     if (methodIndex > 0) name += methodIndex
+                    name = metaMethodName(name)
                     val returnTypeName = method.returnType.withoutVariables()
                     val static = method.modifiers.contains(STATIC)
                     val parent = when {
@@ -161,9 +169,9 @@ private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type
                             .superclass(parent)
                             .addMethod(constructorBuilder()
                                     .addModifiers(PRIVATE)
-                                    .addCode(metaNamedSuperStatement(name, method.returnType))
+                                    .addCode(metaNamedSuperStatement(method.name, method.returnType))
                                     .build())
-                            .apply { generateMethodInvocations(type, name, method) }
+                            .apply { generateMethodInvocations(type, method.name, method) }
                             .apply { generateParameters(method) }
                             .build()
                             .apply(::addType)
@@ -173,7 +181,7 @@ private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type
                             .initializer(registerNewStatement(), methodClassName)
                             .build()
                             .apply(::addField)
-                    methodBuilder(name)
+                    methodBuilder(name.decapitalize())
                             .addModifiers(PUBLIC)
                             .returns(methodClassName)
                             .addCode(returnStatement(), name)
