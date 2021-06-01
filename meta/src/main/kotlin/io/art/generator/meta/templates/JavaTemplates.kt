@@ -99,7 +99,7 @@ fun registerMetaParameterStatement(index: Int, name: String, type: JavaMetaType)
 fun metaTypeStatement(type: JavaMetaType): CodeBlock {
     val poetClass = type.extractPoetClass()
 
-    val metaVariablePattern = "metaVariable(\$S)"
+    val metaVariablePattern = "metaVariable(\$S"
     val metaTypePattern = "metaType(\$T.class, \$T[]::new"
     val metaArrayPattern = "metaArray(\$T.class, \$T[]::new"
 
