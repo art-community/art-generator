@@ -24,6 +24,7 @@ import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
+import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.TypeSpec.classBuilder
 import com.squareup.kotlinpoet.TypeName
@@ -60,8 +61,10 @@ object JavaMetaGenerationService {
                         .returns(reference)
                         .addCode(returnStatement(), META_NAME)
                         .build())
-                .addMethod(constructorBuilder()
-                        .addModifiers(PRIVATE)
+                .addMethod(methodBuilder(COMPUTE_NAME)
+                        .addModifiers(PUBLIC, STATIC)
+                        .addParameter(ParameterSpec.builder(META_MODULE_CLASS_NAME, DEPENDENCIES_NAME).build())
+                        .varargs()
                         .addCode(computeStatement())
                         .build())
                 .apply { generateTree(classes) }

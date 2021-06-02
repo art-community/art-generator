@@ -25,6 +25,7 @@ import com.squareup.javapoet.CodeBlock.of
 import com.squareup.javapoet.TypeName
 import io.art.core.constants.CompilerSuppressingWarnings.ALL
 import io.art.core.constants.StringConstants.*
+import io.art.generator.meta.constants.META_MODULE_CLASS_NAME
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
 import io.art.generator.meta.model.JavaMetaParameter
 import io.art.generator.meta.model.JavaMetaType
@@ -46,7 +47,7 @@ fun returnNullStatement() = "return null;"
 
 fun registerNewStatement() = "register(new \$T())"
 
-fun computeStatement() = "compute();"
+fun computeStatement() = "compute(dependencies);"
 
 
 fun invokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
