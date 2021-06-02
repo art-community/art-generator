@@ -31,7 +31,7 @@ import io.art.generator.meta.model.JavaMetaParameter
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import io.art.generator.meta.service.extractClass
-import io.art.generator.meta.service.hasPrimitive
+import io.art.generator.meta.service.hasVariable
 import javax.lang.model.element.Modifier
 
 fun suppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnings::class.java)
@@ -62,7 +62,7 @@ fun invokeWithoutArgumentsStaticStatement(method: String, type: JavaMetaType): C
 
 fun invokeOneArgumentInstanceStatement(method: String, parameter: JavaMetaParameter): CodeBlock {
     val parameterClass = parameter.type.extractClass()
-    if (parameter.type.hasPrimitive()) {
+    if (!parameter.type.hasVariable()) {
         return of("instance.$method((\$T)(argument));", parameterClass)
     }
     return of("instance.$method(\$T.cast(argument));", CASTER_CLASS_NAME)
@@ -70,7 +70,7 @@ fun invokeOneArgumentInstanceStatement(method: String, parameter: JavaMetaParame
 
 fun invokeOneArgumentStaticStatement(method: String, type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
     val parameterClass = parameter.type.extractClass()
-    if (parameter.type.hasPrimitive()) {
+    if (!parameter.type.hasVariable()) {
         return of("\$T.$method((\$T)(argument));", type.extractClass(), parameterClass)
     }
     return of("\$T.$method(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
@@ -79,14 +79,14 @@ fun invokeOneArgumentStaticStatement(method: String, type: JavaMetaType, paramet
 
 fun invokeInstanceStatement(method: String, parameters: Map<String, JavaMetaParameter>): CodeBlock {
     val parametersFormat = parameters.values.mapIndexed { index, parameter ->
-        if (parameter.type.hasPrimitive()) {
+        if (!parameter.type.hasVariable()) {
             return@mapIndexed "(\$T)(arguments[$index])"
         }
         return@mapIndexed "\$T.cast(arguments[$index])"
     }
     val format = "instance.$method(${parametersFormat.joinToString(COMMA)});"
     val parametersBlock = parameters.values.map { parameter ->
-        if (parameter.type.hasPrimitive()) {
+        if (!parameter.type.hasVariable()) {
             return@map parameter.type.extractClass()
         }
         return@map CASTER_CLASS_NAME
@@ -96,14 +96,14 @@ fun invokeInstanceStatement(method: String, parameters: Map<String, JavaMetaPara
 
 fun invokeStaticStatement(method: String, type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
     val parametersFormat = parameters.values.mapIndexed { index, parameter ->
-        if (parameter.type.hasPrimitive()) {
+        if (!parameter.type.hasVariable()) {
             return@mapIndexed "(\$T)(arguments[$index])"
         }
         return@mapIndexed "\$T.cast(arguments[$index])"
     }
     val format = "\$T.$method(${parametersFormat.joinToString(COMMA)});"
     val parametersBlock = parameters.values.map { parameter ->
-        if (parameter.type.hasPrimitive()) {
+        if (!parameter.type.hasVariable()) {
             return@map parameter.type.extractClass()
         }
         return@map CASTER_CLASS_NAME
@@ -119,12 +119,12 @@ fun returnInvokeWithoutArgumentsConstructorStatement(type: JavaMetaType): CodeBl
 
 fun returnInvokeOneArgumentConstructorStatement(type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
     if (type.typeParameters.isNotEmpty()) {
-        if (parameter.type.hasPrimitive()) {
+        if (!parameter.type.hasVariable()) {
             return of("return new \$T<>(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
         }
         return of("return new \$T<>((\$T)(argument));", type.extractClass(), parameter.type.extractClass())
     }
-    if (parameter.type.hasPrimitive()) {
+    if (!parameter.type.hasVariable()) {
         return of("return new \$T(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
     }
     return of("return new \$T((\$T)(argument));", type.extractClass(), parameter.type.extractClass())
@@ -132,7 +132,7 @@ fun returnInvokeOneArgumentConstructorStatement(type: JavaMetaType, parameter: J
 
 fun returnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
     val parametersFormat = parameters.values.mapIndexed { index, parameter ->
-        if (parameter.type.hasPrimitive()) {
+        if (!parameter.type.hasVariable()) {
             return@mapIndexed "(\$T)(arguments[$index])"
         }
         return@mapIndexed "\$T.cast(arguments[$index])"
@@ -140,7 +140,7 @@ fun returnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String,
     if (type.typeParameters.isNotEmpty()) {
         val format = "return new \$T<>(${parametersFormat.joinToString(COMMA)});"
         val parametersBlock = parameters.values.map { parameter ->
-            if (parameter.type.hasPrimitive()) {
+            if (!parameter.type.hasVariable()) {
                 return@map parameter.type.extractClass()
             }
             return@map CASTER_CLASS_NAME
@@ -149,7 +149,7 @@ fun returnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String,
     }
     val format = "return new \$T(${parametersFormat.joinToString(COMMA)});"
     val parametersBlock = parameters.values.map { parameter ->
-        if (parameter.type.hasPrimitive()) {
+        if (!parameter.type.hasVariable()) {
             return@map parameter.type.extractClass()
         }
         return@map CASTER_CLASS_NAME

@@ -85,4 +85,6 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
 }
 
 
-fun JavaMetaType.hasPrimitive(): Boolean = kind == PRIMITIVE_KIND || arrayComponentType?.hasPrimitive() ?: false
+fun JavaMetaType.hasVariable(): Boolean = kind == VARIABLE_KIND
+        || typeParameters.any { parameter -> parameter.hasVariable() }
+        || arrayComponentType?.hasVariable() ?: false
