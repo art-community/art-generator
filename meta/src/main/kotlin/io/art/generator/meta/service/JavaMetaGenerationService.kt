@@ -67,7 +67,7 @@ object JavaMetaGenerationService {
                 .build()
                 .let { metaClass ->
                     JavaFile.builder(META_NAME, metaClass)
-                            .addStaticImport(MetaType::class.java, META_TYPE_NAME, META_ARRAY_NAME, META_VARIABLE_NAME)
+                            .addStaticImport(MetaType::class.java, META_TYPE_NAME, META_ARRAY_NAME, META_VARIABLE_NAME, META_ENUM_NAME)
                             .addStaticImport(Caster::class.java, CAST_NAME)
                             .addStaticImport(SetFactory::class.java, SET_OF_NAME)
                             .skipJavaLangImports(true)

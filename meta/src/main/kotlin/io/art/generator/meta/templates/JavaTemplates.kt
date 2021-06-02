@@ -136,6 +136,9 @@ private fun metaVariableBlock(type: JavaMetaType) = "metaVariable(\$S"
         .asCode(type.typeName)
         .join(")")
 
+private fun metaEnumBlock(className: TypeName) = "metaEnum(\$T.class, \$T::valueOf)"
+        .asCode(className, className)
+
 private fun metaTypeBlock(className: TypeName, vararg parameters: JavaMetaType): CodeBlock = "metaType(\$T.class"
         .asCode(className)
         .apply { if (parameters.isNotEmpty()) ",".join(join(parameters.map(::metaTypeStatement), COMMA)) }
@@ -149,9 +152,10 @@ private fun metaArrayBlock(type: JavaMetaType, className: TypeName): CodeBlock =
 private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
     val poetClass = type.extractClass()
     return when (type.kind) {
-        PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> metaTypeBlock(poetClass)
+        PRIMITIVE_KIND, UNKNOWN_KIND -> metaTypeBlock(poetClass)
         ARRAY_KIND -> metaArrayBlock(type, poetClass)
         CLASS_KIND, INTERFACE_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
+        ENUM_KIND -> metaEnumBlock(poetClass)
         VARIABLE_KIND -> metaVariableBlock(type)
         WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)
                 ?: type.wildcardSuperBound?.let(::metaTypeStatement)
@@ -173,6 +177,7 @@ private fun CodeBlock.join(block: String): CodeBlock = join(listOf(this, block.a
 private fun CodeBlock.joinSpaced(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), SPACE)
 
 private fun CodeBlock.joinCommas(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), COMMA)
+
 
 private fun casted(parameter: JavaMetaParameter): CodeBlock {
     val parameterClass = parameter.type.extractClass()
