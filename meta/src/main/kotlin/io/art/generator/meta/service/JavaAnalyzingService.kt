@@ -25,7 +25,7 @@ import com.sun.tools.javac.code.Symbol.*
 import com.sun.tools.javac.code.Type
 import io.art.core.constants.CompilerSuppressingWarnings.UNCHECKED_CAST
 import io.art.core.constants.StringConstants.DOT
-import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import io.art.core.extensions.CollectionExtensions
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.*
@@ -39,8 +39,6 @@ import javax.lang.model.SourceVersion.latest
 import javax.lang.model.element.ElementKind.ENUM
 import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeMirror
-
-private val CACHE = mutableMapOf<String, JavaMetaType>()
 
 object JavaAnalyzingService {
     fun analyzeJavaSources(sources: Sequence<Path>): Map<Path, JavaMetaClass> {
@@ -64,7 +62,8 @@ object JavaAnalyzingService {
     }
 }
 
-private fun TypeMirror.asMetaType(): JavaMetaType = putIfAbsent(CACHE, toString()) {
+private val TYPE_CACHE = mutableMapOf<TypeMirror, JavaMetaType>()
+private fun TypeMirror.asMetaType(): JavaMetaType = CollectionExtensions.putIfAbsent(TYPE_CACHE, this) {
     when (this) {
         is Type.TypeVar -> asMetaType()
 
@@ -144,16 +143,20 @@ private fun Type.WildcardType.asMetaType(): JavaMetaType = JavaMetaType(
 
 private fun ClassSymbol.asMetaType(): JavaMetaType = type.asMetaType()
 
-private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
-        type = asMetaType(),
-        source = Paths.get(sourcefile.name),
-        modifiers = modifiers,
 
-        fields = getMembers()
-                .reversed()
-                .asSequence()
-                .filterIsInstance<VarSymbol>()
-                .associate { symbol -> symbol.name.toString() to symbol.asMetaField() },
+private val CLASS_CACHE = mutableMapOf<ClassSymbol, JavaMetaClass>()
+
+private fun ClassSymbol.asMetaClass(): JavaMetaClass = CollectionExtensions.putIfAbsent(CLASS_CACHE, this) {
+    JavaMetaClass(
+            type = asMetaType(),
+            source = Paths.get(sourcefile.name),
+            modifiers = modifiers,
+
+            fields = getMembers()
+                    .reversed()
+                    .asSequence()
+                    .filterIsInstance<VarSymbol>()
+                    .associate { symbol -> symbol.name.toString() to symbol.asMetaField() },
 
         constructors = getMembers()
                 .asSequence()
@@ -169,19 +172,21 @@ private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
                 .map { method -> method.asMetaMethod() }
                 .toList(),
 
-        innerClasses = getMembers()
-                .asSequence()
-                .filterIsInstance<ClassSymbol>()
-                .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
+            innerClasses = getMembers()
+                    .asSequence()
+                    .filterIsInstance<ClassSymbol>()
+                    .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
 
-        //        parent = superclass?.let { superclass.tsym as? ClassSymbol }?.asMetaClass(),
-        //
-        //        interfaces = interfaces
-        //                .map { interfaceType -> interfaceType.tsym }
-        //                .filterIsInstance<ClassSymbol>()
-        //                .map { interfaceField -> interfaceField.asMetaClass() }
-        //
-)
+            parent = superclass?.let { superclass.tsym as? ClassSymbol }?.asMetaClass(),
+
+            //
+            //        interfaces = interfaces
+            //                .map { interfaceType -> interfaceType.tsym }
+            //                .filterIsInstance<ClassSymbol>()
+            //                .map { interfaceField -> interfaceField.asMetaClass() }
+            //
+    )
+}
 
 private fun MethodSymbol.asMetaMethod() = JavaMetaMethod(
         name = name.toString(),
