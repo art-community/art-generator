@@ -137,23 +137,17 @@ fun returnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String,
         }
         return@mapIndexed "\$T.cast(arguments[$index])"
     }
-    if (type.typeParameters.isNotEmpty()) {
-        val format = "return new \$T<>(${parametersFormat.joinToString(COMMA)});"
-        val parametersBlock = parameters.values.map { parameter ->
-            if (!parameter.type.hasVariable()) {
-                return@map parameter.type.extractClass()
-            }
-            return@map CASTER_CLASS_NAME
-        }
-        return of(format, type.extractClass(), *parametersBlock.toTypedArray())
-    }
-    val format = "return new \$T(${parametersFormat.joinToString(COMMA)});"
     val parametersBlock = parameters.values.map { parameter ->
         if (!parameter.type.hasVariable()) {
             return@map parameter.type.extractClass()
         }
         return@map CASTER_CLASS_NAME
     }
+    if (type.typeParameters.isNotEmpty()) {
+        val format = "return new \$T<>(${parametersFormat.joinToString(COMMA)});"
+        return of(format, type.extractClass(), *parametersBlock.toTypedArray())
+    }
+    val format = "return new \$T(${parametersFormat.joinToString(COMMA)});"
     return of(format, type.extractClass(), *parametersBlock.toTypedArray())
 }
 
@@ -168,10 +162,14 @@ fun registerMetaParameterStatement(index: Int, name: String, type: JavaMetaType)
 
 
 fun metaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock {
+    if (modifiers.isEmpty()) return join(listOf(of("super(\$S,", name), metaTypeStatement(type), of(");")), EMPTY_STRING)
     return join(listOf(of("super(\$S,", name), metaTypeStatement(type), of(","), join(modifiers.map { modifier -> of("\$S", modifier) }, ","), of(");")), EMPTY_STRING)
 }
 
 fun metaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock {
+    if (modifiers.isEmpty()) {
+        return join(listOf(of("super("), metaTypeStatement(type), of(","), of(");")), EMPTY_STRING)
+    }
     return join(listOf(of("super("), metaTypeStatement(type), of(","), join(modifiers.map { modifier -> of("\$S", modifier) }, ","), of(");")), EMPTY_STRING)
 }
 
