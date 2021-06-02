@@ -182,7 +182,7 @@ private fun MethodSymbol.asMetaMethod() = JavaMetaMethod(
         typeParameters = typeParameters
                 .asSequence()
                 .map { typeParameter -> typeParameter.type.asMetaType() }
-                .associateBy { type -> type.typeName },
+                .toList(),
         exceptions = thrownTypes.map { exception -> exception.asMetaType() }
 )
 
