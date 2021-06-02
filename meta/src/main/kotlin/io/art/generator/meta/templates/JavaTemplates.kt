@@ -25,12 +25,13 @@ import com.squareup.javapoet.CodeBlock.of
 import com.squareup.javapoet.TypeName
 import io.art.core.constants.CompilerSuppressingWarnings.ALL
 import io.art.core.constants.StringConstants.*
-import io.art.generator.meta.constants.META_MODULE_CLASS_NAME
+import io.art.generator.meta.constants.CASTER_CLASS_NAME
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
 import io.art.generator.meta.model.JavaMetaParameter
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import io.art.generator.meta.service.extractClass
+import io.art.generator.meta.service.hasPrimitive
 import javax.lang.model.element.Modifier
 
 fun suppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnings::class.java)
@@ -61,23 +62,53 @@ fun invokeWithoutArgumentsStaticStatement(method: String, type: JavaMetaType): C
 
 fun invokeOneArgumentInstanceStatement(method: String, parameter: JavaMetaParameter): CodeBlock {
     val parameterClass = parameter.type.extractClass()
-    return of("instance.$method((\$T)(argument));", parameterClass)
+    if (parameter.type.hasPrimitive()) {
+        return of("instance.$method((\$T)(argument));", parameterClass)
+    }
+    return of("instance.$method(\$T.cast(argument));", CASTER_CLASS_NAME)
 }
 
 fun invokeOneArgumentStaticStatement(method: String, type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
     val parameterClass = parameter.type.extractClass()
-    return of("\$T.$method((\$T)(argument));", type.extractClass(), parameterClass)
+    if (parameter.type.hasPrimitive()) {
+        return of("\$T.$method((\$T)(argument));", type.extractClass(), parameterClass)
+    }
+    return of("\$T.$method(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
 }
 
 
-fun invokeInstanceStatement(method: String, arguments: Map<String, JavaMetaParameter>): CodeBlock {
-    val format = "instance.$method(${arguments.values.joinToString(COMMA) { index -> "(\$T)(arguments[$index])" }});"
-    return of(format, *arguments.values.map { type -> type.type.extractClass() }.toTypedArray())
+fun invokeInstanceStatement(method: String, parameters: Map<String, JavaMetaParameter>): CodeBlock {
+    val parametersFormat = parameters.values.mapIndexed { index, parameter ->
+        if (parameter.type.hasPrimitive()) {
+            return@mapIndexed "(\$T)(arguments[$index])"
+        }
+        return@mapIndexed "\$T.cast(arguments[$index])"
+    }
+    val format = "instance.$method(${parametersFormat.joinToString(COMMA)});"
+    val parametersBlock = parameters.values.map { parameter ->
+        if (parameter.type.hasPrimitive()) {
+            return@map parameter.type.extractClass()
+        }
+        return@map CASTER_CLASS_NAME
+    }
+    return of(format, *parametersBlock.toTypedArray())
 }
 
-fun invokeStaticStatement(method: String, type: JavaMetaType, arguments: Map<String, JavaMetaParameter>): CodeBlock {
-    val format = "\$T.$method(${arguments.values.joinToString(COMMA) { index -> "(\$T)(arguments[$index])" }});"
-    return of(format, type, *arguments.values.map { parameter -> parameter.type.extractClass() }.toTypedArray())
+fun invokeStaticStatement(method: String, type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
+    val parametersFormat = parameters.values.mapIndexed { index, parameter ->
+        if (parameter.type.hasPrimitive()) {
+            return@mapIndexed "(\$T)(arguments[$index])"
+        }
+        return@mapIndexed "\$T.cast(arguments[$index])"
+    }
+    val format = "\$T.$method(${parametersFormat.joinToString(COMMA)});"
+    val parametersBlock = parameters.values.map { parameter ->
+        if (parameter.type.hasPrimitive()) {
+            return@map parameter.type.extractClass()
+        }
+        return@map CASTER_CLASS_NAME
+    }
+    return of(format, type.extractClass(), *parametersBlock.toTypedArray())
 }
 
 
@@ -87,17 +118,43 @@ fun returnInvokeWithoutArgumentsConstructorStatement(type: JavaMetaType): CodeBl
 }
 
 fun returnInvokeOneArgumentConstructorStatement(type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
-    if (type.typeParameters.isNotEmpty()) return of("return new \$T<>((\$T)(argument));", type.extractClass(), parameter.type.extractClass())
+    if (type.typeParameters.isNotEmpty()) {
+        if (parameter.type.hasPrimitive()) {
+            return of("return new \$T<>(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
+        }
+        return of("return new \$T<>((\$T)(argument));", type.extractClass(), parameter.type.extractClass())
+    }
+    if (parameter.type.hasPrimitive()) {
+        return of("return new \$T(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
+    }
     return of("return new \$T((\$T)(argument));", type.extractClass(), parameter.type.extractClass())
 }
 
-fun returnInvokeConstructorStatement(type: JavaMetaType, arguments: Map<String, JavaMetaParameter>): CodeBlock {
-    if (type.typeParameters.isNotEmpty()) {
-        val format = "return new \$T<>(${arguments.values.joinToString(",") { index -> "(\$T)(arguments[$index])" }});"
-        return of(format, type.extractClass(), *arguments.values.map { parameter -> parameter.type.extractClass() }.toTypedArray())
+fun returnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
+    val parametersFormat = parameters.values.mapIndexed { index, parameter ->
+        if (parameter.type.hasPrimitive()) {
+            return@mapIndexed "(\$T)(arguments[$index])"
+        }
+        return@mapIndexed "\$T.cast(arguments[$index])"
     }
-    val format = "return new \$T(${arguments.values.joinToString(",") { index -> "(\$T)(arguments[$index])" }});"
-    return of(format, type.extractClass(), *arguments.values.map { parameter -> parameter.type.extractClass() }.toTypedArray())
+    if (type.typeParameters.isNotEmpty()) {
+        val format = "return new \$T<>(${parametersFormat.joinToString(COMMA)});"
+        val parametersBlock = parameters.values.map { parameter ->
+            if (parameter.type.hasPrimitive()) {
+                return@map parameter.type.extractClass()
+            }
+            return@map CASTER_CLASS_NAME
+        }
+        return of(format, type.extractClass(), *parametersBlock.toTypedArray())
+    }
+    val format = "return new \$T(${parametersFormat.joinToString(COMMA)});"
+    val parametersBlock = parameters.values.map { parameter ->
+        if (parameter.type.hasPrimitive()) {
+            return@map parameter.type.extractClass()
+        }
+        return@map CASTER_CLASS_NAME
+    }
+    return of(format, type.extractClass(), *parametersBlock.toTypedArray())
 }
 
 

@@ -25,6 +25,7 @@ import com.sun.tools.javac.code.Symbol.*
 import com.sun.tools.javac.code.Type
 import io.art.core.constants.CompilerSuppressingWarnings.UNCHECKED_CAST
 import io.art.core.constants.StringConstants.DOT
+import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.*
@@ -38,6 +39,8 @@ import javax.lang.model.SourceVersion.latest
 import javax.lang.model.element.ElementKind.ENUM
 import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeMirror
+
+private val CACHE = mutableMapOf<String, JavaMetaType>()
 
 object JavaAnalyzingService {
     fun analyzeJavaSources(sources: Sequence<Path>): Map<Path, JavaMetaClass> {
@@ -61,29 +64,31 @@ object JavaAnalyzingService {
     }
 }
 
-private fun TypeMirror.asMetaType(): JavaMetaType = when (this) {
-    is Type.TypeVar -> asMetaType()
+private fun TypeMirror.asMetaType(): JavaMetaType = putIfAbsent(CACHE, toString()) {
+    when (this) {
+        is Type.TypeVar -> asMetaType()
 
-    is Type.ArrayType -> asMetaType()
+        is Type.ArrayType -> asMetaType()
 
-    is Type.WildcardType -> asMetaType()
+        is Type.WildcardType -> asMetaType()
 
-    is Type.ClassType -> asMetaType()
+        is Type.ClassType -> asMetaType()
 
-    is Type -> when {
-        isPrimitiveOrVoid -> JavaMetaType(
-                originalType = this,
-                kind = PRIMITIVE_KIND,
-                typeName = tsym.qualifiedName.toString()
-        )
-        else -> JavaMetaType(
-                originalType = this,
-                kind = UNKNOWN_KIND,
-                typeName = tsym?.qualifiedName?.toString() ?: toString()
-        )
+        is Type -> when {
+            isPrimitiveOrVoid -> JavaMetaType(
+                    originalType = this,
+                    kind = PRIMITIVE_KIND,
+                    typeName = tsym.qualifiedName.toString()
+            )
+            else -> JavaMetaType(
+                    originalType = this,
+                    kind = UNKNOWN_KIND,
+                    typeName = tsym?.qualifiedName?.toString() ?: toString()
+            )
+        }
+
+        else -> JavaMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
     }
-
-    else -> JavaMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
 }
 
 private fun Type.ClassType.asMetaType(): JavaMetaType = JavaMetaType(
@@ -102,7 +107,8 @@ private fun Type.ClassType.asMetaType(): JavaMetaType = JavaMetaType(
                 .asSequence()
                 .map { argument -> argument.asMetaType() }
                 .filter { argument -> argument.kind != UNKNOWN_KIND }
-                .toList())
+                .toList()
+)
 
 private fun Type.TypeVar.asMetaType(): JavaMetaType = JavaMetaType(
         originalType = this,
@@ -140,7 +146,7 @@ private fun ClassSymbol.asMetaType(): JavaMetaType = type.asMetaType()
 
 private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
         type = asMetaType(),
-        source = Paths.get(sourcefile.toUri()),
+        source = Paths.get(sourcefile.name),
         modifiers = modifiers,
 
         fields = getMembers()
@@ -168,13 +174,13 @@ private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
                 .filterIsInstance<ClassSymbol>()
                 .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
 
-        parent = superclass?.let { superclass.tsym as? ClassSymbol }?.asMetaClass(),
-
-        interfaces = interfaces
-                .map { interfaceType -> interfaceType.tsym }
-                .filterIsInstance<ClassSymbol>()
-                .map { interfaceField -> interfaceField.asMetaClass() }
-
+        //        parent = superclass?.let { superclass.tsym as? ClassSymbol }?.asMetaClass(),
+        //
+        //        interfaces = interfaces
+        //                .map { interfaceType -> interfaceType.tsym }
+        //                .filterIsInstance<ClassSymbol>()
+        //                .map { interfaceField -> interfaceField.asMetaClass() }
+        //
 )
 
 private fun MethodSymbol.asMetaMethod() = JavaMetaMethod(

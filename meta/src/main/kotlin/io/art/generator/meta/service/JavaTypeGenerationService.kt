@@ -83,3 +83,6 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
             ?: wildcardSuperBound?.extractClass()
             ?: OBJECT_CLASS_NAME
 }
+
+
+fun JavaMetaType.hasPrimitive(): Boolean = kind == PRIMITIVE_KIND || arrayComponentType?.hasPrimitive() ?: false

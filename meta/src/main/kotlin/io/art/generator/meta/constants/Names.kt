@@ -1,6 +1,7 @@
 package io.art.generator.meta.constants
 
 const val META_NAME = "meta"
+const val LOAD_NAME = "load"
 const val COMPUTE_NAME = "compute"
 const val DEPENDENCIES_NAME = "dependencies"
 

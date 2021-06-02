@@ -20,6 +20,8 @@ package io.art.generator.meta.constants
 
 
 val DEFAULT_META_METHOD_EXCLUSIONS = setOf(
+        "<init>",
+        "<clinit>",
         "builder",
         "toString",
         "equals",
