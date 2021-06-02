@@ -34,6 +34,7 @@ import io.art.generator.meta.service.extractClass
 import io.art.generator.meta.service.hasVariable
 import javax.lang.model.element.Modifier
 
+
 fun suppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnings::class.java)
         .addMember("value", "{\$S,\$S,\$S}", ALL, UNCHECKED, UNUSED)
         .build()
@@ -42,7 +43,7 @@ fun newStatement() = "new \$T()"
 
 fun returnStatement() = "return \$L;"
 
-fun returnStatement(block: CodeBlock): CodeBlock = join(listOf(of("return"), block), SPACE)
+fun returnStatement(block: CodeBlock): CodeBlock = "return".asCode().joinSpaced(block)
 
 fun returnNullStatement() = "return null;"
 
@@ -52,134 +53,80 @@ fun computeStatement() = "meta.compute(dependencies);"
 
 
 fun invokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
-    return of("instance.$method();")
+    return "instance.$method();".asCode()
 }
 
 fun invokeWithoutArgumentsStaticStatement(method: String, type: JavaMetaType): CodeBlock {
-    return of("\$T.$method();", type.extractClass())
+    return "\$T.$method();".asCode(type.extractClass())
 }
 
 
 fun invokeOneArgumentInstanceStatement(method: String, parameter: JavaMetaParameter): CodeBlock {
-    val parameterClass = parameter.type.extractClass()
-    if (!parameter.type.hasVariable()) {
-        return of("instance.$method((\$T)(argument));", parameterClass)
-    }
-    return of("instance.$method(\$T.cast(argument));", CASTER_CLASS_NAME)
+    return "instance.$method(".join(casted(parameter)).join(");")
 }
 
 fun invokeOneArgumentStaticStatement(method: String, type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
-    val parameterClass = parameter.type.extractClass()
-    if (!parameter.type.hasVariable()) {
-        return of("\$T.$method((\$T)(argument));", type.extractClass(), parameterClass)
-    }
-    return of("\$T.$method(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
+    return "\$T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(");")
 }
 
-
 fun invokeInstanceStatement(method: String, parameters: Map<String, JavaMetaParameter>): CodeBlock {
-    val parametersFormat = parameters.values.mapIndexed { index, parameter ->
-        if (!parameter.type.hasVariable()) {
-            return@mapIndexed "(\$T)(arguments[$index])"
-        }
-        return@mapIndexed "\$T.cast(arguments[$index])"
-    }
-    val format = "instance.$method(${parametersFormat.joinToString(COMMA)});"
-    val parametersBlock = parameters.values.map { parameter ->
-        if (!parameter.type.hasVariable()) {
-            return@map parameter.type.extractClass()
-        }
-        return@map CASTER_CLASS_NAME
-    }
-    return of(format, *parametersBlock.toTypedArray())
+    return "instance.$method(".join(casted(parameters)).join(");")
 }
 
 fun invokeStaticStatement(method: String, type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
-    val parametersFormat = parameters.values.mapIndexed { index, parameter ->
-        if (!parameter.type.hasVariable()) {
-            return@mapIndexed "(\$T)(arguments[$index])"
-        }
-        return@mapIndexed "\$T.cast(arguments[$index])"
-    }
-    val format = "\$T.$method(${parametersFormat.joinToString(COMMA)});"
-    val parametersBlock = parameters.values.map { parameter ->
-        if (!parameter.type.hasVariable()) {
-            return@map parameter.type.extractClass()
-        }
-        return@map CASTER_CLASS_NAME
-    }
-    return of(format, type.extractClass(), *parametersBlock.toTypedArray())
+    return "\$T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(");")
 }
 
-
 fun returnInvokeWithoutArgumentsConstructorStatement(type: JavaMetaType): CodeBlock {
-    if (type.typeParameters.isNotEmpty()) return of("return new \$T<>();", type.extractClass())
-    return of("return new \$T();", type.extractClass())
+    if (type.typeParameters.isNotEmpty()) return "return new \$T<>();".asCode(type.extractClass())
+    return "return new \$T();".asCode(type.extractClass())
 }
 
 fun returnInvokeOneArgumentConstructorStatement(type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
     if (type.typeParameters.isNotEmpty()) {
-        if (!parameter.type.hasVariable()) {
-            return of("return new \$T<>(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
-        }
-        return of("return new \$T<>((\$T)(argument));", type.extractClass(), parameter.type.extractClass())
+        return "return new \$T<>(".asCode(type.extractClass()).join(casted(parameter)).join(");")
     }
-    if (!parameter.type.hasVariable()) {
-        return of("return new \$T(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
-    }
-    return of("return new \$T((\$T)(argument));", type.extractClass(), parameter.type.extractClass())
+    return "return new \$T(".asCode(type.extractClass()).join(casted(parameter)).join(");")
 }
 
 fun returnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
-    val parametersFormat = parameters.values.mapIndexed { index, parameter ->
-        if (!parameter.type.hasVariable()) {
-            return@mapIndexed "(\$T)(arguments[$index])"
-        }
-        return@mapIndexed "\$T.cast(arguments[$index])"
-    }
-    val parametersBlock = parameters.values.map { parameter ->
-        if (!parameter.type.hasVariable()) {
-            return@map parameter.type.extractClass()
-        }
-        return@map CASTER_CLASS_NAME
-    }
     if (type.typeParameters.isNotEmpty()) {
-        val format = "return new \$T<>(${parametersFormat.joinToString(COMMA)});"
-        return of(format, type.extractClass(), *parametersBlock.toTypedArray())
+        return "return new \$T<>(".asCode(type.extractClass()).join(casted(parameters)).join(");")
     }
-    val format = "return new \$T(${parametersFormat.joinToString(COMMA)});"
-    return of(format, type.extractClass(), *parametersBlock.toTypedArray())
+    return "return new \$T(".asCode(type.extractClass()).join(casted(parameters)).join(");")
 }
 
 
 fun registerMetaFieldStatement(name: String, type: JavaMetaType): CodeBlock {
-    return join(listOf(of("register(new MetaField<>(\$S,", name), metaTypeStatement(type), of("))")), EMPTY_STRING)
+    return "register(new MetaField<>(\$S,".asCode(name).join(metaTypeStatement(type)).join("))")
 }
 
 fun registerMetaParameterStatement(index: Int, name: String, type: JavaMetaType): CodeBlock {
-    return join(listOf(of("register(new MetaParameter<>($index, \$S,", name), metaTypeStatement(type), of("))")), EMPTY_STRING)
+    return "register(new MetaParameter<>($index, \$S,".asCode(name).join(metaTypeStatement(type)).join("))")
 }
 
-
 fun metaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock {
-    if (modifiers.isEmpty()) return join(listOf(of("super(\$S,", name), metaTypeStatement(type), of(");")), EMPTY_STRING)
-    return join(listOf(of("super(\$S,", name), metaTypeStatement(type), of(","), join(modifiers.map { modifier -> of("\$S", modifier) }, ","), of(");")), EMPTY_STRING)
+    if (modifiers.isEmpty()) {
+        return "super(\$S,".asCode(name).join(metaTypeStatement(type)).join(");")
+    }
+    return "super(\$S,".asCode(name).join(metaTypeStatement(type)).join(",").join(asString(modifiers)).join(");")
 }
 
 fun metaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock {
     if (modifiers.isEmpty()) {
-        return join(listOf(of("super("), metaTypeStatement(type), of(","), of(");")), EMPTY_STRING)
+        return "super(".join(metaTypeStatement(type)).join(");")
     }
-    return join(listOf(of("super("), metaTypeStatement(type), of(","), join(modifiers.map { modifier -> of("\$S", modifier) }, ","), of(");")), EMPTY_STRING)
+    return "super(".join(metaTypeStatement(type)).join(",").join(asString(modifiers)).join(");")
 }
 
 fun metaTypeSuperStatement(type: JavaMetaType): CodeBlock {
-    return join(listOf(of("super("), metaTypeStatement(type), of(");")), EMPTY_STRING)
+    return "super(".join(metaTypeStatement(type)).join(");")
 }
 
 fun namedSuperStatement(name: String): CodeBlock {
-    return of("super(\$S);", name)
+    return "super(\$S);".asCode(name)
 }
+
 
 private const val metaVariablePattern = "metaVariable(\$S"
 private const val metaTypePattern = "metaType(\$T.class, \$T[]::new"
@@ -188,9 +135,9 @@ private const val metaArrayTypePattern = "metaArray(\$T.class, \$T[]::new, "
 private fun metaTypeBlock(className: TypeName, vararg parameters: JavaMetaType): CodeBlock {
     val builder = of(metaTypePattern, className, className).toBuilder()
     parameters.forEach { parameter ->
-        builder.add(", ").add(metaTypeStatement(parameter))
+        builder.add(COMMA).add(metaTypeStatement(parameter))
     }
-    return builder.add(")").build()
+    return builder.add(CLOSING_BRACKET).build()
 }
 
 private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
@@ -200,14 +147,47 @@ private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
         PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> metaTypeBlock(poetClass)
         ARRAY_KIND -> {
             val componentType = type.arrayComponentType!!
-            join(listOf(of(metaArrayTypePattern, poetClass, poetClass), metaTypeStatement(componentType), of(")")), EMPTY_STRING)
+            metaArrayTypePattern.asCode(poetClass, poetClass).join(metaTypeStatement(componentType)).join(")")
         }
         CLASS_KIND, INTERFACE_KIND -> {
             metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
         }
-        VARIABLE_KIND -> join(listOf(of(metaVariablePattern, type.typeName), of(")")), EMPTY_STRING)
+        VARIABLE_KIND -> metaVariablePattern.asCode(type.typeName).join(")")
         WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)
                 ?: type.wildcardSuperBound?.let(::metaTypeStatement)
                 ?: metaTypeBlock(OBJECT_CLASS_NAME)
     }
 }
+
+private fun String.asCode(vararg arguments: Any): CodeBlock = of(this, *arguments)
+
+private fun String.join(vararg blocks: CodeBlock): CodeBlock = asCode().join(*blocks)
+
+private fun CodeBlock.joinBlocks(separator: String = EMPTY_STRING, vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), separator)
+
+private fun CodeBlock.joinSpaced(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), SPACE)
+
+private fun CodeBlock.joinCommas(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), COMMA)
+
+private fun CodeBlock.join(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), EMPTY_STRING)
+
+private fun CodeBlock.join(block: String): CodeBlock = join(listOf(this, block.asCode()), EMPTY_STRING)
+
+private fun casted(parameter: JavaMetaParameter): CodeBlock {
+    val parameterClass = parameter.type.extractClass()
+    if (!parameter.type.hasVariable()) {
+        return "(\$T)(argument)".asCode(parameterClass)
+    }
+    return "\$T.cast(argument)".asCode(CASTER_CLASS_NAME)
+}
+
+private fun casted(parameters: Map<String, JavaMetaParameter>): CodeBlock = parameters.values
+        .mapIndexed { index, parameter ->
+            if (!parameter.type.hasVariable()) {
+                return@mapIndexed "(\$T)(arguments[$index])".asCode(parameter.type.extractClass())
+            }
+            return@mapIndexed "\$T.cast(arguments[$index])".asCode(CASTER_CLASS_NAME)
+        }
+        .let { blocks -> join(blocks, COMMA) }
+
+private fun asString(modifier: Set<Modifier>): CodeBlock = join(modifier.map { "\$S".asCode(modifier) }, COMMA)
