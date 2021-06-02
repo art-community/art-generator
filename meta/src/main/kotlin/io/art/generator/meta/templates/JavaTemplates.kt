@@ -47,7 +47,7 @@ fun returnNullStatement() = "return null;"
 
 fun registerNewStatement() = "register(new \$T())"
 
-fun computeStatement() = "compute(dependencies);"
+fun computeStatement() = "meta.compute(dependencies);"
 
 
 fun invokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
