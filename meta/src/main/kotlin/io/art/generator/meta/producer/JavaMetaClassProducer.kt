@@ -29,6 +29,7 @@ import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaField
 import io.art.generator.meta.model.JavaMetaMethod
 import io.art.generator.meta.model.JavaMetaType
+import io.art.generator.meta.model.JavaMetaTypeKind.ENUM_KIND
 import io.art.generator.meta.service.withoutVariables
 import io.art.generator.meta.templates.*
 import javax.lang.model.element.Modifier.*
@@ -60,7 +61,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
                         ?: emptyList()
                 generateMethods(methods.toSet(), metaClass.type)
             }
-            .apply { metaClass.innerClasses.values.forEach { inner -> generateClass(inner) } }
+            .apply { metaClass.innerClasses.values.filter { metaClass -> metaClass.type.kind != ENUM_KIND }.forEach { inner -> generateClass(inner) } }
             .build()
             .apply(::addType)
     FieldSpec.builder(reference, className)
