@@ -41,10 +41,7 @@ fun JavaMetaType.toPoet(): TypeName = when (kind) {
     CLASS_KIND, INTERFACE_KIND -> {
         when {
             typeParameters.isNotEmpty() -> {
-                val parameters = typeParameters
-                        .values
-                        .map(JavaMetaType::toPoet)
-                        .toTypedArray()
+                val parameters = typeParameters.map(JavaMetaType::toPoet).toTypedArray()
                 ParameterizedTypeName.get(ClassName.get(classPackageName, className), *parameters)
             }
             else -> ClassName.get(classPackageName, className)
@@ -58,7 +55,7 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
     CLASS_KIND, INTERFACE_KIND -> when {
         typeParameters.isEmpty() -> toPoet()
         else -> {
-            val parameters = typeParameters.values.map { parameter ->
+            val parameters = typeParameters.map { parameter ->
                 when (parameter.kind) {
                     VARIABLE_KIND -> subtypeOf(Object::class.java)
                     else -> parameter.withoutVariables()

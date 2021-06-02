@@ -38,7 +38,7 @@ enum class JavaMetaTypeKind {
 
 data class JavaMetaType(
         val originalType: TypeMirror,
-        val typeParameters: Map<String, JavaMetaType> = emptyMap(),
+        val typeParameters: List<JavaMetaType> = emptyList(),
 
         val typeName: String,
         val kind: JavaMetaTypeKind,

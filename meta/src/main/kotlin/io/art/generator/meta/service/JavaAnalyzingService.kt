@@ -102,7 +102,7 @@ private fun Type.ClassType.asMetaType(): JavaMetaType = JavaMetaType(
                 .asSequence()
                 .map { argument -> argument.asMetaType() }
                 .filter { argument -> argument.kind != UNKNOWN_KIND }
-                .associateBy { argument -> argument.typeName },
+                .toList(),
         classSuperClass = supertype_field?.asMetaType(),
         classSuperInterfaces = interfaces_field
                 ?.map { interfaceField -> interfaceField.asMetaType() }

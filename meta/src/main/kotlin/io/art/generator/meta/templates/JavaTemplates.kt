@@ -146,7 +146,7 @@ private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
             join(listOf(of(metaArrayTypePattern, poetClass, poetClass), metaTypeStatement(componentType), of(")")), EMPTY_STRING)
         }
         CLASS_KIND, INTERFACE_KIND -> {
-            metaTypeBlock(poetClass, *type.typeParameters.values.toTypedArray())
+            metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
         }
         VARIABLE_KIND -> join(listOf(of(metaVariablePattern, type.typeName), of(")")), EMPTY_STRING)
         WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)
