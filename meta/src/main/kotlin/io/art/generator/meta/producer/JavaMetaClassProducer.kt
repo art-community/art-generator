@@ -125,7 +125,7 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
             .build()
     template.toBuilder()
             .addParameter(ArrayTypeName.of(Object::class.java), ARGUMENTS_NAME)
-            .addCode(returnInvokeConstructorStatement(type, constructor.parameters.size))
+            .addCode(returnInvokeConstructorStatement(type, constructor.parameters))
             .build()
             .apply(::addMethod)
     when (constructor.parameters.size) {
@@ -138,7 +138,7 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
         1 -> {
             template.toBuilder()
                     .addParameter(ArrayTypeName.of(Object::class.java), ARGUMENT_NAME)
-                    .addCode(returnInvokeOneArgumentConstructorStatement(type))
+                    .addCode(returnInvokeOneArgumentConstructorStatement(type, constructor.parameters.values.first()))
                     .build()
                     .apply(::addMethod)
         }
@@ -203,8 +203,8 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             .build()
     template.toBuilder().apply {
         val invoke = when {
-            static -> invokeStaticStatement(name, type, method.parameters.size)
-            else -> invokeInstanceStatement(name, method.parameters.size)
+            static -> invokeStaticStatement(name, type, method.parameters)
+            else -> invokeInstanceStatement(name, method.parameters)
         }
         when (method.returnType.originalType.kind) {
             VOID -> addCode(invoke).addCode(returnNullStatement())
@@ -228,8 +228,8 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
         1 -> template.toBuilder().apply {
             addParameter(ClassName.get(Object::class.java), ARGUMENT_NAME)
             val invoke = when {
-                static -> invokeOneArgumentStaticStatement(name, type)
-                else -> invokeOneArgumentInstanceStatement(name)
+                static -> invokeOneArgumentStaticStatement(name, type, method.parameters.values.first())
+                else -> invokeOneArgumentInstanceStatement(name, method.parameters.values.first())
             }
             when (method.returnType.originalType.kind) {
                 VOID -> addCode(invoke).addCode(returnNullStatement())

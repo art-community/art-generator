@@ -23,6 +23,7 @@ import com.squareup.javapoet.WildcardTypeName.subtypeOf
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
+import java.lang.Void.TYPE
 
 fun JavaMetaType.toPoet(): TypeName = when (kind) {
     PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> TypeName.get(originalType)
@@ -73,7 +74,7 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
 
 fun JavaMetaType.extractClass(): TypeName = when (kind) {
     PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> {
-        if (typeName == Void.TYPE.name) toPoet().box() else toPoet()
+        if (typeName == TYPE.name) toPoet().box() else toPoet()
     }
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())
     CLASS_KIND, INTERFACE_KIND -> ClassName.get(classPackageName, className)

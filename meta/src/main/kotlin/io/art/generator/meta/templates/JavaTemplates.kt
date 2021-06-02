@@ -24,10 +24,9 @@ import com.squareup.javapoet.CodeBlock.join
 import com.squareup.javapoet.CodeBlock.of
 import com.squareup.javapoet.TypeName
 import io.art.core.constants.CompilerSuppressingWarnings.ALL
-import io.art.core.constants.StringConstants.EMPTY_STRING
-import io.art.core.constants.StringConstants.SPACE
-import io.art.generator.meta.constants.CASTER_CLASS_NAME
+import io.art.core.constants.StringConstants.*
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
+import io.art.generator.meta.model.JavaMetaParameter
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import io.art.generator.meta.service.extractClass
@@ -59,23 +58,25 @@ fun invokeWithoutArgumentsStaticStatement(method: String, type: JavaMetaType): C
 }
 
 
-fun invokeOneArgumentInstanceStatement(method: String): CodeBlock {
-    return of("instance.$method(\$T.cast(argument));", CASTER_CLASS_NAME)
+fun invokeOneArgumentInstanceStatement(method: String, parameter: JavaMetaParameter): CodeBlock {
+    val parameterClass = parameter.type.extractClass()
+    return of("instance.$method((\$T)(argument));", parameterClass)
 }
 
-fun invokeOneArgumentStaticStatement(method: String, type: JavaMetaType): CodeBlock {
-    return of("\$T.$method(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
+fun invokeOneArgumentStaticStatement(method: String, type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
+    val parameterClass = parameter.type.extractClass()
+    return of("\$T.$method((\$T)(argument));", type.extractClass(), parameterClass)
 }
 
 
-fun invokeInstanceStatement(method: String, argumentsCount: Int): CodeBlock {
-    val format = "instance.$method(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
-    return of(format, *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
+fun invokeInstanceStatement(method: String, arguments: Map<String, JavaMetaParameter>): CodeBlock {
+    val format = "instance.$method(${arguments.values.joinToString(COMMA) { index -> "(\$T)(arguments[$index])" }});"
+    return of(format, *arguments.values.map { type -> type.type.extractClass() }.toTypedArray())
 }
 
-fun invokeStaticStatement(method: String, type: JavaMetaType, argumentsCount: Int): CodeBlock {
-    val format = "\$T.$method(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
-    return of(format, type.extractClass(), *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
+fun invokeStaticStatement(method: String, type: JavaMetaType, arguments: Map<String, JavaMetaParameter>): CodeBlock {
+    val format = "\$T.$method(${arguments.values.joinToString(COMMA) { index -> "(\$T)(arguments[$index])" }});"
+    return of(format, type, *arguments.values.map { parameter -> parameter.type.extractClass() }.toTypedArray())
 }
 
 
@@ -84,18 +85,18 @@ fun returnInvokeWithoutArgumentsConstructorStatement(type: JavaMetaType): CodeBl
     return of("return new \$T();", type.extractClass())
 }
 
-fun returnInvokeOneArgumentConstructorStatement(type: JavaMetaType): CodeBlock {
-    if (type.typeParameters.isNotEmpty()) return of("return new \$T<>(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
-    return of("return new \$T(\$T.cast(argument));", type.extractClass(), CASTER_CLASS_NAME)
+fun returnInvokeOneArgumentConstructorStatement(type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
+    if (type.typeParameters.isNotEmpty()) return of("return new \$T<>((\$T)(argument));", type.extractClass(), parameter.type.extractClass())
+    return of("return new \$T((\$T)(argument));", type.extractClass(), parameter.type.extractClass())
 }
 
-fun returnInvokeConstructorStatement(type: JavaMetaType, argumentsCount: Int): CodeBlock {
+fun returnInvokeConstructorStatement(type: JavaMetaType, arguments: Map<String, JavaMetaParameter>): CodeBlock {
     if (type.typeParameters.isNotEmpty()) {
-        val format = "return new \$T<>(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
-        return of(format, type.extractClass(), *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
+        val format = "return new \$T<>(${arguments.values.joinToString(",") { index -> "(\$T)(arguments[$index])" }});"
+        return of(format, type.extractClass(), *arguments.values.map { parameter -> parameter.type.extractClass() }.toTypedArray())
     }
-    val format = "return new \$T(${(0 until argumentsCount).joinToString(",") { index -> "\$T.cast(arguments[$index])" }});"
-    return of(format, type.extractClass(), *(0 until argumentsCount).map { CASTER_CLASS_NAME }.toTypedArray())
+    val format = "return new \$T(${arguments.values.joinToString(",") { index -> "(\$T)(arguments[$index])" }});"
+    return of(format, type.extractClass(), *arguments.values.map { parameter -> parameter.type.extractClass() }.toTypedArray())
 }
 
 
