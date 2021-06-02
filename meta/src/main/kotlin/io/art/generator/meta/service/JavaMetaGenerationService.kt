@@ -26,6 +26,7 @@ import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.TypeSpec.classBuilder
+import com.squareup.kotlinpoet.TypeName
 import io.art.core.caster.Caster
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.meta.configuration.configuration
@@ -45,6 +46,7 @@ object JavaMetaGenerationService {
         val moduleName = configuration.moduleName
         val metaModuleName = metaName(META_NAME, moduleName)
         val reference = metaName(EMPTY_STRING, moduleName)
+        TypeName
         classBuilder(metaModuleName)
                 .addModifiers(PUBLIC)
                 .addAnnotation(suppressAnnotation())
