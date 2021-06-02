@@ -47,7 +47,6 @@ object JavaMetaGenerationService {
         val moduleName = configuration.moduleName
         val metaModuleName = metaName(META_NAME, moduleName)
         val reference = metaName(EMPTY_STRING, moduleName)
-        TypeName
         classBuilder(metaModuleName)
                 .addModifiers(PUBLIC)
                 .addAnnotation(suppressAnnotation())
