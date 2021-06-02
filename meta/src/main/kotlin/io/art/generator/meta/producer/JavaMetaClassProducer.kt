@@ -49,7 +49,13 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
                     .build())
             .apply { generateConstructors(metaClass.constructors, metaClass.type, typeName) }
             .apply { generateFields(metaClass.fields) }
+            .apply { metaClass.parent?.fields?.filter { field -> !field.value.modifiers.contains(PRIVATE) }?.let(::generateFields) }
             .apply { generateMethods(metaClass.methods, metaClass.type) }
+            .apply {
+                metaClass.interfaces.forEach { interfaceType ->
+                    generateMethods(interfaceType.methods.filter { method -> !method.modifiers.contains(PRIVATE) }, metaClass.type)
+                }
+            }
             .apply { metaClass.innerClasses.values.forEach { inner -> generateClass(inner) } }
             .build()
             .apply(::addType)
