@@ -26,6 +26,7 @@ import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.caster.Caster
 import io.art.core.constants.StringConstants.EMPTY_STRING
+import io.art.core.factory.SetFactory
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.JavaMetaClass
@@ -68,6 +69,7 @@ object JavaMetaGenerationService {
                     JavaFile.builder(META_NAME, metaClass)
                             .addStaticImport(MetaType::class.java, META_TYPE_NAME, META_ARRAY_NAME, META_VARIABLE_NAME)
                             .addStaticImport(Caster::class.java, CAST_NAME)
+                            .addStaticImport(SetFactory::class.java, SET_OF_NAME)
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)

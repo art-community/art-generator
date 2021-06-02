@@ -39,7 +39,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
     val metaClassName = metaClassName(META_NAME, metaClass.type.className)
     val reference = metaClassName(EMPTY_STRING, metaClass.type.className)
     val typeName = metaClass.type.withoutVariables()
-    val constructorStatement = metaTypeSuperStatement(metaClass.type)
+    val constructorStatement = metaClassSuperStatement(metaClass)
     classBuilder(metaClassName)
             .addModifiers(PUBLIC, FINAL, STATIC)
             .superclass(ParameterizedTypeName.get(META_CLASS_CLASS_NAME, typeName.box()))
@@ -79,13 +79,12 @@ private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
             ?: mutableMapOf()
     fields.putAll(metaClass.fields)
     fields.entries.forEach { field ->
-        val fieldType = field.value.type
         val fieldTypeName = field.value.type.withoutVariables()
         val fieldMetaType = ParameterizedTypeName.get(META_FIELD_CLASS_NAME, fieldTypeName.box())
         val fieldName = metaFieldName(field.key)
         FieldSpec.builder(fieldMetaType, fieldName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerMetaFieldStatement(fieldName, fieldType))
+                .initializer(registerMetaFieldStatement(fieldName, field.value))
                 .build()
                 .apply(::addField)
         methodBuilder(fieldName)
@@ -262,13 +261,12 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
 
 private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
     method.parameters.entries.forEachIndexed { parameterIndex, parameter ->
-        val parameterType = parameter.value.type
         val parameterTypeName = parameter.value.type.withoutVariables()
         val metaParameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameterTypeName.box())
         val parameterName = metaParameterName(parameter.key)
         FieldSpec.builder(metaParameterType, parameterName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerMetaParameterStatement(parameterIndex, parameterName, parameterType))
+                .initializer(registerMetaParameterStatement(parameterIndex, parameterName, parameter.value))
                 .build()
                 .apply(::addField)
         methodBuilder(parameterName)

@@ -19,9 +19,11 @@ package io.art.generator.meta.constants
 
 import com.squareup.javapoet.ClassName
 import io.art.core.caster.Caster
+import io.art.core.factory.SetFactory
 import io.art.meta.model.*
 
 
+val SET_FACTORY_CLASS_NAME = ClassName.get(SetFactory::class.java)!!
 val CASTER_CLASS_NAME = ClassName.get(Caster::class.java)!!
 val CLASS_CLASS_NAME = ClassName.get(Class::class.java)!!
 val OBJECT_CLASS_NAME = ClassName.get(Object::class.java)!!

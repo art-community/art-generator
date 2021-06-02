@@ -27,6 +27,9 @@ import io.art.core.constants.CompilerSuppressingWarnings.*
 import io.art.core.constants.StringConstants.*
 import io.art.generator.meta.constants.CASTER_CLASS_NAME
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
+import io.art.generator.meta.constants.SET_FACTORY_CLASS_NAME
+import io.art.generator.meta.model.JavaMetaClass
+import io.art.generator.meta.model.JavaMetaField
 import io.art.generator.meta.model.JavaMetaParameter
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
@@ -50,6 +53,13 @@ fun returnNullStatement() = "return null;"
 fun registerNewStatement() = "register(new \$T())"
 
 fun computeStatement() = "meta.compute(dependencies);"
+
+fun returnNewStatement(type: JavaMetaType): CodeBlock {
+    if (type.typeParameters.isNotEmpty()) {
+        return "return new \$T<>(".asCode(type.extractClass())
+    }
+    return "return new \$T(".asCode(type.extractClass())
+}
 
 
 fun invokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
@@ -80,57 +90,46 @@ fun invokeStaticStatement(method: String, type: JavaMetaType, parameters: Map<St
 
 
 fun returnInvokeWithoutArgumentsConstructorStatement(type: JavaMetaType): CodeBlock {
-    if (type.typeParameters.isNotEmpty()) return "return new \$T<>();".asCode(type.extractClass())
-    return "return new \$T();".asCode(type.extractClass())
+    return returnNewStatement(type).join(");")
 }
 
 fun returnInvokeOneArgumentConstructorStatement(type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
-    if (type.typeParameters.isNotEmpty()) {
-        return "return new \$T<>(".asCode(type.extractClass()).join(casted(parameter)).join(");")
-    }
-    return "return new \$T(".asCode(type.extractClass()).join(casted(parameter)).join(");")
+    return returnNewStatement(type).join(casted(parameter)).join(");")
 }
 
 fun returnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
-    if (type.typeParameters.isNotEmpty()) {
-        return "return new \$T<>(".asCode(type.extractClass()).join(casted(parameters)).join(");")
-    }
-    return "return new \$T(".asCode(type.extractClass()).join(casted(parameters)).join(");")
+    return returnNewStatement(type).join(casted(parameters)).join(");")
 }
 
+fun registerMetaFieldStatement(name: String, field: JavaMetaField): CodeBlock = "register(new MetaField<>(\$S,"
+        .asCode(name)
+        .join(metaTypeStatement(field.type))
+        .joinCommas(asString(field.modifiers))
+        .join("))")
 
-fun registerMetaFieldStatement(name: String, type: JavaMetaType): CodeBlock {
-    return "register(new MetaField<>(\$S,".asCode(name).join(metaTypeStatement(type)).join("))")
-}
+fun registerMetaParameterStatement(index: Int, name: String, parameter: JavaMetaParameter): CodeBlock = "register(new MetaParameter<>($index, \$S,"
+        .asCode(name)
+        .join(metaTypeStatement(parameter.type))
+        .joinCommas(asString(parameter.modifiers))
+        .join("))")
 
-fun registerMetaParameterStatement(index: Int, name: String, type: JavaMetaType): CodeBlock {
-    return "register(new MetaParameter<>($index, \$S,".asCode(name).join(metaTypeStatement(type)).join("))")
-}
+fun metaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super(\$S,"
+        .asCode(name)
+        .join(metaTypeStatement(type))
+        .joinCommas(asString(modifiers))
+        .join(");")
 
+fun metaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super("
+        .join(metaTypeStatement(type))
+        .joinCommas(asString(modifiers))
+        .join(");")
 
-fun metaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock {
-    if (modifiers.isEmpty()) {
-        return "super(\$S,".asCode(name).join(metaTypeStatement(type)).join(");")
-    }
-    return "super(\$S,".asCode(name).join(metaTypeStatement(type)).joinCommas(asString(modifiers)).join(");")
-}
+fun metaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
+        .join(metaTypeStatement(metaClass.type))
+        .joinCommas(asString(metaClass.modifiers))
+        .join(");")
 
-fun metaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock {
-    if (modifiers.isEmpty()) {
-        return "super(".join(metaTypeStatement(type)).join(");")
-    }
-    return "super(".join(metaTypeStatement(type)).joinCommas(asString(modifiers)).join(");")
-}
-
-
-fun metaTypeSuperStatement(type: JavaMetaType): CodeBlock {
-    return "super(".join(metaTypeStatement(type)).join(");")
-}
-
-fun namedSuperStatement(name: String): CodeBlock {
-    return "super(\$S);".asCode(name)
-}
-
+fun namedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
 
 private const val metaVariablePattern = "metaVariable(\$S"
 private const val metaTypePattern = "metaType(\$T.class, \$T[]::new"
@@ -194,4 +193,6 @@ private fun casted(parameters: Map<String, JavaMetaParameter>): CodeBlock = para
         }
         .let { blocks -> join(blocks, COMMA) }
 
-private fun asString(modifiers: Set<Modifier>): CodeBlock = join(modifiers.map { modifier -> "\$S".asCode(modifier) }, COMMA)
+private fun asString(modifiers: Set<Modifier>): CodeBlock = "\$T.setOf(".asCode(SET_FACTORY_CLASS_NAME)
+        .join(join(modifiers.map { modifier -> "\$S".asCode(modifier) }, COMMA))
+        .join(")")
