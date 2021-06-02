@@ -132,9 +132,7 @@ fun metaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
 fun namedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
 
 
-private fun metaVariableBlock(type: JavaMetaType) = "metaVariable(\$S"
-        .asCode(type.typeName)
-        .join(")")
+private fun metaVariableBlock(type: JavaMetaType) = "metaVariable(\$S".asCode(type.typeName).join(")")
 
 private fun metaEnumBlock(className: TypeName) = "metaEnum(\$T.class, \$T::valueOf)"
         .asCode(className, className)
