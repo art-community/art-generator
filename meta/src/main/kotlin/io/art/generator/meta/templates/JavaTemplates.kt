@@ -131,36 +131,34 @@ fun metaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
 
 fun namedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
 
-private const val metaVariablePattern = "metaVariable(\$S"
-private const val metaTypePattern = "metaType(\$T.class, \$T[]::new"
-private const val metaArrayTypePattern = "metaArray(\$T.class, \$T[]::new, "
 
-private fun metaTypeBlock(className: TypeName, vararg parameters: JavaMetaType): CodeBlock {
-    val builder = of(metaTypePattern, className, className).toBuilder()
-    parameters.forEach { parameter ->
-        builder.add(COMMA).add(metaTypeStatement(parameter))
-    }
-    return builder.add(CLOSING_BRACKET).build()
-}
+private fun metaVariableBlock(type: JavaMetaType) = "metaVariable(\$S"
+        .asCode(type.typeName)
+        .join(")")
+
+private fun metaTypeBlock(className: TypeName, vararg parameters: JavaMetaType): CodeBlock = "metaType(\$T.class"
+        .asCode(className)
+        .apply { if (parameters.isNotEmpty()) ",".join(join(parameters.map(::metaTypeStatement), COMMA)) }
+        .join(")")
+
+private fun metaArrayBlock(type: JavaMetaType, className: TypeName): CodeBlock = "metaArray(\$T.class, \$T[]::new, "
+        .asCode(className, className)
+        .join(metaTypeStatement(type.arrayComponentType!!))
+        .join(")")
 
 private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
     val poetClass = type.extractClass()
-
     return when (type.kind) {
         PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> metaTypeBlock(poetClass)
-        ARRAY_KIND -> {
-            val componentType = type.arrayComponentType!!
-            metaArrayTypePattern.asCode(poetClass, poetClass).join(metaTypeStatement(componentType)).join(")")
-        }
-        CLASS_KIND, INTERFACE_KIND -> {
-            metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
-        }
-        VARIABLE_KIND -> metaVariablePattern.asCode(type.typeName).join(")")
+        ARRAY_KIND -> metaArrayBlock(type, poetClass)
+        CLASS_KIND, INTERFACE_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
+        VARIABLE_KIND -> metaVariableBlock(type)
         WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)
                 ?: type.wildcardSuperBound?.let(::metaTypeStatement)
                 ?: metaTypeBlock(OBJECT_CLASS_NAME)
     }
 }
+
 
 private fun String.asCode(vararg arguments: Any): CodeBlock = of(this, *arguments)
 
