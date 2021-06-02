@@ -18,7 +18,7 @@
 
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
-package io.art.generator.meta.service
+package io.art.generator.meta.provider
 
 import com.sun.source.util.JavacTask
 import com.sun.tools.javac.api.JavacTool

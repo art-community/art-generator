@@ -29,7 +29,7 @@ import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.*
 import io.art.generator.meta.model.JavaMetaTypeKind.*
-import io.art.generator.meta.service.JavaCompilerProvider.useJavaCompiler
+import io.art.generator.meta.provider.JavaCompilerProvider.useJavaCompiler
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -95,7 +95,7 @@ private fun Type.ClassType.asMetaType(): JavaMetaType = JavaMetaType(
             asElement().isEnum -> ENUM_KIND
             else -> UNKNOWN_KIND
         },
-        typeName = tsym.name.toString(),
+        typeName = tsym.qualifiedName.toString(),
         className = tsym.simpleName.toString(),
         classPackageName = tsym.qualifiedName.toString().substringBeforeLast(DOT),
         typeParameters = typeArguments
@@ -112,7 +112,7 @@ private fun Type.ClassType.asMetaType(): JavaMetaType = JavaMetaType(
 private fun Type.TypeVar.asMetaType(): JavaMetaType = JavaMetaType(
         originalType = this,
         kind = VARIABLE_KIND,
-        typeName = tsym.name.toString(),
+        typeName = tsym.qualifiedName.toString(),
         typeVariableBounds = upperBound
                 .let { bound ->
                     when (bound) {
@@ -129,7 +129,7 @@ private fun Type.TypeVar.asMetaType(): JavaMetaType = JavaMetaType(
 private fun Type.ArrayType.asMetaType(): JavaMetaType = JavaMetaType(
         originalType = this,
         kind = ARRAY_KIND,
-        typeName = tsym.name.toString(),
+        typeName = tsym.qualifiedName.toString(),
         arrayComponentType = componentType.asMetaType().takeIf { type -> type.kind != UNKNOWN_KIND }
 )
 
@@ -179,10 +179,7 @@ private fun MethodSymbol.asMetaMethod() = JavaMetaMethod(
         modifiers = modifiers,
         returnType = returnType.asMetaType(),
         parameters = parameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
-        typeParameters = typeParameters
-                .asSequence()
-                .map { typeParameter -> typeParameter.type.asMetaType() }
-                .toList(),
+        typeParameters = typeParameters.map { typeParameter -> typeParameter.type.asMetaType() },
         exceptions = thrownTypes.map { exception -> exception.asMetaType() }
 )
 

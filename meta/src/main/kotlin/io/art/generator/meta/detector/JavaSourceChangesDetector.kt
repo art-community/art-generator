@@ -16,15 +16,17 @@
  * limitations under the License.
  */
 
-package io.art.generator.meta.service
+package io.art.generator.meta.detector
 
 import io.art.core.constants.StringConstants.DOT
 import io.art.core.extensions.FileExtensions.readFileBytes
 import io.art.core.extensions.HashExtensions.xx64
+import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.CLASSES_CHANGED
 import io.art.generator.meta.constants.CLASSES_NOT_CHANGED
 import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.META_NAME
+import io.art.generator.meta.extension.isJava
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
 import java.nio.file.Path
@@ -53,6 +55,11 @@ object JavaSourceChangesDetector {
         cache.hashes = existed
         return JavaSourcesChanges(existed.keys, changed)
     }
+
+    private fun collectJavaSources() = configuration.sourcesRoot.toFile()
+            .walkTopDown()
+            .filter { file -> file.isJava }
+            .map { file -> file.toPath() }
 
     data class JavaSourcesChanges(val existed: Set<Path>, val changed: List<Path>) {
         fun changed(action: JavaSourcesChanges.() -> Unit) {
