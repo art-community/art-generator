@@ -46,8 +46,6 @@ data class JavaMetaType(
         val classFullName: String? = null,
         val className: String? = null,
         val classPackageName: String? = null,
-        val classSuperClass: JavaMetaType? = null,
-        val classSuperInterfaces: List<JavaMetaType> = emptyList(),
 
         val arrayComponentType: JavaMetaType? = null,
 
@@ -68,8 +66,6 @@ data class JavaMetaType(
         if (className != other.className) return false
         if (classPackageName != other.classPackageName) return false
         if (typeParameters != other.typeParameters) return false
-        if (classSuperClass != other.classSuperClass) return false
-        if (classSuperInterfaces != other.classSuperInterfaces) return false
         if (arrayComponentType != other.arrayComponentType) return false
         if (wildcardExtendsBound != other.wildcardExtendsBound) return false
         if (wildcardSuperBound != other.wildcardSuperBound) return false
@@ -85,8 +81,6 @@ data class JavaMetaType(
         result = 31 * result + (className?.hashCode() ?: 0)
         result = 31 * result + (classPackageName?.hashCode() ?: 0)
         result = 31 * result + typeParameters.hashCode()
-        result = 31 * result + (classSuperClass?.hashCode() ?: 0)
-        result = 31 * result + classSuperInterfaces.hashCode()
         result = 31 * result + (arrayComponentType?.hashCode() ?: 0)
         result = 31 * result + (wildcardExtendsBound?.hashCode() ?: 0)
         result = 31 * result + (wildcardSuperBound?.hashCode() ?: 0)
@@ -102,7 +96,9 @@ data class JavaMetaClass(
         val constructors: List<JavaMetaMethod>,
         val innerClasses: Map<String, JavaMetaClass>,
         val methods: List<JavaMetaMethod>,
-        val modifiers: Set<Modifier>
+        val modifiers: Set<Modifier>,
+        val parent: JavaMetaClass? = null,
+        val interfaces: List<JavaMetaClass> = emptyList(),
 )
 
 data class JavaMetaField(

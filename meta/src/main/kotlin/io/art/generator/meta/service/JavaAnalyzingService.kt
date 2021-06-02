@@ -102,12 +102,7 @@ private fun Type.ClassType.asMetaType(): JavaMetaType = JavaMetaType(
                 .asSequence()
                 .map { argument -> argument.asMetaType() }
                 .filter { argument -> argument.kind != UNKNOWN_KIND }
-                .toList(),
-        classSuperClass = supertype_field?.asMetaType(),
-        classSuperInterfaces = interfaces_field
-                ?.map { interfaceField -> interfaceField.asMetaType() }
-                ?: emptyList()
-)
+                .toList())
 
 private fun Type.TypeVar.asMetaType(): JavaMetaType = JavaMetaType(
         originalType = this,
@@ -171,7 +166,15 @@ private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
         innerClasses = getMembers()
                 .asSequence()
                 .filterIsInstance<ClassSymbol>()
-                .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() }
+                .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
+
+        parent = superclass?.let { superclass.tsym as? ClassSymbol }?.asMetaClass(),
+
+        interfaces = interfaces
+                .map { interfaceType -> interfaceType.tsym }
+                .filterIsInstance<ClassSymbol>()
+                .map { interfaceField -> interfaceField.asMetaClass() }
+
 )
 
 private fun MethodSymbol.asMetaMethod() = JavaMetaMethod(
