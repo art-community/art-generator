@@ -112,14 +112,14 @@ fun metaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Mo
     if (modifiers.isEmpty()) {
         return "super(\$S,".asCode(name).join(metaTypeStatement(type)).join(");")
     }
-    return "super(\$S,".asCode(name).join(metaTypeStatement(type)).join(",").join(asString(modifiers)).join(");")
+    return "super(\$S,".asCode(name).join(metaTypeStatement(type)).joinCommas(asString(modifiers)).join(");")
 }
 
 fun metaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock {
     if (modifiers.isEmpty()) {
         return "super(".join(metaTypeStatement(type)).join(");")
     }
-    return "super(".join(metaTypeStatement(type)).join(",").join(asString(modifiers)).join(");")
+    return "super(".join(metaTypeStatement(type)).joinCommas(asString(modifiers)).join(");")
 }
 
 
@@ -167,15 +167,15 @@ private fun String.asCode(vararg arguments: Any): CodeBlock = of(this, *argument
 
 private fun String.join(vararg blocks: CodeBlock): CodeBlock = asCode().join(*blocks)
 
-private fun CodeBlock.joinBlocks(separator: String = EMPTY_STRING, vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), separator)
-
-private fun CodeBlock.joinSpaced(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), SPACE)
-
-private fun CodeBlock.joinCommas(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), COMMA)
+private fun CodeBlock.join(separator: String = EMPTY_STRING, vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), separator)
 
 private fun CodeBlock.join(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), EMPTY_STRING)
 
 private fun CodeBlock.join(block: String): CodeBlock = join(listOf(this, block.asCode()), EMPTY_STRING)
+
+private fun CodeBlock.joinSpaced(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), SPACE)
+
+private fun CodeBlock.joinCommas(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), COMMA)
 
 private fun casted(parameter: JavaMetaParameter): CodeBlock {
     val parameterClass = parameter.type.extractClass()
@@ -194,4 +194,4 @@ private fun casted(parameters: Map<String, JavaMetaParameter>): CodeBlock = para
         }
         .let { blocks -> join(blocks, COMMA) }
 
-private fun asString(modifiers: Set<Modifier>): CodeBlock = join(modifiers.map { modifier -> "\$S".asCode(modifier) }, EMPTY_STRING)
+private fun asString(modifiers: Set<Modifier>): CodeBlock = join(modifiers.map { modifier -> "\$S".asCode(modifier) }, COMMA)
