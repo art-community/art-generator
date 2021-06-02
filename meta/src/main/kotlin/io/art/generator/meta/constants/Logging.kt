@@ -28,3 +28,4 @@ const val CLASSES_CHANGED = "Classes changed. Process generation"
 const val CLASSES_NOT_CHANGED = "Classes not changed. Skip Generation"
 const val ANALYZING_MESSAGE = "Analyzing sources"
 const val GENERATING_METAS_MESSAGE = "Generating meta classes"
+val GENERATED_MESSAGE = { name: String -> "Generated meta class: $name" }

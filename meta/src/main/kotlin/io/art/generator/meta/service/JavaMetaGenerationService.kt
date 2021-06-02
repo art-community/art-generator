@@ -71,6 +71,7 @@ object JavaMetaGenerationService {
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)
+                    JAVA_LOGGER.info(GENERATED_MESSAGE(metaClass.name))
                 }
     }
 
