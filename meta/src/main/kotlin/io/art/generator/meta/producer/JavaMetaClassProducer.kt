@@ -99,33 +99,35 @@ private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
 
 private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, typeName: TypeName) {
     val type = metaClass.type
-    metaClass.constructors.filter { constructor -> constructor.modifiers.contains(PUBLIC) }.mapIndexed { index, constructor ->
-        var name = CONSTRUCTOR_NAME
-        if (index > 0) name += index
-        classBuilder(name)
-                .addModifiers(PUBLIC, FINAL, STATIC)
-                .superclass(ParameterizedTypeName.get(META_CONSTRUCTOR_CLASS_NAME, typeName.box()))
-                .addMethod(constructorBuilder()
-                        .addModifiers(PRIVATE)
-                        .addCode(metaConstructorSuperStatement(type, constructor.modifiers))
-                        .build())
-                .apply { generateConstructorInvocations(type, constructor) }
-                .apply { generateParameters(constructor) }
-                .build()
-                .apply(::addType)
-        val constructorClassName = ClassName.get(EMPTY_STRING, name)
-        FieldSpec.builder(constructorClassName, name)
-                .addModifiers(PRIVATE, FINAL)
-                .initializer(registerNewStatement(), constructorClassName)
-                .build()
-                .apply(::addField)
-        methodBuilder(name)
-                .addModifiers(PUBLIC)
-                .returns(constructorClassName)
-                .addCode(returnStatement(), name)
-                .build()
-                .let(::addMethod)
-    }
+    metaClass.constructors
+            .filter { constructor -> constructor.modifiers.contains(PUBLIC) }
+            .mapIndexed { index, constructor ->
+                var name = CONSTRUCTOR_NAME
+                if (index > 0) name += index
+                classBuilder(name)
+                        .addModifiers(PUBLIC, FINAL, STATIC)
+                        .superclass(ParameterizedTypeName.get(META_CONSTRUCTOR_CLASS_NAME, typeName.box()))
+                        .addMethod(constructorBuilder()
+                                .addModifiers(PRIVATE)
+                                .addCode(metaConstructorSuperStatement(type, constructor.modifiers))
+                                .build())
+                        .apply { generateConstructorInvocations(type, constructor) }
+                        .apply { generateParameters(constructor) }
+                        .build()
+                        .apply(::addType)
+                val constructorClassName = ClassName.get(EMPTY_STRING, name)
+                FieldSpec.builder(constructorClassName, name)
+                        .addModifiers(PRIVATE, FINAL)
+                        .initializer(registerNewStatement(), constructorClassName)
+                        .build()
+                        .apply(::addField)
+                methodBuilder(name)
+                        .addModifiers(PUBLIC)
+                        .returns(constructorClassName)
+                        .addCode(returnStatement(), name)
+                        .build()
+                        .let(::addMethod)
+            }
 }
 
 private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, constructor: JavaMetaMethod) {
@@ -263,15 +265,16 @@ private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
         val parameterType = parameter.value.type
         val parameterTypeName = parameter.value.type.withoutVariables()
         val metaParameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameterTypeName.box())
-        FieldSpec.builder(metaParameterType, parameter.key)
+        val parameterName = metaParameterName(parameter.key)
+        FieldSpec.builder(metaParameterType, parameterName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerMetaParameterStatement(parameterIndex, parameter.key, parameterType))
+                .initializer(registerMetaParameterStatement(parameterIndex, parameterName, parameterType))
                 .build()
                 .apply(::addField)
-        methodBuilder(parameter.key)
+        methodBuilder(parameterName)
                 .addModifiers(PUBLIC)
                 .returns(metaParameterType)
-                .addCode(returnStatement(), parameter.key)
+                .addCode(returnStatement(), parameterName)
                 .build()
                 .let(::addMethod)
     }

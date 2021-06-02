@@ -24,6 +24,8 @@ fun metaName(name: String): String = "${name.capitalize()}Class"
 
 fun metaFieldName(name: String): String = "${name}Field"
 
+fun metaParameterName(name: String): String = "${name}Parameter"
+
 fun metaMethodName(name: String): String = "${name}Method"
 
 fun metaName(packageName: String, name: String, vararg nested: String): ClassName =

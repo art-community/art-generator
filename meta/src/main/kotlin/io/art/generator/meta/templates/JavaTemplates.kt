@@ -69,6 +69,7 @@ fun invokeOneArgumentStaticStatement(method: String, type: JavaMetaType, paramet
     return "\$T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(");")
 }
 
+
 fun invokeInstanceStatement(method: String, parameters: Map<String, JavaMetaParameter>): CodeBlock {
     return "instance.$method(".join(casted(parameters)).join(");")
 }
@@ -76,6 +77,7 @@ fun invokeInstanceStatement(method: String, parameters: Map<String, JavaMetaPara
 fun invokeStaticStatement(method: String, type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
     return "\$T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(");")
 }
+
 
 fun returnInvokeWithoutArgumentsConstructorStatement(type: JavaMetaType): CodeBlock {
     if (type.typeParameters.isNotEmpty()) return "return new \$T<>();".asCode(type.extractClass())
@@ -105,6 +107,7 @@ fun registerMetaParameterStatement(index: Int, name: String, type: JavaMetaType)
     return "register(new MetaParameter<>($index, \$S,".asCode(name).join(metaTypeStatement(type)).join("))")
 }
 
+
 fun metaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock {
     if (modifiers.isEmpty()) {
         return "super(\$S,".asCode(name).join(metaTypeStatement(type)).join(");")
@@ -118,6 +121,7 @@ fun metaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>):
     }
     return "super(".join(metaTypeStatement(type)).join(",").join(asString(modifiers)).join(");")
 }
+
 
 fun metaTypeSuperStatement(type: JavaMetaType): CodeBlock {
     return "super(".join(metaTypeStatement(type)).join(");")
@@ -190,4 +194,4 @@ private fun casted(parameters: Map<String, JavaMetaParameter>): CodeBlock = para
         }
         .let { blocks -> join(blocks, COMMA) }
 
-private fun asString(modifier: Set<Modifier>): CodeBlock = join(modifier.map { "\$S".asCode(modifier) }, COMMA)
+private fun asString(modifiers: Set<Modifier>): CodeBlock = join(modifiers.map { modifier -> "\$S".asCode(modifier) }, EMPTY_STRING)
