@@ -30,8 +30,6 @@ import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaNode
-import io.art.generator.meta.model.JavaMetaTypeKind
-import io.art.generator.meta.model.JavaMetaTypeKind.ENUM_KIND
 import io.art.generator.meta.model.asTree
 import io.art.generator.meta.producer.generateClass
 import io.art.generator.meta.templates.*
@@ -105,7 +103,7 @@ object JavaMetaGenerationService {
                         .addModifiers(PRIVATE)
                         .addCode(namedSuperStatement(node.packageShortName))
                         .build())
-        node.classes.filter { metaClass -> metaClass.type.kind != ENUM_KIND }.forEach { metaClass -> packageBuilder.generateClass(metaClass) }
+        node.classes.filter(JavaMetaClass::couldBeGenerated).forEach(packageBuilder::generateClass)
         node.children.values.forEach { child -> packageBuilder.generateTree(child) }
         addType(packageBuilder.build())
     }

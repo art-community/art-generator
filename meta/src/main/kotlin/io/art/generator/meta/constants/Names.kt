@@ -1,30 +1,16 @@
 package io.art.generator.meta.constants
 
-const val META_NAME = "meta"
-const val LOAD_NAME = "load"
-const val COMPUTE_NAME = "compute"
-const val DEPENDENCIES_NAME = "dependencies"
-
-const val GENERATOR = "generator"
-
 const val JAVA = "java"
 const val CLASS = "class"
 const val JAR = "jar"
 
-const val CLASS_KEYWORD = "class"
 
-const val JAVA_PACKAGE_PREFIX = "java."
-
-const val BUILDER_NAME = "builder"
-const val REGISTER_NAME = "register"
-
-const val TO_STRING_NAME = "toString"
-
-
+const val META_NAME = "meta"
+const val LOAD_NAME = "load"
+const val DEPENDENCIES_NAME = "dependencies"
+const val GENERATOR_NAME = "generator"
 const val GET_ELEMENTS_NAME = "getElements"
 const val GET_SYMBOLS_NAME = "getSymbols"
-
-
 const val INVOKE_NAME = "invoke"
 const val CONSTRUCTOR_NAME = "constructor"
 const val INSTANCE_NAME = "instance"

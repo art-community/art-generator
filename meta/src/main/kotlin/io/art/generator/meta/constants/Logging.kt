@@ -21,7 +21,7 @@ package io.art.generator.meta.constants
 import io.art.logging.logger.Logger
 import io.art.logging.module.LoggingModule
 
-val COMMON_LOGGER: Logger = LoggingModule.logger(GENERATOR)
+val COMMON_LOGGER: Logger = LoggingModule.logger(GENERATOR_NAME)
 val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)
 const val SOURCES_CHANGED = "Sources changed"
 const val CLASSES_CHANGED = "Classes changed. Process generation"

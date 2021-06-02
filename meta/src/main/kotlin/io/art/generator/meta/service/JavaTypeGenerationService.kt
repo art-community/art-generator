@@ -21,9 +21,11 @@ package io.art.generator.meta.service
 import com.squareup.javapoet.*
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
+import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import java.lang.Void.TYPE
+import javax.lang.model.element.Modifier.PUBLIC
 
 fun JavaMetaType.toPoet(): TypeName = when (kind) {
     PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> TypeName.get(originalType)
@@ -84,7 +86,8 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
             ?: OBJECT_CLASS_NAME
 }
 
-
 fun JavaMetaType.hasVariable(): Boolean = kind == VARIABLE_KIND
         || typeParameters.any { parameter -> parameter.hasVariable() }
         || arrayComponentType?.hasVariable() ?: false
+
+fun JavaMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && modifiers.contains(PUBLIC)

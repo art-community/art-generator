@@ -23,7 +23,7 @@ import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.CodeBlock.join
 import com.squareup.javapoet.CodeBlock.of
 import com.squareup.javapoet.TypeName
-import io.art.core.constants.CompilerSuppressingWarnings.ALL
+import io.art.core.constants.CompilerSuppressingWarnings.*
 import io.art.core.constants.StringConstants.*
 import io.art.generator.meta.constants.CASTER_CLASS_NAME
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
@@ -35,7 +35,7 @@ import io.art.generator.meta.service.hasVariable
 import javax.lang.model.element.Modifier
 
 fun suppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnings::class.java)
-        .addMember("value", "\$S", ALL)
+        .addMember("value", "{\$S,\$S,\$S}", ALL, UNCHECKED, UNUSED)
         .build()
 
 fun newStatement() = "new \$T()"
