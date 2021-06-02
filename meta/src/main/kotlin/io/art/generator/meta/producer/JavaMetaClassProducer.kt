@@ -51,10 +51,14 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
             .apply { generateFields(metaClass.fields) }
             .apply { metaClass.parent?.fields?.filter { field -> !field.value.modifiers.contains(PRIVATE) }?.let(::generateFields) }
             .apply {
-                val methods = metaClass.interfaces.flatMap { interfaceType ->
+                val methods = metaClass.methods.toMutableList()
+                methods += metaClass.interfaces.flatMap { interfaceType ->
                     interfaceType.methods.filter { method -> method.modifiers.contains(DEFAULT) || method.modifiers.contains(STATIC) }
                 }
-                generateMethods(methods + metaClass.methods, metaClass.type)
+                methods += metaClass.parent?.methods
+                        ?.filter { method -> !method.modifiers.contains(PRIVATE) }
+                        ?: emptyList()
+                generateMethods(methods.toSet(), metaClass.type)
             }
             .apply { metaClass.innerClasses.values.forEach { inner -> generateClass(inner) } }
             .build()
@@ -152,7 +156,7 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
 }
 
 
-private fun TypeSpec.Builder.generateMethods(methods: List<JavaMetaMethod>, type: JavaMetaType) {
+private fun TypeSpec.Builder.generateMethods(methods: Set<JavaMetaMethod>, type: JavaMetaType) {
     methods.filter { method -> !configuration.metaMethodExclusions.contains(method.name) }
             .groupBy { method -> method.name }
             .map { grouped ->
