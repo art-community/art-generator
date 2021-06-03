@@ -19,8 +19,9 @@
 package io.art.generator.meta.templates
 
 import com.squareup.javapoet.ClassName
+import io.art.core.constants.StringConstants.EMPTY_STRING
 
-fun metaName(name: String): String = "${name.capitalize()}Class"
+fun metaClassName(name: String): String = "${name.capitalize()}Class"
 
 fun metaFieldName(name: String): String = "${name}Field"
 
@@ -28,11 +29,14 @@ fun metaParameterName(name: String): String = "${name}Parameter"
 
 fun metaMethodName(name: String): String = "${name}Method"
 
-fun metaName(packageName: String, name: String, vararg nested: String): ClassName =
-        ClassName.get(packageName, "Meta${name.capitalize()}", *nested)
+fun metaModuleClassName(packageName: String, name: String): ClassName =
+        ClassName.get(packageName, "Meta${name.capitalize()}")
 
-fun metaClassName(packageName: String, name: String, vararg nested: String): ClassName =
-        ClassName.get(packageName, "Meta${name.capitalize()}Class", *nested)
+fun metaPackageClassName(name: String): ClassName =
+        ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Package")
 
-fun metaPackageName(packageName: String, name: String, vararg nested: String): ClassName =
-        ClassName.get(packageName, "Meta${name.capitalize()}Package", *nested)
+fun metaClassClassName(name: String): ClassName =
+        ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Class")
+
+fun metaMethodClassName(name: String): ClassName =
+        ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Method")

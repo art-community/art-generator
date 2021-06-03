@@ -42,8 +42,8 @@ object JavaMetaGenerationService {
         JAVA_LOGGER.info(GENERATING_METAS_MESSAGE)
         val root = configuration.sourcesRoot.toFile().apply { parentFile.mkdirs() }
         val moduleName = configuration.moduleName
-        val metaModuleName = metaName(META_NAME, moduleName)
-        val reference = metaName(EMPTY_STRING, moduleName)
+        val metaModuleName = metaModuleClassName(META_NAME, moduleName)
+        val reference = metaModuleClassName(EMPTY_STRING, moduleName)
         classBuilder(metaModuleName)
                 .addModifiers(PUBLIC)
                 .addAnnotation(suppressAnnotation())
@@ -85,16 +85,15 @@ object JavaMetaGenerationService {
     }
 
     private fun TypeSpec.Builder.generateTree(node: JavaMetaNode) {
-        val metaPackageName = metaPackageName(META_NAME, node.packageShortName)
-        val reference = metaPackageName(EMPTY_STRING, node.packageShortName)
-        FieldSpec.builder(reference, node.packageShortName)
+        val metaPackageName = metaPackageClassName(node.packageShortName)
+        FieldSpec.builder(metaPackageName, node.packageShortName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerNewStatement(), reference)
+                .initializer(registerNewStatement(), metaPackageName)
                 .build()
                 .apply(::addField)
         methodBuilder(node.packageShortName)
                 .addModifiers(PUBLIC)
-                .returns(reference)
+                .returns(metaPackageName)
                 .addCode(returnStatement(), node.packageShortName)
                 .build()
                 .let(::addMethod)

@@ -36,9 +36,8 @@ import javax.lang.model.element.Modifier.*
 import javax.lang.model.type.TypeKind.VOID
 
 fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
-    val className = metaName(metaClass.type.className!!)
-    val metaClassName = metaClassName(META_NAME, metaClass.type.className)
-    val reference = metaClassName(EMPTY_STRING, metaClass.type.className)
+    val className = metaClassName(metaClass.type.className!!)
+    val metaClassName = metaClassClassName(metaClass.type.className)
     val typeName = metaClass.type.withoutVariables()
     val constructorStatement = metaClassSuperStatement(metaClass)
     classBuilder(metaClassName)
@@ -59,14 +58,14 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
             }
             .build()
             .apply(::addType)
-    FieldSpec.builder(reference, className)
+    FieldSpec.builder(metaClassName, className)
             .addModifiers(PRIVATE, FINAL)
-            .initializer(registerNewStatement(), reference)
+            .initializer(registerNewStatement(), metaClassName)
             .build()
             .apply(::addField)
     methodBuilder(className.decapitalize())
             .addModifiers(PUBLIC)
-            .returns(reference)
+            .returns(metaClassName)
             .addCode(returnStatement(), className)
             .build()
             .let(::addMethod)
@@ -170,8 +169,7 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
     var name = method.name
     if (index > 0) name += index
     val methodName = metaMethodName(name)
-    val methodClassName = name.capitalize()
-    val reference = ClassName.get(EMPTY_STRING, methodClassName)
+    val methodClassName = metaMethodClassName(name)
     val returnTypeName = method.returnType.withoutVariables().box()
     val static = method.modifiers.contains(STATIC)
     val parent = when {
@@ -189,14 +187,14 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
             .apply { generateParameters(method) }
             .build()
             .apply(::addType)
-    FieldSpec.builder(reference, methodName)
+    FieldSpec.builder(methodClassName, methodName)
             .addModifiers(PRIVATE, FINAL)
-            .initializer(registerNewStatement(), reference)
+            .initializer(registerNewStatement(), methodClassName)
             .build()
             .apply(::addField)
     methodBuilder(methodName)
             .addModifiers(PUBLIC)
-            .returns(reference)
+            .returns(methodClassName)
             .addCode(returnStatement(), methodName)
             .build()
             .let(::addMethod)
