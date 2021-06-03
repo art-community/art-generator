@@ -33,6 +33,7 @@ import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.*
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import io.art.generator.meta.provider.JavaCompilerProvider.useJavaCompiler
+import io.art.generator.meta.templates.metaModuleName
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -57,7 +58,9 @@ object JavaAnalyzingService {
             task.analyze()
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
-                    .map { element -> (element as ClassSymbol).asMetaClass() }
+                    .map { element -> (element as ClassSymbol) }
+                    .filter { symbol -> symbol.className() != metaModuleName(configuration.moduleName) }
+                    .map { symbol -> symbol.asMetaClass() }
                     .filter { input -> input.type.classPackageName?.split(DOT)?.firstOrNull() != META_NAME }
                     .associateBy { metaClass -> metaClass.source }
         }
