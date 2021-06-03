@@ -53,7 +53,7 @@ object JavaAnalyzingService {
                 ?.toList()
                 ?: emptyList()
 
-        JAVA_LOGGER.info(ANALYZING_MESSAGE(sourceRoots))
+        JAVA_LOGGER.info(ANALYZING_MESSAGE(configuration.sourcesRoot))
         return useJavaCompiler(sources, sourceRoots) { task ->
             task.analyze()
                     .asSequence()

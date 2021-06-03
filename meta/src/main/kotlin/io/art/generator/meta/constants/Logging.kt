@@ -18,21 +18,22 @@
 
 package io.art.generator.meta.constants
 
+import io.art.generator.meta.configuration.configuration
 import io.art.logging.logger.Logger
 import io.art.logging.module.LoggingModule
 import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.relativeTo
 
 val COMMON_LOGGER: Logger = LoggingModule.logger(GENERATOR_NAME)
 
-fun Sequence<Path>.names() = map { path -> path.toFile().name }.toList()
-
-fun Collection<Path>.names() = map { path -> path.toFile().name }.toList()
+fun Collection<Path>.names() = map { path -> path.toFile().relativeTo(configuration.sourcesRoot.toFile()) }.toList()
 
 val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)
 
 val SOURCES_CHANGED = { modified: List<Path>, deleted: List<Path> -> "Sources changed. Modified: ${modified.names()}. Deleted: ${deleted.names()}" }
-val CLASSES_CHANGED = { classes: List<Path> -> "Classes changed: ${classes.names()}. Process generation" }
-val ANALYZING_MESSAGE = { roots: List<Path> -> "Analyzing sources inside ${roots.names()}" }
+val CLASSES_CHANGED = { changed: List<Path>, deleted: List<Path> -> "Classes changed. Modified: ${changed.names()}. Deleted: ${deleted.names()}. Process generation" }
+val ANALYZING_MESSAGE = { root: Path -> "Analyzing sources inside $root" }
 val ANALYZE_COMPLETED = { sources: List<Path> -> "Analyze completed. Sources: ${sources.names()}" }
 val GENERATING_METAS_MESSAGE = { classes: List<String> -> "Generating meta classes for: $classes" }
 val GENERATED_MESSAGE = { name: String -> "Generated meta class: $name" }

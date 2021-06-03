@@ -18,18 +18,17 @@
 
 package io.art.generator.meta.detector
 
-import io.art.core.constants.StringConstants.DOT
 import io.art.core.extensions.FileExtensions.readFileBytes
 import io.art.core.extensions.HashExtensions.xx64
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.CLASSES_CHANGED
 import io.art.generator.meta.constants.CLASSES_NOT_CHANGED
 import io.art.generator.meta.constants.JAVA_LOGGER
-import io.art.generator.meta.constants.META_NAME
 import io.art.generator.meta.extension.isJava
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.common.metaModuleJavaFile
 import io.art.generator.meta.service.java.JavaAnalyzingService.analyzeJavaSources
+import io.art.generator.meta.templates.metaModuleClassFullName
 import java.nio.file.Path
 
 
@@ -45,7 +44,6 @@ object JavaSourceChangesDetector {
         val sources = collectJavaSources()
         val deleted = cache.hashes.keys.filter { source -> !sources.contains(source) }
         val existed = cache.hashes.filterKeys(sources::contains).toMutableMap()
-        val added = sources.filter { source -> !cache.hashes.containsKey(source) }
         val modified = mutableListOf<Path>()
         sources.forEach { source ->
             val currentModified = existed[source]
@@ -70,17 +68,19 @@ object JavaSourceChangesDetector {
 
     data class JavaSourcesChanges(val existed: Set<Path>, val modified: List<Path>, val deleted: List<Path>) {
         fun changed(action: JavaSourcesChanges.() -> Unit) {
-            if (modified.isNotEmpty()) action(this)
+            if (modified.isNotEmpty() || deleted.isNotEmpty()) action(this)
         }
 
-        fun handle(handler: (Set<JavaMetaClass>) -> Unit) = analyzeJavaSources(existed.asSequence()).apply {
-            filterValues { javaClass -> javaClass.type.classPackageName?.substringAfterLast(DOT) != META_NAME }
-            filterValues { javaClass -> !cache.classes.contains(javaClass) }.ifEmpty {
-                JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
-                return@apply
+        fun handle(handler: (Set<JavaMetaClass>) -> Unit) {
+            val sources = analyzeJavaSources(existed.asSequence()).filter { source ->
+                source.value.type.className != metaModuleClassFullName(configuration.moduleName)
             }
-            JAVA_LOGGER.info(CLASSES_CHANGED(keys.toList()))
-            cache.classes = values.toSet().apply(handler)
+            if (deleted.isEmpty() && sources.isEmpty()) {
+                JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
+                return
+            }
+            JAVA_LOGGER.info(CLASSES_CHANGED(modified, deleted))
+            cache.classes = sources.values.toSet().apply(handler)
         }
     }
 }

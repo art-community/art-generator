@@ -39,7 +39,7 @@ import javax.lang.model.element.Modifier.*
 
 object JavaMetaGenerationService {
     fun generateJavaMeta(classes: Sequence<JavaMetaClass>) {
-        JAVA_LOGGER.info(GENERATING_METAS_MESSAGE(classes.map { metaClass -> metaClass.type.className!! }.toList()))
+        JAVA_LOGGER.info(GENERATING_METAS_MESSAGE(classes.map { metaClass -> metaClass.type.classFullName!! }.toList()))
         val root = configuration.sourcesRoot.toFile().apply { parentFile.mkdirs() }
         val moduleName = configuration.moduleName
         val metaModuleName = metaModuleClassName(META_NAME, moduleName)
@@ -73,7 +73,7 @@ object JavaMetaGenerationService {
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)
-                    JAVA_LOGGER.info(GENERATED_MESSAGE(metaClass.name))
+                    JAVA_LOGGER.info(GENERATED_MESSAGE(metaModuleClassFullName(moduleName)))
                 }
     }
 
