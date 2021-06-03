@@ -28,6 +28,7 @@ import io.art.core.constants.StringConstants.*
 import io.art.generator.meta.constants.CASTER_CLASS_NAME
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
 import io.art.generator.meta.constants.SET_FACTORY_CLASS_NAME
+import io.art.generator.meta.exception.MetaGeneratorException
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaField
 import io.art.generator.meta.model.JavaMetaParameter
@@ -150,7 +151,7 @@ private fun metaArrayBlock(type: JavaMetaType, className: TypeName): CodeBlock =
 private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
     val poetClass = type.extractClass()
     return when (type.kind) {
-        PRIMITIVE_KIND, UNKNOWN_KIND -> metaTypeBlock(poetClass)
+        PRIMITIVE_KIND -> metaTypeBlock(poetClass)
         ARRAY_KIND -> metaArrayBlock(type, poetClass)
         CLASS_KIND, INTERFACE_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
         ENUM_KIND -> metaEnumBlock(poetClass)
@@ -158,6 +159,7 @@ private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
         WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)
                 ?: type.wildcardSuperBound?.let(::metaTypeStatement)
                 ?: metaTypeBlock(OBJECT_CLASS_NAME)
+        UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $type")
     }
 }
 

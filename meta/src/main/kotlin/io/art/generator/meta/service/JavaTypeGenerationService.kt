@@ -21,6 +21,7 @@ package io.art.generator.meta.service
 import com.squareup.javapoet.*
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
+import io.art.generator.meta.exception.MetaGeneratorException
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
@@ -28,7 +29,7 @@ import java.lang.Void.TYPE
 import javax.lang.model.element.Modifier.PUBLIC
 
 fun JavaMetaType.toPoet(): TypeName = when (kind) {
-    PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> TypeName.get(originalType)
+    PRIMITIVE_KIND, ENUM_KIND -> TypeName.get(originalType)
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.toPoet())
 
@@ -50,11 +51,15 @@ fun JavaMetaType.toPoet(): TypeName = when (kind) {
             else -> ClassName.get(classPackageName, className)
         }
     }
+
+    UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
 }
 
 fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
-    PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> toPoet()
+    PRIMITIVE_KIND, ENUM_KIND -> toPoet()
+
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.withoutVariables())
+
     CLASS_KIND, INTERFACE_KIND -> when {
         typeParameters.isEmpty() -> toPoet()
         else -> {
@@ -68,22 +73,32 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
             ParameterizedTypeName.get(rawType, *parameters.toTypedArray())
         }
     }
+
     VARIABLE_KIND -> OBJECT_CLASS_NAME
+
     WILDCARD_KIND -> wildcardExtendsBound?.withoutVariables()?.let(WildcardTypeName::subtypeOf)
             ?: wildcardSuperBound?.withoutVariables()?.let(WildcardTypeName::supertypeOf)
             ?: subtypeOf(Object::class.java)
+
+    UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
 }
 
 fun JavaMetaType.extractClass(): TypeName = when (kind) {
-    PRIMITIVE_KIND, ENUM_KIND, UNKNOWN_KIND -> {
+    PRIMITIVE_KIND, ENUM_KIND -> {
         if (typeName == TYPE.name) toPoet().box() else toPoet()
     }
+
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())
+
     CLASS_KIND, INTERFACE_KIND -> ClassName.get(classPackageName, className)
+
     VARIABLE_KIND -> OBJECT_CLASS_NAME
+
     WILDCARD_KIND -> wildcardExtendsBound?.extractClass()
             ?: wildcardSuperBound?.extractClass()
             ?: OBJECT_CLASS_NAME
+
+    UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
 }
 
 fun JavaMetaType.hasVariable(): Boolean = kind == VARIABLE_KIND
