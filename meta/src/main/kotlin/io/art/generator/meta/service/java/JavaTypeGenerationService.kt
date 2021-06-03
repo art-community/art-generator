@@ -78,9 +78,7 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
     UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
 }
 
-fun JavaMetaType.hasVariable(): Boolean = kind == VARIABLE_KIND
-        || typeParameters.any { parameter -> parameter.hasVariable() }
-        || arrayComponentType?.hasVariable() ?: false
+fun JavaMetaType.hasVariable(): Boolean = kind == VARIABLE_KIND || arrayComponentType?.hasVariable() ?: false
 
 fun JavaMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && modifiers.contains(PUBLIC)
 
