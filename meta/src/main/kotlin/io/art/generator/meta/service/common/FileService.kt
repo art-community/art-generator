@@ -16,21 +16,15 @@
  * limitations under the License.
  */
 
-package io.art.generator.meta.constants
+package io.art.generator.meta.service.common
 
-const val KOTLIN_EXTENSION = "kt"
-const val KOTLIN_SCRIPT_EXTENSION = "kts"
+import io.art.generator.meta.configuration.configuration
+import io.art.generator.meta.constants.DOT_JAVA
+import io.art.generator.meta.constants.META_NAME
+import io.art.generator.meta.templates.metaModuleFileName
+import java.io.File
 
-const val DOT_JAVA = ".java"
-
-
-const val JAVA_MODULE_SUPPRESSION = "JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE"
-
-val META_METHOD_EXCLUSIONS = setOf(
-        "builder",
-        "toString",
-        "equals",
-        "canEqual",
-        "hashCode",
-        "clone"
-)
+val metaModuleJavaFile: File
+    get() = configuration.sourcesRoot.resolve(META_NAME)
+            .resolve(metaModuleFileName(configuration.moduleName, DOT_JAVA))
+            .toFile()

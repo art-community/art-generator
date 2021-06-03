@@ -28,6 +28,7 @@ import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.META_NAME
 import io.art.generator.meta.extension.isJava
 import io.art.generator.meta.model.JavaMetaClass
+import io.art.generator.meta.service.common.metaModuleJavaFile
 import io.art.generator.meta.service.java.JavaAnalyzingService.analyzeJavaSources
 import java.nio.file.Path
 
@@ -42,28 +43,34 @@ object JavaSourceChangesDetector {
 
     fun detectJavaChanges(): JavaSourcesChanges {
         val sources = collectJavaSources()
+        val deleted = cache.hashes.keys.filter { source -> !sources.contains(source) }
         val existed = cache.hashes.filterKeys(sources::contains).toMutableMap()
-        val changed = mutableListOf<Path>()
+        val added = sources.filter { source -> !cache.hashes.containsKey(source) }
+        val modified = mutableListOf<Path>()
         sources.forEach { source ->
             val currentModified = existed[source]
             val newModified = xx64(readFileBytes(source))
-            if (currentModified != newModified) {
-                changed.add(source)
-            }
+            if (currentModified != newModified) modified.add(source)
             existed[source] = newModified
         }
         cache.hashes = existed
-        return JavaSourcesChanges(existed.keys, changed)
+        return JavaSourcesChanges(
+                existed = existed.keys,
+                modified = modified,
+                deleted = deleted
+        )
     }
 
     private fun collectJavaSources() = configuration.sourcesRoot.toFile()
             .walkTopDown()
+            .asSequence()
+            .filter { file -> !metaModuleJavaFile.exists() || file != metaModuleJavaFile }
             .filter { file -> file.isJava }
             .map { file -> file.toPath() }
 
-    data class JavaSourcesChanges(val existed: Set<Path>, val changed: List<Path>) {
+    data class JavaSourcesChanges(val existed: Set<Path>, val modified: List<Path>, val deleted: List<Path>) {
         fun changed(action: JavaSourcesChanges.() -> Unit) {
-            if (changed.isNotEmpty()) action(this)
+            if (modified.isNotEmpty()) action(this)
         }
 
         fun handle(handler: (Set<JavaMetaClass>) -> Unit) = analyzeJavaSources(existed.asSequence()).apply {
@@ -72,7 +79,7 @@ object JavaSourceChangesDetector {
                 JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
                 return@apply
             }
-            JAVA_LOGGER.info(CLASSES_CHANGED)
+            JAVA_LOGGER.info(CLASSES_CHANGED(keys.toList()))
             cache.classes = values.toSet().apply(handler)
         }
     }

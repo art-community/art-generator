@@ -33,7 +33,7 @@ object JavaSourceWatchingService {
     private var generate: Future<*>? = null
 
     fun watchJavaSources() = detectJavaChanges().changed {
-        JAVA_LOGGER.info(SOURCES_CHANGED)
+        JAVA_LOGGER.info(SOURCES_CHANGED(modified, deleted))
         generate = schedule(now().plusSeconds(configuration.analyzerDelay.seconds)) {
             generate?.cancel(false)
             handle { classes -> generateJavaMeta(classes.asSequence()) }

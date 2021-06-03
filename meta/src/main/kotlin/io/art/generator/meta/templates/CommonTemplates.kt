@@ -22,7 +22,9 @@ import com.squareup.javapoet.ClassName
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.meta.constants.META_NAME
 
-fun metaModuleName(name: String): String = "$META_NAME.Meta$name"
+fun metaModuleClassFullName(name: String): String = "$META_NAME.Meta$name"
+
+fun metaModuleFileName(name: String, extension: String): String = "Meta$name$extension"
 
 fun metaClassName(name: String): String = "${name.capitalize()}Class"
 

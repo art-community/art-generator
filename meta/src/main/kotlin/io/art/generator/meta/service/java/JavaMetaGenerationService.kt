@@ -39,7 +39,7 @@ import javax.lang.model.element.Modifier.*
 
 object JavaMetaGenerationService {
     fun generateJavaMeta(classes: Sequence<JavaMetaClass>) {
-        JAVA_LOGGER.info(GENERATING_METAS_MESSAGE)
+        JAVA_LOGGER.info(GENERATING_METAS_MESSAGE(classes.map { metaClass -> metaClass.type.className!! }.toList()))
         val root = configuration.sourcesRoot.toFile().apply { parentFile.mkdirs() }
         val moduleName = configuration.moduleName
         val metaModuleName = metaModuleClassName(META_NAME, moduleName)

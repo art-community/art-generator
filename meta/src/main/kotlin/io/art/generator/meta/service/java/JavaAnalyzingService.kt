@@ -33,7 +33,7 @@ import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.*
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import io.art.generator.meta.provider.JavaCompilerProvider.useJavaCompiler
-import io.art.generator.meta.templates.metaModuleName
+import io.art.generator.meta.templates.metaModuleClassFullName
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -45,7 +45,6 @@ import javax.lang.model.type.TypeMirror
 
 object JavaAnalyzingService {
     fun analyzeJavaSources(sources: Sequence<Path>): Map<Path, JavaMetaClass> {
-        JAVA_LOGGER.info(ANALYZING_MESSAGE)
 
         val sourceRoots = configuration.sourcesRoot.toFile()
                 .listFiles()
@@ -54,15 +53,17 @@ object JavaAnalyzingService {
                 ?.toList()
                 ?: emptyList()
 
+        JAVA_LOGGER.info(ANALYZING_MESSAGE(sourceRoots))
         return useJavaCompiler(sources, sourceRoots) { task ->
             task.analyze()
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
                     .map { element -> (element as ClassSymbol) }
-                    .filter { symbol -> symbol.className() != metaModuleName(configuration.moduleName) }
+                    .filter { symbol -> symbol.className() != metaModuleClassFullName(configuration.moduleName) }
                     .map { symbol -> symbol.asMetaClass() }
                     .filter { input -> input.type.classPackageName?.split(DOT)?.firstOrNull() != META_NAME }
                     .associateBy { metaClass -> metaClass.source }
+                    .apply { JAVA_LOGGER.info(ANALYZE_COMPLETED(keys.toList())) }
         }
     }
 }
