@@ -130,6 +130,7 @@ private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, type
 private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, constructor: JavaMetaMethod) {
     val template = methodBuilder(INVOKE_NAME)
             .addModifiers(PUBLIC)
+            .addException(THROWABLE_CLASS_NAME)
             .addAnnotation(Override::class.java)
             .returns(type.withoutVariables())
             .build()
@@ -206,6 +207,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
     val template = methodBuilder(INVOKE_NAME)
             .addModifiers(PUBLIC)
             .addAnnotation(Override::class.java)
+            .addException(THROWABLE_CLASS_NAME)
             .returns(OBJECT_CLASS_NAME)
             .apply { if (!static) addParameter(type.withoutVariables(), INSTANCE_NAME) }
             .build()

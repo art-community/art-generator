@@ -37,3 +37,4 @@ val INSTANCE_META_METHOD_CLASS_NAME = ClassName.get(InstanceMetaMethod::class.ja
 val STATIC_META_METHOD_CLASS_NAME = ClassName.get(StaticMetaMethod::class.java)!!
 val META_PARAMETER_CLASS_NAME = ClassName.get(MetaParameter::class.java)!!
 val META_CONSTRUCTOR_CLASS_NAME = ClassName.get(MetaConstructor::class.java)!!
+val THROWABLE_CLASS_NAME = ClassName.get(Throwable::class.java)!!
