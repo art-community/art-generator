@@ -27,10 +27,10 @@ import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaMethod
 import io.art.generator.meta.model.JavaMetaType
-import io.art.generator.meta.service.couldBeGenerated
-import io.art.generator.meta.service.parentFields
-import io.art.generator.meta.service.parentMethods
-import io.art.generator.meta.service.withoutVariables
+import io.art.generator.meta.service.java.couldBeGenerated
+import io.art.generator.meta.service.java.parentFields
+import io.art.generator.meta.service.java.parentMethods
+import io.art.generator.meta.service.java.withoutVariables
 import io.art.generator.meta.templates.*
 import javax.lang.model.element.Modifier.*
 import javax.lang.model.type.TypeKind.VOID

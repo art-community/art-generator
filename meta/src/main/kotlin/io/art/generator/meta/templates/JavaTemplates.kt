@@ -34,8 +34,8 @@ import io.art.generator.meta.model.JavaMetaField
 import io.art.generator.meta.model.JavaMetaParameter
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
-import io.art.generator.meta.service.extractClass
-import io.art.generator.meta.service.hasVariable
+import io.art.generator.meta.service.java.extractClass
+import io.art.generator.meta.service.java.hasVariable
 import javax.lang.model.element.Modifier
 
 

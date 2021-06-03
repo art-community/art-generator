@@ -18,7 +18,7 @@
 
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
-package io.art.generator.meta.service
+package io.art.generator.meta.service.java
 
 import com.sun.tools.javac.code.Flags.Flag.SYNTHETIC
 import com.sun.tools.javac.code.Flags.asFlagSet

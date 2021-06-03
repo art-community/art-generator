@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-package io.art.generator.meta.service
+package io.art.generator.meta.service.java
 
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.SOURCES_CHANGED
 import io.art.generator.meta.detector.JavaSourceChangesDetector.detectJavaChanges
-import io.art.generator.meta.service.JavaMetaGenerationService.generateJavaMeta
+import io.art.generator.meta.service.java.JavaMetaGenerationService.generateJavaMeta
 import io.art.scheduler.manager.Scheduling.schedule
 import java.time.LocalDateTime.now
 import java.util.concurrent.Future

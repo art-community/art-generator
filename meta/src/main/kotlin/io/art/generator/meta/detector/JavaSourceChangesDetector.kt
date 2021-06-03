@@ -28,7 +28,7 @@ import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.META_NAME
 import io.art.generator.meta.extension.isJava
 import io.art.generator.meta.model.JavaMetaClass
-import io.art.generator.meta.service.JavaAnalyzingService.analyzeJavaSources
+import io.art.generator.meta.service.java.JavaAnalyzingService.analyzeJavaSources
 import java.nio.file.Path
 
 
