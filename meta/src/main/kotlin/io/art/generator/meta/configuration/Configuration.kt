@@ -19,7 +19,6 @@
 package io.art.generator.meta.configuration
 
 import io.art.configurator.module.ConfiguratorModule.configuration
-import io.art.generator.meta.constants.DEFAULT_META_METHOD_EXCLUSIONS
 import io.art.generator.meta.extension.path
 import java.nio.file.Path
 import java.time.Duration
@@ -33,7 +32,6 @@ data class Configuration(
         val moduleName: String,
         val watcherPeriod: Duration,
         val analyzerDelay: Duration,
-        val metaMethodExclusions: Set<String>,
 )
 
 val configuration: Configuration by lazy {
@@ -45,8 +43,7 @@ val configuration: Configuration by lazy {
                 classpath = getStringArray("classpath").map { file -> file.path }.toSet(),
                 moduleName = getString("module.name"),
                 watcherPeriod = getDuration("watcher.period"),
-                analyzerDelay = getDuration("analyzer.delay"),
-                metaMethodExclusions = getStringArray("meta.method.exclusions").toSet().ifEmpty { DEFAULT_META_METHOD_EXCLUSIONS },
+                analyzerDelay = getDuration("analyzer.delay")
         )
     }
 }

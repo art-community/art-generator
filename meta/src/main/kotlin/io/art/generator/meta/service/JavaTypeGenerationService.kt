@@ -20,48 +20,25 @@ package io.art.generator.meta.service
 
 import com.squareup.javapoet.*
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
+import io.art.generator.meta.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.meta.constants.OBJECT_CLASS_NAME
 import io.art.generator.meta.exception.MetaGeneratorException
 import io.art.generator.meta.model.JavaMetaClass
+import io.art.generator.meta.model.JavaMetaMethod
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import java.lang.Void.TYPE
-import javax.lang.model.element.Modifier.PUBLIC
-
-fun JavaMetaType.toPoet(): TypeName = when (kind) {
-    PRIMITIVE_KIND, ENUM_KIND -> TypeName.get(originalType)
-
-    ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.toPoet())
-
-    WILDCARD_KIND -> wildcardExtendsBound?.toPoet().let(WildcardTypeName::subtypeOf)
-            ?: wildcardSuperBound?.toPoet()?.let(WildcardTypeName::supertypeOf)
-            ?: WildcardTypeName.get(originalType)
-
-    VARIABLE_KIND -> {
-        val bounds = typeVariableBounds.map(JavaMetaType::toPoet).toTypedArray()
-        TypeVariableName.get(typeName, *bounds)
-    }
-
-    CLASS_KIND, INTERFACE_KIND -> {
-        when {
-            typeParameters.isNotEmpty() -> {
-                val parameters = typeParameters.map(JavaMetaType::toPoet).toTypedArray()
-                ParameterizedTypeName.get(ClassName.get(classPackageName, className), *parameters)
-            }
-            else -> ClassName.get(classPackageName, className)
-        }
-    }
-
-    UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
-}
+import javax.lang.model.element.Modifier.*
 
 fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
-    PRIMITIVE_KIND, ENUM_KIND -> toPoet()
+    PRIMITIVE_KIND -> TypeName.get(originalType)
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.withoutVariables())
 
+    ENUM_KIND -> ClassName.get(classPackageName, className)
+
     CLASS_KIND, INTERFACE_KIND -> when {
-        typeParameters.isEmpty() -> toPoet()
+        typeParameters.isEmpty() -> ClassName.get(classPackageName, className)
         else -> {
             val parameters = typeParameters.map { parameter ->
                 when (parameter.kind) {
@@ -84,13 +61,13 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
 }
 
 fun JavaMetaType.extractClass(): TypeName = when (kind) {
-    PRIMITIVE_KIND, ENUM_KIND -> {
-        if (typeName == TYPE.name) toPoet().box() else toPoet()
+    PRIMITIVE_KIND -> {
+        if (typeName == TYPE.name) TypeName.get(originalType).box() else TypeName.get(originalType)
     }
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())
 
-    CLASS_KIND, INTERFACE_KIND -> ClassName.get(classPackageName, className)
+    CLASS_KIND, INTERFACE_KIND, ENUM_KIND -> ClassName.get(classPackageName, className)
 
     VARIABLE_KIND -> OBJECT_CLASS_NAME
 
@@ -106,3 +83,23 @@ fun JavaMetaType.hasVariable(): Boolean = kind == VARIABLE_KIND
         || arrayComponentType?.hasVariable() ?: false
 
 fun JavaMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && modifiers.contains(PUBLIC)
+
+fun JavaMetaMethod.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) && modifiers.contains(PUBLIC)
+
+fun JavaMetaClass.parentMethods() = parent
+        ?.methods
+        ?.filter { method ->
+            method.modifiers.contains(PUBLIC)
+                    || method.modifiers.contains(PROTECTED)
+                    || !(method.modifiers.contains(PRIVATE) && parent.type.classPackageName == type.classPackageName)
+        }
+        ?: emptyList()
+
+fun JavaMetaClass.parentFields() = parent
+        ?.fields
+        ?.filter { field ->
+            field.value.modifiers.contains(PUBLIC)
+                    || field.value.modifiers.contains(PROTECTED)
+                    || !(field.value.modifiers.contains(PRIVATE) && parent.type.classPackageName == type.classPackageName)
+        }
+        ?: emptyMap()

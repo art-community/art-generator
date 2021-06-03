@@ -38,7 +38,6 @@ enum class JavaMetaTypeKind {
 
 data class JavaMetaType(
         val originalType: TypeMirror,
-        val typeParameters: List<JavaMetaType> = emptyList(),
 
         val typeName: String,
         val kind: JavaMetaTypeKind,
@@ -52,41 +51,18 @@ data class JavaMetaType(
         val wildcardExtendsBound: JavaMetaType? = null,
         val wildcardSuperBound: JavaMetaType? = null,
 
-        val typeVariableBounds: List<JavaMetaType> = emptyList(),
+        val typeParameters: MutableList<JavaMetaType> = mutableListOf(),
+        val typeVariableBounds: MutableList<JavaMetaType> = mutableListOf(),
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-
         other as JavaMetaType
-
         if (typeName != other.typeName) return false
-        if (kind != other.kind) return false
-        if (classFullName != other.classFullName) return false
-        if (className != other.className) return false
-        if (classPackageName != other.classPackageName) return false
-        if (typeParameters != other.typeParameters) return false
-        if (arrayComponentType != other.arrayComponentType) return false
-        if (wildcardExtendsBound != other.wildcardExtendsBound) return false
-        if (wildcardSuperBound != other.wildcardSuperBound) return false
-        if (typeVariableBounds != other.typeVariableBounds) return false
-
         return true
     }
 
-    override fun hashCode(): Int {
-        var result = typeName.hashCode()
-        result = 31 * result + kind.hashCode()
-        result = 31 * result + (classFullName?.hashCode() ?: 0)
-        result = 31 * result + (className?.hashCode() ?: 0)
-        result = 31 * result + (classPackageName?.hashCode() ?: 0)
-        result = 31 * result + typeParameters.hashCode()
-        result = 31 * result + (arrayComponentType?.hashCode() ?: 0)
-        result = 31 * result + (wildcardExtendsBound?.hashCode() ?: 0)
-        result = 31 * result + (wildcardSuperBound?.hashCode() ?: 0)
-        result = 31 * result + typeVariableBounds.hashCode()
-        return result
-    }
+    override fun hashCode(): Int = typeName.hashCode()
 }
 
 data class JavaMetaClass(

@@ -23,12 +23,13 @@ import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.constants.StringConstants.EMPTY_STRING
-import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaMethod
 import io.art.generator.meta.model.JavaMetaType
 import io.art.generator.meta.service.couldBeGenerated
+import io.art.generator.meta.service.parentFields
+import io.art.generator.meta.service.parentMethods
 import io.art.generator.meta.service.withoutVariables
 import io.art.generator.meta.templates.*
 import javax.lang.model.element.Modifier.*
@@ -71,20 +72,16 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
             .let(::addMethod)
 }
 
+
 private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
-    val fields = metaClass.parent
-            ?.fields
-            ?.filter { field -> !field.value.modifiers.contains(PRIVATE) }
-            ?.toMutableMap()
-            ?: mutableMapOf()
-    fields.putAll(metaClass.fields)
+    val fields = metaClass.parentFields() + metaClass.fields
     fields.entries.forEach { field ->
         val fieldTypeName = field.value.type.withoutVariables()
         val fieldMetaType = ParameterizedTypeName.get(META_FIELD_CLASS_NAME, fieldTypeName.box())
         val fieldName = metaFieldName(field.key)
         FieldSpec.builder(fieldMetaType, fieldName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerMetaFieldStatement(fieldName, field.value))
+                .initializer(registerMetaFieldStatement(field.key, field.value))
                 .build()
                 .apply(::addField)
         methodBuilder(fieldName)
@@ -96,10 +93,11 @@ private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
     }
 }
 
+
 private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, typeName: TypeName) {
     val type = metaClass.type
     metaClass.constructors
-            .filter { constructor -> constructor.modifiers.contains(PUBLIC) }
+            .filter(JavaMetaMethod::couldBeGenerated)
             .mapIndexed { index, constructor ->
                 var name = CONSTRUCTOR_NAME
                 if (index > 0) name += index
@@ -157,59 +155,50 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
     }
 }
 
+
 private fun TypeSpec.Builder.generateMethods(metaClass: JavaMetaClass) {
     val type = metaClass.type
-    val methods = metaClass.methods.toMutableList()
-    methods += metaClass.interfaces.flatMap { interfaceType ->
-        interfaceType.methods.filter { method -> method.modifiers.contains(DEFAULT) || method.modifiers.contains(STATIC) }
-    }
-    methods += metaClass.parent?.methods
-            ?.filter { method -> !method.modifiers.contains(PRIVATE) }
-            ?: emptyList()
-    methods.filter { method -> !configuration.metaMethodExclusions.contains(method.name) }
+    val methods = metaClass.methods + metaClass.parentMethods()
+    methods.asSequence()
+            .filter(JavaMetaMethod::couldBeGenerated)
             .groupBy { method -> method.name }
-            .map { grouped ->
-                grouped.value.forEachIndexed { methodIndex, method ->
-                    var name = method.name
-                    if (methodIndex > 0) name += methodIndex
-                    val methodName = metaMethodName(name)
-                    val methodClassName = name.capitalize()
-                    val reference = ClassName.get(EMPTY_STRING, methodClassName)
-                    val returnTypeName = method.returnType.withoutVariables()
-                    val static = method.modifiers.contains(STATIC)
-                    val parent = when {
-                        static -> {
-                            ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnTypeName.box())
-                        }
-                        else -> {
-                            ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, type.withoutVariables(), returnTypeName.box())
-                        }
-                    }
-                    classBuilder(methodClassName)
-                            .addModifiers(PUBLIC, FINAL, STATIC)
-                            .superclass(parent)
-                            .addMethod(constructorBuilder()
-                                    .addModifiers(PRIVATE)
-                                    .addCode(metaMethodSuperStatement(method.name, method.returnType, method.modifiers))
-                                    .build())
-                            .apply { generateMethodInvocations(type, method.name, method) }
-                            .apply { generateParameters(method) }
-                            .build()
-                            .apply(::addType)
-                    FieldSpec.builder(reference, methodName)
-                            .addModifiers(PRIVATE, FINAL)
-                            .initializer(registerNewStatement(), reference)
-                            .build()
-                            .apply(::addField)
-                    methodBuilder(methodName)
-                            .addModifiers(PUBLIC)
-                            .returns(reference)
-                            .addCode(returnStatement(), methodName)
-                            .build()
-                            .let(::addMethod)
-                }
+            .map { grouped -> grouped.value.forEachIndexed { methodIndex, method -> generateMethod(method, methodIndex, type) } }
+}
 
-            }
+private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, ownerType: JavaMetaType) {
+    var name = method.name
+    if (index > 0) name += index
+    val methodName = metaMethodName(name)
+    val methodClassName = name.capitalize()
+    val reference = ClassName.get(EMPTY_STRING, methodClassName)
+    val returnTypeName = method.returnType.withoutVariables().box()
+    val static = method.modifiers.contains(STATIC)
+    val parent = when {
+        static -> ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnTypeName)
+        else -> ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, ownerType.withoutVariables(), returnTypeName)
+    }
+    classBuilder(methodClassName)
+            .addModifiers(PUBLIC, FINAL, STATIC)
+            .superclass(parent)
+            .addMethod(constructorBuilder()
+                    .addModifiers(PRIVATE)
+                    .addCode(metaMethodSuperStatement(method.name, method.returnType, method.modifiers))
+                    .build())
+            .apply { generateMethodInvocations(ownerType, method.name, method) }
+            .apply { generateParameters(method) }
+            .build()
+            .apply(::addType)
+    FieldSpec.builder(reference, methodName)
+            .addModifiers(PRIVATE, FINAL)
+            .initializer(registerNewStatement(), reference)
+            .build()
+            .apply(::addField)
+    methodBuilder(methodName)
+            .addModifiers(PUBLIC)
+            .returns(reference)
+            .addCode(returnStatement(), methodName)
+            .build()
+            .let(::addMethod)
 }
 
 private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name: String, method: JavaMetaMethod) {
@@ -259,6 +248,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
     }
 }
 
+
 private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
     method.parameters.entries.forEachIndexed { parameterIndex, parameter ->
         val parameterTypeName = parameter.value.type.withoutVariables()
@@ -266,7 +256,7 @@ private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
         val parameterName = metaParameterName(parameter.key)
         FieldSpec.builder(metaParameterType, parameterName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerMetaParameterStatement(parameterIndex, parameterName, parameter.value))
+                .initializer(registerMetaParameterStatement(parameterIndex, parameter.key, parameter.value))
                 .build()
                 .apply(::addField)
         methodBuilder(parameterName)

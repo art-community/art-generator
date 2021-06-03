@@ -16,9 +16,19 @@ const val CONSTRUCTOR_NAME = "constructor"
 const val INSTANCE_NAME = "instance"
 const val ARGUMENT_NAME = "argument"
 const val ARGUMENTS_NAME = "arguments"
+
 const val META_TYPE_NAME = "metaType"
 const val META_ARRAY_NAME = "metaArray"
 const val META_VARIABLE_NAME = "metaVariable"
 const val META_ENUM_NAME = "metaEnum"
+
+val META_METHODS = setOf(
+        META_TYPE_NAME,
+        META_ARRAY_NAME,
+        META_VARIABLE_NAME,
+        META_ENUM_NAME
+)
+
+
 const val CAST_NAME = "cast"
 const val SET_OF_NAME = "setOf"
