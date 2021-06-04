@@ -21,12 +21,13 @@ package io.art.generator.meta.service.java
 import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.SOURCES_CHANGED
 import io.art.generator.meta.detector.JavaSourceChangesDetector.detectJavaChanges
+import io.art.generator.meta.service.java.JavaAnalyzingService.analyzeJavaSources
 import io.art.generator.meta.service.java.JavaMetaGenerationService.generateJavaMeta
 
 
 object JavaSourceWatchingService {
     fun watchJavaSources() = detectJavaChanges().changed {
         JAVA_LOGGER.info(SOURCES_CHANGED(modified, deleted))
-        handle { classes -> generateJavaMeta(classes.asSequence()) }
+        generateJavaMeta(analyzeJavaSources(existed.asSequence()).values.asSequence())
     }
 }

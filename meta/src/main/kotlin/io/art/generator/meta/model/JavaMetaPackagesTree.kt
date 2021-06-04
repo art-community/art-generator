@@ -65,7 +65,4 @@ private class JavaMetaPackagesTree(classes: Sequence<JavaMetaClass>) {
     fun collect() = rootPackages.mapValues { node -> node.value.collect() }
 }
 
-fun Sequence<JavaMetaClass>.asTree(): Map<String, JavaMetaNode> {
-    val javaMetaPackagesTree = JavaMetaPackagesTree(this)
-    return javaMetaPackagesTree.collect()
-}
+fun Sequence<JavaMetaClass>.asTree(): Map<String, JavaMetaNode> = JavaMetaPackagesTree(this).collect()

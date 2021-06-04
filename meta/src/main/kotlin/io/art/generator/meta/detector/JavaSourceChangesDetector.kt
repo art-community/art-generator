@@ -20,9 +20,7 @@ package io.art.generator.meta.detector
 
 import io.art.core.extensions.FileExtensions.readFileBytes
 import io.art.core.extensions.HashExtensions.xx64
-import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.common.collectJavaSources
-import io.art.generator.meta.service.java.JavaAnalyzingService.analyzeJavaSources
 import java.nio.file.Path
 
 
@@ -53,10 +51,6 @@ object JavaSourceChangesDetector {
     data class JavaSourcesChanges(val existed: Set<Path>, val modified: List<Path>, val deleted: List<Path>) {
         fun changed(action: JavaSourcesChanges.() -> Unit) {
             if (modified.isNotEmpty() || deleted.isNotEmpty()) action(this)
-        }
-
-        fun handle(handler: (Set<JavaMetaClass>) -> Unit) {
-            analyzeJavaSources(existed.asSequence()).values.toSet().apply(handler)
         }
     }
 }

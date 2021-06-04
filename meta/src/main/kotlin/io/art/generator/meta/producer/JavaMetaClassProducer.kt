@@ -57,6 +57,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
                         .forEach { inner -> generateClass(inner) }
             }
             .build()
+            .apply { alwaysQualify(metaClass.type.className) }
             .apply(::addType)
     FieldSpec.builder(metaClassName, className)
             .addModifiers(PRIVATE, FINAL)

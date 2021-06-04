@@ -33,10 +33,7 @@ fun Sequence<JavaMetaClass>.javaClassNames() = map { source -> source.type.class
 val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)
 
 val SOURCES_CHANGED = { modified: List<Path>, deleted: List<Path> -> "Sources changed\nModified: ${modified.relativeNames()}\nDeleted: ${deleted.relativeNames()}" }
-val CLASSES_CHANGED = { changed: List<Path>, deleted: List<Path> -> "Classes changed\nModified: ${changed.relativeNames()}\nDeleted: ${deleted.relativeNames()}\nProcess generation" }
 val ANALYZING_MESSAGE = { root: Path -> "Analyzing sources inside $root" }
 val ANALYZE_COMPLETED = { sources: List<Path> -> "Analyze completed\nSources: ${sources.relativeNames()}" }
-val GENERATING_METAS_MESSAGE = { classes: Sequence<JavaMetaClass> -> "Generating meta classes.\nSources: ${classes.javaClassNames()}" }
+val GENERATING_METAS_MESSAGE = { classes: Sequence<JavaMetaClass> -> "Generating meta classes\nSources: ${classes.javaClassNames()}" }
 val GENERATED_MESSAGE = { name: String -> "Generated meta class: $name" }
-
-const val CLASSES_NOT_CHANGED = "Classes not changed. Skip Generation"

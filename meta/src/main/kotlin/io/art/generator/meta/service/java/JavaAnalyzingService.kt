@@ -28,7 +28,10 @@ import io.art.core.constants.StringConstants.DOT
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.meta.configuration.configuration
-import io.art.generator.meta.constants.*
+import io.art.generator.meta.constants.ANALYZE_COMPLETED
+import io.art.generator.meta.constants.ANALYZING_MESSAGE
+import io.art.generator.meta.constants.JAVA_LOGGER
+import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.model.*
 import io.art.generator.meta.model.JavaMetaTypeKind.*
 import io.art.generator.meta.provider.JavaCompilerProvider.useJavaCompiler
@@ -40,9 +43,10 @@ import javax.lang.model.element.ElementKind.ENUM
 import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeMirror
 
+private val TYPE_CACHE = mutableMapOf<TypeMirror, JavaMetaType>()
+
 object JavaAnalyzingService {
     fun analyzeJavaSources(sources: Sequence<Path>): Map<Path, JavaMetaClass> {
-
         val sourceRoots = configuration.sourcesRoot.toFile()
                 .listFiles()
                 ?.asSequence()
@@ -58,14 +62,12 @@ object JavaAnalyzingService {
                     .map { element -> (element as ClassSymbol) }
                     .filter { symbol -> symbol.className() != metaModuleClassFullName(configuration.moduleName) }
                     .map { symbol -> symbol.asMetaClass() }
-                    .filter { input -> input.type.classPackageName?.split(DOT)?.firstOrNull() != META_NAME }
                     .associateBy { metaClass -> metaClass.source }
                     .apply { JAVA_LOGGER.info(ANALYZE_COMPLETED(keys.toList())) }
+                    .apply { TYPE_CACHE.clear() }
         }
     }
 }
-
-private val TYPE_CACHE = mutableMapOf<TypeMirror, JavaMetaType>()
 
 private fun TypeMirror.asMetaType(): JavaMetaType = putIfAbsent(TYPE_CACHE, this) {
     when (this) {

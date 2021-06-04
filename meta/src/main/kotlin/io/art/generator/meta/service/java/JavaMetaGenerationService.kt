@@ -86,7 +86,6 @@ object JavaMetaGenerationService {
 
     private fun TypeSpec.Builder.generateTree(packageName: String, packageClassName: ClassName, node: JavaMetaNode) {
         if (packageName.isEmpty()) {
-            node.classes.filter(JavaMetaClass::couldBeGenerated).forEach(::generateClass)
             return
         }
         val metaPackageName = metaPackageName(packageName)
