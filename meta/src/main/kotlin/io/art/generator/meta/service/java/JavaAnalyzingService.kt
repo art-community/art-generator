@@ -27,6 +27,7 @@ import com.sun.tools.javac.code.Symbol.*
 import com.sun.tools.javac.code.Type
 import io.art.core.constants.CompilerSuppressingWarnings.UNCHECKED_CAST
 import io.art.core.constants.StringConstants.DOT
+import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.*
@@ -110,7 +111,8 @@ private fun Type.ClassType.asMetaType(): JavaMetaType {
                 },
                 typeName = tsym.qualifiedName.toString(),
                 className = tsym.simpleName.toString(),
-                classPackageName = tsym.qualifiedName.toString().substringBeforeLast(DOT)
+                classPackageName = tsym.qualifiedName.toString().takeIf { name -> name.contains(DOT) }?.substringBeforeLast(DOT)
+                        ?: EMPTY_STRING
         )
     }
     typeArguments

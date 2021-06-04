@@ -81,31 +81,34 @@ object JavaMetaGenerationService {
         classes.asTree()
                 .values
                 .asSequence()
-                .forEach { node -> generateTree(node) }
+                .forEach { node -> generateTree(node.packageShortName, metaPackageClassName(node.packageShortName), node) }
     }
 
-    private fun TypeSpec.Builder.generateTree(node: JavaMetaNode) {
-        val metaPackageName = metaPackageClassName(node.packageShortName)
-        FieldSpec.builder(metaPackageName, node.packageShortName)
+    private fun TypeSpec.Builder.generateTree(originalName: String, packageClassName: ClassName, node: JavaMetaNode) {
+        if (originalName.isEmpty()) {
+            node.classes.filter(JavaMetaClass::couldBeGenerated).forEach(::generateClass)
+            return
+        }
+        FieldSpec.builder(packageClassName, originalName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerNewStatement(), metaPackageName)
+                .initializer(registerNewStatement(), packageClassName)
                 .build()
                 .apply(::addField)
-        methodBuilder(node.packageShortName)
+        methodBuilder(originalName.decapitalize())
                 .addModifiers(PUBLIC)
-                .returns(metaPackageName)
-                .addCode(returnStatement(), node.packageShortName)
+                .returns(packageClassName)
+                .addCode(returnStatement(), originalName)
                 .build()
                 .let(::addMethod)
-        val packageBuilder = classBuilder(metaPackageName)
+        val packageBuilder = classBuilder(packageClassName)
                 .addModifiers(PUBLIC, FINAL, STATIC)
                 .superclass(META_PACKAGE_CLASS_NAME)
                 .addMethod(constructorBuilder()
                         .addModifiers(PRIVATE)
-                        .addCode(namedSuperStatement(node.packageShortName))
+                        .addCode(namedSuperStatement(originalName))
                         .build())
         node.classes.filter(JavaMetaClass::couldBeGenerated).forEach(packageBuilder::generateClass)
-        node.children.values.forEach { child -> packageBuilder.generateTree(child) }
+        node.children.values.forEach { child -> packageBuilder.generateTree(originalName, nestedMetaPackageClassName(originalName), child) }
         addType(packageBuilder.build())
     }
 }

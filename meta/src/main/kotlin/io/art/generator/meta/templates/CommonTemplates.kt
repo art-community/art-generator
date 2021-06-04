@@ -26,6 +26,8 @@ fun metaModuleClassFullName(name: String): String = "$META_NAME.Meta$name"
 
 fun metaModuleFileName(name: String, extension: String): String = "Meta$name$extension"
 
+fun metaPackageName(name: String): String = "${name.capitalize()}Package"
+
 fun metaClassName(name: String): String = "${name.capitalize()}Class"
 
 fun metaFieldName(name: String): String = "${name}Field"
@@ -36,6 +38,10 @@ fun metaMethodName(name: String): String = "${name}Method"
 
 fun metaModuleClassName(packageName: String, name: String): ClassName =
         ClassName.get(packageName, "Meta${name.capitalize()}")
+
+
+fun nestedMetaPackageClassName(name: String): ClassName =
+        ClassName.get(EMPTY_STRING, "Nested${name.capitalize()}Package")
 
 fun metaPackageClassName(name: String): ClassName =
         ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Package")

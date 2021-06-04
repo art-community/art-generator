@@ -18,7 +18,9 @@
 
 package io.art.generator.meta.model
 
+import io.art.core.combiner.SectionCombiner.combine
 import io.art.core.constants.StringConstants.DOT
+import io.art.core.constants.StringConstants.EMPTY_STRING
 
 data class JavaMetaNode(
         val packageFullName: String,
@@ -32,12 +34,9 @@ private class JavaMetaPackagesTree(classes: Sequence<JavaMetaClass>) {
 
     init {
         classes.forEach { metaClass ->
-            metaClass.type.classPackageName
-                    ?.substringBefore(DOT)
-                    ?.let { packageName ->
-                        rootPackages[packageName]?.add(metaClass)?.let { return@forEach }
-                        rootPackages[packageName] = Node(packageName).apply { add(metaClass) }
-                    }
+            val packageName = metaClass.type.classPackageName!!.substringBefore(DOT)
+            rootPackages[packageName]?.add(metaClass)?.let { return@forEach }
+            rootPackages[packageName] = Node(packageName).apply { add(metaClass) }
         }
     }
 
@@ -53,7 +52,7 @@ private class JavaMetaPackagesTree(classes: Sequence<JavaMetaClass>) {
             }
             if (childPackage.isEmpty()) return
             val nextPackageShortName = childPackage.removePrefix(packageFullName + DOT).substringBefore(DOT)
-            val nextPackageFullName = packageFullName + DOT + nextPackageShortName
+            val nextPackageFullName = combine(packageFullName, nextPackageShortName)
             children[nextPackageShortName]?.add(childClass)?.let { return }
             children[nextPackageShortName] = Node(nextPackageFullName).apply { add(childClass) }
         }
@@ -67,4 +66,7 @@ private class JavaMetaPackagesTree(classes: Sequence<JavaMetaClass>) {
     fun collect() = rootPackages.mapValues { node -> node.value.collect() }
 }
 
-fun Sequence<JavaMetaClass>.asTree() = JavaMetaPackagesTree(this).collect()
+fun Sequence<JavaMetaClass>.asTree(): Map<String, JavaMetaNode> {
+    val javaMetaPackagesTree = JavaMetaPackagesTree(this)
+    return javaMetaPackagesTree.collect()
+}
