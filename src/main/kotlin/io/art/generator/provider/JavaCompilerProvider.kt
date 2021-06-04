@@ -30,11 +30,10 @@ import io.art.core.context.Context.context
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.constants.PARAMETERS_OPTION
-import io.art.generator.logger.CollectingDiagnosticListener
+import io.art.generator.logging.EmptyDiagnosticListener
+import io.art.generator.logging.EmptyWriter
 import io.art.generator.model.JavaCompilerContext
 import org.jetbrains.kotlin.javac.JavacOptionsMapper.setUTF8Encoding
-import java.io.PrintWriter
-import java.io.Writer
 import java.nio.charset.Charset.defaultCharset
 import java.nio.file.Path
 import java.util.*
@@ -49,41 +48,26 @@ class JavaCompilerConfiguration(
 object JavaCompilerProvider {
     fun <T> useJavaCompiler(compilerConfiguration: JavaCompilerConfiguration, action: JavaCompiler.(task: JavacTask) -> T): T {
         val tool = JavacTool.create()
-        val listener = CollectingDiagnosticListener()
         val classpath = configuration.classpath.map { path -> path.toFile() }
-        val emptyWriter = PrintWriter(object : Writer() {
-            override fun close() {
-
-            }
-
-            override fun flush() {
-            }
-
-            override fun write(cbuf: CharArray, off: Int, len: Int) {
-            }
-        })
-
         val context = JavaCompilerContext().apply {
             Options.instance(this).apply { setUTF8Encoding(this) }
         }
-
-        val fileManager = tool.getStandardFileManager(listener, Locale.getDefault(), defaultCharset()).apply {
+        val fileManager = tool.getStandardFileManager(EmptyDiagnosticListener, Locale.getDefault(), defaultCharset()).apply {
             setLocation(SOURCE_PATH, compilerConfiguration.sourceRoots.map(Path::toFile))
             setLocation(CLASS_PATH, classpath)
             setLocation(CLASS_OUTPUT, listOf(compilerConfiguration.destination.toFile()))
         }
-
         val options = listOf(PARAMETERS_OPTION)
-
         val files = fileManager.getJavaFileObjects(*compilerConfiguration.sources.map { path -> path.toFile() }.toList().toTypedArray())
-
-        val compilerInstance = JavaCompiler.instance(context).apply { log.setWriter(ERROR, emptyWriter) }
-        compilerInstance.shouldStopPolicyIfError = GENERATE
+        val compilerInstance = JavaCompiler.instance(context).apply {
+            log.setWriter(ERROR, EmptyWriter)
+            shouldStopPolicyIfError = GENERATE
+        }
         try {
             val javacTask = tool.getTask(
-                    emptyWriter,
+                    EmptyWriter,
                     fileManager,
-                    listener,
+                    EmptyDiagnosticListener,
                     options,
                     emptyList(),
                     files,

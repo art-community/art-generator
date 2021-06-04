@@ -29,13 +29,13 @@ import io.art.generator.constants.CASTER_CLASS_NAME
 import io.art.generator.constants.OBJECT_CLASS_NAME
 import io.art.generator.constants.SET_FACTORY_CLASS_NAME
 import io.art.generator.exception.MetaGeneratorException
+import io.art.generator.extension.extractClass
+import io.art.generator.extension.hasVariable
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaField
 import io.art.generator.model.JavaMetaParameter
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.*
-import io.art.generator.service.java.extractClass
-import io.art.generator.service.java.hasVariable
 import javax.lang.model.element.Modifier
 
 
@@ -47,7 +47,7 @@ fun newStatement() = "new \$T()"
 
 fun returnStatement() = "return \$L;"
 
-fun returnStatement(block: CodeBlock): CodeBlock = "return".asCode().joinSpaced(block)
+fun returnStatement(block: CodeBlock): CodeBlock = "return".asCode().joinBySpace(block)
 
 fun returnNullStatement() = "return null;"
 
@@ -105,29 +105,29 @@ fun returnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String,
 fun registerMetaFieldStatement(name: String, field: JavaMetaField): CodeBlock = "register(new MetaField<>(\$S,"
         .asCode(name)
         .join(metaTypeStatement(field.type))
-        .joinCommas(asString(field.modifiers))
+        .joinByComma(asString(field.modifiers))
         .join("))")
 
 fun registerMetaParameterStatement(index: Int, name: String, parameter: JavaMetaParameter): CodeBlock = "register(new MetaParameter<>($index, \$S,"
         .asCode(name)
         .join(metaTypeStatement(parameter.type))
-        .joinCommas(asString(parameter.modifiers))
+        .joinByComma(asString(parameter.modifiers))
         .join("))")
 
 fun metaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super(\$S,"
         .asCode(name)
         .join(metaTypeStatement(type))
-        .joinCommas(asString(modifiers))
+        .joinByComma(asString(modifiers))
         .join(");")
 
 fun metaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super("
         .join(metaTypeStatement(type))
-        .joinCommas(asString(modifiers))
+        .joinByComma(asString(modifiers))
         .join(");")
 
 fun metaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
         .join(metaTypeStatement(metaClass.type))
-        .joinCommas(asString(metaClass.modifiers))
+        .joinByComma(asString(metaClass.modifiers))
         .join(");")
 
 fun namedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
@@ -142,7 +142,7 @@ private fun metaTypeBlock(className: TypeName, vararg parameters: JavaMetaType):
         .asCode(className)
         .let { block ->
             if (parameters.isEmpty()) return@let block
-            block.joinCommas(*parameters.map(::metaTypeStatement).toTypedArray())
+            block.joinByComma(*parameters.map(::metaTypeStatement).toTypedArray())
         }
         .join(")")
 
@@ -171,15 +171,13 @@ private fun String.asCode(vararg arguments: Any): CodeBlock = of(this, *argument
 
 private fun String.join(vararg blocks: CodeBlock): CodeBlock = asCode().join(*blocks)
 
-private fun CodeBlock.join(separator: String = EMPTY_STRING, vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), separator)
-
 private fun CodeBlock.join(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), EMPTY_STRING)
 
 private fun CodeBlock.join(block: String): CodeBlock = join(listOf(this, block.asCode()), EMPTY_STRING)
 
-private fun CodeBlock.joinSpaced(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), SPACE)
+private fun CodeBlock.joinBySpace(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), SPACE)
 
-private fun CodeBlock.joinCommas(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), COMMA)
+private fun CodeBlock.joinByComma(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), COMMA)
 
 
 private fun casted(parameter: JavaMetaParameter): CodeBlock {

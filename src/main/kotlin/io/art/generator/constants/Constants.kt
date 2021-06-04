@@ -21,8 +21,9 @@ package io.art.generator.constants
 const val KOTLIN_EXTENSION = "kt"
 const val KOTLIN_SCRIPT_EXTENSION = "kts"
 
-const val DOT_JAVA = ".java"
-
+const val JAVA = "java"
+const val CLASS = "class"
+const val JAR = "jar"
 
 const val JAVA_MODULE_SUPPRESSION = "JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE"
 

@@ -54,7 +54,6 @@ object JavaAnalyzingService {
                 ?.map(File::toPath)
                 ?.toList()
                 ?: emptyList()
-
         JAVA_LOGGER.info(ANALYZING_MESSAGE(configuration.sourcesRoot))
         return useJavaCompiler(JavaCompilerConfiguration(sources, sourceRoots)) { task ->
             task.analyze()

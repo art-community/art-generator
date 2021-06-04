@@ -11,6 +11,12 @@ tasks.withType(type = Wrapper::class) {
     gradleVersion = "7.0"
 }
 
+val compileKotlin by tasks.getting(KotlinCompile::class) {
+    kotlinOptions {
+        jvmTarget = JavaVersion.current().toString()
+    }
+}
+
 allprojects {
     group = "io.art.generator"
     repositories { mavenCentral() }
@@ -46,12 +52,6 @@ dependencies {
 
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
-}
-
-val compileKotlin by tasks.getting(KotlinCompile::class) {
-    kotlinOptions {
-        jvmTarget = JavaVersion.current().toString()
-    }
 }
 
 executable {

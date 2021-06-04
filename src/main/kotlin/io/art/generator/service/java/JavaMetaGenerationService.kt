@@ -24,17 +24,15 @@ import com.squareup.javapoet.*
 import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
-import io.art.core.caster.Caster
 import io.art.core.constants.StringConstants.EMPTY_STRING
-import io.art.core.factory.SetFactory
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.*
+import io.art.generator.extension.couldBeGenerated
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaNode
 import io.art.generator.model.asTree
 import io.art.generator.producer.generateClass
 import io.art.generator.templates.*
-import io.art.meta.model.MetaType
 import javax.lang.model.element.Modifier.*
 
 object JavaMetaGenerationService {
@@ -67,9 +65,9 @@ object JavaMetaGenerationService {
                 .build()
                 .let { metaClass ->
                     JavaFile.builder(META_NAME, metaClass)
-                            .addStaticImport(MetaType::class.java, *META_METHODS.toTypedArray())
-                            .addStaticImport(Caster::class.java, CAST_NAME)
-                            .addStaticImport(SetFactory::class.java, SET_OF_NAME)
+                            .addStaticImport(META_TYPE_CLASS_NAME, *META_METHODS.toTypedArray())
+                            .addStaticImport(CASTER_CLASS_NAME, CAST_NAME)
+                            .addStaticImport(SET_FACTORY_CLASS_NAME, SET_OF_NAME)
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)

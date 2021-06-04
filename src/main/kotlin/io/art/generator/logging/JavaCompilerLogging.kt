@@ -16,15 +16,25 @@
  * limitations under the License.
  */
 
-package io.art.generator.logger
+package io.art.generator.logging
 
+import java.io.PrintWriter
+import java.io.Writer
 import javax.tools.Diagnostic
 import javax.tools.DiagnosticListener
 
-class CollectingDiagnosticListener : DiagnosticListener<Any> {
-    val diagnostics = mutableListOf<Diagnostic<out Any>>()
+object EmptyWriter : PrintWriter(object : Writer() {
+    override fun close() {
+    }
 
+    override fun flush() {
+    }
+
+    override fun write(cbuf: CharArray, off: Int, len: Int) {
+    }
+})
+
+object EmptyDiagnosticListener : DiagnosticListener<Any> {
     override fun report(diagnostic: Diagnostic<out Any>) {
-        diagnostics += diagnostic
     }
 }

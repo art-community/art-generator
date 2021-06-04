@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.service
+package io.art.generator.service.kotlin
 
 object KotlinAnalyzingService {
     fun analyzeKotlinSources() {

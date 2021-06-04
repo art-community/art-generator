@@ -19,4 +19,3 @@
 package io.art.generator.constants
 
 const val PARAMETERS_OPTION = "-parameters"
-const val NO_WARN_OPTION = "-nowarn"

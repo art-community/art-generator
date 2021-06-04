@@ -29,7 +29,6 @@ import java.time.Duration
 
 
 data class Configuration(
-        val configurationPath: String,
         val sourcesRoot: Path,
         val classpath: Set<Path>,
         val moduleName: String,
@@ -40,7 +39,6 @@ data class Configuration(
 val configuration: Configuration by lazy {
     with(configuration()) {
         Configuration(
-                configurationPath = path,
                 sourcesRoot = getString("paths.sources").path,
                 classpath = getString("classpath").split(if (isWindows()) SEMICOLON else COLON).map { path -> get(path) }.toSet(),
                 moduleName = getString("module.name"),

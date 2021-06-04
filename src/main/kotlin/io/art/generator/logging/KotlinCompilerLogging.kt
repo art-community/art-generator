@@ -16,19 +16,24 @@
  * limitations under the License.
  */
 
-package io.art.generator.logger
+package io.art.generator.logging
 
 import io.art.logging.logger.Logger
-import io.art.logging.module.LoggingModule.logger
+import io.art.logging.module.LoggingModule
 import io.art.logging.stream.LoggerStream
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.cli.common.messages.MessageRenderer.WITHOUT_PATHS
+import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import java.io.PrintStream
+import java.io.PrintWriter
+import java.io.Writer
+import javax.tools.Diagnostic
+import javax.tools.DiagnosticListener
 
-class LoggingMessageCollector(private val logger: Logger = logger(LoggingMessageCollector::class.java),
+
+class LoggingMessageCollector(private val logger: Logger = LoggingModule.logger(LoggingMessageCollector::class.java),
                               private val stream: PrintStream = LoggerStream(logger, Logger::info),
-                              private val printer: MessageCollector = PrintingMessageCollector(stream, WITHOUT_PATHS, true)
+                              private val printer: MessageCollector = PrintingMessageCollector(stream, MessageRenderer.WITHOUT_PATHS, true)
 ) : MessageCollector by printer
 
 val loggingMessageCollector = LoggingMessageCollector()

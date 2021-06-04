@@ -28,7 +28,6 @@ import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.VARIABLE_KIND
-import io.art.generator.service.java.*
 import io.art.generator.templates.*
 import javax.lang.model.element.Modifier.*
 import javax.lang.model.type.TypeKind.VOID
@@ -70,7 +69,6 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
             .let(::addMethod)
 }
 
-
 private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
     val fields = metaClass.parentFields() + metaClass.fields
     fields.entries.forEach { field ->
@@ -90,7 +88,6 @@ private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
                 .let(::addMethod)
     }
 }
-
 
 private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, typeName: TypeName) {
     val type = metaClass.type
@@ -153,7 +150,6 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
         }
     }
 }
-
 
 private fun TypeSpec.Builder.generateMethods(metaClass: JavaMetaClass) {
     val type = metaClass.type
@@ -221,7 +217,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             VOID -> addCode(invoke).addCode(returnNullStatement())
             else -> addCode(returnStatement(invoke))
         }
-        addParameter(ArrayTypeName.of(Object::class.java), ARGUMENTS_NAME)
+        addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
         addMethod(build())
     }
     when (method.parameters.size) {
@@ -250,7 +246,6 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
         }
     }
 }
-
 
 private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
     val variableExclusions = method.typeParameters

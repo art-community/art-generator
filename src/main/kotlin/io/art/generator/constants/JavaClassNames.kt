@@ -25,10 +25,8 @@ import io.art.meta.model.*
 
 val SET_FACTORY_CLASS_NAME = ClassName.get(SetFactory::class.java)!!
 val CASTER_CLASS_NAME = ClassName.get(Caster::class.java)!!
-val CLASS_CLASS_NAME = ClassName.get(Class::class.java)!!
 val OBJECT_CLASS_NAME = ClassName.get(Object::class.java)!!
 val META_FIELD_CLASS_NAME = ClassName.get(MetaField::class.java)!!
-val META_METHOD_CLASS_NAME = ClassName.get(MetaMethod::class.java)!!
 val META_CLASS_CLASS_NAME = ClassName.get(MetaClass::class.java)!!
 val META_TYPE_CLASS_NAME = ClassName.get(MetaType::class.java)!!
 val META_PACKAGE_CLASS_NAME = ClassName.get(MetaPackage::class.java)!!

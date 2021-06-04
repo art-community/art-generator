@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.service.java
+package io.art.generator.extension
 
 import com.squareup.javapoet.*
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
