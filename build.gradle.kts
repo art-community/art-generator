@@ -7,7 +7,6 @@ plugins {
     kotlin("jvm")
 }
 
-
 tasks.withType(type = Wrapper::class) {
     gradleVersion = "7.0"
 }
@@ -17,36 +16,37 @@ allprojects {
     repositories { mavenCentral() }
 }
 
-val included: Configuration by configurations.creating {
-    configurations.implementation.get().extendsFrom(this)
-}
-
 dependencies {
-    included(kotlin("stdlib-jdk8"))
-    included(kotlin("compiler-embeddable"))
-    included(kotlin("reflect"))
+    val lombokVersion: String by project
+    val junitVersion: String by project
+    val javaPoetVersion: String by project
+    val kotlinPoetVersion: String by project
 
-    included("io.art.java:core:main")
-    included("io.art.java:launcher:main")
-    included("io.art.java:configurator:main")
-    included("io.art.java:yaml-configuration:main")
-    included("io.art.java:value:main")
-    included("io.art.java:model:main")
-    included("io.art.java:scheduler:main")
-    included("io.art.java:logging:main")
-    included("io.art.java:meta:main")
-    included("com.squareup", "javapoet", "+")
-    included("com.squareup", "kotlinpoet", "+")
-    included("org.projectlombok", "lombok", "+")
+    embedded(kotlin("stdlib-jdk8"))
+    embedded(kotlin("compiler-embeddable"))
+    embedded(kotlin("reflect"))
 
-    testCompileOnly("org.projectlombok", "lombok", "+")
-    testAnnotationProcessor("org.projectlombok", "lombok", "+")
+    embedded("io.art.java:core:main")
+    embedded("io.art.java:launcher:main")
+    embedded("io.art.java:configurator:main")
+    embedded("io.art.java:yaml-configuration:main")
+    embedded("io.art.java:value:main")
+    embedded("io.art.java:model:main")
+    embedded("io.art.java:scheduler:main")
+    embedded("io.art.java:logging:main")
+    embedded("io.art.java:meta:main")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:+")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:+")
-    testRuntime("org.junit.platform:junit-platform-console:+")
+    embedded("com.squareup", "javapoet", javaPoetVersion)
+    embedded("com.squareup", "kotlinpoet", kotlinPoetVersion)
+
+    embedded("org.projectlombok", "lombok", lombokVersion)
+
+    testCompileOnly("org.projectlombok", "lombok", lombokVersion)
+    testAnnotationProcessor("org.projectlombok", "lombok", lombokVersion)
+
+    testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
+    testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 }
-
 
 val compileKotlin by tasks.getting(KotlinCompile::class) {
     kotlinOptions {
@@ -54,24 +54,10 @@ val compileKotlin by tasks.getting(KotlinCompile::class) {
     }
 }
 
-tasks.register("build-executable-jar", org.gradle.jvm.tasks.Jar::class.java) {
-    val compileKotlin: KotlinCompile = tasks["compileKotlin"] as KotlinCompile
-    val processResources: Task = tasks["processResources"]
-
-    group = "art"
-    dependsOn("build")
-
-    manifest {
-        attributes(mapOf("Main-Class" to "io.art.generator.meta.MetaGenerator", "Multi-Release" to "true"))
-    }
-
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-    from(processResources.outputs.files)
-    from(compileKotlin.outputs.files)
-    from(included.mapNotNull { dependency -> if (dependency.isDirectory) dependency else zipTree(dependency) })
+executable {
+    jar()
+    main("io.art.generator.Generator")
 }
-
 
 val testSourceSet: SourceSet = sourceSets.test.get()
 val configurationFile = testSourceSet
@@ -83,6 +69,8 @@ val configurationFile = testSourceSet
 
 task("prepare") {
     group = "art"
+
+    val embedded: Configuration by configurations
     doFirst {
         val configuration = """
             logging:
@@ -98,7 +86,7 @@ task("prepare") {
               period: 300ms
             analyzer:
               delay: 1s
-            classpath: ${included.files.joinToString(if (OperatingSystem.current().isWindows) ";" else ":")}
+            classpath: ${embedded.files.joinToString(if (OperatingSystem.current().isWindows) ";" else ":")}
         """.trimIndent()
         configurationFile.writeText(configuration)
     }
