@@ -20,7 +20,6 @@ package io.art.generator.meta.model
 
 import io.art.core.combiner.SectionCombiner.combine
 import io.art.core.constants.StringConstants.DOT
-import io.art.core.constants.StringConstants.EMPTY_STRING
 
 data class JavaMetaNode(
         val packageFullName: String,

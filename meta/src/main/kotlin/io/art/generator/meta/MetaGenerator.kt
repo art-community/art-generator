@@ -23,12 +23,19 @@ package io.art.generator.meta
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
-import io.art.generator.meta.service.java.JavaSourceWatchingService.watchJavaSources
 import io.art.generator.meta.service.initialize
+import io.art.generator.meta.service.java.JavaSourceWatchingService.watchJavaSources
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
+import io.art.scheduler.constants.SchedulerModuleConstants.PeriodicTaskMode.DELAYED
+import io.art.scheduler.executor.deferred.DefaultExceptionHandler
+import io.art.scheduler.executor.deferred.DeferredExecutor.deferredExecutor
+import io.art.scheduler.executor.periodic.PeriodicExecutor
+import io.art.scheduler.factory.TaskFactory.task
 import io.art.scheduler.manager.Scheduling.scheduleDelayed
+import io.art.scheduler.model.PeriodicRunnableTask
 import io.art.scheduler.module.SchedulerActivator.scheduler
+import java.time.LocalDateTime.now
 
 object MetaGenerator {
     @JvmStatic

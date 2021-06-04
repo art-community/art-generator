@@ -18,25 +18,15 @@
 
 package io.art.generator.meta.service.java
 
-import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.SOURCES_CHANGED
 import io.art.generator.meta.detector.JavaSourceChangesDetector.detectJavaChanges
 import io.art.generator.meta.service.java.JavaMetaGenerationService.generateJavaMeta
-import io.art.scheduler.manager.Scheduling.schedule
-import java.time.LocalDateTime.now
-import java.util.concurrent.Future
 
 
 object JavaSourceWatchingService {
-    @Volatile
-    private var generate: Future<*>? = null
-
     fun watchJavaSources() = detectJavaChanges().changed {
         JAVA_LOGGER.info(SOURCES_CHANGED(modified, deleted))
-        generate = schedule(now().plusSeconds(configuration.analyzerDelay.seconds)) {
-            generate?.cancel(false)
-            handle { classes -> generateJavaMeta(classes.asSequence()) }
-        }
+        handle { classes -> generateJavaMeta(classes.asSequence()) }
     }
 }
