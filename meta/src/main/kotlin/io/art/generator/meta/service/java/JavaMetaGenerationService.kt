@@ -42,15 +42,15 @@ object JavaMetaGenerationService {
         JAVA_LOGGER.info(GENERATING_METAS_MESSAGE(classes.map { metaClass -> metaClass.type.classFullName!! }.toList()))
         val root = configuration.sourcesRoot.toFile().apply { parentFile.mkdirs() }
         val moduleName = configuration.moduleName
-        val metaModuleName = metaModuleClassName(META_NAME, moduleName)
+        val metaModuleClassName = metaModuleClassName(META_NAME, moduleName)
         val reference = metaModuleClassName(EMPTY_STRING, moduleName)
-        classBuilder(metaModuleName)
+        classBuilder(metaModuleClassName)
                 .addModifiers(PUBLIC)
                 .addAnnotation(suppressAnnotation())
                 .superclass(META_MODULE_CLASS_NAME)
                 .addField(FieldSpec.builder(reference, META_NAME)
                         .addModifiers(PRIVATE, FINAL, STATIC)
-                        .initializer(newStatement(), metaModuleName)
+                        .initializer(newStatement(), metaModuleClassName)
                         .build())
                 .addMethod(methodBuilder(META_NAME)
                         .addModifiers(PUBLIC, STATIC)
@@ -84,20 +84,20 @@ object JavaMetaGenerationService {
                 .forEach { node -> generateTree(node.packageShortName, metaPackageClassName(node.packageShortName), node) }
     }
 
-    private fun TypeSpec.Builder.generateTree(originalName: String, packageClassName: ClassName, node: JavaMetaNode) {
-        if (originalName.isEmpty()) {
+    private fun TypeSpec.Builder.generateTree(packageName: String, packageClassName: ClassName, node: JavaMetaNode) {
+        if (packageName.isEmpty()) {
             node.classes.filter(JavaMetaClass::couldBeGenerated).forEach(::generateClass)
             return
         }
-        FieldSpec.builder(packageClassName, originalName)
+        FieldSpec.builder(packageClassName, packageName)
                 .addModifiers(PRIVATE, FINAL)
                 .initializer(registerNewStatement(), packageClassName)
                 .build()
                 .apply(::addField)
-        methodBuilder(originalName.decapitalize())
+        methodBuilder(packageName)
                 .addModifiers(PUBLIC)
                 .returns(packageClassName)
-                .addCode(returnStatement(), originalName)
+                .addCode(returnStatement(), packageName)
                 .build()
                 .let(::addMethod)
         val packageBuilder = classBuilder(packageClassName)
@@ -105,10 +105,10 @@ object JavaMetaGenerationService {
                 .superclass(META_PACKAGE_CLASS_NAME)
                 .addMethod(constructorBuilder()
                         .addModifiers(PRIVATE)
-                        .addCode(namedSuperStatement(originalName))
+                        .addCode(namedSuperStatement(packageName))
                         .build())
         node.classes.filter(JavaMetaClass::couldBeGenerated).forEach(packageBuilder::generateClass)
-        node.children.values.forEach { child -> packageBuilder.generateTree(originalName, nestedMetaPackageClassName(originalName), child) }
+        node.children.values.forEach { child -> packageBuilder.generateTree(packageName, nestedMetaPackageClassName(packageName), child) }
         addType(packageBuilder.build())
     }
 }

@@ -39,12 +39,4 @@ pluginManagement {
     }
 }
 
-val projects = setOf("language-java", "meta")
-
-projects.forEach { project ->
-    include(project)
-    when {
-        current().isJava11Compatible -> project(":$project").name = "$project-$VERSION_11"
-        else -> project(":$project").name = "$project-${VERSION_1_8}"
-    }
-}
+include("language-java", "meta")

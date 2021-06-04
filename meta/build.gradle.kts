@@ -12,10 +12,6 @@ val included: Configuration by configurations.creating {
 }
 
 dependencies {
-    if (JavaVersion.current().isJava8) {
-        included(files(Jvm.current().toolsJar))
-    }
-
     included(kotlin("stdlib-jdk8"))
     included(kotlin("compiler-embeddable"))
     included(kotlin("reflect"))

@@ -19,12 +19,11 @@
 package io.art.generator.meta.service.common
 
 import io.art.generator.meta.configuration.configuration
-import io.art.generator.meta.constants.DOT_JAVA
 import io.art.generator.meta.constants.META_NAME
-import io.art.generator.meta.templates.metaModuleFileName
+import io.art.generator.meta.templates.metaModuleJavaFileName
 import java.io.File
 
 val metaModuleJavaFile: File
     get() = configuration.sourcesRoot.resolve(META_NAME)
-            .resolve(metaModuleFileName(configuration.moduleName, DOT_JAVA))
+            .resolve(metaModuleJavaFileName(configuration.moduleName))
             .toFile()
