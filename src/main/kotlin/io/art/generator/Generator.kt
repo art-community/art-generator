@@ -33,7 +33,10 @@ import io.art.scheduler.module.SchedulerActivator.scheduler
 object Generator {
     @JvmStatic
     fun main(arguments: Array<String>) {
-        activator(arguments).mainModuleId(Generator::class.simpleName).module(scheduler().with(logging())).launch()
+        activator(arguments)
+                .mainModuleId(Generator::class.simpleName)
+                .module(scheduler().with(logging()))
+                .launch()
         initialize()
         scheduleDelayed(configuration.watcherPeriod, ::watchJavaSources)
         block()
