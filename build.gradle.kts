@@ -32,6 +32,10 @@ dependencies {
     embedded(kotlin("compiler-embeddable"))
     embedded(kotlin("reflect"))
 
+    testImplementation(kotlin("stdlib-jdk8"))
+    testImplementation(kotlin("compiler-embeddable"))
+    testImplementation(kotlin("reflect"))
+
     embedded("io.art.java:core:main")
     embedded("io.art.java:launcher:main")
     embedded("io.art.java:configurator:main")
