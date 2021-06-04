@@ -32,9 +32,12 @@ import java.nio.file.Path
 
 
 object JavaSourceChangesDetector {
-    private data class Cache(@Volatile var hashes: Map<Path, Long>)
+    private data class Cache(
+            @Volatile var hashes: Map<Path, Long>,
+            @Volatile var classes: Map<Path, JavaMetaClass>
+    )
 
-    private val cache = Cache(emptyMap())
+    private val cache = Cache(emptyMap(), emptyMap())
 
     fun detectJavaChanges(): JavaSourcesChanges {
         val sources = collectJavaSources()
@@ -68,8 +71,14 @@ object JavaSourceChangesDetector {
                 JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
                 return
             }
-            JAVA_LOGGER.info(CLASSES_CHANGED(modified, deleted))
+            val changed = sources.filterValues { source -> !cache.classes.filterKeys { path -> !deleted.contains(path) }.containsValue(source) }
+            if (deleted.isEmpty() && changed.isEmpty()) {
+                JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
+                return
+            }
+            JAVA_LOGGER.info(CLASSES_CHANGED(changed.keys.toList(), deleted))
             handler(sources.values.toSet())
+            cache.classes = changed
         }
     }
 }
