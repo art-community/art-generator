@@ -60,40 +60,17 @@ executable {
 }
 
 val testSourceSet: SourceSet = sourceSets.test.get()
-val configurationFile = testSourceSet
-        .resources
-        .sourceDirectories
-        .first()
-        .apply { mkdirs() }
-        .resolve("module.yml")
 
 task("prepare") {
     group = "art"
 
     val embedded: Configuration by configurations
     doFirst {
-        val configuration = """
-            logging:
-              default:
-                writers:
-                  - type: console
-                    colored: false
-            module:
-              name: Example
-            paths:
-              sources: ${testSourceSet.java.sourceDirectories.first()}
-            watcher:
-              period: 300ms
-            analyzer:
-              delay: 1s
-            classpath: ${embedded.files.joinToString(if (OperatingSystem.current().isWindows) ";" else ":")}
-        """.trimIndent()
-        configurationFile.writeText(configuration)
     }
 }
 
 tasks.test {
     dependsOn("prepare")
     useJUnitPlatform()
-    doLast { configurationFile.delete() }
+    //doLast { configurationFile.delete() }
 }

@@ -26,14 +26,13 @@ import io.art.generator.extension.path
 import java.nio.file.Path
 import java.nio.file.Paths.get
 import java.time.Duration
-
+import java.time.Duration.ofMillis
 
 data class Configuration(
         val sourcesRoot: Path,
         val classpath: Set<Path>,
         val moduleName: String,
-        val watcherPeriod: Duration,
-        val analyzerDelay: Duration,
+        val watcherPeriod: Duration
 )
 
 val configuration: Configuration by lazy {
@@ -42,8 +41,7 @@ val configuration: Configuration by lazy {
                 sourcesRoot = getString("paths.sources").path,
                 classpath = getString("classpath").split(if (isWindows()) SEMICOLON else COLON).map { path -> get(path) }.toSet(),
                 moduleName = getString("module.name"),
-                watcherPeriod = getDuration("watcher.period"),
-                analyzerDelay = getDuration("analyzer.delay")
+                watcherPeriod = ofMillis(getLong("watcher.period"))
         )
     }
 }
