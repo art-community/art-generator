@@ -166,7 +166,9 @@ private fun ClassSymbol.asMetaType(): JavaMetaType = type.asMetaType()
 
 private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
         type = asMetaType(),
+
         source = Paths.get(sourcefile.name),
+
         modifiers = modifiers,
 
         fields = members()
