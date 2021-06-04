@@ -17,6 +17,7 @@
  */
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
+import io.art.generator.meta.MetaGenerator
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.loader.PathClassLoader

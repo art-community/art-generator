@@ -27,10 +27,8 @@ import io.art.generator.meta.constants.*
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.model.JavaMetaMethod
 import io.art.generator.meta.model.JavaMetaType
-import io.art.generator.meta.service.java.couldBeGenerated
-import io.art.generator.meta.service.java.parentFields
-import io.art.generator.meta.service.java.parentMethods
-import io.art.generator.meta.service.java.withoutVariables
+import io.art.generator.meta.model.JavaMetaTypeKind.VARIABLE_KIND
+import io.art.generator.meta.service.java.*
 import io.art.generator.meta.templates.*
 import javax.lang.model.element.Modifier.*
 import javax.lang.model.type.TypeKind.VOID
@@ -177,12 +175,16 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
         static -> ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnTypeName)
         else -> ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, ownerType.withoutVariables(), returnTypeName)
     }
+    val variableExclusions = method.typeParameters
+            .filter { parameter -> parameter.kind == VARIABLE_KIND }
+            .map { parameter -> parameter.typeName }
+            .toSet()
     classBuilder(methodClassName)
             .addModifiers(PUBLIC, FINAL, STATIC)
             .superclass(parent)
             .addMethod(constructorBuilder()
                     .addModifiers(PRIVATE)
-                    .addCode(metaMethodSuperStatement(method.name, method.returnType, method.modifiers))
+                    .addCode(metaMethodSuperStatement(method.name, method.returnType.excludeVariables(variableExclusions), method.modifiers))
                     .build())
             .apply { generateMethodInvocations(ownerType, method.name, method) }
             .apply { generateParameters(method) }
@@ -251,13 +253,17 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
 
 
 private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
+    val variableExclusions = method.typeParameters
+            .filter { parameter -> parameter.kind == VARIABLE_KIND }
+            .map { parameter -> parameter.typeName }
+            .toSet()
     method.parameters.entries.forEachIndexed { parameterIndex, parameter ->
         val parameterTypeName = parameter.value.type.withoutVariables()
         val metaParameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameterTypeName.box())
         val parameterName = metaParameterName(parameter.key)
         FieldSpec.builder(metaParameterType, parameterName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerMetaParameterStatement(parameterIndex, parameter.key, parameter.value))
+                .initializer(registerMetaParameterStatement(parameterIndex, parameter.key, parameter.value.excludeVariables(variableExclusions)))
                 .build()
                 .apply(::addField)
         methodBuilder(parameterName)

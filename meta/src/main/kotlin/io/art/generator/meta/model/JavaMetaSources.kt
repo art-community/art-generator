@@ -36,6 +36,9 @@ enum class JavaMetaTypeKind {
     UNKNOWN_KIND
 }
 
+lateinit var OBJECT_META_TYPE: JavaMetaType
+fun hasObjectMetaType() = ::OBJECT_META_TYPE.isInitialized
+
 data class JavaMetaType(
         val originalType: TypeMirror,
 

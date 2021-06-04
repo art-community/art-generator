@@ -62,15 +62,18 @@ tasks.register("build-executable-jar", Jar::class.java) {
 }
 
 
-tasks.test {
-    val testSourceSet = sourceSets.test.get()
-    val resources = testSourceSet
-            .resources
-            .sourceDirectories
-            .first()
-            .apply { mkdirs() }
-            .resolve("module.yml")
-    val configuration = """
+val testSourceSet: SourceSet = sourceSets.test.get()
+val configurationFile = testSourceSet
+        .resources
+        .sourceDirectories
+        .first()
+        .apply { mkdirs() }
+        .resolve("module.yml")
+
+task("prepare") {
+    group = "art"
+    doFirst {
+        val configuration = """
             logging:
               default:
                 writers:
@@ -86,7 +89,12 @@ tasks.test {
               delay: 1s
             classpath: ${included.files.joinToString(if (OperatingSystem.current().isWindows) ";" else ":")}
         """.trimIndent()
-    resources.writeText(configuration)
+        configurationFile.writeText(configuration)
+    }
+}
+
+tasks.test {
+    dependsOn("prepare")
     useJUnitPlatform()
-    doLast { resources.delete() }
+    doLast { configurationFile.delete() }
 }

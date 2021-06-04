@@ -110,7 +110,9 @@ private fun Type.ClassType.asMetaType(): JavaMetaType {
                 },
                 typeName = tsym.qualifiedName.toString(),
                 className = tsym.simpleName.toString(),
-                classPackageName = tsym.qualifiedName.toString().takeIf { name -> name.contains(DOT) }?.substringBeforeLast(DOT)
+                classPackageName = tsym.qualifiedName
+                        .toString()
+                        .takeIf { name -> name.contains(DOT) }?.substringBeforeLast(DOT)
                         ?: EMPTY_STRING
         )
     }
@@ -211,7 +213,19 @@ private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
 
         parent = superclass
                 ?.let { superclass.tsym as? ClassSymbol }
-                ?.takeIf { superclass.tsym.qualifiedName.toString() != Object::class.java.name }
+                ?.apply {
+                    if (!hasObjectMetaType() && superclass.tsym?.qualifiedName.toString() == Object::class.java.name) {
+                        OBJECT_META_TYPE = JavaMetaType(
+                                originalType = superclass,
+                                typeName = superclass.tsym.qualifiedName.toString(),
+                                kind = CLASS_KIND,
+                                classFullName = superclass.tsym.qualifiedName.toString(),
+                                className = superclass.tsym.simpleName.toString(),
+                                classPackageName = superclass.tsym.qualifiedName.toString().substringBeforeLast(DOT)
+                        )
+                    }
+                }
+                ?.takeIf { superclass.tsym?.qualifiedName.toString() != Object::class.java.name }
                 ?.asMetaClass(),
 
         interfaces = interfaces
