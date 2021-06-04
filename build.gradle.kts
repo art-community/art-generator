@@ -1,4 +1,4 @@
-import org.gradle.internal.os.OperatingSystem
+import io.art.gradle.common.constants.WRITE_CONFIGURATION_TASK
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -60,17 +60,12 @@ executable {
 }
 
 val testSourceSet: SourceSet = sourceSets.test.get()
-
-task("prepare") {
-    group = "art"
-
-    val embedded: Configuration by configurations
-    doFirst {
-    }
+generator {
+    java(testSourceSet.java)
 }
 
 tasks.test {
-    dependsOn("prepare")
+    dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
-    //doLast { configurationFile.delete() }
+    generator.configurationPath.toFile().delete()
 }

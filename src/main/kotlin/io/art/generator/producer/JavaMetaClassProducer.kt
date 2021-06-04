@@ -24,6 +24,7 @@ import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.constants.*
+import io.art.generator.extension.*
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaType
