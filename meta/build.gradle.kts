@@ -54,12 +54,3 @@ tasks.register("build-executable-jar", Jar::class.java) {
     from(compileKotlin.outputs.files)
     from(included.mapNotNull { dependency -> if (dependency.isDirectory) dependency else zipTree(dependency) })
 }
-
-tasks.register("print-classpath") {
-    group = "art"
-    doLast {
-        included.files.forEach {
-            println("- $it")
-        }
-    }
-}
