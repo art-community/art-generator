@@ -27,7 +27,9 @@ fun metaModuleClassFullName(name: String): String = "$META_NAME.Meta$name"
 fun metaModuleJavaFileName(name: String): String = "Meta$name.java"
 
 
-fun metaClassName(name: String): String = "${name.capitalize()}Class"
+fun metaClassName(name: String): String = "${name.decapitalize()}Class"
+
+fun metaPackageName(name: String): String = "${name}Package"
 
 fun metaFieldName(name: String): String = "${name}Field"
 

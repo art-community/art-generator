@@ -63,7 +63,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
             .initializer(registerNewStatement(), metaClassName)
             .build()
             .apply(::addField)
-    methodBuilder(className.decapitalize())
+    methodBuilder(className)
             .addModifiers(PUBLIC)
             .returns(metaClassName)
             .addCode(returnStatement(), className)
