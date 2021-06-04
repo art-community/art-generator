@@ -22,14 +22,14 @@ import io.art.configurator.module.ConfiguratorModule.configuration
 import io.art.core.constants.StringConstants.COLON
 import io.art.core.constants.StringConstants.SEMICOLON
 import io.art.core.determiner.SystemDeterminer.isWindows
-import io.art.generator.extension.path
+import io.art.generator.constants.GeneratorLanguages
 import java.nio.file.Path
 import java.nio.file.Paths.get
 import java.time.Duration
 import java.time.Duration.ofMillis
 
 data class Configuration(
-        val sourcesRoot: Path,
+        val sources: Map<GeneratorLanguages, Set<Path>>,
         val classpath: Set<Path>,
         val moduleName: String,
         val watcherPeriod: Duration
@@ -38,7 +38,9 @@ data class Configuration(
 val configuration: Configuration by lazy {
     with(configuration()) {
         Configuration(
-                sourcesRoot = getString("paths.sources").path,
+                sources = getNested("sources")
+                        .keys
+                        .associate { key -> GeneratorLanguages.valueOf(key) to getStringArray("sources.$key").map { path -> get(path) }.toSet() },
                 classpath = getString("classpath").split(if (isWindows()) SEMICOLON else COLON).map { path -> get(path) }.toSet(),
                 moduleName = getString("module.name"),
                 watcherPeriod = ofMillis(getLong("watcher.period"))

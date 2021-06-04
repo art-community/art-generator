@@ -29,8 +29,8 @@ object JavaSourceChangesDetector {
 
     private val cache = Cache(emptyMap())
 
-    fun detectJavaChanges(): JavaSourcesChanges {
-        val sources = collectJavaSources()
+    fun detectJavaChanges(root: Path): JavaSourcesChanges {
+        val sources = collectJavaSources(root)
         val deleted = cache.hashes.keys.filter { source -> !sources.contains(source) }
         val existed = cache.hashes.filterKeys(sources::contains).toMutableMap()
         val modified = mutableListOf<Path>()
@@ -42,13 +42,14 @@ object JavaSourceChangesDetector {
         }
         cache.hashes = existed
         return JavaSourcesChanges(
+                root = root,
                 existed = existed.keys,
                 modified = modified,
                 deleted = deleted
         )
     }
 
-    data class JavaSourcesChanges(val existed: Set<Path>, val modified: List<Path>, val deleted: List<Path>) {
+    data class JavaSourcesChanges(val root: Path, val existed: Set<Path>, val modified: List<Path>, val deleted: List<Path>) {
         fun changed(action: JavaSourcesChanges.() -> Unit) {
             if (modified.isNotEmpty() || deleted.isNotEmpty()) action(this)
         }

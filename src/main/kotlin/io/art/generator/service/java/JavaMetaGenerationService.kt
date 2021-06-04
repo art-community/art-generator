@@ -33,12 +33,13 @@ import io.art.generator.model.JavaMetaNode
 import io.art.generator.model.asTree
 import io.art.generator.producer.generateClass
 import io.art.generator.templates.*
+import java.nio.file.Path
 import javax.lang.model.element.Modifier.*
 
 object JavaMetaGenerationService {
-    fun generateJavaMeta(classes: Sequence<JavaMetaClass>) {
+    fun generateJavaMeta(root: Path, classes: Sequence<JavaMetaClass>) {
         JAVA_LOGGER.info(GENERATING_METAS_MESSAGE(classes))
-        val root = configuration.sourcesRoot.toFile().apply { parentFile.mkdirs() }
+        root.toFile().parentFile.mkdirs()
         val moduleName = configuration.moduleName
         val metaModuleClassName = metaModuleClassName(META_NAME, moduleName)
         val reference = metaModuleClassName(EMPTY_STRING, moduleName)

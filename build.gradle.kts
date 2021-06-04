@@ -42,6 +42,16 @@ dependencies {
     embedded("io.art.java:logging:main")
     embedded("io.art.java:meta:main")
 
+    testImplementation("io.art.java:core:main")
+    testImplementation("io.art.java:launcher:main")
+    testImplementation("io.art.java:configurator:main")
+    testImplementation("io.art.java:yaml-configuration:main")
+    testImplementation("io.art.java:value:main")
+    testImplementation("io.art.java:model:main")
+    testImplementation("io.art.java:scheduler:main")
+    testImplementation("io.art.java:logging:main")
+    testImplementation("io.art.java:meta:main")
+
     embedded("com.squareup", "javapoet", javaPoetVersion)
     embedded("com.squareup", "kotlinpoet", kotlinPoetVersion)
 
@@ -62,6 +72,7 @@ executable {
 val testSourceSet: SourceSet = sourceSets.test.get()
 generator {
     java(testSourceSet.java)
+    configurationPath(testSourceSet.resources.sourceDirectories.first().resolve("module.yml").toPath())
 }
 
 tasks.test {

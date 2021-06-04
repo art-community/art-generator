@@ -35,3 +35,9 @@ val META_METHOD_EXCLUSIONS = setOf(
         "hashCode",
         "clone"
 )
+
+enum class GeneratorLanguages {
+    JAVA,
+    KOTLIN,
+    DART
+}

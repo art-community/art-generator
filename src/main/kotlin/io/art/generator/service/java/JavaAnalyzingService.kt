@@ -47,14 +47,14 @@ import javax.lang.model.type.TypeMirror
 private val TYPE_CACHE = mutableMapOf<TypeMirror, JavaMetaType>()
 
 object JavaAnalyzingService {
-    fun analyzeJavaSources(sources: Sequence<Path>): Map<Path, JavaMetaClass> {
-        val sourceRoots = configuration.sourcesRoot.toFile()
+    fun analyzeJavaSources(root: Path, sources: Sequence<Path>): Map<Path, JavaMetaClass> {
+        val sourceRoots = root.toFile()
                 .listFiles()
                 ?.asSequence()
                 ?.map(File::toPath)
                 ?.toList()
                 ?: emptyList()
-        JAVA_LOGGER.info(ANALYZING_MESSAGE(configuration.sourcesRoot))
+        JAVA_LOGGER.info(ANALYZING_MESSAGE(root))
         return useJavaCompiler(JavaCompilerConfiguration(sources, sourceRoots)) { task ->
             task.analyze()
                     .asSequence()
@@ -63,7 +63,7 @@ object JavaAnalyzingService {
                     .filter { symbol -> symbol.className() != metaModuleClassFullName(configuration.moduleName) }
                     .map { symbol -> symbol.asMetaClass() }
                     .associateBy { metaClass -> metaClass.source }
-                    .apply { JAVA_LOGGER.info(ANALYZE_COMPLETED(keys.toList())) }
+                    .apply { JAVA_LOGGER.info(ANALYZE_COMPLETED(root, keys.toList())) }
                     .apply { TYPE_CACHE.clear() }
         }
     }

@@ -18,6 +18,7 @@
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
 import io.art.generator.configuration.configuration
+import io.art.generator.constants.GeneratorLanguages.JAVA
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.JavaCompilerConfiguration
@@ -37,7 +38,8 @@ import java.nio.file.Path
 
 @TestInstance(PER_CLASS)
 class GeneratorTest {
-    private val generatedFile: Path by lazy { configuration.sourcesRoot.resolve("meta").resolve("MetaExample.java") }
+    private val root: Path by lazy { configuration.sources[JAVA]!!.first() }
+    private val generatedFile: Path by lazy { root.resolve("meta").resolve("MetaExample.java") }
     private val generatedClassName = "meta.MetaExample"
 
     @BeforeAll
@@ -63,8 +65,7 @@ class GeneratorTest {
         assertTrue { generatedFile.toFile().exists() }
 
         val sources = sequenceOf(generatedFile)
-        val sourceRoots = configuration.sourcesRoot.toFile()
-                .listFiles()
+        val sourceRoots = root.toFile().listFiles()
                 ?.asSequence()
                 ?.map(File::toPath)
                 ?.toList()
