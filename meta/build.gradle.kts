@@ -25,10 +25,8 @@ dependencies {
     included("io.art.java:scheduler:main")
     included("io.art.java:logging:main")
     included("io.art.java:meta:main")
-
     included("com.squareup", "javapoet", "+")
     included("com.squareup", "kotlinpoet", "+")
-
     included("org.projectlombok", "lombok", "+")
 
     testCompileOnly("org.projectlombok", "lombok", "+")
@@ -63,14 +61,25 @@ tasks.register("build-executable-jar", Jar::class.java) {
     from(included.mapNotNull { dependency -> if (dependency.isDirectory) dependency else zipTree(dependency) })
 }
 
-tasks.test {
 
-    val resources = sourceSets.test.get().resources.sourceDirectories.first().apply { mkdirs() }.resolve("module.yml")
+tasks.test {
+    val testSourceSet = sourceSets.test.get()
+    val resources = testSourceSet
+            .resources
+            .sourceDirectories
+            .first()
+            .apply { mkdirs() }
+            .resolve("module.yml")
     val configuration = """
+            logging:
+              default:
+                writers:
+                  - type: console
+                    colored: false
             module:
               name: Example
             paths:
-              sources: ${sourceSets.test.get().java.sourceDirectories.first()}
+              sources: ${testSourceSet.java.sourceDirectories.first()}
             watcher:
               period: 300ms
             analyzer:

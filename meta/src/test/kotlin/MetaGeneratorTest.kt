@@ -42,7 +42,7 @@ class MetaGeneratorTest {
 
     @BeforeAll
     fun setup() {
-        activator().module(logging { logging -> logging.colored(false) }).launch()
+        activator().module(logging()).launch()
         initialize()
     }
 
