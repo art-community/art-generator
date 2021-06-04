@@ -16,24 +16,15 @@
  * limitations under the License.
  */
 
-import org.gradle.api.JavaVersion.*
+package io.art.generator.logger
 
-rootProject.name = "art-generator"
+import javax.tools.Diagnostic
+import javax.tools.DiagnosticListener
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url = uri("https://nexus.art-platform.io/repository/art-gradle-plugins/") }
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id.contains("art")) {
-                useModule("io.art.gradle:art-gradle:main")
-            }
-        }
-    }
-    plugins {
-        val kotlinVersion: String by settings
-        kotlin("jvm") version kotlinVersion
+class CollectingDiagnosticListener : DiagnosticListener<Any> {
+    val diagnostics = mutableListOf<Diagnostic<out Any>>()
+
+    override fun report(diagnostic: Diagnostic<out Any>) {
+        diagnostics += diagnostic
     }
 }

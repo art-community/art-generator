@@ -16,24 +16,7 @@
  * limitations under the License.
  */
 
-import org.gradle.api.JavaVersion.*
+package io.art.generator.constants
 
-rootProject.name = "art-generator"
-
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url = uri("https://nexus.art-platform.io/repository/art-gradle-plugins/") }
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id.contains("art")) {
-                useModule("io.art.gradle:art-gradle:main")
-            }
-        }
-    }
-    plugins {
-        val kotlinVersion: String by settings
-        kotlin("jvm") version kotlinVersion
-    }
-}
+const val PARAMETERS_OPTION = "-parameters"
+const val NO_WARN_OPTION = "-nowarn"

@@ -16,24 +16,18 @@
  * limitations under the License.
  */
 
-import org.gradle.api.JavaVersion.*
+package io.art.generator.service.java
 
-rootProject.name = "art-generator"
+import io.art.generator.constants.JAVA_LOGGER
+import io.art.generator.constants.SOURCES_CHANGED
+import io.art.generator.detector.JavaSourceChangesDetector.detectJavaChanges
+import io.art.generator.service.java.JavaAnalyzingService.analyzeJavaSources
+import io.art.generator.service.java.JavaMetaGenerationService.generateJavaMeta
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url = uri("https://nexus.art-platform.io/repository/art-gradle-plugins/") }
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id.contains("art")) {
-                useModule("io.art.gradle:art-gradle:main")
-            }
-        }
-    }
-    plugins {
-        val kotlinVersion: String by settings
-        kotlin("jvm") version kotlinVersion
+
+object JavaSourceWatchingService {
+    fun watchJavaSources() = detectJavaChanges().changed {
+        JAVA_LOGGER.info(SOURCES_CHANGED(modified, deleted))
+        generateJavaMeta(analyzeJavaSources(existed.asSequence()).values.asSequence())
     }
 }

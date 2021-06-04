@@ -16,24 +16,15 @@
  * limitations under the License.
  */
 
-import org.gradle.api.JavaVersion.*
+package io.art.generator.loader
 
-rootProject.name = "art-generator"
+import io.art.generator.exception.MetaGeneratorException
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url = uri("https://nexus.art-platform.io/repository/art-gradle-plugins/") }
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id.contains("art")) {
-                useModule("io.art.gradle:art-gradle:main")
-            }
-        }
-    }
-    plugins {
-        val kotlinVersion: String by settings
-        kotlin("jvm") version kotlinVersion
+class BinaryClassLoader(private val classes: Map<String, ByteArray>) : ClassLoader() {
+    override fun loadClass(name: String): Class<*> = try {
+        val bytes = classes[name] ?: throw ClassNotFoundException(name)
+        defineClass(name, bytes, 0, bytes.size).apply(::resolveClass)
+    } catch (throwable: Throwable) {
+        throw MetaGeneratorException(throwable)
     }
 }

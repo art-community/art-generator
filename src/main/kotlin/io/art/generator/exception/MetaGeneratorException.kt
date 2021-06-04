@@ -16,24 +16,11 @@
  * limitations under the License.
  */
 
-import org.gradle.api.JavaVersion.*
+package io.art.generator.exception
 
-rootProject.name = "art-generator"
-
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url = uri("https://nexus.art-platform.io/repository/art-gradle-plugins/") }
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id.contains("art")) {
-                useModule("io.art.gradle:art-gradle:main")
-            }
-        }
-    }
-    plugins {
-        val kotlinVersion: String by settings
-        kotlin("jvm") version kotlinVersion
-    }
+class MetaGeneratorException : RuntimeException {
+    constructor(message: String) : super(message)
+    constructor(message: String, cause: Throwable) : super(message, cause)
+    constructor(cause: Throwable) : super(cause)
+    constructor(message: String, cause: Throwable, enableSuppression: Boolean, writableStackTrace: Boolean) : super(message, cause, enableSuppression, writableStackTrace)
 }

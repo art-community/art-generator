@@ -16,24 +16,21 @@
  * limitations under the License.
  */
 
-import org.gradle.api.JavaVersion.*
+package io.art.generator.constants
 
-rootProject.name = "art-generator"
+const val KOTLIN_EXTENSION = "kt"
+const val KOTLIN_SCRIPT_EXTENSION = "kts"
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url = uri("https://nexus.art-platform.io/repository/art-gradle-plugins/") }
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id.contains("art")) {
-                useModule("io.art.gradle:art-gradle:main")
-            }
-        }
-    }
-    plugins {
-        val kotlinVersion: String by settings
-        kotlin("jvm") version kotlinVersion
-    }
-}
+const val DOT_JAVA = ".java"
+
+
+const val JAVA_MODULE_SUPPRESSION = "JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE"
+
+val META_METHOD_EXCLUSIONS = setOf(
+        "builder",
+        "toString",
+        "equals",
+        "canEqual",
+        "hashCode",
+        "clone"
+)
