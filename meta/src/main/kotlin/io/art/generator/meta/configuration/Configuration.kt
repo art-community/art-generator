@@ -27,7 +27,6 @@ import java.time.Duration
 data class Configuration(
         val configurationPath: String,
         val sourcesRoot: Path,
-        val sources: Set<Path>,
         val classpath: Set<Path>,
         val moduleName: String,
         val watcherPeriod: Duration,
@@ -39,7 +38,6 @@ val configuration: Configuration by lazy {
         Configuration(
                 configurationPath = path,
                 sourcesRoot = getString("paths.sources").path,
-                sources = getStringArray("sources").map { file -> file.path }.toSet(),
                 classpath = getStringArray("classpath").map { file -> file.path }.toSet(),
                 moduleName = getString("module.name"),
                 watcherPeriod = getDuration("watcher.period"),

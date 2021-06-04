@@ -1,10 +1,7 @@
 module:
   name: Example
 paths:
-  sources: "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/java"
-sources:
-  - "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/java/module/ExampleConfigurator.java"
-  - "D:/Development/Projects/art/art-environment/local/projects/sandbox/src/main/kotlin/module/ExampleKotlin.kt"
+  sources: "D:/Development/Projects/art/art-environment/local/projects/art-generator/meta/src/test/java"
 watcher:
   period: 300ms
 analyzer:

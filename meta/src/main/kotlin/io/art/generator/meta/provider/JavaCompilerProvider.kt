@@ -22,10 +22,11 @@ package io.art.generator.meta.provider
 
 import com.sun.source.util.JavacTask
 import com.sun.tools.javac.api.JavacTool
-import com.sun.tools.javac.comp.CompileStates
+import com.sun.tools.javac.comp.CompileStates.CompileState.GENERATE
 import com.sun.tools.javac.main.JavaCompiler
 import com.sun.tools.javac.util.Log.WriterKind.ERROR
 import com.sun.tools.javac.util.Options
+import io.art.core.context.Context.context
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.constants.PARAMETERS_OPTION
@@ -37,11 +38,16 @@ import java.io.Writer
 import java.nio.charset.Charset.defaultCharset
 import java.nio.file.Path
 import java.util.*
-import javax.tools.StandardLocation.CLASS_PATH
-import javax.tools.StandardLocation.SOURCE_PATH
+import javax.tools.StandardLocation.*
+
+class JavaCompilerConfiguration(
+        val sources: Sequence<Path>,
+        val sourceRoots: List<Path>,
+        val destination: Path = context().configuration().workingDirectory
+)
 
 object JavaCompilerProvider {
-    fun <T> useJavaCompiler(sources: Sequence<Path>, sourceRoots: List<Path>, action: JavaCompiler.(task: JavacTask) -> T): T {
+    fun <T> useJavaCompiler(compilerConfiguration: JavaCompilerConfiguration, action: JavaCompiler.(task: JavacTask) -> T): T {
         val tool = JavacTool.create()
         val listener = CollectingDiagnosticListener()
         val classpath = configuration.classpath.map { path -> path.toFile() }
@@ -64,18 +70,19 @@ object JavaCompilerProvider {
         }
 
         val fileManager = tool.getStandardFileManager(listener, Locale.getDefault(), defaultCharset()).apply {
-            setLocation(SOURCE_PATH, sourceRoots.map(Path::toFile))
+            setLocation(SOURCE_PATH, compilerConfiguration.sourceRoots.map(Path::toFile))
             setLocation(CLASS_PATH, classpath)
+            setLocation(CLASS_OUTPUT, listOf(compilerConfiguration.destination.toFile()))
         }
 
         val options = listOf(
                 PARAMETERS_OPTION,
         )
 
-        val files = fileManager.getJavaFileObjects(*sources.map { path -> path.toFile() }.toList().toTypedArray())
+        val files = fileManager.getJavaFileObjects(*compilerConfiguration.sources.map { path -> path.toFile() }.toList().toTypedArray())
 
         val compilerInstance = JavaCompiler.instance(context).apply { log.setWriter(ERROR, emptyWriter) }
-        compilerInstance.shouldStopPolicyIfError = CompileStates.CompileState.GENERATE
+        compilerInstance.shouldStopPolicyIfError = GENERATE
         try {
             val javacTask = tool.getTask(
                     emptyWriter,

@@ -28,7 +28,15 @@ dependencies {
 
     included("com.squareup", "javapoet", "+")
     included("com.squareup", "kotlinpoet", "+")
+
     included("org.projectlombok", "lombok", "+")
+
+    testCompileOnly("org.projectlombok", "lombok", "+")
+    testAnnotationProcessor("org.projectlombok", "lombok", "+")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:+")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:+")
+    testRuntime("org.junit.platform:junit-platform-console:+")
 }
 
 val compileKotlin by tasks.getting(KotlinCompile::class) {
@@ -53,4 +61,8 @@ tasks.register("build-executable-jar", Jar::class.java) {
     from(processResources.outputs.files)
     from(compileKotlin.outputs.files)
     from(included.mapNotNull { dependency -> if (dependency.isDirectory) dependency else zipTree(dependency) })
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

@@ -34,6 +34,7 @@ import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.model.*
 import io.art.generator.meta.model.JavaMetaTypeKind.*
+import io.art.generator.meta.provider.JavaCompilerConfiguration
 import io.art.generator.meta.provider.JavaCompilerProvider.useJavaCompiler
 import io.art.generator.meta.templates.metaModuleClassFullName
 import java.io.File
@@ -55,7 +56,7 @@ object JavaAnalyzingService {
                 ?: emptyList()
 
         JAVA_LOGGER.info(ANALYZING_MESSAGE(configuration.sourcesRoot))
-        return useJavaCompiler(sources, sourceRoots) { task ->
+        return useJavaCompiler(JavaCompilerConfiguration(sources, sourceRoots)) { task ->
             task.analyze()
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }

@@ -23,7 +23,7 @@ package io.art.generator.meta
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
-import io.art.generator.meta.service.initialize
+import io.art.generator.meta.service.common.initialize
 import io.art.generator.meta.service.java.JavaSourceWatchingService.watchJavaSources
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
