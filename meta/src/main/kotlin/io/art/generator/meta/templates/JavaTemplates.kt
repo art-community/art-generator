@@ -140,7 +140,7 @@ private fun metaEnumBlock(className: TypeName) = "metaEnum(\$T.class, \$T::value
 
 private fun metaTypeBlock(className: TypeName, vararg parameters: JavaMetaType): CodeBlock = "metaType(\$T.class"
         .asCode(className)
-        .apply { if (parameters.isNotEmpty()) ",".join(join(parameters.map(::metaTypeStatement), COMMA)) }
+        .apply { if (parameters.isNotEmpty()) join(",".join(join(parameters.map(::metaTypeStatement), COMMA))) }
         .join(")")
 
 private fun metaArrayBlock(type: JavaMetaType, className: TypeName): CodeBlock = "metaArray(\$T.class, \$T[]::new, "
