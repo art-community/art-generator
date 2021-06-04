@@ -29,6 +29,8 @@ import java.util.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class Model<V1, V2 extends String, V3 extends Number & Comparator<V1>, V4 extends V2> {
+    String parent;
+
     boolean f1;
     String f2;
     V1 f3;
