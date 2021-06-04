@@ -24,21 +24,17 @@ import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.CLASSES_CHANGED
 import io.art.generator.meta.constants.CLASSES_NOT_CHANGED
 import io.art.generator.meta.constants.JAVA_LOGGER
-import io.art.generator.meta.extension.isJava
 import io.art.generator.meta.model.JavaMetaClass
-import io.art.generator.meta.service.common.metaModuleJavaFile
+import io.art.generator.meta.service.common.collectJavaSources
 import io.art.generator.meta.service.java.JavaAnalyzingService.analyzeJavaSources
 import io.art.generator.meta.templates.metaModuleClassFullName
 import java.nio.file.Path
 
 
 object JavaSourceChangesDetector {
-    private data class Cache(
-            @Volatile var hashes: Map<Path, Long>,
-            @Volatile var classes: Set<JavaMetaClass>
-    )
+    private data class Cache(@Volatile var hashes: Map<Path, Long>)
 
-    private val cache = Cache(emptyMap(), emptySet())
+    private val cache = Cache(emptyMap())
 
     fun detectJavaChanges(): JavaSourcesChanges {
         val sources = collectJavaSources()
@@ -59,13 +55,6 @@ object JavaSourceChangesDetector {
         )
     }
 
-    private fun collectJavaSources() = configuration.sourcesRoot.toFile()
-            .walkTopDown()
-            .asSequence()
-            .filter { file -> !metaModuleJavaFile.exists() || file != metaModuleJavaFile }
-            .filter { file -> file.isJava }
-            .map { file -> file.toPath() }
-
     data class JavaSourcesChanges(val existed: Set<Path>, val modified: List<Path>, val deleted: List<Path>) {
         fun changed(action: JavaSourcesChanges.() -> Unit) {
             if (modified.isNotEmpty() || deleted.isNotEmpty()) action(this)
@@ -80,7 +69,7 @@ object JavaSourceChangesDetector {
                 return
             }
             JAVA_LOGGER.info(CLASSES_CHANGED(modified, deleted))
-            cache.classes = sources.values.toSet().apply(handler)
+            handler(sources.values.toSet())
         }
     }
 }

@@ -26,6 +26,8 @@ fun metaModuleClassFullName(name: String): String = "$META_NAME.Meta$name"
 
 fun metaModuleJavaFileName(name: String): String = "Meta$name.java"
 
+fun metaModuleKotlinFileName(name: String): String = "Meta$name.kt"
+
 
 fun metaClassName(name: String): String = "${name.decapitalize()}Class"
 
