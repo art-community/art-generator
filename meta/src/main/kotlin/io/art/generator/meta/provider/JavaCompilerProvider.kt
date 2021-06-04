@@ -64,9 +64,7 @@ object JavaCompilerProvider {
         })
 
         val context = JavaCompilerContext().apply {
-            Options.instance(this).apply {
-                setUTF8Encoding(this)
-            }
+            Options.instance(this).apply { setUTF8Encoding(this) }
         }
 
         val fileManager = tool.getStandardFileManager(listener, Locale.getDefault(), defaultCharset()).apply {
@@ -75,9 +73,7 @@ object JavaCompilerProvider {
             setLocation(CLASS_OUTPUT, listOf(compilerConfiguration.destination.toFile()))
         }
 
-        val options = listOf(
-                PARAMETERS_OPTION,
-        )
+        val options = listOf(PARAMETERS_OPTION)
 
         val files = fileManager.getJavaFileObjects(*compilerConfiguration.sources.map { path -> path.toFile() }.toList().toTypedArray())
 

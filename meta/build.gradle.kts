@@ -1,5 +1,5 @@
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
-import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -64,5 +64,20 @@ tasks.register("build-executable-jar", Jar::class.java) {
 }
 
 tasks.test {
+
+    val resources = sourceSets.test.get().resources.sourceDirectories.first().apply { mkdirs() }.resolve("module.yml")
+    val configuration = """
+            module:
+              name: Example
+            paths:
+              sources: ${sourceSets.test.get().java.sourceDirectories.first()}
+            watcher:
+              period: 300ms
+            analyzer:
+              delay: 1s
+            classpath: ${included.files.joinToString(if (OperatingSystem.current().isWindows) ";" else ":")}
+        """.trimIndent()
+    resources.writeText(configuration)
     useJUnitPlatform()
+    doLast { resources.delete() }
 }

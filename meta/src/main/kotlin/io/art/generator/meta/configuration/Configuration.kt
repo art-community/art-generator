@@ -19,8 +19,12 @@
 package io.art.generator.meta.configuration
 
 import io.art.configurator.module.ConfiguratorModule.configuration
+import io.art.core.constants.StringConstants.COLON
+import io.art.core.constants.StringConstants.SEMICOLON
+import io.art.core.determiner.SystemDeterminer.isWindows
 import io.art.generator.meta.extension.path
 import java.nio.file.Path
+import java.nio.file.Paths.get
 import java.time.Duration
 
 
@@ -38,7 +42,7 @@ val configuration: Configuration by lazy {
         Configuration(
                 configurationPath = path,
                 sourcesRoot = getString("paths.sources").path,
-                classpath = getStringArray("classpath").map { file -> file.path }.toSet(),
+                classpath = getString("classpath").split(if (isWindows()) SEMICOLON else COLON).map { path -> get(path) }.toSet(),
                 moduleName = getString("module.name"),
                 watcherPeriod = getDuration("watcher.period"),
                 analyzerDelay = getDuration("analyzer.delay")

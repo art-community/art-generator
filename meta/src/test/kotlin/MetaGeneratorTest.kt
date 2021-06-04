@@ -17,7 +17,6 @@
  */
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
-import io.art.core.context.Context.context
 import io.art.generator.meta.configuration.configuration
 import io.art.generator.meta.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.meta.loader.PathClassLoader
@@ -38,16 +37,7 @@ import java.nio.file.Path
 
 @TestInstance(PER_CLASS)
 class MetaGeneratorTest {
-    private val generatedFile: Path by lazy {
-        context().configuration()
-                .workingDirectory
-                .resolve("src")
-                .resolve("test")
-                .resolve("java")
-                .resolve("meta")
-                .resolve("MetaExample.java")
-    }
-
+    private val generatedFile: Path by lazy { configuration.sourcesRoot.resolve("meta").resolve("MetaExample.java") }
     private val generatedClassName = "meta.MetaExample"
 
     @BeforeAll
@@ -69,8 +59,6 @@ class MetaGeneratorTest {
     @Test
     fun testMetaGeneration(@TempDir tempDirectory: Path) {
         watchJavaSources()
-
-        println(generatedFile.toFile().absolutePath)
 
         assertTrue { generatedFile.toFile().exists() }
 
