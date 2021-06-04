@@ -58,11 +58,11 @@ data class JavaMetaType(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
         other as JavaMetaType
-        if (typeName != other.typeName) return false
+        if (originalType != other.originalType) return false
         return true
     }
 
-    override fun hashCode(): Int = typeName.hashCode()
+    override fun hashCode(): Int = originalType.hashCode()
 }
 
 data class JavaMetaClass(

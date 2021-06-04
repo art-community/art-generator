@@ -141,20 +141,24 @@ private fun Type.TypeVar.asMetaType(): JavaMetaType {
     return type
 }
 
-private fun Type.ArrayType.asMetaType(): JavaMetaType = JavaMetaType(
-        originalType = this,
-        kind = ARRAY_KIND,
-        typeName = tsym.qualifiedName.toString(),
-        arrayComponentType = componentType.asMetaType().takeIf { type -> type.kind != UNKNOWN_KIND }
-)
+private fun Type.ArrayType.asMetaType(): JavaMetaType = putIfAbsent(TYPE_CACHE, this) {
+    JavaMetaType(
+            originalType = this,
+            kind = ARRAY_KIND,
+            typeName = tsym.qualifiedName.toString(),
+            arrayComponentType = componentType.asMetaType().takeIf { type -> type.kind != UNKNOWN_KIND }
+    )
+}
 
-private fun Type.WildcardType.asMetaType(): JavaMetaType = JavaMetaType(
-        originalType = this,
-        kind = WILDCARD_KIND,
-        typeName = type.toString(),
-        wildcardSuperBound = superBound?.asMetaType()?.takeIf { type -> type.kind != UNKNOWN_KIND },
-        wildcardExtendsBound = extendsBound?.asMetaType()?.takeIf { type -> type.kind != UNKNOWN_KIND }
-)
+private fun Type.WildcardType.asMetaType(): JavaMetaType = putIfAbsent(TYPE_CACHE, this) {
+    JavaMetaType(
+            originalType = this,
+            kind = WILDCARD_KIND,
+            typeName = type.toString(),
+            wildcardSuperBound = superBound?.asMetaType()?.takeIf { type -> type.kind != UNKNOWN_KIND },
+            wildcardExtendsBound = extendsBound?.asMetaType()?.takeIf { type -> type.kind != UNKNOWN_KIND }
+    )
+}
 
 private fun ClassSymbol.asMetaType(): JavaMetaType = type.asMetaType()
 

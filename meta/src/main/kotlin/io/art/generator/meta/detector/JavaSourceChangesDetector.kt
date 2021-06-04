@@ -20,24 +20,16 @@ package io.art.generator.meta.detector
 
 import io.art.core.extensions.FileExtensions.readFileBytes
 import io.art.core.extensions.HashExtensions.xx64
-import io.art.generator.meta.configuration.configuration
-import io.art.generator.meta.constants.CLASSES_CHANGED
-import io.art.generator.meta.constants.CLASSES_NOT_CHANGED
-import io.art.generator.meta.constants.JAVA_LOGGER
 import io.art.generator.meta.model.JavaMetaClass
 import io.art.generator.meta.service.common.collectJavaSources
 import io.art.generator.meta.service.java.JavaAnalyzingService.analyzeJavaSources
-import io.art.generator.meta.templates.metaModuleClassFullName
 import java.nio.file.Path
 
 
 object JavaSourceChangesDetector {
-    private data class Cache(
-            @Volatile var hashes: Map<Path, Long>,
-            @Volatile var classes: Map<Path, JavaMetaClass>
-    )
+    private data class Cache(@Volatile var hashes: Map<Path, Long>)
 
-    private val cache = Cache(emptyMap(), emptyMap())
+    private val cache = Cache(emptyMap())
 
     fun detectJavaChanges(): JavaSourcesChanges {
         val sources = collectJavaSources()
@@ -64,21 +56,7 @@ object JavaSourceChangesDetector {
         }
 
         fun handle(handler: (Set<JavaMetaClass>) -> Unit) {
-            val sources = analyzeJavaSources(existed.asSequence()).filter { source ->
-                source.value.type.className != metaModuleClassFullName(configuration.moduleName)
-            }
-            if (deleted.isEmpty() && sources.isEmpty()) {
-                JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
-                return
-            }
-            val changed = sources.filterValues { source -> !cache.classes.filterKeys { path -> !deleted.contains(path) }.containsValue(source) }
-            if (deleted.isEmpty() && changed.isEmpty()) {
-                JAVA_LOGGER.info(CLASSES_NOT_CHANGED)
-                return
-            }
-            JAVA_LOGGER.info(CLASSES_CHANGED(changed.keys.toList(), deleted))
-            handler(sources.values.toSet())
-            cache.classes = changed
+            analyzeJavaSources(existed.asSequence()).values.toSet().apply(handler)
         }
     }
 }
