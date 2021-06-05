@@ -38,9 +38,10 @@ data class Configuration(
 val configuration: Configuration by lazy {
     with(configuration()) {
         Configuration(
-                sources = getNested("sources")
-                        .keys
-                        .associate { key -> GeneratorLanguages.valueOf(key) to getStringArray("sources.$key").map { path -> get(path) }.toSet() },
+                sources = getNested("sources").keys.associate { key ->
+                    val paths = getStringArray("sources.$key")
+                    GeneratorLanguages.valueOf(key) to paths.map { path -> get(path) }.toSet()
+                },
                 classpath = getString("classpath").split(if (isWindows()) SEMICOLON else COLON).map { path -> get(path) }.toSet(),
                 moduleName = getString("module.name"),
                 watcherPeriod = ofMillis(getLong("watcher.period"))
