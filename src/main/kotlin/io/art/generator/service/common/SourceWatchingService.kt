@@ -20,13 +20,17 @@ package io.art.generator.service.common
 
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.GeneratorLanguages.JAVA
+import io.art.generator.constants.GeneratorLanguages.KOTLIN
 import io.art.generator.constants.JAVA_LOGGER
+import io.art.generator.constants.KOTLIN_LOGGER
 import io.art.generator.constants.SOURCES_CHANGED
 import io.art.generator.constants.SOURCES_NOT_FOUND
+import io.art.generator.detector.SourcesChanges
 import io.art.generator.detector.detectChanges
 import io.art.generator.service.java.JavaMetaGenerationService.generateJavaMeta
 import io.art.generator.service.java.analyzeJavaSources
 import io.art.scheduler.manager.Scheduling.schedule
+import java.nio.file.Path
 
 
 object SourceWatchingService {
@@ -35,23 +39,34 @@ object SourceWatchingService {
             detectChanges(path, collectJavaSources(path)).changed {
                 JAVA_LOGGER.info(SOURCES_CHANGED(path, modified, deleted))
                 if (asynchronous) {
-                    schedule {
-                        val sources = analyzeJavaSources(path, existed.asSequence())
-                        if (sources.isEmpty()) {
-                            JAVA_LOGGER.info(SOURCES_NOT_FOUND(root))
-                            return@schedule
-                        }
-                        generateJavaMeta(path, sources.values.asSequence())
-                    }
+                    schedule { handleJavaSources(path) }
                     return@changed
                 }
-                val sources = analyzeJavaSources(path, existed.asSequence())
-                if (sources.isEmpty()) {
-                    JAVA_LOGGER.info(SOURCES_NOT_FOUND(root))
-                    return@changed
-                }
-                generateJavaMeta(path, sources.values.asSequence())
+                handleJavaSources(path)
             }
         }
+        configuration.sources[KOTLIN]?.forEach { path ->
+            detectChanges(path, collectKotlinSources(path) + collectJavaSources(path)).changed {
+                KOTLIN_LOGGER.info(SOURCES_CHANGED(path, modified, deleted))
+                if (asynchronous) {
+                    schedule { handleKotlinSources(path) }
+                    return@changed
+                }
+                handleKotlinSources(path)
+            }
+        }
+    }
+
+    private fun SourcesChanges.handleJavaSources(path: Path) {
+        val sources = analyzeJavaSources(path, existed.asSequence())
+        if (sources.isEmpty()) {
+            JAVA_LOGGER.info(SOURCES_NOT_FOUND(root))
+            return
+        }
+        generateJavaMeta(path, sources.values.asSequence())
+    }
+
+    private fun SourcesChanges.handleKotlinSources(path: Path) {
+        TODO("Kotlin...")
     }
 }

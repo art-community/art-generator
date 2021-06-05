@@ -30,6 +30,7 @@ fun Collection<Path>.relativeNames(root: Path) = map { path -> path.toFile().rel
 fun Sequence<JavaMetaClass>.javaClassNames() = map { source -> source.type.classFullName!! }.toList()
 
 val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)
+val KOTLIN_LOGGER: Logger = LoggingModule.logger(KOTLIN)
 
 val SOURCES_CHANGED = { root: Path, modified: List<Path>, deleted: List<Path> -> "Sources changed\nModified: ${modified.relativeNames(root)}\nDeleted: ${deleted.relativeNames(root)}" }
 val SOURCES_NOT_FOUND = { root: Path -> "Sources not found inside $root" }

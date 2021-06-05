@@ -21,7 +21,9 @@ package io.art.generator.service.common
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.META_NAME
 import io.art.generator.extension.isJava
+import io.art.generator.extension.isKotlin
 import io.art.generator.templates.metaModuleJavaFileName
+import io.art.generator.templates.metaModuleKotlinFileName
 import java.io.File
 import java.nio.file.Path
 
@@ -29,9 +31,20 @@ fun metaModuleJavaFile(root: Path): File = root.resolve(META_NAME)
         .resolve(metaModuleJavaFileName(configuration.moduleName))
         .toFile()
 
+fun metaModuleKotlinFile(root: Path): File = root.resolve(META_NAME)
+        .resolve(metaModuleKotlinFileName(configuration.moduleName))
+        .toFile()
+
 fun collectJavaSources(root: Path) = root.toFile()
         .walkTopDown()
         .asSequence()
         .filter { file -> !metaModuleJavaFile(root).exists() || file != metaModuleJavaFile(root) }
         .filter { file -> file.isJava }
+        .map { file -> file.toPath() }
+
+fun collectKotlinSources(root: Path) = root.toFile()
+        .walkTopDown()
+        .asSequence()
+        .filter { file -> !metaModuleKotlinFile(root).exists() || file != metaModuleKotlinFile(root) }
+        .filter { file -> file.isKotlin }
         .map { file -> file.toPath() }

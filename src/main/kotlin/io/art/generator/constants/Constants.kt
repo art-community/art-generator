@@ -22,6 +22,7 @@ const val KOTLIN_EXTENSION = "kt"
 const val KOTLIN_SCRIPT_EXTENSION = "kts"
 
 const val JAVA = "java"
+const val KOTLIN = "kotlin"
 const val CLASS = "class"
 const val JAR = "jar"
 
