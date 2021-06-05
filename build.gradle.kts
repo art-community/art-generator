@@ -68,15 +68,19 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 }
 
-executable {
-    jar()
-    main("io.art.generator.Generator")
-}
-
 val testSourceSet: SourceSet = sourceSets.test.get()
 generator {
     java(testSourceSet.java)
     configurationPath(testSourceSet.resources.sourceDirectories.first().resolve("module.yml").toPath())
+}
+
+executable {
+    jar {
+        configureRun {
+            jvmArgs("-Dconfiguration=${generator.configurationPath.toFile().absolutePath}")
+        }
+    }
+    main("io.art.generator.Generator")
 }
 
 tasks.test {
