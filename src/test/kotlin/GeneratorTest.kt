@@ -44,7 +44,7 @@ class GeneratorTest {
 
     @BeforeAll
     fun setup() {
-        activator().module(logging()).launch()
+        activator().mainModuleId(GeneratorTest::class.simpleName).module(logging()).launch()
         initialize()
     }
 

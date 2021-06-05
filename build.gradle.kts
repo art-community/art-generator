@@ -71,7 +71,6 @@ dependencies {
 val testSourceSet: SourceSet = sourceSets.test.get()
 generator {
     java(testSourceSet.java)
-    configurationPath(testSourceSet.resources.sourceDirectories.first().resolve("module.yml").toPath())
 }
 
 executable {
@@ -86,5 +85,5 @@ executable {
 tasks.test {
     dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
-    generator.configurationPath.toFile().delete()
+    jvmArgs("-Dconfiguration=${generator.configurationPath.toFile().absolutePath}")
 }
