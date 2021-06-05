@@ -27,7 +27,6 @@ import io.art.generator.service.common.SourceWatchingService.watchSources
 import io.art.generator.service.common.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
-import io.art.scheduler.module.SchedulerActivator.scheduler
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -71,6 +70,8 @@ class GeneratorTest {
                 ?.map(File::toPath)
                 ?.toList()
                 ?: emptyList()
+
+        assertTrue(sourceRoots.isNotEmpty(), "sources for generation not found")
 
         useJavaCompiler(JavaCompilerConfiguration(sources, sourceRoots, tempDirectory)) { task -> assertTrue(task.call()) }
 
