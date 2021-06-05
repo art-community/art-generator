@@ -80,14 +80,15 @@ object JavaMetaGenerationService {
         classes.asTree()
                 .values
                 .asSequence()
-                .forEach { node -> generateTree(node.packageShortName, metaPackageClassName(node.packageShortName), node) }
+                .forEach { node -> generateTree(node.packageShortName, node) }
     }
 
-    private fun TypeSpec.Builder.generateTree(packageName: String, packageClassName: ClassName, node: JavaMetaNode) {
+    private fun TypeSpec.Builder.generateTree(packageName: String, node: JavaMetaNode) {
         if (packageName.isEmpty()) {
             return
         }
         val metaPackageName = metaPackageName(packageName)
+        val packageClassName = metaPackageClassName(packageName)
         FieldSpec.builder(packageClassName, metaPackageName)
                 .addModifiers(PRIVATE, FINAL)
                 .initializer(registerNewStatement(), packageClassName)
@@ -108,7 +109,7 @@ object JavaMetaGenerationService {
                         .build())
         node.classes.filter(JavaMetaClass::couldBeGenerated).forEach(packageBuilder::generateClass)
         node.children.values.forEach { child ->
-            packageBuilder.generateTree(child.packageShortName, nestedMetaPackageClassName(child.packageShortName), child)
+            packageBuilder.generateTree(child.packageShortName, child)
         }
         addType(packageBuilder.build())
     }

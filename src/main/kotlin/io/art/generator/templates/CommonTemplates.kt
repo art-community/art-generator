@@ -21,6 +21,7 @@ package io.art.generator.templates
 import com.squareup.javapoet.ClassName
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.constants.META_NAME
+import io.art.generator.extension.name
 
 fun metaModuleClassFullName(name: String): String = "$META_NAME.Meta$name"
 
@@ -44,13 +45,10 @@ fun metaModuleClassName(packageName: String, name: String): ClassName =
         ClassName.get(packageName, "Meta${name.capitalize()}")
 
 fun metaPackageClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Package")
-
-fun nestedMetaPackageClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "MetaNested${name.capitalize()}Package")
+        ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Package".name())
 
 fun metaClassClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Class")
+        ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Class".name())
 
 fun metaMethodClassName(name: String): ClassName =
         ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Method")
