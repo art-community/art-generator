@@ -65,7 +65,7 @@ fun String.name(): String {
         NAMES[this] = 0
         return this
     }
-    val index = NAMES[this]!!
-    NAMES[this] = index + 1
+    val index = NAMES[this]!! + 1
+    NAMES[this] = index
     return this + index
 }
