@@ -183,6 +183,7 @@ private class JavaAnalyzingService {
 
             constructors = members()
                     .symbols
+                    .reversed()
                     .asSequence()
                     .filterIsInstance<MethodSymbol>()
                     .filter { method -> method.isConstructor }
@@ -194,6 +195,7 @@ private class JavaAnalyzingService {
 
             methods = members()
                     .symbols
+                    .reversed()
                     .asSequence()
                     .filterIsInstance<MethodSymbol>()
                     .filter { method -> !method.isConstructor }

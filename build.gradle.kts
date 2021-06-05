@@ -63,11 +63,9 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 }
 
-val main: SourceSet = sourceSets.main.get()
 val testSourceSet: SourceSet = sourceSets.test.get()
 generator {
     java(testSourceSet.java)
-    java(main.java)
     consoleLogging()
 }
 
