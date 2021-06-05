@@ -23,10 +23,11 @@ import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
-import io.art.generator.service.common.initialize
 import io.art.generator.service.common.SourceWatchingService.watchSources
+import io.art.generator.service.common.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
+import io.art.scheduler.module.SchedulerActivator.scheduler
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -60,7 +61,7 @@ class GeneratorTest {
 
     @Test
     fun testMetaGeneration(@TempDir tempDirectory: Path) {
-        watchSources()
+        watchSources(asynchronous = false)
 
         assertTrue { generatedFile.toFile().exists() }
 

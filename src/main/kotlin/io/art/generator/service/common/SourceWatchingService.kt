@@ -23,17 +23,21 @@ import io.art.generator.constants.GeneratorLanguages.JAVA
 import io.art.generator.constants.JAVA_LOGGER
 import io.art.generator.constants.SOURCES_CHANGED
 import io.art.generator.detector.SourceChangesDetector.detectChanges
-import io.art.generator.service.java.JavaAnalyzingService.analyzeJavaSources
 import io.art.generator.service.java.JavaMetaGenerationService.generateJavaMeta
+import io.art.generator.service.java.analyzeJavaSources
 import io.art.scheduler.manager.Scheduling.schedule
 
 
 object SourceWatchingService {
-    fun watchSources() {
+    fun watchSources(asynchronous: Boolean = true) {
         configuration.sources[JAVA]?.forEach { path ->
             detectChanges(path, collectJavaSources(path)).changed {
                 JAVA_LOGGER.info(SOURCES_CHANGED(path, modified, deleted))
-                schedule { generateJavaMeta(path, analyzeJavaSources(path, existed.asSequence()).values.asSequence()) }
+                if (asynchronous) {
+                    schedule { generateJavaMeta(path, analyzeJavaSources(path, existed.asSequence()).values.asSequence()) }
+                    return@changed
+                }
+                generateJavaMeta(path, analyzeJavaSources(path, existed.asSequence()).values.asSequence())
             }
         }
     }
