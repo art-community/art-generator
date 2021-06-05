@@ -55,7 +55,7 @@ private class JavaAnalyzingService {
                 ?.asSequence()
                 ?.map(File::toPath)
                 ?.toList()
-                ?: emptyList()
+                ?: return emptyMap()
         JAVA_LOGGER.info(ANALYZING_MESSAGE(root))
         return useJavaCompiler(JavaCompilerConfiguration(sources, sourceRoots)) { task ->
             task.analyze()

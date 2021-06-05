@@ -108,11 +108,7 @@ object JavaMetaGenerationService {
                         .build())
         node.classes.filter(JavaMetaClass::couldBeGenerated).forEach(packageBuilder::generateClass)
         node.children.values.forEach { child ->
-            if (packageName == child.packageShortName) {
-                packageBuilder.generateTree(packageName, nestedMetaPackageClassName(packageName), child)
-                return@forEach
-            }
-            packageBuilder.generateTree(child.packageShortName, metaPackageClassName(child.packageShortName), child)
+            packageBuilder.generateTree(packageName, nestedMetaPackageClassName(packageName), child)
         }
         addType(packageBuilder.build())
     }

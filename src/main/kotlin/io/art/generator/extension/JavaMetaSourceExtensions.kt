@@ -40,7 +40,7 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
         else -> {
             val parameters = typeParameters.map { parameter ->
                 when (parameter.kind) {
-                    VARIABLE_KIND -> subtypeOf(Object::class.java)
+                    VARIABLE_KIND -> subtypeOf(OBJECT_CLASS_NAME)
                     else -> parameter.withoutVariables()
                 }
             }
@@ -53,7 +53,7 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
 
     WILDCARD_KIND -> wildcardExtendsBound?.withoutVariables()?.let(WildcardTypeName::subtypeOf)
             ?: wildcardSuperBound?.withoutVariables()?.let(WildcardTypeName::supertypeOf)
-            ?: subtypeOf(Object::class.java)
+            ?: subtypeOf(OBJECT_CLASS_NAME)
 
     UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
 }

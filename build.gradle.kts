@@ -54,18 +54,27 @@ dependencies {
     testImplementation("io.art.java:scheduler:main")
     testImplementation("io.art.java:logging:main")
     testImplementation("io.art.java:meta:main")
+
+    annotationProcessor("org.projectlombok", "lombok", lombokVersion)
+
     testCompileOnly("org.projectlombok", "lombok", lombokVersion)
     testAnnotationProcessor("org.projectlombok", "lombok", lombokVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 }
 
+val main: SourceSet = sourceSets.main.get()
 val testSourceSet: SourceSet = sourceSets.test.get()
-generator { java(testSourceSet.java) }
+generator {
+    java(testSourceSet.java)
+    java(main.java)
+    consoleLogging()
+}
 
 executable {
     jar {
         configureRun {
+            dependsOn(WRITE_CONFIGURATION_TASK)
             jvmArgs("-Dconfiguration=${generator.configurationPath.toFile().absolutePath}")
         }
     }
