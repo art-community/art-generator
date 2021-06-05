@@ -31,47 +31,37 @@ dependencies {
     embedded(kotlin("stdlib-jdk8"))
     embedded(kotlin("compiler-embeddable"))
     embedded(kotlin("reflect"))
-
-    testImplementation(kotlin("stdlib-jdk8"))
-    testImplementation(kotlin("compiler-embeddable"))
-    testImplementation(kotlin("reflect"))
-
     embedded("io.art.java:core:main")
     embedded("io.art.java:launcher:main")
     embedded("io.art.java:configurator:main")
     embedded("io.art.java:yaml-configuration:main")
     embedded("io.art.java:value:main")
-    embedded("io.art.java:model:main")
     embedded("io.art.java:scheduler:main")
     embedded("io.art.java:logging:main")
     embedded("io.art.java:meta:main")
+    embedded("com.squareup", "javapoet", javaPoetVersion)
+    embedded("com.squareup", "kotlinpoet", kotlinPoetVersion)
+    embedded("org.projectlombok", "lombok", lombokVersion)
 
+    testImplementation(kotlin("stdlib-jdk8"))
+    testImplementation(kotlin("compiler-embeddable"))
+    testImplementation(kotlin("reflect"))
     testImplementation("io.art.java:core:main")
     testImplementation("io.art.java:launcher:main")
     testImplementation("io.art.java:configurator:main")
     testImplementation("io.art.java:yaml-configuration:main")
     testImplementation("io.art.java:value:main")
-    testImplementation("io.art.java:model:main")
     testImplementation("io.art.java:scheduler:main")
     testImplementation("io.art.java:logging:main")
     testImplementation("io.art.java:meta:main")
-
-    embedded("com.squareup", "javapoet", javaPoetVersion)
-    embedded("com.squareup", "kotlinpoet", kotlinPoetVersion)
-
-    embedded("org.projectlombok", "lombok", lombokVersion)
-
     testCompileOnly("org.projectlombok", "lombok", lombokVersion)
     testAnnotationProcessor("org.projectlombok", "lombok", lombokVersion)
-
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 }
 
 val testSourceSet: SourceSet = sourceSets.test.get()
-generator {
-    java(testSourceSet.java)
-}
+generator { java(testSourceSet.java) }
 
 executable {
     jar {
