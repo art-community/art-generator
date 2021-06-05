@@ -32,6 +32,7 @@ fun Sequence<JavaMetaClass>.javaClassNames() = map { source -> source.type.class
 val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)
 
 val SOURCES_CHANGED = { root: Path, modified: List<Path>, deleted: List<Path> -> "Sources changed\nModified: ${modified.relativeNames(root)}\nDeleted: ${deleted.relativeNames(root)}" }
+val SOURCES_NOT_FOUND = { root: Path -> "Sources not found inside $root" }
 val ANALYZING_MESSAGE = { root: Path -> "Analyzing sources inside $root" }
 val ANALYZE_COMPLETED = { root: Path, sources: List<Path> -> "Analyze completed\nSources: ${sources.relativeNames(root)}" }
 val GENERATING_METAS_MESSAGE = { classes: Sequence<JavaMetaClass> -> "Generating meta classes\nSources: ${classes.javaClassNames()}" }

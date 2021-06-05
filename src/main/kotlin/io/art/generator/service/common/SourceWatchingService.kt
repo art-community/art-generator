@@ -22,6 +22,7 @@ import io.art.generator.configuration.configuration
 import io.art.generator.constants.GeneratorLanguages.JAVA
 import io.art.generator.constants.JAVA_LOGGER
 import io.art.generator.constants.SOURCES_CHANGED
+import io.art.generator.constants.SOURCES_NOT_FOUND
 import io.art.generator.detector.detectChanges
 import io.art.generator.service.java.JavaMetaGenerationService.generateJavaMeta
 import io.art.generator.service.java.analyzeJavaSources
@@ -36,13 +37,19 @@ object SourceWatchingService {
                 if (asynchronous) {
                     schedule {
                         val sources = analyzeJavaSources(path, existed.asSequence())
-                        if (sources.isEmpty()) return@schedule
+                        if (sources.isEmpty()) {
+                            JAVA_LOGGER.info(SOURCES_NOT_FOUND(root))
+                            return@schedule
+                        }
                         generateJavaMeta(path, sources.values.asSequence())
                     }
                     return@changed
                 }
                 val sources = analyzeJavaSources(path, existed.asSequence())
-                if (sources.isEmpty()) return@changed
+                if (sources.isEmpty()) {
+                    JAVA_LOGGER.info(SOURCES_NOT_FOUND(root))
+                    return@changed
+                }
                 generateJavaMeta(path, sources.values.asSequence())
             }
         }
