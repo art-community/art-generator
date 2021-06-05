@@ -20,17 +20,15 @@ package io.art.generator.detector
 
 import io.art.core.extensions.FileExtensions.readFileBytes
 import io.art.core.extensions.HashExtensions.xx64
-import io.art.generator.service.common.collectJavaSources
 import java.nio.file.Path
 
 
-object JavaSourceChangesDetector {
+object SourceChangesDetector {
     private data class Cache(@Volatile var hashes: Map<Path, Long>)
 
     private val cache = Cache(emptyMap())
 
-    fun detectJavaChanges(root: Path): JavaSourcesChanges {
-        val sources = collectJavaSources(root)
+    fun detectChanges(root: Path, sources: Sequence<Path>): SourcesChanges {
         val deleted = cache.hashes.keys.filter { source -> !sources.contains(source) }
         val existed = cache.hashes.filterKeys(sources::contains).toMutableMap()
         val modified = mutableListOf<Path>()
@@ -41,7 +39,7 @@ object JavaSourceChangesDetector {
             existed[source] = newModified
         }
         cache.hashes = existed
-        return JavaSourcesChanges(
+        return SourcesChanges(
                 root = root,
                 existed = existed.keys,
                 modified = modified,
@@ -49,8 +47,8 @@ object JavaSourceChangesDetector {
         )
     }
 
-    data class JavaSourcesChanges(val root: Path, val existed: Set<Path>, val modified: List<Path>, val deleted: List<Path>) {
-        fun changed(action: JavaSourcesChanges.() -> Unit) {
+    data class SourcesChanges(val root: Path, val existed: Set<Path>, val modified: List<Path>, val deleted: List<Path>) {
+        fun changed(action: SourcesChanges.() -> Unit) {
             if (modified.isNotEmpty() || deleted.isNotEmpty()) action(this)
         }
     }

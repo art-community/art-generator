@@ -16,22 +16,25 @@
  * limitations under the License.
  */
 
-package io.art.generator.service.java
+package io.art.generator.service.common
 
 import io.art.generator.configuration.configuration
-import io.art.generator.constants.GeneratorLanguages
+import io.art.generator.constants.GeneratorLanguages.JAVA
 import io.art.generator.constants.JAVA_LOGGER
 import io.art.generator.constants.SOURCES_CHANGED
-import io.art.generator.detector.JavaSourceChangesDetector.detectJavaChanges
+import io.art.generator.detector.SourceChangesDetector.detectChanges
 import io.art.generator.service.java.JavaAnalyzingService.analyzeJavaSources
 import io.art.generator.service.java.JavaMetaGenerationService.generateJavaMeta
+import io.art.scheduler.manager.Scheduling.schedule
 
 
-object JavaSourceWatchingService {
-    fun watchJavaSources() = configuration.sources[GeneratorLanguages.JAVA]?.forEach { path ->
-        detectJavaChanges(path).changed {
-            JAVA_LOGGER.info(SOURCES_CHANGED(path, modified, deleted))
-            generateJavaMeta(path, analyzeJavaSources(path, existed.asSequence()).values.asSequence())
+object SourceWatchingService {
+    fun watchSources() {
+        configuration.sources[JAVA]?.forEach { path ->
+            detectChanges(path, collectJavaSources(path)).changed {
+                JAVA_LOGGER.info(SOURCES_CHANGED(path, modified, deleted))
+                schedule { generateJavaMeta(path, analyzeJavaSources(path, existed.asSequence()).values.asSequence()) }
+            }
         }
     }
 }
