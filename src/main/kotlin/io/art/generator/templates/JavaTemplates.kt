@@ -43,17 +43,17 @@ fun suppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnin
         .addMember("value", "{\$S,\$S,\$S}", ALL, UNCHECKED, UNUSED)
         .build()
 
-fun newStatement() = "new \$T()"
+fun newStatement(type: TypeName): CodeBlock = "new \$T()".asCode(type)
 
-fun returnStatement() = "return \$L;"
+fun returnStatement(label: String): CodeBlock = "return \$L;".asCode(label)
 
 fun returnStatement(block: CodeBlock): CodeBlock = "return".asCode().joinBySpace(block)
 
-fun returnNullStatement() = "return null;"
+fun returnNullStatement(): CodeBlock = "return null;".asCode()
 
-fun registerNewStatement() = "register(new \$T())"
+fun registerNewStatement(type: TypeName): CodeBlock = "register(new \$T())".asCode(type)
 
-fun computeStatement() = "meta.compute(dependencies);"
+fun superStatement(label: String): CodeBlock = "super(\$L);".asCode(label)
 
 fun returnNewStatement(type: JavaMetaType): CodeBlock {
     if (type.typeParameters.isNotEmpty()) {

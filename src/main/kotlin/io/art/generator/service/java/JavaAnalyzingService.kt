@@ -37,7 +37,6 @@ import io.art.generator.model.JavaMetaTypeKind.*
 import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
 import io.art.generator.templates.metaModuleClassFullName
-import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.lang.model.element.ElementKind.ENUM
@@ -50,14 +49,9 @@ private class JavaAnalyzingService {
     private val cache = mutableMapOf<TypeMirror, JavaMetaType>()
 
     fun analyzeJavaSources(root: Path, sources: Sequence<Path>): Map<Path, JavaMetaClass> {
-        val sourceRoots = root.toFile()
-                .listFiles()
-                ?.asSequence()
-                ?.map(File::toPath)
-                ?.toList()
-                ?: return emptyMap()
+        if (!root.toFile().exists()) return emptyMap()
         JAVA_LOGGER.info(ANALYZING_MESSAGE(root))
-        return useJavaCompiler(JavaCompilerConfiguration(sources, sourceRoots)) { task ->
+        return useJavaCompiler(JavaCompilerConfiguration(root, sources)) { task ->
             task.analyze()
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }

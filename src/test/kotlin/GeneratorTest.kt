@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.io.TempDir
-import java.io.File
 import java.nio.file.Path
 
 
@@ -65,15 +64,10 @@ class GeneratorTest {
         assertTrue { generatedFile.toFile().exists() }
 
         val sources = sequenceOf(generatedFile)
-        val sourceRoots = root.toFile().listFiles()
-                ?.asSequence()
-                ?.map(File::toPath)
-                ?.toList()
-                ?: emptyList()
 
-        assertTrue(sourceRoots.isNotEmpty(), "sources for generation not found")
+        assertTrue(root.toFile().exists(), "sources for generation not found")
 
-        useJavaCompiler(JavaCompilerConfiguration(sources, sourceRoots, tempDirectory)) { task -> assertTrue(task.call()) }
+        useJavaCompiler(JavaCompilerConfiguration(root, sources, tempDirectory)) { task -> assertTrue(task.call()) }
 
         assertNotNull { PathClassLoader(tempDirectory).loadClass(generatedClassName) }
     }

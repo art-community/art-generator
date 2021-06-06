@@ -37,7 +37,7 @@ import java.nio.file.Path
 import javax.lang.model.element.Modifier.*
 
 object JavaMetaGenerationService {
-    fun generateJavaMeta(root: Path, classes: Sequence<JavaMetaClass>) {
+    fun generateJavaMetaClasses(root: Path, classes: Sequence<JavaMetaClass>) {
         JAVA_LOGGER.info(GENERATING_METAS_MESSAGE(classes))
         root.toFile().parentFile.mkdirs()
         val moduleName = configuration.moduleName
@@ -47,20 +47,20 @@ object JavaMetaGenerationService {
                 .addModifiers(PUBLIC)
                 .addAnnotation(suppressAnnotation())
                 .superclass(META_MODULE_CLASS_NAME)
+                .addMethod(constructorBuilder()
+                        .addModifiers(PUBLIC)
+                        .addParameter(ParameterSpec.builder(ArrayTypeName.of(META_MODULE_CLASS_NAME), DEPENDENCIES_NAME).build())
+                        .varargs()
+                        .addCode(superStatement(DEPENDENCIES_NAME))
+                        .build())
                 .addField(FieldSpec.builder(reference, META_NAME)
                         .addModifiers(PRIVATE, FINAL, STATIC)
-                        .initializer(newStatement(), metaModuleClassName)
+                        .initializer(newStatement(metaModuleClassName))
                         .build())
                 .addMethod(methodBuilder(META_NAME)
                         .addModifiers(PUBLIC, STATIC)
                         .returns(reference)
-                        .addCode(returnStatement(), META_NAME)
-                        .build())
-                .addMethod(methodBuilder(LOAD_NAME)
-                        .addModifiers(PUBLIC, STATIC)
-                        .addParameter(ParameterSpec.builder(ArrayTypeName.of(META_MODULE_CLASS_NAME), DEPENDENCIES_NAME).build())
-                        .varargs()
-                        .addCode(computeStatement())
+                        .addCode(returnStatement(META_NAME))
                         .build())
                 .apply { generateTree(classes) }
                 .build()
@@ -91,13 +91,13 @@ object JavaMetaGenerationService {
         val packageClassName = metaPackageClassName(packageName)
         FieldSpec.builder(packageClassName, metaPackageName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerNewStatement(), packageClassName)
+                .initializer(registerNewStatement(packageClassName))
                 .build()
                 .apply(::addField)
         methodBuilder(metaPackageName)
                 .addModifiers(PUBLIC)
                 .returns(packageClassName)
-                .addCode(returnStatement(), metaPackageName)
+                .addCode(returnStatement(metaPackageName))
                 .build()
                 .let(::addMethod)
         val packageBuilder = classBuilder(packageClassName)
