@@ -237,7 +237,6 @@ private class JavaAnalyzingService {
             returnType = returnType.asMetaType(),
             parameters = parameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
             typeParameters = typeParameters.map { typeParameter -> typeParameter.type.asMetaType() },
-            exceptions = thrownTypes.map { exception -> exception.asMetaType() }
     )
 
     private fun VarSymbol.asMetaField() = JavaMetaField(

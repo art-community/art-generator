@@ -21,9 +21,9 @@
 package io.art.generator.model
 
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import org.jetbrains.kotlin.types.KotlinType
 import java.nio.file.Path
 import javax.lang.model.element.Modifier
-import javax.lang.model.type.TypeMirror
 
 enum class KotlinMetaTypeKind {
     CLASS_KIND,
@@ -36,11 +36,17 @@ enum class KotlinMetaTypeKind {
     UNKNOWN_KIND
 }
 
-lateinit var KOTLIN_OBJECT_META_TYPE: KotlinMetaType
-fun hasKotlinObjectMetaType() = ::KOTLIN_OBJECT_META_TYPE.isInitialized
+enum class KotlinTypeVariableVariance {
+    IN,
+    OUT,
+    INVARIANT
+}
+
+lateinit var KOTLIN_ANY_META_TYPE: KotlinMetaType
+fun hasKotlinAnyMetaType() = ::KOTLIN_ANY_META_TYPE.isInitialized
 
 data class KotlinMetaType(
-        val originalType: TypeMirror,
+        val originalType: KotlinType,
 
         val typeName: String,
         val kind: KotlinMetaTypeKind,
@@ -52,6 +58,8 @@ data class KotlinMetaType(
         val arrayComponentType: KotlinMetaType? = null,
 
         val typeParameters: MutableList<KotlinMetaType> = mutableListOf(),
+
+        val typeVariableVariance: KotlinTypeVariableVariance?,
         val typeVariableBounds: MutableList<KotlinMetaType> = mutableListOf(),
 ) {
     override fun equals(other: Any?): Boolean {
@@ -68,7 +76,7 @@ data class KotlinMetaType(
 data class KotlinMetaClass(
         val type: KotlinMetaType,
         val source: Path,
-        val fields: Map<String, KotlinMetaField>,
+        val properties: Map<String, KotlinMetaProperty>,
         val constructors: List<KotlinMetaMethod>,
         val innerClasses: Map<String, KotlinMetaClass>,
         val methods: List<KotlinMetaMethod>,
@@ -77,7 +85,7 @@ data class KotlinMetaClass(
         val interfaces: List<KotlinMetaClass> = emptyList(),
 )
 
-data class KotlinMetaField(
+data class KotlinMetaProperty(
         val name: String,
         val type: KotlinMetaType,
         val modifiers: Set<Modifier>
@@ -94,6 +102,5 @@ data class KotlinMetaMethod(
         val returnType: KotlinMetaType,
         val parameters: Map<String, KotlinMetaParameter>,
         val modifiers: Set<Modifier>,
-        val typeParameters: List<KotlinMetaType> = emptyList(),
-        val exceptions: List<KotlinMetaType> = emptyList(),
+        val typeParameters: List<KotlinMetaType> = emptyList()
 )

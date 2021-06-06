@@ -97,6 +97,5 @@ data class JavaMetaMethod(
         val returnType: JavaMetaType,
         val parameters: Map<String, JavaMetaParameter>,
         val modifiers: Set<Modifier>,
-        val typeParameters: List<JavaMetaType> = emptyList(),
-        val exceptions: List<JavaMetaType> = emptyList(),
+        val typeParameters: List<JavaMetaType> = emptyList()
 )
