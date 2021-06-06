@@ -35,13 +35,13 @@ package model
  * limitations under the License.
  */
 
-class ModelKotlin<T1, in T2, out Str>(
+class ModelKotlin<T1, out T2, out T3, T4>(
         val f1: String,
         var f2: String,
-        val f3: String?,
-        val f4: String?,
-        val f5: ModelKotlin<*, *, *>?
-) {
+        val f3: T1?,
+        val f4: T1?,
+        val f5: ModelKotlin<*, *, *, *>?
+) where T1 : CharSequence, T1 : Comparable<T1> {
     var f6 = "test"
         private set
 

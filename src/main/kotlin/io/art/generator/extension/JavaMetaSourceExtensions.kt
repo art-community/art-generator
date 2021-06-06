@@ -109,9 +109,7 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
 
     VARIABLE_KIND -> OBJECT_CLASS_NAME
 
-    WILDCARD_KIND -> wildcardExtendsBound?.extractClass()
-            ?: wildcardSuperBound?.extractClass()
-            ?: OBJECT_CLASS_NAME
+    WILDCARD_KIND -> wildcardExtendsBound?.extractClass() ?: OBJECT_CLASS_NAME
 
     UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
 }
