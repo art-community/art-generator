@@ -147,6 +147,8 @@ public class Model<V1, V2 extends String, V3 extends Number & Comparator<String>
         String f2;
         int f3;
         T f4;
+        Model f5;
+        Model<?, ?, ?, ?> f6;
 
         public static <M extends String> int staticMethod(int p1, M p2) {
             return p1;

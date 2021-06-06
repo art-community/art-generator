@@ -25,7 +25,7 @@ import java.nio.file.Path
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeMirror
 
-enum class JavaMetaTypeKind {
+enum class KotlinMetaTypeKind {
     CLASS_KIND,
     ENUM_KIND,
     WILDCARD_KIND,
@@ -36,26 +36,23 @@ enum class JavaMetaTypeKind {
     UNKNOWN_KIND
 }
 
-lateinit var JAVA_OBJECT_META_TYPE: JavaMetaType
-fun hasJavaObjectMetaType() = ::JAVA_OBJECT_META_TYPE.isInitialized
+lateinit var KOTLIN_OBJECT_META_TYPE: KotlinMetaType
+fun hasKotlinObjectMetaType() = ::KOTLIN_OBJECT_META_TYPE.isInitialized
 
-data class JavaMetaType(
+data class KotlinMetaType(
         val originalType: TypeMirror,
 
         val typeName: String,
-        val kind: JavaMetaTypeKind,
+        val kind: KotlinMetaTypeKind,
 
         val classFullName: String? = null,
         val className: String? = null,
         val classPackageName: String? = null,
 
-        val arrayComponentType: JavaMetaType? = null,
+        val arrayComponentType: KotlinMetaType? = null,
 
-        val wildcardExtendsBound: JavaMetaType? = null,
-        val wildcardSuperBound: JavaMetaType? = null,
-
-        val typeParameters: MutableList<JavaMetaType> = mutableListOf(),
-        val typeVariableBounds: MutableList<JavaMetaType> = mutableListOf(),
+        val typeParameters: MutableList<KotlinMetaType> = mutableListOf(),
+        val typeVariableBounds: MutableList<KotlinMetaType> = mutableListOf(),
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -68,35 +65,35 @@ data class JavaMetaType(
     override fun hashCode(): Int = originalType.hashCode()
 }
 
-data class JavaMetaClass(
-        val type: JavaMetaType,
+data class KotlinMetaClass(
+        val type: KotlinMetaType,
         val source: Path,
-        val fields: Map<String, JavaMetaField>,
-        val constructors: List<JavaMetaMethod>,
-        val innerClasses: Map<String, JavaMetaClass>,
-        val methods: List<JavaMetaMethod>,
+        val fields: Map<String, KotlinMetaField>,
+        val constructors: List<KotlinMetaMethod>,
+        val innerClasses: Map<String, KotlinMetaClass>,
+        val methods: List<KotlinMetaMethod>,
         val modifiers: Set<Modifier>,
-        val parent: JavaMetaClass? = null,
-        val interfaces: List<JavaMetaClass> = emptyList(),
+        val parent: KotlinMetaClass? = null,
+        val interfaces: List<KotlinMetaClass> = emptyList(),
 )
 
-data class JavaMetaField(
+data class KotlinMetaField(
         val name: String,
-        val type: JavaMetaType,
+        val type: KotlinMetaType,
         val modifiers: Set<Modifier>
 )
 
-data class JavaMetaParameter(
+data class KotlinMetaParameter(
         val name: String,
-        val type: JavaMetaType,
+        val type: KotlinMetaType,
         val modifiers: Set<Modifier>
 )
 
-data class JavaMetaMethod(
+data class KotlinMetaMethod(
         val name: String,
-        val returnType: JavaMetaType,
-        val parameters: Map<String, JavaMetaParameter>,
+        val returnType: KotlinMetaType,
+        val parameters: Map<String, KotlinMetaParameter>,
         val modifiers: Set<Modifier>,
-        val typeParameters: List<JavaMetaType> = emptyList(),
-        val exceptions: List<JavaMetaType> = emptyList(),
+        val typeParameters: List<KotlinMetaType> = emptyList(),
+        val exceptions: List<KotlinMetaType> = emptyList(),
 )

@@ -18,6 +18,8 @@
 
 package io.art.generator.constants
 
+import org.jetbrains.kotlin.com.intellij.openapi.Disposable
+
 const val KOTLIN_EXTENSION = "kt"
 const val KOTLIN_SCRIPT_EXTENSION = "kts"
 
@@ -42,3 +44,7 @@ enum class GeneratorLanguages {
     KOTLIN,
     DART
 }
+
+val EMPTY_DISPOSABLE = Disposable {}
+
+const val KOTLIN_COMPILER_MODULE_NAME = "kotlin-analyzer"

@@ -124,6 +124,7 @@ private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, type
 }
 
 private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, constructor: JavaMetaMethod) {
+    val parameters = constructor.parameters
     val template = methodBuilder(INVOKE_NAME)
             .addModifiers(PUBLIC)
             .addException(THROWABLE_CLASS_NAME)
@@ -132,10 +133,10 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
             .build()
     template.toBuilder()
             .addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
-            .addCode(returnInvokeConstructorStatement(type, constructor.parameters))
+            .addCode(returnInvokeConstructorStatement(type, parameters))
             .build()
             .apply(::addMethod)
-    when (constructor.parameters.size) {
+    when (parameters.size) {
         0 -> {
             template.toBuilder()
                     .addCode(returnInvokeWithoutArgumentsConstructorStatement(type))
@@ -145,7 +146,7 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
         1 -> {
             template.toBuilder()
                     .addParameter(OBJECT_CLASS_NAME, ARGUMENT_NAME)
-                    .addCode(returnInvokeOneArgumentConstructorStatement(type, constructor.parameters.values.first()))
+                    .addCode(returnInvokeOneArgumentConstructorStatement(type, parameters.values.first()))
                     .build()
                     .apply(::addMethod)
         }
@@ -166,7 +167,8 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
     if (index > 0) name += index
     val methodName = metaMethodName(name)
     val methodClassName = metaMethodClassName(name)
-    val returnTypeName = method.returnType.withoutVariables().box()
+    val returnType = method.returnType
+    val returnTypeName = returnType.withoutVariables().box()
     val static = method.modifiers.contains(STATIC)
     val parent = when {
         static -> ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnTypeName)
@@ -181,7 +183,7 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
             .superclass(parent)
             .addMethod(constructorBuilder()
                     .addModifiers(PRIVATE)
-                    .addCode(metaMethodSuperStatement(method.name, method.returnType.excludeVariables(variableExclusions), method.modifiers))
+                    .addCode(metaMethodSuperStatement(method.name, returnType.excludeVariables(variableExclusions), method.modifiers))
                     .build())
             .apply { generateMethodInvocations(ownerType, method.name, method) }
             .apply { generateParameters(method) }
@@ -202,6 +204,7 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
 
 private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name: String, method: JavaMetaMethod) {
     val static = method.modifiers.contains(STATIC)
+    val parameters = method.parameters
     val template = methodBuilder(INVOKE_NAME)
             .addModifiers(PUBLIC)
             .addAnnotation(OVERRIDE_CLASS_NAME)
@@ -211,8 +214,8 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             .build()
     template.toBuilder().apply {
         val invoke = when {
-            static -> invokeStaticStatement(name, type, method.parameters)
-            else -> invokeInstanceStatement(name, method.parameters)
+            static -> invokeStaticStatement(name, type, parameters)
+            else -> invokeInstanceStatement(name, parameters)
         }
         when (method.returnType.originalType.kind) {
             VOID -> addCode(invoke).addCode(returnNullStatement())
@@ -221,7 +224,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
         addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
         addMethod(build())
     }
-    when (method.parameters.size) {
+    when (parameters.size) {
         0 -> template.toBuilder().apply {
             val invoke = when {
                 static -> invokeWithoutArgumentsStaticStatement(name, type)
@@ -236,8 +239,8 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
         1 -> template.toBuilder().apply {
             addParameter(OBJECT_CLASS_NAME, ARGUMENT_NAME)
             val invoke = when {
-                static -> invokeOneArgumentStaticStatement(name, type, method.parameters.values.first())
-                else -> invokeOneArgumentInstanceStatement(name, method.parameters.values.first())
+                static -> invokeOneArgumentStaticStatement(name, type, parameters.values.first())
+                else -> invokeOneArgumentInstanceStatement(name, parameters.values.first())
             }
             when (method.returnType.originalType.kind) {
                 VOID -> addCode(invoke).addCode(returnNullStatement())

@@ -53,7 +53,7 @@ object JavaCompilerProvider {
             Options.instance(this).apply { setUTF8Encoding(this) }
         }
         val fileManager = tool.getStandardFileManager(EmptyDiagnosticListener, Locale.getDefault(), defaultCharset()).apply {
-            setLocation(SOURCE_PATH, compilerConfiguration.root.map(Path::toFile))
+            setLocation(SOURCE_PATH, listOf(compilerConfiguration.root.toFile()))
             setLocation(CLASS_PATH, classpath)
             setLocation(CLASS_OUTPUT, listOf(compilerConfiguration.destination.toFile()))
         }

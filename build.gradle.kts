@@ -63,6 +63,12 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 }
 
+sourceSets {
+    test {
+        java.srcDirs("src/test/kotlin-model")
+    }
+}
+
 val testSourceSet: SourceSet = sourceSets.test.get()
 generator {
     java(testSourceSet.java)

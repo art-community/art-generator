@@ -209,8 +209,8 @@ private class JavaAnalyzingService {
             parent = superclass
                     ?.let { superclass.tsym as? ClassSymbol }
                     ?.apply {
-                        if (!hasObjectMetaType() && superclass.tsym?.qualifiedName.toString() == Object::class.java.name) {
-                            OBJECT_META_TYPE = JavaMetaType(
+                        if (!hasJavaObjectMetaType() && superclass.tsym?.qualifiedName.toString() == Object::class.java.name) {
+                            JAVA_OBJECT_META_TYPE = JavaMetaType(
                                     originalType = superclass,
                                     typeName = superclass.tsym.qualifiedName.toString(),
                                     kind = CLASS_KIND,

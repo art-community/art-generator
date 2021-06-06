@@ -61,7 +61,7 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
 fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when (kind) {
     PRIMITIVE_KIND, ENUM_KIND -> this
 
-    VARIABLE_KIND -> if (exclusions.contains(typeName)) OBJECT_META_TYPE else this
+    VARIABLE_KIND -> if (exclusions.contains(typeName)) JAVA_OBJECT_META_TYPE else this
 
     ARRAY_KIND -> JavaMetaType(
             originalType = originalType,

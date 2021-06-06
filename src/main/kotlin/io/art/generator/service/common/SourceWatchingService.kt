@@ -29,6 +29,7 @@ import io.art.generator.detector.SourcesChanges
 import io.art.generator.detector.detectChanges
 import io.art.generator.service.java.JavaMetaGenerationService.generateJavaMetaClasses
 import io.art.generator.service.java.analyzeJavaSources
+import io.art.generator.service.kotlin.analyzeKotlinSources
 import io.art.scheduler.manager.Scheduling.schedule
 import java.nio.file.Path
 
@@ -67,6 +68,12 @@ object SourceWatchingService {
     }
 
     private fun SourcesChanges.handleKotlinSources(path: Path) {
-        TODO("Kotlin...")
+        val sources = analyzeKotlinSources(path)
+        if (sources.isEmpty()) {
+            KOTLIN_LOGGER.info(SOURCES_NOT_FOUND(root))
+            return
+        }
+        KOTLIN_LOGGER.info("Sources: ${sources.size}")
+        //generateJavaMetaClasses(path, sources.values.asSequence())
     }
 }
