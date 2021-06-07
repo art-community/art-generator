@@ -18,7 +18,7 @@
 
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.Generator
-import io.art.generator.service.common.SourceWatchingService
+import io.art.generator.service.common.SourceWatchingService.watchSources
 import io.art.generator.service.common.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
@@ -30,6 +30,6 @@ fun main() {
             .module(scheduler().with(logging()))
             .launch()
     initialize()
-    SourceWatchingService.watchSources(false)
+    watchSources()
     block()
 }
