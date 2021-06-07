@@ -30,6 +30,6 @@ fun main() {
             .module(scheduler().with(logging()))
             .launch()
     initialize()
-    watchSources()
+    watchSources(false)
     block()
 }
