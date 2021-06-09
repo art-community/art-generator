@@ -25,6 +25,7 @@ import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
+import org.jetbrains.kotlin.builtins.functions.FunctionClassDescriptor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
@@ -39,6 +40,7 @@ import org.jetbrains.kotlin.types.TypeProjection
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.UnwrappedType
 import org.jetbrains.kotlin.types.Variance.*
+import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.nio.file.Path
 import java.util.Objects.nonNull
 
@@ -79,6 +81,31 @@ private class KotlinAnalyzingService {
     }
 
     private fun SimpleType.asMetaType(): KotlinMetaType = when {
+        constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(cache, this) {
+            KotlinMetaType(
+                    originalType = this,
+                    kind = FUNCTION_KIND,
+                    nullable = isNullableType(this),
+                    typeName = toString(),
+                    functionResultType = arguments.takeLast(1).firstOrNull()?.asMetaType()
+            )
+        }.apply {
+            functionArgumentTypes.clear()
+            functionArgumentTypes.addAll(arguments.dropLast(1).map { type -> type.asMetaType() })
+        }
+
+        isEnum() -> KotlinMetaType(
+                originalType = this,
+                kind = ENUM_KIND,
+                nullable = isNullableType(this),
+
+                classFullName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString(),
+                className = constructor.declarationDescriptor!!.classId!!.relativeClassName.asString(),
+                classPackageName = constructor.declarationDescriptor!!.classId!!.packageFqName.asString(),
+
+                typeName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString()
+        )
+
         isArray(this) -> KotlinMetaType(
                 originalType = this,
                 kind = ARRAY_KIND,
@@ -88,6 +115,7 @@ private class KotlinAnalyzingService {
 
                 typeName = toString()
         )
+
         constructor.declarationDescriptor is ClassDescriptor -> putIfAbsent(cache, this) {
             KotlinMetaType(
                     originalType = this,
@@ -126,16 +154,16 @@ private class KotlinAnalyzingService {
     }
 
     private fun TypeProjection.asMetaType(): KotlinMetaType {
-        val unwraped = type.unwrap()
+        val unwrapped = type.unwrap()
         if (isStarProjection) {
             return KotlinMetaType(
-                    originalType = unwraped,
+                    originalType = unwrapped,
                     kind = WILDCARD_KIND,
-                    nullable = isNullableType(unwraped),
+                    nullable = isNullableType(unwrapped),
                     typeName = toString()
             )
         }
-        return unwraped.asMetaType()
+        return unwrapped.asMetaType()
     }
 
     private fun ClassDescriptor.asMetaType(): KotlinMetaType = defaultType.asMetaType()

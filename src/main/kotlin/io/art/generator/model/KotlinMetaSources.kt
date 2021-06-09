@@ -27,9 +27,9 @@ import org.jetbrains.kotlin.types.KotlinType
 enum class KotlinMetaTypeKind {
     CLASS_KIND,
     ARRAY_KIND,
+    FUNCTION_KIND,
     ENUM_KIND,
     WILDCARD_KIND,
-    INTERFACE_KIND,
     VARIABLE_KIND,
     UNKNOWN_KIND
 }
@@ -57,6 +57,9 @@ data class KotlinMetaType(
         val arrayComponentType: KotlinMetaType? = null,
 
         val typeParameters: MutableList<KotlinMetaType> = mutableListOf(),
+
+        val functionArgumentTypes: MutableList<KotlinMetaType> = mutableListOf(),
+        val functionResultType: KotlinMetaType? = null,
 
         val typeVariableVariance: KotlinTypeVariableVariance? = null,
         val typeVariableBounds: MutableList<KotlinMetaType> = mutableListOf(),

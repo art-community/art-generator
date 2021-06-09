@@ -19,12 +19,15 @@
 package model
 
 class ModelKotlin<T1, out T2, out T3, T4>(
-        val f1: T1?,
+        val f0: String,
+        val f1: String?,
         val f2: T1?,
-        val f3: T2,
-        val f4: T3,
-        val f5: T4,
-        val f6: ModelKotlin<T1, *, *, String>?
+        val f3: T1,
+        val f4: T2,
+        val f5: T3,
+        val f6: T4,
+        val f7: ModelKotlin<T1, *, *, String>?,
+        val f8: (p1: String) -> ModelKotlin<T1, *, *, String>?,
 ) where T1 : CharSequence, T1 : Comparable<T1>
 
 typealias Alias = ModelKotlin<*, *, *, *>
