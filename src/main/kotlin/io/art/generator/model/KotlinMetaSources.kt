@@ -58,10 +58,12 @@ data class KotlinMetaType(
 
         val arrayComponentType: KotlinMetaType? = null,
 
-        val typeParameters: MutableList<KotlinMetaType> = mutableListOf(),
+        val typeParameters: List<KotlinMetaType> = listOf(),
 
         val typeVariableVariance: KotlinTypeVariableVariance? = null,
-        val typeVariableBounds: MutableList<KotlinMetaType> = mutableListOf(),
+        val typeVariableBounds: List<KotlinMetaType> = listOf(),
+
+        val nullable: Boolean = false,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

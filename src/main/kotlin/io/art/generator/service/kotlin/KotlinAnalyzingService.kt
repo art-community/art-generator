@@ -26,19 +26,16 @@ import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
-import org.jetbrains.kotlin.descriptors.ClassDescriptor
-import org.jetbrains.kotlin.descriptors.FunctionDescriptor
-import org.jetbrains.kotlin.descriptors.VariableDescriptor
-import org.jetbrains.kotlin.descriptors.VariableDescriptorWithAccessors
+import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
-import org.jetbrains.kotlin.types.KotlinType
-import org.jetbrains.kotlin.types.SimpleType
-import org.jetbrains.kotlin.types.UnwrappedType
+import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.TypeUtils.isNullableType
+import org.jetbrains.kotlin.types.Variance.*
 import java.nio.file.Path
 import java.util.Objects.nonNull
 
@@ -74,7 +71,7 @@ private class KotlinAnalyzingService {
     private fun KotlinType.asMetaType(): KotlinMetaType = putIfAbsent(cache, this) {
         when (val unwrapped: UnwrappedType = unwrap()) {
             is SimpleType -> unwrapped.asMetaType()
-            else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
+            else -> KotlinMetaType(originalType = unwrapped, kind = UNKNOWN_KIND, typeName = toString())
         }
     }
 
@@ -82,6 +79,7 @@ private class KotlinAnalyzingService {
         isArray(this) -> KotlinMetaType(
                 originalType = this,
                 kind = ARRAY_KIND,
+                nullable = isNullableType(this),
 
                 arrayComponentType = constructor.builtIns.getArrayElementType(this).asMetaType(),
 
@@ -90,16 +88,35 @@ private class KotlinAnalyzingService {
         constructor.declarationDescriptor is ClassDescriptor -> KotlinMetaType(
                 originalType = this,
                 kind = CLASS_KIND,
+                nullable = isNullableType(this),
 
                 classFullName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString(),
                 className = constructor.declarationDescriptor!!.classId!!.relativeClassName.asString(),
                 classPackageName = constructor.declarationDescriptor!!.classId!!.packageFqName.asString(),
+
+                typeParameters = constructor.parameters
+                        .map { parameter -> parameter.asMetaType() }
+                        .toList(),
 
                 typeName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString()
         )
         else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
     }
 
+    private fun TypeParameterDescriptor.asMetaType(): KotlinMetaType {
+        return KotlinMetaType(
+                originalType = defaultType,
+                kind = VARIABLE_KIND,
+                nullable = isNullableType(defaultType),
+                typeName = toString(),
+                typeVariableVariance = when (variance) {
+                    INVARIANT -> KotlinTypeVariableVariance.INVARIANT
+                    IN_VARIANCE -> KotlinTypeVariableVariance.IN
+                    OUT_VARIANCE -> KotlinTypeVariableVariance.OUT
+                },
+                typeVariableBounds = upperBounds.map { type -> type.asMetaType() }
+        )
+    }
 
     private fun ClassDescriptor.asMetaType(): KotlinMetaType = defaultType.asMetaType()
 
@@ -131,7 +148,7 @@ private class KotlinAnalyzingService {
 
             parent = getSuperClassNotAny()?.asMetaClass(),
 
-            interfaces = getSuperInterfaces().map { interfaceField -> interfaceField.asMetaClass() }
+            interfaces = getSuperInterfaces().map { interfaceType -> interfaceType.asMetaClass() }
     )
 
     private fun FunctionDescriptor.asMetaMethod() = KotlinMetaMethod(
