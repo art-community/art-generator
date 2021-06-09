@@ -82,7 +82,7 @@ fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when 
                     classFullName = classFullName,
                     className = className,
                     classPackageName = classPackageName,
-                    typeParameters = parameters.toMutableList()
+                    typeParameters = parameters.toMutableSet()
             )
         }
     }

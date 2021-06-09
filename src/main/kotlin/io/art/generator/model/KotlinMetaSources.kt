@@ -23,9 +23,6 @@ package io.art.generator.model
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.types.KotlinType
-import java.beans.Visibility
-import java.nio.file.Path
-import javax.lang.model.element.Modifier
 
 enum class KotlinMetaTypeKind {
     CLASS_KIND,
@@ -59,15 +56,15 @@ data class KotlinMetaType(
 
         val arrayComponentType: KotlinMetaType? = null,
 
-        val typeParameters: MutableList<KotlinMetaType> = mutableListOf(),
+        val typeParameters: MutableSet<KotlinMetaType> = mutableSetOf(),
 
         val typeVariableVariance: KotlinTypeVariableVariance? = null,
-        val typeVariableBounds: MutableList<KotlinMetaType> = mutableListOf(),
+        val typeVariableBounds: MutableSet<KotlinMetaType> = mutableSetOf(),
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        other as JavaMetaType
+        other as KotlinMetaType
         if (originalType != other.originalType) return false
         return true
     }

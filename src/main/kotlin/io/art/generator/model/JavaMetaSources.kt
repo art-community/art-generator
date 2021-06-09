@@ -21,7 +21,6 @@
 package io.art.generator.model
 
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
-import java.nio.file.Path
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeMirror
 
@@ -53,8 +52,8 @@ data class JavaMetaType(
         val wildcardExtendsBound: JavaMetaType? = null,
         val wildcardSuperBound: JavaMetaType? = null,
 
-        val typeParameters: MutableList<JavaMetaType> = mutableListOf(),
-        val typeVariableBounds: MutableList<JavaMetaType> = mutableListOf(),
+        val typeParameters: MutableSet<JavaMetaType> = mutableSetOf(),
+        val typeVariableBounds: MutableSet<JavaMetaType> = mutableSetOf(),
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

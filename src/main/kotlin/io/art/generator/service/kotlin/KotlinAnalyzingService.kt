@@ -106,21 +106,21 @@ private class KotlinAnalyzingService {
     }
 
     private fun TypeProjection.asMetaType(): KotlinMetaType {
+        val unwraped = type.unwrap()
         if (isStarProjection) {
             return KotlinMetaType(
-                    originalType = type,
+                    originalType = unwraped,
                     kind = WILDCARD_KIND,
-                    nullable = isNullableType(type),
+                    nullable = isNullableType(unwraped),
                     typeName = toString()
             )
         }
-        val unwrap = type.unwrap()
-        return when (val descriptor = unwrap.constructor.declarationDescriptor) {
-            is TypeParameterDescriptor -> putIfAbsent(cache, unwrap) {
+        return when (val descriptor = unwraped.constructor.declarationDescriptor) {
+            is TypeParameterDescriptor -> putIfAbsent(cache, unwraped) {
                 KotlinMetaType(
-                        originalType = unwrap,
+                        originalType = unwraped,
                         kind = VARIABLE_KIND,
-                        nullable = isNullableType(unwrap),
+                        nullable = isNullableType(unwraped),
                         typeName = toString(),
                         typeVariableVariance = when (descriptor.variance) {
                             INVARIANT -> KotlinTypeVariableVariance.INVARIANT
@@ -129,6 +129,7 @@ private class KotlinAnalyzingService {
                         },
                 )
             }.apply { typeVariableBounds.addAll(descriptor.upperBounds.map { type -> type.asMetaType() }) }
+
             else -> KotlinMetaType(originalType = type, kind = UNKNOWN_KIND, typeName = toString())
         }
     }
