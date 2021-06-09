@@ -59,7 +59,7 @@ private class JavaAnalyzingService {
                     .map { symbol -> symbol.asMetaClass() }
                     .distinctBy { metaClass -> metaClass.type.typeName }
                     .toList()
-                    .apply { JAVA_LOGGER.info(ANALYZE_COMPLETED(root, map { metaClass -> metaClass.type.typeName })) }
+                    .apply { JAVA_LOGGER.info(ANALYZE_COMPLETED(map { metaClass -> metaClass.type.typeName })) }
         }
     }
 
