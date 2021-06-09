@@ -38,7 +38,6 @@ import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
 import io.art.generator.templates.metaModuleClassFullName
 import java.nio.file.Path
-import java.nio.file.Paths
 import javax.lang.model.element.ElementKind.ENUM
 import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeMirror
@@ -48,8 +47,8 @@ fun analyzeJavaSources(root: Path, sources: Sequence<Path>) = JavaAnalyzingServi
 private class JavaAnalyzingService {
     private val cache = mutableMapOf<TypeMirror, JavaMetaType>()
 
-    fun analyzeJavaSources(root: Path, sources: Sequence<Path>): Map<Path, JavaMetaClass> {
-        if (!root.toFile().exists()) return emptyMap()
+    fun analyzeJavaSources(root: Path, sources: Sequence<Path>): List<JavaMetaClass> {
+        if (!root.toFile().exists()) return emptyList()
         JAVA_LOGGER.info(ANALYZING_MESSAGE(root))
         return useJavaCompiler(JavaCompilerConfiguration(root, sources)) { task ->
             task.analyze()
@@ -58,8 +57,9 @@ private class JavaAnalyzingService {
                     .map { element -> (element as ClassSymbol) }
                     .filter { symbol -> symbol.className() != metaModuleClassFullName(configuration.moduleName) }
                     .map { symbol -> symbol.asMetaClass() }
-                    .associateBy { metaClass -> metaClass.source }
-                    .apply { JAVA_LOGGER.info(ANALYZE_COMPLETED(root, keys.toList())) }
+                    .distinctBy { metaClass -> metaClass.type.typeName }
+                    .toList()
+                    .apply { JAVA_LOGGER.info(ANALYZE_COMPLETED(root, map { metaClass -> metaClass.type.typeName })) }
         }
     }
 
@@ -161,8 +161,6 @@ private class JavaAnalyzingService {
 
     private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
             type = asMetaType(),
-
-            source = Paths.get(sourcefile.name),
 
             modifiers = modifiers,
 

@@ -29,6 +29,7 @@ import javax.lang.model.element.Modifier
 
 enum class KotlinMetaTypeKind {
     CLASS_KIND,
+    ARRAY_KIND,
     ENUM_KIND,
     WILDCARD_KIND,
     INTERFACE_KIND,
@@ -75,7 +76,6 @@ data class KotlinMetaType(
 
 data class KotlinMetaClass(
         val type: KotlinMetaType,
-        val source: Path?,
         val properties: Map<String, KotlinMetaProperty>,
         val constructors: List<KotlinMetaMethod>,
         val innerClasses: Map<String, KotlinMetaClass>,
@@ -88,7 +88,9 @@ data class KotlinMetaClass(
 data class KotlinMetaProperty(
         val name: String,
         val type: KotlinMetaType,
-        val visibility: DescriptorVisibility
+        val visibility: DescriptorVisibility,
+        val hasGetter: Boolean,
+        val hasSetter: Boolean
 )
 
 data class KotlinMetaParameter(

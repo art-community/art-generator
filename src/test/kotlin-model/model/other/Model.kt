@@ -23,11 +23,10 @@ class ModelClass(
         var f2: String,
         val f3: String?,
         val f4: String?,
-        val f5: ModelClass?
+        val f5: ModelClass?,
+        val f7: Array<String>
 ) {
     private var f6 = "test"
-
-    fun getF6() = f6
 
     fun simpleMethod() {
 

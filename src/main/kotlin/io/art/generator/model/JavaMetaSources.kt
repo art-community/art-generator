@@ -69,7 +69,6 @@ data class JavaMetaType(
 
 data class JavaMetaClass(
         val type: JavaMetaType,
-        val source: Path,
         val fields: Map<String, JavaMetaField>,
         val constructors: List<JavaMetaMethod>,
         val innerClasses: Map<String, JavaMetaClass>,

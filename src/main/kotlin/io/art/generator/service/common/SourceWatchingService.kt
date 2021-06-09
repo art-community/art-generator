@@ -64,7 +64,7 @@ object SourceWatchingService {
             JAVA_LOGGER.info(SOURCES_NOT_FOUND(root))
             return
         }
-        generateJavaMetaClasses(path, sources.values.asSequence())
+        generateJavaMetaClasses(path, sources.asSequence())
     }
 
     private fun SourcesChanges.handleKotlinSources(path: Path) {

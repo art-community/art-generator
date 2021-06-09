@@ -47,8 +47,6 @@ object ModelObject {
     val f4: String? = null
     private var f6 = "test"
 
-    fun getF6() = f6
-
     fun simpleMethod() {
 
     }

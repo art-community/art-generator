@@ -20,11 +20,11 @@ package io.art.generator.service.kotlin
 
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.model.*
-import io.art.generator.model.KotlinMetaTypeKind.CLASS_KIND
-import io.art.generator.model.KotlinMetaTypeKind.UNKNOWN_KIND
+import io.art.generator.model.KotlinMetaTypeKind.*
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import org.jetbrains.kotlin.analyzer.AnalysisResult
+import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
@@ -40,7 +40,6 @@ import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.SimpleType
 import org.jetbrains.kotlin.types.UnwrappedType
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.util.Objects.nonNull
 
 fun analyzeKotlinSources(root: Path) = KotlinAnalyzingService().analyzeKotlinSources(root)
@@ -48,17 +47,17 @@ fun analyzeKotlinSources(root: Path) = KotlinAnalyzingService().analyzeKotlinSou
 private class KotlinAnalyzingService {
     private val cache = mutableMapOf<KotlinType, KotlinMetaType>()
 
-    fun analyzeKotlinSources(root: Path): Map<Path, KotlinMetaClass> {
+    fun analyzeKotlinSources(root: Path): List<KotlinMetaClass> {
         val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(root), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
-                ?: return emptyMap()
+                ?: return emptyList()
         return root.toFile().listFiles()!!
                 .map { file -> file.name }
                 .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()
                 .map { descriptor -> descriptor.asMetaClass() }
-                .filter { metaClass -> nonNull(metaClass.source) }
-                .associateBy { metaClass -> metaClass.source!! }
+                .distinctBy { metaClass -> metaClass.type.typeName }
+                .toList()
     }
 
     private fun collectClasses(analysisResult: AnalysisResult, packageName: String): List<ClassDescriptor> {
@@ -80,15 +79,23 @@ private class KotlinAnalyzingService {
     }
 
     private fun SimpleType.asMetaType(): KotlinMetaType = when {
+        isArray(this) -> KotlinMetaType(
+                originalType = this,
+                kind = ARRAY_KIND,
+
+                arrayComponentType = constructor.builtIns.getArrayElementType(this).asMetaType(),
+
+                typeName = toString()
+        )
         constructor.declarationDescriptor is ClassDescriptor -> KotlinMetaType(
                 originalType = this,
                 kind = CLASS_KIND,
 
-                classFullName = constructor.declarationDescriptor!!.classId!!.asString(),
+                classFullName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString(),
                 className = constructor.declarationDescriptor!!.classId!!.relativeClassName.asString(),
                 classPackageName = constructor.declarationDescriptor!!.classId!!.packageFqName.asString(),
 
-                typeName = constructor.declarationDescriptor!!.classId!!.asString()
+                typeName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString()
         )
         else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
     }
@@ -98,8 +105,6 @@ private class KotlinAnalyzingService {
 
     private fun ClassDescriptor.asMetaClass(): KotlinMetaClass = KotlinMetaClass(
             type = asMetaType(),
-
-            source = source.containingFile.name?.let { name -> Paths.get(name) },
 
             visibility = visibility,
 
@@ -140,7 +145,9 @@ private class KotlinAnalyzingService {
     private fun VariableDescriptorWithAccessors.asMetaProperty() = KotlinMetaProperty(
             name = name.toString(),
             visibility = visibility,
-            type = type.asMetaType()
+            type = type.asMetaType(),
+            hasGetter = nonNull(getter),
+            hasSetter = nonNull(setter),
     )
 
     private fun VariableDescriptor.asMetaParameter() = KotlinMetaParameter(
