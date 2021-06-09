@@ -100,7 +100,10 @@ private class KotlinAnalyzingService {
 
                     typeName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString()
             )
-        }.apply { typeParameters.addAll(arguments.map { projection -> projection.asMetaType() }) }
+        }.apply {
+            typeParameters.clear()
+            typeParameters.addAll(arguments.map { projection -> projection.asMetaType() })
+        }
 
         constructor.declarationDescriptor is TypeParameterDescriptor -> putIfAbsent(cache, this) {
             KotlinMetaType(
@@ -114,7 +117,10 @@ private class KotlinAnalyzingService {
                         OUT_VARIANCE -> KotlinTypeVariableVariance.OUT
                     },
             )
-        }.apply { typeVariableBounds.addAll((constructor.declarationDescriptor as TypeParameterDescriptor).upperBounds.map { type -> type.asMetaType() }) }
+        }.apply {
+            typeVariableBounds.clear()
+            typeVariableBounds.addAll((constructor.declarationDescriptor as TypeParameterDescriptor).upperBounds.map { type -> type.asMetaType() })
+        }
 
         else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
     }

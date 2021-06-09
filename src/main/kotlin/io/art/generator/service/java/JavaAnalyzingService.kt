@@ -108,6 +108,7 @@ private class JavaAnalyzingService {
                             ?: EMPTY_STRING
             )
         }
+        type.typeParameters.clear()
         typeArguments
                 .asSequence()
                 .map { argument -> argument.asMetaType() }
@@ -124,6 +125,7 @@ private class JavaAnalyzingService {
                     typeName = tsym.qualifiedName.toString()
             )
         }
+        type.typeVariableBounds.clear()
         upperBound
                 .let { bound ->
                     when (bound) {
