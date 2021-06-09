@@ -51,6 +51,7 @@ data class KotlinMetaType(
 
         val typeName: String,
         val kind: KotlinMetaTypeKind,
+        val nullable: Boolean = false,
 
         val classFullName: String? = null,
         val className: String? = null,
@@ -58,12 +59,10 @@ data class KotlinMetaType(
 
         val arrayComponentType: KotlinMetaType? = null,
 
-        val typeParameters: List<KotlinMetaType> = listOf(),
+        val typeParameters: MutableList<KotlinMetaType> = mutableListOf(),
 
         val typeVariableVariance: KotlinTypeVariableVariance? = null,
-        val typeVariableBounds: List<KotlinMetaType> = listOf(),
-
-        val nullable: Boolean = false,
+        val typeVariableBounds: MutableList<KotlinMetaType> = mutableListOf(),
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

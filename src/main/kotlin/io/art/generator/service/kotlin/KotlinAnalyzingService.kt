@@ -33,8 +33,11 @@ import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
-import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.types.SimpleType
+import org.jetbrains.kotlin.types.TypeProjection
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
+import org.jetbrains.kotlin.types.UnwrappedType
 import org.jetbrains.kotlin.types.Variance.*
 import java.nio.file.Path
 import java.util.Objects.nonNull
@@ -85,37 +88,49 @@ private class KotlinAnalyzingService {
 
                 typeName = toString()
         )
-        constructor.declarationDescriptor is ClassDescriptor -> KotlinMetaType(
-                originalType = this,
-                kind = CLASS_KIND,
-                nullable = isNullableType(this),
+        constructor.declarationDescriptor is ClassDescriptor -> putIfAbsent(cache, this) {
+            KotlinMetaType(
+                    originalType = this,
+                    kind = CLASS_KIND,
+                    nullable = isNullableType(this),
 
-                classFullName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString(),
-                className = constructor.declarationDescriptor!!.classId!!.relativeClassName.asString(),
-                classPackageName = constructor.declarationDescriptor!!.classId!!.packageFqName.asString(),
+                    classFullName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString(),
+                    className = constructor.declarationDescriptor!!.classId!!.relativeClassName.asString(),
+                    classPackageName = constructor.declarationDescriptor!!.classId!!.packageFqName.asString(),
 
-                typeParameters = constructor.parameters
-                        .map { parameter -> parameter.asMetaType() }
-                        .toList(),
+                    typeName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString()
+            )
+        }.apply { typeParameters.addAll(arguments.map { projection -> projection.asMetaType() }) }
 
-                typeName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString()
-        )
         else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
     }
 
-    private fun TypeParameterDescriptor.asMetaType(): KotlinMetaType {
-        return KotlinMetaType(
-                originalType = defaultType,
-                kind = VARIABLE_KIND,
-                nullable = isNullableType(defaultType),
-                typeName = toString(),
-                typeVariableVariance = when (variance) {
-                    INVARIANT -> KotlinTypeVariableVariance.INVARIANT
-                    IN_VARIANCE -> KotlinTypeVariableVariance.IN
-                    OUT_VARIANCE -> KotlinTypeVariableVariance.OUT
-                },
-                typeVariableBounds = upperBounds.map { type -> type.asMetaType() }
-        )
+    private fun TypeProjection.asMetaType(): KotlinMetaType {
+        if (isStarProjection) {
+            return KotlinMetaType(
+                    originalType = type,
+                    kind = WILDCARD_KIND,
+                    nullable = isNullableType(type),
+                    typeName = toString()
+            )
+        }
+        val unwrap = type.unwrap()
+        return when (val descriptor = unwrap.constructor.declarationDescriptor) {
+            is TypeParameterDescriptor -> putIfAbsent(cache, unwrap) {
+                KotlinMetaType(
+                        originalType = unwrap,
+                        kind = VARIABLE_KIND,
+                        nullable = isNullableType(unwrap),
+                        typeName = toString(),
+                        typeVariableVariance = when (descriptor.variance) {
+                            INVARIANT -> KotlinTypeVariableVariance.INVARIANT
+                            IN_VARIANCE -> KotlinTypeVariableVariance.IN
+                            OUT_VARIANCE -> KotlinTypeVariableVariance.OUT
+                        },
+                )
+            }.apply { typeVariableBounds.addAll(descriptor.upperBounds.map { type -> type.asMetaType() }) }
+            else -> KotlinMetaType(originalType = type, kind = UNKNOWN_KIND, typeName = toString())
+        }
     }
 
     private fun ClassDescriptor.asMetaType(): KotlinMetaType = defaultType.asMetaType()
