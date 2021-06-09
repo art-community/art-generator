@@ -27,7 +27,6 @@ import io.art.core.constants.CompilerSuppressingWarnings.*
 import io.art.core.constants.StringConstants.*
 import io.art.generator.constants.CASTER_CLASS_NAME
 import io.art.generator.constants.OBJECT_CLASS_NAME
-import io.art.generator.constants.SET_FACTORY_CLASS_NAME
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.extension.extractClass
 import io.art.generator.extension.hasVariable
@@ -37,6 +36,7 @@ import io.art.generator.model.JavaMetaParameter
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.*
 import javax.lang.model.element.Modifier
+import javax.lang.model.element.Modifier.PUBLIC
 
 
 fun suppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnings::class.java)
@@ -105,29 +105,26 @@ fun returnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String,
 fun registerMetaFieldStatement(name: String, field: JavaMetaField): CodeBlock = "register(new MetaField<>(\$S,"
         .asCode(name)
         .join(metaTypeStatement(field.type))
-        .joinByComma(asString(field.modifiers))
         .join("))")
 
 fun registerMetaParameterStatement(index: Int, name: String, parameter: JavaMetaParameter): CodeBlock = "register(new MetaParameter<>($index, \$S,"
         .asCode(name)
         .join(metaTypeStatement(parameter.type))
-        .joinByComma(asString(parameter.modifiers))
         .join("))")
 
 fun metaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super(\$S,"
         .asCode(name)
         .join(metaTypeStatement(type))
-        .joinByComma(asString(modifiers))
+        .joinByComma(asPublicFlag(modifiers))
         .join(");")
 
 fun metaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super("
         .join(metaTypeStatement(type))
-        .joinByComma(asString(modifiers))
+        .joinByComma(asPublicFlag(modifiers))
         .join(");")
 
 fun metaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
         .join(metaTypeStatement(metaClass.type))
-        .joinByComma(asString(metaClass.modifiers))
         .join(");")
 
 fun namedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
@@ -197,6 +194,9 @@ private fun casted(parameters: Map<String, JavaMetaParameter>): CodeBlock = para
         }
         .let { blocks -> join(blocks, COMMA) }
 
-private fun asString(modifiers: Set<Modifier>): CodeBlock = "\$T.setOf(".asCode(SET_FACTORY_CLASS_NAME)
-        .join(join(modifiers.map { modifier -> "\$S".asCode(modifier) }, COMMA))
-        .join(")")
+private fun asPublicFlag(modifiers: Set<Modifier>): CodeBlock {
+    if (modifiers.contains(PUBLIC)) {
+        return "true".asCode()
+    }
+    return "false".asCode()
+}

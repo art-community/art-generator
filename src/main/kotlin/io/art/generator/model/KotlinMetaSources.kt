@@ -21,7 +21,9 @@
 package io.art.generator.model
 
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.types.KotlinType
+import java.beans.Visibility
 import java.nio.file.Path
 import javax.lang.model.element.Modifier
 
@@ -59,7 +61,7 @@ data class KotlinMetaType(
 
         val typeParameters: MutableList<KotlinMetaType> = mutableListOf(),
 
-        val typeVariableVariance: KotlinTypeVariableVariance?,
+        val typeVariableVariance: KotlinTypeVariableVariance? = null,
         val typeVariableBounds: MutableList<KotlinMetaType> = mutableListOf(),
 ) {
     override fun equals(other: Any?): Boolean {
@@ -75,12 +77,12 @@ data class KotlinMetaType(
 
 data class KotlinMetaClass(
         val type: KotlinMetaType,
-        val source: Path,
+        val source: Path?,
         val properties: Map<String, KotlinMetaProperty>,
         val constructors: List<KotlinMetaMethod>,
         val innerClasses: Map<String, KotlinMetaClass>,
         val methods: List<KotlinMetaMethod>,
-        val modifiers: Set<Modifier>,
+        val visibility: DescriptorVisibility,
         val parent: KotlinMetaClass? = null,
         val interfaces: List<KotlinMetaClass> = emptyList(),
 )
@@ -88,19 +90,19 @@ data class KotlinMetaClass(
 data class KotlinMetaProperty(
         val name: String,
         val type: KotlinMetaType,
-        val modifiers: Set<Modifier>
+        val visibility: DescriptorVisibility
 )
 
 data class KotlinMetaParameter(
         val name: String,
         val type: KotlinMetaType,
-        val modifiers: Set<Modifier>
+        val visibility: DescriptorVisibility
 )
 
 data class KotlinMetaMethod(
         val name: String,
-        val returnType: KotlinMetaType,
+        val returnType: KotlinMetaType?,
         val parameters: Map<String, KotlinMetaParameter>,
-        val modifiers: Set<Modifier>,
+        val visibility: DescriptorVisibility,
         val typeParameters: List<KotlinMetaType> = emptyList()
 )
