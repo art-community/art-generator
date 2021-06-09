@@ -102,6 +102,20 @@ private class KotlinAnalyzingService {
             )
         }.apply { typeParameters.addAll(arguments.map { projection -> projection.asMetaType() }) }
 
+        constructor.declarationDescriptor is TypeParameterDescriptor -> putIfAbsent(cache, this) {
+            KotlinMetaType(
+                    originalType = this,
+                    kind = VARIABLE_KIND,
+                    nullable = isNullableType(this),
+                    typeName = toString(),
+                    typeVariableVariance = when ((constructor.declarationDescriptor as TypeParameterDescriptor).variance) {
+                        INVARIANT -> KotlinTypeVariableVariance.INVARIANT
+                        IN_VARIANCE -> KotlinTypeVariableVariance.IN
+                        OUT_VARIANCE -> KotlinTypeVariableVariance.OUT
+                    },
+            )
+        }.apply { typeVariableBounds.addAll((constructor.declarationDescriptor as TypeParameterDescriptor).upperBounds.map { type -> type.asMetaType() }) }
+
         else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
     }
 
@@ -115,23 +129,7 @@ private class KotlinAnalyzingService {
                     typeName = toString()
             )
         }
-        return when (val descriptor = unwraped.constructor.declarationDescriptor) {
-            is TypeParameterDescriptor -> putIfAbsent(cache, unwraped) {
-                KotlinMetaType(
-                        originalType = unwraped,
-                        kind = VARIABLE_KIND,
-                        nullable = isNullableType(unwraped),
-                        typeName = toString(),
-                        typeVariableVariance = when (descriptor.variance) {
-                            INVARIANT -> KotlinTypeVariableVariance.INVARIANT
-                            IN_VARIANCE -> KotlinTypeVariableVariance.IN
-                            OUT_VARIANCE -> KotlinTypeVariableVariance.OUT
-                        },
-                )
-            }.apply { typeVariableBounds.addAll(descriptor.upperBounds.map { type -> type.asMetaType() }) }
-
-            else -> KotlinMetaType(originalType = type, kind = UNKNOWN_KIND, typeName = toString())
-        }
+        return unwraped.asMetaType()
     }
 
     private fun ClassDescriptor.asMetaType(): KotlinMetaType = defaultType.asMetaType()

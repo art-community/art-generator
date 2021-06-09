@@ -19,41 +19,11 @@
 package model
 
 class ModelKotlin<T1, out T2, out T3, T4>(
-        val f1: String,
-        var f2: String,
-        val f3: T1?,
-        val f4: T1?,
-        val f5: ModelKotlin<*, *, *, *>?
-) where T1 : CharSequence, T1 : Comparable<T1> {
-    var f6 = "test"
-        private set
+        val f1: T1?,
+        val f2: T1?,
+        val f3: T2,
+        val f4: T3,
+        val f5: T4,
+        val f6: ModelKotlin<T1, *, *, *>?
+) where T1 : CharSequence, T1 : Comparable<T1>
 
-    fun simpleMethod() {
-
-    }
-
-    fun simpleMethod(p1: String) {
-
-    }
-
-    fun simpleMethod(p1: String, p2: Int): String = ""
-}
-
-
-object ModelObject {
-    val f1: String = ""
-    var f2: String = ""
-    val f3: String? = null
-    val f4: String? = null
-    private var f6 = "test"
-
-    fun simpleMethod() {
-
-    }
-
-    fun simpleMethod(p1: String) {
-
-    }
-
-    fun simpleMethod(p1: String, p2: Int): String = ""
-}
