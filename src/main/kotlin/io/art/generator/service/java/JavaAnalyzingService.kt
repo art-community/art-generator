@@ -96,8 +96,7 @@ private class JavaAnalyzingService {
                     originalType = this,
                     classFullName = tsym.qualifiedName.toString(),
                     kind = when {
-                        !isInterface && !asElement().isEnum -> CLASS_KIND
-                        isInterface -> INTERFACE_KIND
+                        !asElement().isEnum -> CLASS_KIND
                         asElement().isEnum -> ENUM_KIND
                         else -> UNKNOWN_KIND
                     },

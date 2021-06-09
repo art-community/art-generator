@@ -35,7 +35,7 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
 
     ENUM_KIND -> ClassName.get(classPackageName, className)
 
-    CLASS_KIND, INTERFACE_KIND -> when {
+    CLASS_KIND -> when {
         typeParameters.isEmpty() -> ClassName.get(classPackageName, className)
         else -> {
             val parameters = typeParameters.map { parameter ->
@@ -69,7 +69,7 @@ fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when 
             kind = kind,
             arrayComponentType = arrayComponentType?.excludeVariables(exclusions))
 
-    CLASS_KIND, INTERFACE_KIND -> when {
+    CLASS_KIND -> when {
         typeParameters.isEmpty() -> this
         else -> {
             val parameters = typeParameters
@@ -105,7 +105,7 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())
 
-    CLASS_KIND, INTERFACE_KIND, ENUM_KIND -> ClassName.get(classPackageName, className)
+    CLASS_KIND, ENUM_KIND -> ClassName.get(classPackageName, className)
 
     VARIABLE_KIND -> OBJECT_CLASS_NAME
 

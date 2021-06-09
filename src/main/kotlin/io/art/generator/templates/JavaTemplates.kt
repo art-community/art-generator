@@ -153,7 +153,7 @@ private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
     return when (type.kind) {
         PRIMITIVE_KIND -> metaTypeBlock(poetClass)
         ARRAY_KIND -> metaArrayBlock(type, poetClass)
-        CLASS_KIND, INTERFACE_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
+        CLASS_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
         ENUM_KIND -> metaEnumBlock(poetClass)
         VARIABLE_KIND -> metaVariableBlock(type)
         WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)

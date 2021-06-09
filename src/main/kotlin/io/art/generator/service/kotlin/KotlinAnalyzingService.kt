@@ -20,6 +20,7 @@ package io.art.generator.service.kotlin
 
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.model.*
+import io.art.generator.model.KotlinMetaTypeKind.CLASS_KIND
 import io.art.generator.model.KotlinMetaTypeKind.UNKNOWN_KIND
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
@@ -32,9 +33,12 @@ import org.jetbrains.kotlin.descriptors.VariableDescriptorWithAccessors
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
+import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
 import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.types.SimpleType
+import org.jetbrains.kotlin.types.UnwrappedType
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.Objects.nonNull
@@ -69,9 +73,24 @@ private class KotlinAnalyzingService {
     }
 
     private fun KotlinType.asMetaType(): KotlinMetaType = putIfAbsent(cache, this) {
-        when (this) {
+        when (val unwrapped: UnwrappedType = unwrap()) {
+            is SimpleType -> unwrapped.asMetaType()
             else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
         }
+    }
+
+    private fun SimpleType.asMetaType(): KotlinMetaType = when {
+        constructor.declarationDescriptor is ClassDescriptor -> KotlinMetaType(
+                originalType = this,
+                kind = CLASS_KIND,
+
+                classFullName = constructor.declarationDescriptor!!.classId!!.asString(),
+                className = constructor.declarationDescriptor!!.classId!!.relativeClassName.asString(),
+                classPackageName = constructor.declarationDescriptor!!.classId!!.packageFqName.asString(),
+
+                typeName = constructor.declarationDescriptor!!.classId!!.asString()
+        )
+        else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
     }
 
 

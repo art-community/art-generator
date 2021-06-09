@@ -32,9 +32,7 @@ enum class KotlinMetaTypeKind {
     ENUM_KIND,
     WILDCARD_KIND,
     INTERFACE_KIND,
-    PRIMITIVE_KIND,
     VARIABLE_KIND,
-    ARRAY_KIND,
     UNKNOWN_KIND
 }
 
