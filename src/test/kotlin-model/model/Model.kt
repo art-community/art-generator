@@ -30,6 +30,6 @@ class ModelKotlin<T1, out T2, out T3, T4>(
         val f8: (p1: String) -> ModelKotlin<T1, *, *, String>?,
 ) where T1 : CharSequence, T1 : Comparable<T1>
 
-typealias Alias = ModelKotlin<*, *, *, *>
+typealias Alias = ModelKotlin<*, *, *, in String>
 
 data class Nested(val f1: Alias)
