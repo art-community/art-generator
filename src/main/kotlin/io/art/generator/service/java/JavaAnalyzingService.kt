@@ -112,7 +112,6 @@ private class JavaAnalyzingService {
         typeArguments
                 .asSequence()
                 .map { argument -> argument.asMetaType() }
-                .filter { argument -> argument.kind != UNKNOWN_KIND }
                 .forEach(type.typeParameters::add)
         return type
     }
@@ -135,7 +134,6 @@ private class JavaAnalyzingService {
                 }
                 .asSequence()
                 .map { argument -> argument.asMetaType() }
-                .filter { argument -> argument.kind != UNKNOWN_KIND }
                 .forEach(type.typeVariableBounds::add)
         return type
     }
@@ -145,7 +143,7 @@ private class JavaAnalyzingService {
                 originalType = this,
                 kind = ARRAY_KIND,
                 typeName = tsym.qualifiedName.toString(),
-                arrayComponentType = componentType.asMetaType().takeIf { type -> type.kind != UNKNOWN_KIND }
+                arrayComponentType = componentType.asMetaType()
         )
     }
 
@@ -154,8 +152,8 @@ private class JavaAnalyzingService {
                 originalType = this,
                 kind = WILDCARD_KIND,
                 typeName = type.toString(),
-                wildcardSuperBound = superBound?.asMetaType()?.takeIf { type -> type.kind != UNKNOWN_KIND },
-                wildcardExtendsBound = extendsBound?.asMetaType()?.takeIf { type -> type.kind != UNKNOWN_KIND }
+                wildcardSuperBound = superBound?.asMetaType(),
+                wildcardExtendsBound = extendsBound?.asMetaType()
         )
     }
 
@@ -207,18 +205,6 @@ private class JavaAnalyzingService {
 
             parent = superclass
                     ?.let { superclass.tsym as? ClassSymbol }
-                    ?.apply {
-                        if (!hasJavaObjectMetaType() && superclass.tsym?.qualifiedName.toString() == Object::class.java.name) {
-                            JAVA_OBJECT_META_TYPE = JavaMetaType(
-                                    originalType = superclass,
-                                    typeName = superclass.tsym.qualifiedName.toString(),
-                                    kind = CLASS_KIND,
-                                    classFullName = superclass.tsym.qualifiedName.toString(),
-                                    className = superclass.tsym.simpleName.toString(),
-                                    classPackageName = superclass.tsym.qualifiedName.toString().substringBeforeLast(DOT)
-                            )
-                        }
-                    }
                     ?.takeIf { superclass.tsym?.qualifiedName.toString() != Object::class.java.name }
                     ?.asMetaClass(),
 

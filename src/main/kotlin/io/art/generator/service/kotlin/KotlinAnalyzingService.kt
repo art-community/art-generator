@@ -21,6 +21,8 @@ package io.art.generator.service.kotlin
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.model.*
 import io.art.generator.model.KotlinMetaTypeKind.*
+import io.art.generator.model.KotlinTypeVariableVariance.IN
+import io.art.generator.model.KotlinTypeVariableVariance.OUT
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import org.jetbrains.kotlin.analyzer.AnalysisResult
@@ -90,8 +92,9 @@ private class KotlinAnalyzingService {
                     functionResultType = arguments.takeLast(1).firstOrNull()?.asMetaType()
             )
         }.apply {
+            val newArguments = arguments.dropLast(1).map { type -> type.asMetaType() }
             functionArgumentTypes.clear()
-            functionArgumentTypes.addAll(arguments.dropLast(1).map { type -> type.asMetaType() })
+            functionArgumentTypes.addAll(newArguments)
         }
 
         isEnum() -> KotlinMetaType(
@@ -110,9 +113,7 @@ private class KotlinAnalyzingService {
                 originalType = this,
                 kind = ARRAY_KIND,
                 nullable = isNullableType(this),
-
                 arrayComponentType = constructor.builtIns.getArrayElementType(this).asMetaType(),
-
                 typeName = toString()
         )
 
@@ -129,8 +130,9 @@ private class KotlinAnalyzingService {
                     typeName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString()
             )
         }.apply {
+            val newArguments = arguments.map { projection -> projection.asMetaType() }
             typeParameters.clear()
-            typeParameters.addAll(arguments.map { projection -> projection.asMetaType() })
+            typeParameters.addAll(newArguments)
         }
 
         constructor.declarationDescriptor is TypeParameterDescriptor -> putIfAbsent(cache, this) {
@@ -141,13 +143,14 @@ private class KotlinAnalyzingService {
                     typeName = toString(),
                     typeVariableVariance = when ((constructor.declarationDescriptor as TypeParameterDescriptor).variance) {
                         INVARIANT -> KotlinTypeVariableVariance.INVARIANT
-                        IN_VARIANCE -> KotlinTypeVariableVariance.IN
-                        OUT_VARIANCE -> KotlinTypeVariableVariance.OUT
+                        IN_VARIANCE -> IN
+                        OUT_VARIANCE -> OUT
                     },
             )
         }.apply {
+            val newBounds = (constructor.declarationDescriptor as TypeParameterDescriptor).upperBounds.map { type -> type.asMetaType() }
             typeVariableBounds.clear()
-            typeVariableBounds.addAll((constructor.declarationDescriptor as TypeParameterDescriptor).upperBounds.map { type -> type.asMetaType() })
+            typeVariableBounds.addAll(newBounds)
         }
 
         else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())

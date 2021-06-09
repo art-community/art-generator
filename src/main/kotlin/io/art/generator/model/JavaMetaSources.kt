@@ -20,8 +20,8 @@
 
 package io.art.generator.model
 
+import com.sun.tools.javac.code.Type
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
-import java.nio.file.Path
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeMirror
 
@@ -35,8 +35,14 @@ enum class JavaMetaTypeKind {
     UNKNOWN_KIND
 }
 
-lateinit var JAVA_OBJECT_META_TYPE: JavaMetaType
-fun hasJavaObjectMetaType() = ::JAVA_OBJECT_META_TYPE.isInitialized
+val JAVA_OBJECT_META_TYPE: JavaMetaType = JavaMetaType(
+        originalType = Type.JCNoType(),
+        typeName = Object::class.java.name,
+        kind = JavaMetaTypeKind.CLASS_KIND,
+        classFullName = Object::class.java.name,
+        className = Object::class.java.simpleName,
+        classPackageName = Object::class.java.packageName
+)
 
 data class JavaMetaType(
         val originalType: TypeMirror,
@@ -81,13 +87,13 @@ data class JavaMetaClass(
 data class JavaMetaField(
         val name: String,
         val type: JavaMetaType,
-        val modifiers: Set<Modifier>
+        val modifiers: Set<Modifier>,
 )
 
 data class JavaMetaParameter(
         val name: String,
         val type: JavaMetaType,
-        val modifiers: Set<Modifier>
+        val modifiers: Set<Modifier>,
 )
 
 data class JavaMetaMethod(
@@ -95,5 +101,5 @@ data class JavaMetaMethod(
         val returnType: JavaMetaType,
         val parameters: Map<String, JavaMetaParameter>,
         val modifiers: Set<Modifier>,
-        val typeParameters: List<JavaMetaType> = emptyList()
+        val typeParameters: List<JavaMetaType> = emptyList(),
 )
