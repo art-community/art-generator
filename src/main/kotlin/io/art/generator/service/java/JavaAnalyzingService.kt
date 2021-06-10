@@ -157,10 +157,8 @@ private class JavaAnalyzingService {
         )
     }
 
-    private fun ClassSymbol.asMetaType(): JavaMetaType = type.asMetaType()
-
     private fun ClassSymbol.asMetaClass(): JavaMetaClass = JavaMetaClass(
-            type = asMetaType(),
+            type = type.asMetaType(),
 
             modifiers = modifiers,
 

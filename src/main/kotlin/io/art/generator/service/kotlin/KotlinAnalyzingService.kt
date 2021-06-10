@@ -83,20 +83,6 @@ private class KotlinAnalyzingService {
     }
 
     private fun SimpleType.asMetaType(): KotlinMetaType = when {
-        constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(cache, this) {
-            KotlinMetaType(
-                    originalType = this,
-                    kind = FUNCTION_KIND,
-                    nullable = isNullableType(this),
-                    typeName = toString(),
-                    functionResultType = arguments.takeLast(1).firstOrNull()?.asMetaType()
-            )
-        }.apply {
-            val newArguments = arguments.dropLast(1).map { type -> type.asMetaType() }
-            functionArgumentTypes.clear()
-            functionArgumentTypes.addAll(newArguments)
-        }
-
         isEnum() -> KotlinMetaType(
                 originalType = this,
                 kind = ENUM_KIND,
@@ -116,6 +102,20 @@ private class KotlinAnalyzingService {
                 arrayComponentType = constructor.builtIns.getArrayElementType(this).asMetaType(),
                 typeName = toString()
         )
+
+        constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(cache, this) {
+            KotlinMetaType(
+                    originalType = this,
+                    kind = FUNCTION_KIND,
+                    nullable = isNullableType(this),
+                    typeName = toString(),
+                    functionResultType = arguments.takeLast(1).firstOrNull()?.asMetaType()
+            )
+        }.apply {
+            val newArguments = arguments.dropLast(1).map { type -> type.asMetaType() }
+            functionArgumentTypes.clear()
+            functionArgumentTypes.addAll(newArguments)
+        }
 
         constructor.declarationDescriptor is ClassDescriptor -> putIfAbsent(cache, this) {
             KotlinMetaType(
@@ -148,7 +148,8 @@ private class KotlinAnalyzingService {
                     },
             )
         }.apply {
-            val newBounds = (constructor.declarationDescriptor as TypeParameterDescriptor).upperBounds.map { type -> type.asMetaType() }
+            val typeParameterDescriptor = constructor.declarationDescriptor as TypeParameterDescriptor
+            val newBounds = (typeParameterDescriptor).upperBounds.map { type -> type.asMetaType() }
             typeVariableBounds.clear()
             typeVariableBounds.addAll(newBounds)
         }
@@ -169,10 +170,8 @@ private class KotlinAnalyzingService {
         return unwrapped.asMetaType()
     }
 
-    private fun ClassDescriptor.asMetaType(): KotlinMetaType = defaultType.asMetaType()
-
     private fun ClassDescriptor.asMetaClass(): KotlinMetaClass = KotlinMetaClass(
-            type = asMetaType(),
+            type = defaultType.asMetaType(),
 
             visibility = visibility,
 
