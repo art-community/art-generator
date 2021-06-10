@@ -35,9 +35,9 @@ import javax.lang.model.type.TypeKind.VOID
 
 fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
     val className = metaClassName(metaClass.type.className!!)
-    val metaClassName = metaClassClassName(metaClass.type.className)
+    val metaClassName = javaMetaClassClassName(metaClass.type.className)
     val typeName = metaClass.type.withoutVariables()
-    val constructorStatement = metaClassSuperStatement(metaClass)
+    val constructorStatement = javaMetaClassSuperStatement(metaClass)
     classBuilder(metaClassName)
             .addModifiers(PUBLIC, FINAL, STATIC)
             .superclass(ParameterizedTypeName.get(META_CLASS_CLASS_NAME, typeName.box()))
@@ -46,7 +46,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
                     .addCode(constructorStatement)
                     .build())
             .apply { generateConstructors(metaClass, typeName) }
-            .apply { generateFields(metaClass) }
+            .apply { generateProperties(metaClass) }
             .apply { generateMethods(metaClass) }
             .apply {
                 metaClass.innerClasses
@@ -59,18 +59,18 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
             .apply(::addType)
     FieldSpec.builder(metaClassName, className)
             .addModifiers(PRIVATE, FINAL)
-            .initializer(registerNewStatement(metaClassName))
+            .initializer(javaRegisterNewStatement(metaClassName))
             .build()
             .apply(::addField)
     methodBuilder(className)
             .addModifiers(PUBLIC)
             .returns(metaClassName)
-            .addCode(returnStatement(className))
+            .addCode(javaReturnStatement(className))
             .build()
             .let(::addMethod)
 }
 
-private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
+private fun TypeSpec.Builder.generateProperties(metaClass: JavaMetaClass) {
     val fields = metaClass.parentFields() + metaClass.fields
     fields.entries.forEach { field ->
         val fieldTypeName = field.value.type.withoutVariables()
@@ -78,13 +78,13 @@ private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
         val fieldName = metaFieldName(field.key)
         FieldSpec.builder(fieldMetaType, fieldName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerMetaFieldStatement(field.key, field.value))
+                .initializer(javaRegisterMetaFieldStatement(field.key, field.value))
                 .build()
                 .apply(::addField)
         methodBuilder(fieldName)
                 .addModifiers(PUBLIC)
                 .returns(fieldMetaType)
-                .addCode(returnStatement(fieldName))
+                .addCode(javaReturnStatement(fieldName))
                 .build()
                 .let(::addMethod)
     }
@@ -102,7 +102,7 @@ private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, type
                         .superclass(ParameterizedTypeName.get(META_CONSTRUCTOR_CLASS_NAME, typeName.box()))
                         .addMethod(constructorBuilder()
                                 .addModifiers(PRIVATE)
-                                .addCode(metaConstructorSuperStatement(type, constructor.modifiers))
+                                .addCode(javaMetaConstructorSuperStatement(type, constructor.modifiers))
                                 .build())
                         .apply { generateConstructorInvocations(type, constructor) }
                         .apply { generateParameters(constructor) }
@@ -111,13 +111,13 @@ private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, type
                 val constructorClassName = ClassName.get(EMPTY_STRING, name)
                 FieldSpec.builder(constructorClassName, name)
                         .addModifiers(PRIVATE, FINAL)
-                        .initializer(registerNewStatement(constructorClassName))
+                        .initializer(javaRegisterNewStatement(constructorClassName))
                         .build()
                         .apply(::addField)
                 methodBuilder(name)
                         .addModifiers(PUBLIC)
                         .returns(constructorClassName)
-                        .addCode(returnStatement(name))
+                        .addCode(javaReturnStatement(name))
                         .build()
                         .let(::addMethod)
             }
@@ -133,20 +133,20 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
             .build()
     template.toBuilder()
             .addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
-            .addCode(returnInvokeConstructorStatement(type, parameters))
+            .addCode(javaReturnInvokeConstructorStatement(type, parameters))
             .build()
             .apply(::addMethod)
     when (parameters.size) {
         0 -> {
             template.toBuilder()
-                    .addCode(returnInvokeWithoutArgumentsConstructorStatement(type))
+                    .addCode(javaReturnInvokeWithoutArgumentsConstructorStatement(type))
                     .build()
                     .apply(::addMethod)
         }
         1 -> {
             template.toBuilder()
                     .addParameter(OBJECT_CLASS_NAME, ARGUMENT_NAME)
-                    .addCode(returnInvokeOneArgumentConstructorStatement(type, parameters.values.first()))
+                    .addCode(javaReturnInvokeOneArgumentConstructorStatement(type, parameters.values.first()))
                     .build()
                     .apply(::addMethod)
         }
@@ -166,7 +166,7 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
     var name = method.name
     if (index > 0) name += index
     val methodName = metaMethodName(name)
-    val methodClassName = metaMethodClassName(name)
+    val methodClassName = javaMetaMethodClassName(name)
     val returnType = method.returnType
     val returnTypeName = returnType.withoutVariables().box()
     val static = method.modifiers.contains(STATIC)
@@ -183,7 +183,7 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
             .superclass(parent)
             .addMethod(constructorBuilder()
                     .addModifiers(PRIVATE)
-                    .addCode(metaMethodSuperStatement(method.name, returnType.excludeVariables(variableExclusions), method.modifiers))
+                    .addCode(javaMetaMethodSuperStatement(method.name, returnType.excludeVariables(variableExclusions), method.modifiers))
                     .build())
             .apply { generateMethodInvocations(ownerType, method.name, method) }
             .apply { generateParameters(method) }
@@ -191,13 +191,13 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
             .apply(::addType)
     FieldSpec.builder(methodClassName, methodName)
             .addModifiers(PRIVATE, FINAL)
-            .initializer(registerNewStatement(methodClassName))
+            .initializer(javaRegisterNewStatement(methodClassName))
             .build()
             .apply(::addField)
     methodBuilder(methodName)
             .addModifiers(PUBLIC)
             .returns(methodClassName)
-            .addCode(returnStatement(methodName))
+            .addCode(javaReturnStatement(methodName))
             .build()
             .let(::addMethod)
 }
@@ -214,12 +214,12 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             .build()
     template.toBuilder().apply {
         val invoke = when {
-            static -> invokeStaticStatement(name, type, parameters)
-            else -> invokeInstanceStatement(name, parameters)
+            static -> javaInvokeStaticStatement(name, type, parameters)
+            else -> javaInvokeInstanceStatement(name, parameters)
         }
         when (method.returnType.originalType.kind) {
-            VOID -> addCode(invoke).addCode(returnNullStatement())
-            else -> addCode(returnStatement(invoke))
+            VOID -> addCode(invoke).addCode(javaReturnNullStatement())
+            else -> addCode(javaReturnStatement(invoke))
         }
         addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
         addMethod(build())
@@ -227,24 +227,24 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
     when (parameters.size) {
         0 -> template.toBuilder().apply {
             val invoke = when {
-                static -> invokeWithoutArgumentsStaticStatement(name, type)
-                else -> invokeWithoutArgumentsInstanceStatement(name)
+                static -> javaInvokeWithoutArgumentsStaticStatement(name, type)
+                else -> javaInvokeWithoutArgumentsInstanceStatement(name)
             }
             when (method.returnType.originalType.kind) {
-                VOID -> addCode(invoke).addCode(returnNullStatement())
-                else -> addCode(returnStatement(invoke))
+                VOID -> addCode(invoke).addCode(javaReturnNullStatement())
+                else -> addCode(javaReturnStatement(invoke))
             }
             addMethod(build())
         }
         1 -> template.toBuilder().apply {
             addParameter(OBJECT_CLASS_NAME, ARGUMENT_NAME)
             val invoke = when {
-                static -> invokeOneArgumentStaticStatement(name, type, parameters.values.first())
-                else -> invokeOneArgumentInstanceStatement(name, parameters.values.first())
+                static -> javaInvokeOneArgumentStaticStatement(name, type, parameters.values.first())
+                else -> javaInvokeOneArgumentInstanceStatement(name, parameters.values.first())
             }
             when (method.returnType.originalType.kind) {
-                VOID -> addCode(invoke).addCode(returnNullStatement())
-                else -> addCode(returnStatement(invoke))
+                VOID -> addCode(invoke).addCode(javaReturnNullStatement())
+                else -> addCode(javaReturnStatement(invoke))
             }
             addMethod(build())
         }
@@ -262,13 +262,13 @@ private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
         val parameterName = metaParameterName(parameter.key)
         FieldSpec.builder(metaParameterType, parameterName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(registerMetaParameterStatement(parameterIndex, parameter.key, parameter.value.excludeVariables(variableExclusions)))
+                .initializer(javaRegisterMetaParameterStatement(parameterIndex, parameter.key, parameter.value.excludeVariables(variableExclusions)))
                 .build()
                 .apply(::addField)
         methodBuilder(parameterName)
                 .addModifiers(PUBLIC)
                 .returns(metaParameterType)
-                .addCode(returnStatement(parameterName))
+                .addCode(javaReturnStatement(parameterName))
                 .build()
                 .let(::addMethod)
     }

@@ -19,6 +19,7 @@
 package io.art.generator.constants
 
 import io.art.generator.model.JavaMetaClass
+import io.art.generator.model.KotlinMetaClass
 import io.art.logging.logger.Logger
 import io.art.logging.module.LoggingModule
 import java.nio.file.Path
@@ -29,12 +30,19 @@ fun Collection<Path>.relativeNames(root: Path) = map { path -> path.toFile().rel
 
 fun Sequence<JavaMetaClass>.javaClassNames() = map { source -> source.type.classFullName!! }.toList()
 
+fun Sequence<KotlinMetaClass>.kotlinClassNames() = map { source -> source.type.classFullName!! }.toList()
+
 val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)
 val KOTLIN_LOGGER: Logger = LoggingModule.logger(KOTLIN)
 
 val SOURCES_CHANGED = { root: Path, modified: List<Path>, deleted: List<Path> -> "Sources changed\nModified: ${modified.relativeNames(root)}\nDeleted: ${deleted.relativeNames(root)}" }
+
 val SOURCES_NOT_FOUND = { root: Path -> "Sources not found inside $root" }
+
 val ANALYZING_MESSAGE = { root: Path -> "Analyzing sources inside $root" }
+
 val ANALYZE_COMPLETED = { sources: List<String> -> "Analyze completed\nClasses: $sources" }
-val GENERATING_METAS_MESSAGE = { classes: Sequence<JavaMetaClass> -> "Generating meta classes\nSources: ${classes.javaClassNames()}" }
+
+val GENERATING_METAS_MESSAGE = { classes: List<String> -> "Generating meta classes\nSources: $classes" }
+
 val GENERATED_MESSAGE = { name: String -> "Generated meta class: $name" }

@@ -37,7 +37,7 @@ import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
-import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
+import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassOrAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.SimpleType
@@ -232,7 +232,21 @@ private class KotlinAnalyzingService {
                     .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
 
-            parent = getSuperClassNotAny()
+            parent = getSuperClassOrAny()
+                    .apply {
+                        if (!hasKotlinAnyMetaType() && classId!!.asSingleFqName().asString() == Any::class.qualifiedName!!) {
+                            KOTLIN_ANY_META_TYPE = KotlinMetaType(
+                                    originalType = defaultType,
+                                    kind = CLASS_KIND,
+                                    nullable = true,
+                                    typeName = name.asString(),
+                                    classPackageName = classId!!.packageFqName.asString(),
+                                    className = classId!!.shortClassName.asString(),
+                                    classFullName = classId!!.asSingleFqName().asString()
+                            )
+                        }
+                    }
+                    .takeIf { descriptor -> descriptor.name.asString() != Any::class.qualifiedName!! }
                     ?.takeIf { descriptor -> descriptor.kind != ENUM_ENTRY }
                     ?.takeIf { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     ?.takeIf { descriptor -> descriptor != this }
