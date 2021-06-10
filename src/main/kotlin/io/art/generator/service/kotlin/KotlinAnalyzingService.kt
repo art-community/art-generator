@@ -30,16 +30,20 @@ import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
 import org.jetbrains.kotlin.builtins.functions.FunctionClassDescriptor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.jetbrains.kotlin.descriptors.*
+import org.jetbrains.kotlin.descriptors.ClassKind.ANNOTATION_CLASS
+import org.jetbrains.kotlin.descriptors.ClassKind.ENUM_ENTRY
 import org.jetbrains.kotlin.load.java.JavaClassesTracker
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
-import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.types.SimpleType
+import org.jetbrains.kotlin.types.TypeProjection
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
+import org.jetbrains.kotlin.types.UnwrappedType
 import org.jetbrains.kotlin.types.Variance.*
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.nio.file.Path
@@ -69,6 +73,8 @@ private class KotlinAnalyzingService {
                 .map { file -> file.name }
                 .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()
+                .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
+                .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                 .map { descriptor -> descriptor.asMetaClass() }
                 .distinctBy { metaClass -> metaClass.type.typeName }
                 .toList()
@@ -215,11 +221,17 @@ private class KotlinAnalyzingService {
             innerClasses = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<ClassDescriptor>()
+                    .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
+                    .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
 
-//            parent = getSuperClassNotAny()?.asMetaClass(),
-//
-//            interfaces = getSuperInterfaces().map { interfaceType -> interfaceType.asMetaClass() }
+            parent = getSuperClassNotAny()
+                    ?.takeIf { descriptor -> descriptor.kind != ENUM_ENTRY }
+                    ?.takeIf { descriptor -> descriptor.kind != ANNOTATION_CLASS }
+                    ?.takeIf { descriptor -> descriptor != this }
+                    ?.asMetaClass(),
+
+            interfaces = getSuperInterfaces().map { interfaceType -> interfaceType.asMetaClass() }
     )
 
     private fun FunctionDescriptor.asMetaMethod() = KotlinMetaMethod(

@@ -626,12 +626,12 @@ data class KotlinOtherModel<V1, V2 : String?, V3, V4 : V2?>(
     val ip9: List<String>? = null
     val ip10: List<String>? = null
     val ip11: List<V1>? = null
-    val ip12: List<V2>? = null
+    val ip12: List<V2?>? = null
     val ip13: List<V2>? = null
     val ip14: List<V3>? = null
-    val ip15: List<V3>? = null
+    val ip15: List<V3?>? = null
     val ip16: List<V4>? = null
-    val ip17: List<V4>? = null
+    val ip17: List<V4?>? = null
     val ip18: BooleanArray? = null
     val ip19: Array<V1>? = null
     val ip20: Array<V2>? = null
