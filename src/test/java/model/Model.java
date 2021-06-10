@@ -97,7 +97,7 @@ public class Model<V1, V2 extends String, V3 extends Number & Comparator<String>
     List<? extends List<? extends V1[]>[]> f58;
     List<? extends List<? extends V1[]>[]>[] f59;
 
-    JavaModel<String, V2, IntersectionType, V4> f60;
+    Model<String, V2, IntersectionType, V4> f60;
 
     Map<String, String> f61;
     Map<?, String> f62;
@@ -147,8 +147,8 @@ public class Model<V1, V2 extends String, V3 extends Number & Comparator<String>
         String f2;
         int f3;
         T f4;
-        JavaModel f5;
-        JavaModel<?, ?, ?, ?> f6;
+        Model f5;
+        Model<?, ?, ?, ?> f6;
 
         public static <M extends String> int staticMethod(int p1, M p2) {
             return p1;
