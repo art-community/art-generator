@@ -22,7 +22,7 @@ import io.art.core.context.Context
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.EMPTY_DISPOSABLE
 import io.art.generator.constants.KOTLIN_COMPILER_MODULE_NAME
-import io.art.generator.logging.loggingMessageCollector
+import io.art.generator.logging.emptyMessageCollector
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoots
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_FILES
@@ -49,7 +49,7 @@ class KotlinCompilerConfiguration(
 object KotlinCompilerProvider {
     fun <T> useKotlinCompiler(kotlinCompilerConfiguration: KotlinCompilerConfiguration, action: KotlinCoreEnvironment.() -> T): T? {
         val compilerConfiguration = CompilerConfiguration()
-        compilerConfiguration.put(MESSAGE_COLLECTOR_KEY, loggingMessageCollector)
+        compilerConfiguration.put(MESSAGE_COLLECTOR_KEY, emptyMessageCollector)
         compilerConfiguration.put(MODULE_NAME, KOTLIN_COMPILER_MODULE_NAME)
         compilerConfiguration.put(REPORT_OUTPUT_FILES, true)
         compilerConfiguration.put(JVM_TARGET, JVM_11)

@@ -20,6 +20,9 @@ package io.art.generator.templates
 
 import com.squareup.javapoet.ClassName
 import io.art.core.constants.StringConstants.EMPTY_STRING
+import io.art.core.extensions.StringExtensions
+import io.art.core.extensions.StringExtensions.capitalize
+import io.art.core.extensions.StringExtensions.decapitalize
 import io.art.generator.constants.META_NAME
 import io.art.generator.extension.name
 
@@ -30,7 +33,7 @@ fun metaModuleJavaFileName(name: String): String = "Meta$name.java"
 fun metaModuleKotlinFileName(name: String): String = "Meta$name.kt"
 
 
-fun metaClassName(name: String): String = "${name.decapitalize()}Class"
+fun metaClassName(name: String): String = "${decapitalize(name)}Class"
 
 fun metaPackageName(name: String): String = "${name}Package"
 
@@ -42,13 +45,13 @@ fun metaMethodName(name: String): String = "${name}Method"
 
 
 fun metaModuleClassName(packageName: String, name: String): ClassName =
-        ClassName.get(packageName, "Meta${name.capitalize()}")
+        ClassName.get(packageName, "Meta${capitalize(name)}")
 
 fun metaPackageClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Package".name())
+        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Package".name())
 
 fun metaClassClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Class".name())
+        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Class".name())
 
 fun metaMethodClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${name.capitalize()}Method")
+        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Method")
