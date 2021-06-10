@@ -97,7 +97,7 @@ public class Model<V1, V2 extends String, V3 extends Number & Comparator<V1>, V4
     List<? extends List<? extends V1[]>[]> f58;
     List<? extends List<? extends V1[]>[]>[] f59;
 
-    Model<String, V2, IntersectionType, V4> f60;
+    JavaModel<String, V2, IntersectionType, V4> f60;
 
     Map<String, String> f61;
     Map<?, String> f62;
