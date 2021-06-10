@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
 import org.jetbrains.kotlin.builtins.functions.FunctionClassDescriptor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.jetbrains.kotlin.descriptors.*
+import org.jetbrains.kotlin.load.java.JavaClassesTracker
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
@@ -51,7 +52,7 @@ fun analyzeKotlinSources(root: Path) = KotlinAnalyzingService().analyzeKotlinSou
 private class KotlinAnalyzingService {
     private val cache = mutableMapOf<KotlinType, KotlinMetaType>()
 
-    private class JavaTracker : org.jetbrains.kotlin.load.java.JavaClassesTracker {
+    private class JavaTracker : JavaClassesTracker {
         val classes = mutableListOf<JavaClassDescriptor>()
 
         override fun onCompletedAnalysis(module: ModuleDescriptor) {}
@@ -59,7 +60,6 @@ private class KotlinAnalyzingService {
         override fun reportClass(classDescriptor: JavaClassDescriptor) {
             classes += classDescriptor
         }
-
     }
 
     fun analyzeKotlinSources(root: Path): List<KotlinMetaClass> {
@@ -100,17 +100,18 @@ private class KotlinAnalyzingService {
     }
 
     private fun SimpleType.asMetaType(): KotlinMetaType = when {
-        isEnum() -> KotlinMetaType(
-                originalType = this,
-                kind = ENUM_KIND,
-                nullable = isNullableType(this),
-
-                classFullName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString(),
-                className = constructor.declarationDescriptor!!.classId!!.relativeClassName.asString(),
-                classPackageName = constructor.declarationDescriptor!!.classId!!.packageFqName.asString(),
-
-                typeName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString()
-        )
+        isEnum() -> {
+            val classId = constructor.declarationDescriptor?.classId
+            KotlinMetaType(
+                    originalType = this,
+                    kind = ENUM_KIND,
+                    nullable = isNullableType(this),
+                    classFullName = classId!!.asSingleFqName().asString(),
+                    className = classId.relativeClassName.asString(),
+                    classPackageName = classId.packageFqName.asString(),
+                    typeName = classId.asSingleFqName().asString()
+            )
+        }
 
         isArray(this) -> KotlinMetaType(
                 originalType = this,
@@ -126,49 +127,57 @@ private class KotlinAnalyzingService {
                     kind = FUNCTION_KIND,
                     nullable = isNullableType(this),
                     typeName = toString(),
-                    functionResultType = arguments.takeLast(1).firstOrNull()?.asMetaType()
+                    functionResultType = arguments
+                            .takeLast(1)
+                            .firstOrNull()
+                            ?.asMetaType()
             )
         }.apply {
-            val newArguments = arguments.dropLast(1).map { type -> type.asMetaType() }
+            val newArguments = arguments
+                    .dropLast(1)
+                    .map { type -> type.asMetaType() }
             functionArgumentTypes.clear()
             functionArgumentTypes.addAll(newArguments)
         }
 
-        constructor.declarationDescriptor is ClassDescriptor -> putIfAbsent(cache, this) {
-            KotlinMetaType(
-                    originalType = this,
-                    kind = CLASS_KIND,
-                    nullable = isNullableType(this),
-
-                    classFullName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString(),
-                    className = constructor.declarationDescriptor!!.classId!!.relativeClassName.asString(),
-                    classPackageName = constructor.declarationDescriptor!!.classId!!.packageFqName.asString(),
-
-                    typeName = constructor.declarationDescriptor!!.classId!!.asSingleFqName().asString()
-            )
-        }.apply {
-            val newArguments = arguments.map { projection -> projection.asMetaType() }
-            typeParameters.clear()
-            typeParameters.addAll(newArguments)
+        constructor.declarationDescriptor is ClassDescriptor -> {
+            val classId = constructor.declarationDescriptor?.classId
+            putIfAbsent(cache, this) {
+                KotlinMetaType(
+                        originalType = this,
+                        kind = CLASS_KIND,
+                        nullable = isNullableType(this),
+                        classFullName = classId!!.asSingleFqName().asString(),
+                        className = classId.relativeClassName.asString(),
+                        classPackageName = classId.packageFqName.asString(),
+                        typeName = classId.asSingleFqName().asString()
+                )
+            }.apply {
+                val newArguments = arguments.map { projection -> projection.asMetaType() }
+                typeParameters.clear()
+                typeParameters.addAll(newArguments)
+            }
         }
 
-        constructor.declarationDescriptor is TypeParameterDescriptor -> putIfAbsent(cache, this) {
-            KotlinMetaType(
-                    originalType = this,
-                    kind = VARIABLE_KIND,
-                    nullable = isNullableType(this),
-                    typeName = toString(),
-                    typeVariableVariance = when ((constructor.declarationDescriptor as TypeParameterDescriptor).variance) {
-                        INVARIANT -> KotlinTypeVariableVariance.INVARIANT
-                        IN_VARIANCE -> IN
-                        OUT_VARIANCE -> OUT
-                    },
-            )
-        }.apply {
+        constructor.declarationDescriptor is TypeParameterDescriptor -> {
             val typeParameterDescriptor = constructor.declarationDescriptor as TypeParameterDescriptor
-            val newBounds = (typeParameterDescriptor).upperBounds.map { type -> type.asMetaType() }
-            typeVariableBounds.clear()
-            typeVariableBounds.addAll(newBounds)
+            putIfAbsent(cache, this) {
+                KotlinMetaType(
+                        originalType = this,
+                        kind = VARIABLE_KIND,
+                        nullable = isNullableType(this),
+                        typeName = toString(),
+                        typeVariableVariance = when (typeParameterDescriptor.variance) {
+                            INVARIANT -> KotlinTypeVariableVariance.INVARIANT
+                            IN_VARIANCE -> IN
+                            OUT_VARIANCE -> OUT
+                        },
+                )
+            }.apply {
+                val newBounds = (typeParameterDescriptor).upperBounds.map { type -> type.asMetaType() }
+                typeVariableBounds.clear()
+                typeVariableBounds.addAll(newBounds)
+            }
         }
 
         else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
