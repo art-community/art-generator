@@ -74,11 +74,8 @@ private class KotlinAnalyzingService {
                 .map { descriptor -> descriptor.asMetaClass() }
                 .distinctBy { metaClass -> metaClass.type.typeName }
                 .toList()
-        val javaClasses = javaTracker.classes.asSequence()
-                .map { descriptor -> descriptor.asMetaClass() }
-                .distinctBy { metaClass -> metaClass.type.typeName }
-                .toList()
-        return kotlinClasses + javaClasses
+        //val javaClasses = javaTracker.classes.map { descriptor -> descriptor.asMetaClass() }.distinctBy { metaClass -> metaClass.type.typeName }
+        return kotlinClasses
     }
 
     private fun collectClasses(analysisResult: AnalysisResult, packageName: String): List<ClassDescriptor> {
@@ -222,9 +219,9 @@ private class KotlinAnalyzingService {
                     .filterIsInstance<ClassDescriptor>()
                     .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
 
-            parent = getSuperClassNotAny()?.asMetaClass(),
-
-            interfaces = getSuperInterfaces().map { interfaceType -> interfaceType.asMetaClass() }
+//            parent = getSuperClassNotAny()?.asMetaClass(),
+//
+//            interfaces = getSuperInterfaces().map { interfaceType -> interfaceType.asMetaClass() }
     )
 
     private fun FunctionDescriptor.asMetaMethod() = KotlinMetaMethod(
