@@ -57,7 +57,8 @@ private class KotlinAnalyzingService {
     private class JavaTracker : JavaClassesTracker {
         val classes = mutableListOf<JavaClassDescriptor>()
 
-        override fun onCompletedAnalysis(module: ModuleDescriptor) {}
+        override fun onCompletedAnalysis(module: ModuleDescriptor) {
+        }
 
         override fun reportClass(classDescriptor: JavaClassDescriptor) {
             classes += classDescriptor
@@ -78,8 +79,15 @@ private class KotlinAnalyzingService {
                 .map { descriptor -> descriptor.asMetaClass() }
                 .distinctBy { metaClass -> metaClass.type.typeName }
                 .toList()
-        //val javaClasses = javaTracker.classes.map { descriptor -> descriptor.asMetaClass() }.distinctBy { metaClass -> metaClass.type.typeName }
-        return kotlinClasses
+        val javaClasses = javaTracker.classes
+                .toList()
+                .asSequence()
+                .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
+                .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
+                .map { descriptor -> descriptor.asMetaClass() }
+                .distinctBy { metaClass -> metaClass.type.typeName }
+                .toList()
+        return kotlinClasses + javaClasses
     }
 
     private fun collectClasses(analysisResult: AnalysisResult, packageName: String): List<ClassDescriptor> {
