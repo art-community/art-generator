@@ -20,19 +20,19 @@
 
 package io.art.generator.service.kotlin
 
-import com.squareup.javapoet.FieldSpec
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.KModifier.VARARG
+import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.*
 import io.art.generator.extension.couldBeGenerated
-import io.art.generator.model.*
+import io.art.generator.model.KotlinMetaClass
+import io.art.generator.model.KotlinMetaNode
+import io.art.generator.model.asTree
 import io.art.generator.producer.generateClass
 import io.art.generator.templates.*
 import java.nio.file.Path
-import javax.lang.model.element.Modifier.*
 
 object KotlinMetaGenerationService {
     fun generateKotlinMetaClasses(root: Path, classes: Sequence<KotlinMetaClass>) {
@@ -42,20 +42,20 @@ object KotlinMetaGenerationService {
         val metaModuleClassName = kotlinMetaModuleClassName(META_NAME, moduleName)
         val reference = kotlinMetaModuleClassName(EMPTY_STRING, moduleName)
         classBuilder(metaModuleClassName)
-                .addModifiers(KModifier.PUBLIC)
+                .addModifiers(PUBLIC)
                 .addAnnotation(kotlinSuppressAnnotation())
                 .superclass(KOTLIN_META_MODULE_CLASS_NAME)
                 .addFunction(FunSpec.constructorBuilder()
-                        .addModifiers(KModifier.PUBLIC)
+                        .addModifiers(PUBLIC)
                         .addParameter(ParameterSpec.builder(DEPENDENCIES_NAME, KOTLIN_META_MODULE_ARRAY_CLASS_NAME, VARARG).build())
                         .addCode(kotlinSuperStatement(DEPENDENCIES_NAME))
                         .build())
                 .addProperty(PropertySpec.builder(META_NAME, reference)
-                        .addModifiers(KModifier.PRIVATE, KModifier.FINAL)
+                        .addModifiers(PRIVATE, FINAL)
                         .initializer(kotlinNewStatement(metaModuleClassName))
                         .build())
                 .addFunction(FunSpec.builder(META_NAME)
-                        .addModifiers(KModifier.PUBLIC)
+                        .addModifiers(PUBLIC)
                         .returns(reference)
                         .addCode(kotlinReturnStatement(META_NAME))
                         .build())
@@ -69,7 +69,7 @@ object KotlinMetaGenerationService {
                             .addImport(KOTLIN_SET_FACTORY_CLASS_NAME, SET_OF_NAME)
                             .build()
                             .writeTo(root)
-                    JAVA_LOGGER.info(GENERATED_MESSAGE(metaModuleClassFullName(moduleName)))
+                    KOTLIN_LOGGER.info(GENERATED_MESSAGE(metaModuleClassFullName(moduleName)))
                 }
     }
 
@@ -87,21 +87,21 @@ object KotlinMetaGenerationService {
         val metaPackageName = metaPackageName(packageName)
         val packageClassName = kotlinMetaPackageClassName(packageName)
         PropertySpec.builder(metaPackageName, packageClassName)
-                .addModifiers(KModifier.PRIVATE, KModifier.FINAL)
+                .addModifiers(PRIVATE, FINAL)
                 .initializer(kotlinRegisterNewStatement(packageClassName))
                 .build()
                 .apply(::addProperty)
         FunSpec.builder(metaPackageName)
-                .addModifiers(KModifier.PUBLIC)
+                .addModifiers(PUBLIC)
                 .returns(packageClassName)
                 .addCode(kotlinReturnStatement(metaPackageName))
                 .build()
                 .let(::addFunction)
         val packageBuilder = classBuilder(packageClassName)
-                .addModifiers(KModifier.PUBLIC, KModifier.FINAL)
+                .addModifiers(PUBLIC, FINAL)
                 .superclass(KOTLIN_META_PACKAGE_CLASS_NAME)
                 .addFunction(FunSpec.constructorBuilder()
-                        .addModifiers(KModifier.PRIVATE)
+                        .addModifiers(PRIVATE)
                         .addCode(kotlinNamedSuperStatement(packageName))
                         .build())
         node.classes.filter(KotlinMetaClass::couldBeGenerated).forEach(packageBuilder::generateClass)
