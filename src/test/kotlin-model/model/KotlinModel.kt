@@ -341,7 +341,7 @@ open class KotlinModel<V1, V2 : String?, V3, V4 : V2?>(
         }
 
         companion object {
-            fun <M : String?> staticMethod(p1: Int, p2: M): Int {
+            fun <M : String?> simpleMethod(p1: Int, p2: M): Int {
                 return p1
             }
         }
@@ -422,37 +422,37 @@ open class KotlinModel<V1, V2 : String?, V3, V4 : V2?>(
     }
 
     companion object {
-        fun staticMethod(p1: Int): Int {
+        fun simpleMethod(p1: Int): Int {
             return p1
         }
 
-        fun staticMethod(p1: String): String {
+        fun simpleMethod(p1: String): String {
             return p1
         }
 
-        fun <T> staticMethod(list: List<T>) {
+        fun <T> simpleMethod(list: List<T>) {
 
         }
 
-        fun staticMethod(p1: String?, vararg p2: Int): Int {
+        fun simpleMethod(p1: String?, vararg p2: Int): Int {
             return p2[0]
         }
     }
 
     object KotlinObject {
-        fun staticMethod(p1: Int): Int {
+        fun simpleMethod(p1: Int): Int {
             return p1
         }
 
-        fun staticMethod(p1: String): String {
+        fun simpleMethod(p1: String): String {
             return p1
         }
 
-        fun <T> staticMethod(list: List<T>?) {
+        fun <T> simpleMethod(list: List<T>?) {
 
         }
 
-        fun staticMethod(p1: String?, vararg p2: Int): Int {
+        fun simpleMethod(p1: String?, vararg p2: Int): Int {
             return p2[0]
         }
 
@@ -462,17 +462,16 @@ open class KotlinModel<V1, V2 : String?, V3, V4 : V2?>(
     }
 }
 
-
 object KotlinObject {
-    fun staticMethod(p1: Alias): Int {
+    fun simpleMethod(p1: Alias): Int {
         return 0
     }
 
-    infix fun staticMethod(p1: String): String {
+    infix fun simpleMethod(p1: String): String {
         return p1
     }
 
-    inline fun <T> staticMethod(list: List<T>?, lamdba: (p: String) -> String) {
+    inline fun <T> simpleMethod(list: List<T>?, lambda: (p: String) -> String) {
 
     }
 
@@ -485,20 +484,16 @@ object KotlinObject {
         }
     }
 
-    suspend fun staticMethod(p1: String?, vararg p2: Int): Int {
-        return p2[0]
-    }
+    suspend fun simpleMethod(p1: String?, vararg p2: Int) = p2[0]
 }
 
-fun staticMethod(p1: Alias): Int {
+fun simpleMethod(p1: Alias): Int {
     return 0
 }
 
-inline fun staticMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String): String {
-    return p1
-}
+inline fun simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1
 
-inline fun <T> staticMethod(list: List<T>?, lambda: (p: String) -> String) {
+inline fun <T> simpleMethod(list: List<T>?, lambda: (p: String) -> String) {
 
 }
 
@@ -511,6 +506,6 @@ private tailrec fun factorial(n: Long, accum: Long = 1): Long {
     }
 }
 
-suspend fun staticMethod(p1: String?, vararg p2: Int): Int {
+suspend fun simpleMethod(p1: String?, vararg p2: Int): Int {
     return p2[0]
 }

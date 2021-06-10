@@ -33,15 +33,13 @@ import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.load.java.JavaClassesTracker
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
-import org.jetbrains.kotlin.types.KotlinType
-import org.jetbrains.kotlin.types.SimpleType
-import org.jetbrains.kotlin.types.TypeProjection
+import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
-import org.jetbrains.kotlin.types.UnwrappedType
 import org.jetbrains.kotlin.types.Variance.*
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.nio.file.Path
@@ -240,9 +238,10 @@ private class KotlinAnalyzingService {
             hasSetter = nonNull(setter),
     )
 
-    private fun VariableDescriptor.asMetaParameter() = KotlinMetaParameter(
+    private fun ValueParameterDescriptor.asMetaParameter() = KotlinMetaParameter(
             name = name.toString(),
             visibility = visibility,
-            type = type.asMetaType()
+            type = type.asMetaType(),
+            varargs = varargElementType != null,
     )
 }

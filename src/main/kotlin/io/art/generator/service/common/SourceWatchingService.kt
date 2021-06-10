@@ -18,10 +18,6 @@
 
 package io.art.generator.service.common
 
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.TypeSpec
-import com.squareup.kotlinpoet.jvm.jvmSuppressWildcards
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.GeneratorLanguages.JAVA
 import io.art.generator.constants.GeneratorLanguages.KOTLIN
@@ -36,7 +32,6 @@ import io.art.generator.service.java.analyzeJavaSources
 import io.art.generator.service.kotlin.analyzeKotlinSources
 import io.art.scheduler.manager.Scheduling.schedule
 import java.nio.file.Path
-
 
 object SourceWatchingService {
     fun watchSources(asynchronous: Boolean = true) {

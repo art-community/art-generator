@@ -97,7 +97,8 @@ data class KotlinMetaProperty(
 data class KotlinMetaParameter(
         val name: String,
         val type: KotlinMetaType,
-        val visibility: DescriptorVisibility
+        val visibility: DescriptorVisibility,
+        val varargs: Boolean,
 )
 
 data class KotlinMetaMethod(
