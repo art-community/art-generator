@@ -18,6 +18,10 @@
 
 package io.art.generator.service.common
 
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.jvm.jvmSuppressWildcards
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.GeneratorLanguages.JAVA
 import io.art.generator.constants.GeneratorLanguages.KOTLIN
