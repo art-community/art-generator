@@ -38,11 +38,13 @@ import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR_EXTENDED_CHEC
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
 import org.jetbrains.kotlin.config.JvmTarget.JVM_11
+import org.jetbrains.kotlin.load.java.JavaClassesTracker
 import java.nio.file.Path
 
 
 class KotlinCompilerConfiguration(
         val root: Path,
+        val javaClassesTracker: JavaClassesTracker? = null,
         val destination: Path = Context.context().configuration().workingDirectory
 )
 
@@ -63,6 +65,7 @@ object KotlinCompilerProvider {
         compilerConfiguration.put(USE_FIR, true)
         compilerConfiguration.put(IR, true)
         compilerConfiguration.put(USE_FIR_EXTENDED_CHECKERS, false)
+        kotlinCompilerConfiguration.javaClassesTracker?.let { tracker -> compilerConfiguration.put(JAVA_CLASSES_TRACKER, tracker) }
         compilerConfiguration.put(OUTPUT_DIRECTORY, kotlinCompilerConfiguration.destination.toFile())
 
         val classpath = configuration.classpath.map { path -> path.toFile() }

@@ -51,17 +51,34 @@ fun analyzeKotlinSources(root: Path) = KotlinAnalyzingService().analyzeKotlinSou
 private class KotlinAnalyzingService {
     private val cache = mutableMapOf<KotlinType, KotlinMetaType>()
 
+    private class JavaTracker : org.jetbrains.kotlin.load.java.JavaClassesTracker {
+        val classes = mutableListOf<JavaClassDescriptor>()
+
+        override fun onCompletedAnalysis(module: ModuleDescriptor) {}
+
+        override fun reportClass(classDescriptor: JavaClassDescriptor) {
+            classes += classDescriptor
+        }
+
+    }
+
     fun analyzeKotlinSources(root: Path): List<KotlinMetaClass> {
-        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(root), KotlinToJVMBytecodeCompiler::analyze)
+        val javaTracker = JavaTracker()
+        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(root, javaTracker), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
                 ?: return emptyList()
-        return root.toFile().listFiles()!!
+        val kotlinClasses = root.toFile().listFiles()!!
                 .map { file -> file.name }
                 .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()
                 .map { descriptor -> descriptor.asMetaClass() }
                 .distinctBy { metaClass -> metaClass.type.typeName }
                 .toList()
+        val javaClasses = javaTracker.classes.asSequence()
+                .map { descriptor -> descriptor.asMetaClass() }
+                .distinctBy { metaClass -> metaClass.type.typeName }
+                .toList()
+        return kotlinClasses + javaClasses
     }
 
     private fun collectClasses(analysisResult: AnalysisResult, packageName: String): List<ClassDescriptor> {
