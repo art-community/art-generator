@@ -758,16 +758,16 @@ data class KotlinOtherModel<V1, V2 : String?, V3, V4 : V2?>(
     lateinit var lp72: Map<Enum, List<Array<Enum>>>
     lateinit var lp73: Map<Enum, List<Array<Enum>>>
 
-    fun simpleMethod(p1: Int): Int {
-        return p1
-    }
+    fun simpleMethod(p1: Int): Int = p1
 
     fun simpleMethod(p1: IntArray): Int {
         fun simpleMethod(p1: IntArray) {
 
         }
 
-        class LocalClass {}
+        class LocalClass {
+
+        }
 
         return p1[0]
     }
@@ -785,85 +785,35 @@ data class KotlinOtherModel<V1, V2 : String?, V3, V4 : V2?>(
         var f5: KotlinModel<*, *, *, *>? = null
         var f6: KotlinModel<*, *, *, *>? = null
 
-        fun simpleMethod(p1: Int): Int {
-            return p1
-        }
+        fun simpleMethod(p1: Int): Int = p1
 
         companion object {
-            fun <M : String?> simpleMethod(p1: Int, p2: M): Int {
-                return p1
-            }
+            fun <M : String?> simpleMethod(p1: Int, p2: M): Int = p1
         }
     }
 
     inline fun <reified T> membersOf() = T::class.members
 
     inner class IntersectionInnerType : Number(), Comparator<String> {
-        override fun toByte(): Byte {
-            TODO("Not yet implemented")
-        }
-
-        override fun toChar(): Char {
-            TODO("Not yet implemented")
-        }
-
-        override fun toDouble(): Double {
-            TODO("Not yet implemented")
-        }
-
-        override fun toFloat(): Float {
-            TODO("Not yet implemented")
-        }
-
-        override fun toInt(): Int {
-            TODO("Not yet implemented")
-        }
-
-        override fun toLong(): Long {
-            TODO("Not yet implemented")
-        }
-
-        override fun toShort(): Short {
-            TODO("Not yet implemented")
-        }
-
-        override fun compare(o1: String?, o2: String?): Int {
-            TODO("Not yet implemented")
-        }
+        override fun toByte(): Byte = TODO("Not yet implemented")
+        override fun toChar(): Char = TODO("Not yet implemented")
+        override fun toDouble(): Double = TODO("Not yet implemented")
+        override fun toFloat(): Float = TODO("Not yet implemented")
+        override fun toInt(): Int = TODO("Not yet implemented")
+        override fun toLong(): Long = TODO("Not yet implemented")
+        override fun toShort(): Short = TODO("Not yet implemented")
+        override fun compare(o1: String?, o2: String?): Int = TODO("Not yet implemented")
     }
 
     class IntersectionType : Number(), Comparator<String> {
-        override fun toByte(): Byte {
-            TODO("Not yet implemented")
-        }
-
-        override fun toChar(): Char {
-            TODO("Not yet implemented")
-        }
-
-        override fun toDouble(): Double {
-            TODO("Not yet implemented")
-        }
-
-        override fun toFloat(): Float {
-            TODO("Not yet implemented")
-        }
-
-        override fun toInt(): Int {
-            TODO("Not yet implemented")
-        }
-
-        override fun toLong(): Long {
-            TODO("Not yet implemented")
-        }
-
-        override fun toShort(): Short {
-            TODO("Not yet implemented")
-        }
-
-        override fun compare(o1: String?, o2: String?): Int {
-            TODO("Not yet implemented")
-        }
+        override fun toByte(): Byte = TODO("Not yet implemented")
+        override fun toChar(): Char = TODO("Not yet implemented")
+        override fun toDouble(): Double = TODO("Not yet implemented")
+        override fun toFloat(): Float = TODO("Not yet implemented")
+        override fun toInt(): Int = TODO("Not yet implemented")
+        override fun toLong(): Long = TODO("Not yet implemented")
+        override fun toShort(): Short = TODO("Not yet implemented")
+        override fun compare(o1: String?, o2: String?): Int = TODO("Not yet implemented")
     }
 
     enum class Enum {
@@ -921,7 +871,6 @@ object KotlinObject {
     }
 
     inline fun <T> simpleMethod(list: List<T>?, lambda: (p: String) -> String) {
-
     }
 
     private tailrec fun factorial(n: Long, accum: Long = 1): Long {
@@ -958,3 +907,43 @@ private tailrec fun factorial(n: Long, accum: Long = 1): Long {
 suspend fun simpleMethod(p1: String?, vararg p2: Int): Int {
     return p2[0]
 }
+
+class KotlinBase
+
+var KotlinBase.mp1: Boolean
+    get() = false
+    set(value) = TODO()
+
+var KotlinBase.mp2: KotlinOtherModel.Enum?
+    get() = null
+    set(value) = TODO()
+
+var KotlinBase.mp3: List<KotlinOtherModel.Enum>?
+    get() = null
+    set(value) = TODO()
+
+var KotlinBase.mp4: Array<KotlinOtherModel.Enum>?
+    get() = null
+    set(value) = TODO()
+
+var KotlinBase.mp5: Map<KotlinOtherModel.Enum, KotlinOtherModel.Enum>?
+    get() = null
+    set(value) = TODO()
+
+var KotlinBase.mp6: Map<KotlinOtherModel.Enum, List<KotlinOtherModel.Enum>>?
+    get() = null
+    set(value) = TODO()
+
+var KotlinBase.mp7: Map<KotlinOtherModel.Enum, List<Array<KotlinOtherModel.Enum>>>?
+    get() = null
+    set(value) = TODO()
+
+var KotlinBase.mp8: Map<KotlinOtherModel.Enum, List<Array<KotlinOtherModel.Enum>>>?
+    get() = null
+    set(value) = TODO()
+
+fun KotlinBase.simpleMethod(p1: Alias): Int {
+    return 0
+}
+
+inline fun KotlinBase.simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1
