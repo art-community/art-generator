@@ -216,13 +216,13 @@ private class KotlinAnalyzingService {
 
             constructors = constructors
                     .asSequence()
-                    .map { method -> method.asMetaMethod() }
+                    .map { method -> method.asMetaMethod(constructor = true) }
                     .toList(),
 
             methods = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<FunctionDescriptor>()
-                    .map { method -> method.asMetaMethod() }
+                    .map { method -> method.asMetaMethod(constructor = false) }
                     .toList(),
 
             innerClasses = getAllDescriptors(defaultType.memberScope)
@@ -261,12 +261,12 @@ private class KotlinAnalyzingService {
                     .toList()
     )
 
-    private fun FunctionDescriptor.asMetaMethod() = KotlinMetaMethod(
+    private fun FunctionDescriptor.asMetaMethod(constructor: Boolean) = KotlinMetaMethod(
             name = name.toString(),
             visibility = visibility,
             returnType = returnType?.asMetaType(),
             parameters = valueParameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
-            typeParameters = typeParameters.map { typeParameter -> typeParameter.defaultType.asMetaType() },
+            typeParameters = if (!constructor) typeParameters.map { typeParameter -> typeParameter.defaultType.asMetaType() } else emptyList(),
     )
 
     private fun VariableDescriptorWithAccessors.asMetaProperty() = KotlinMetaProperty(

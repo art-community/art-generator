@@ -104,13 +104,13 @@ fun kotlinReturnInvokeConstructorStatement(type: KotlinMetaType, parameters: Map
     return returnNewStatement(type).join(casted(parameters)).join(")")
 }
 
-fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty, metaType: TypeName): CodeBlock =
+fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty): CodeBlock =
         "register(MetaField(%S,"
                 .asCode(name)
                 .join(metaTypeStatement(property.type))
                 .join("))")
 
-fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: KotlinMetaParameter, metaType: TypeName): CodeBlock =
+fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: KotlinMetaParameter): CodeBlock =
         "register(MetaParameter($index, %S,"
                 .asCode(name)
                 .join(metaTypeStatement(parameter.type))
