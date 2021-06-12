@@ -105,6 +105,7 @@ private class KotlinAnalyzingService {
         }
         val builtIns = unwrapped.constructor.builtIns
         return putIfAbsent(cache, unwrapped) {
+
             if (isPrimitiveArray(unwrapped)) {
                 val elementType = builtIns.getArrayElementType(unwrapped).unwrap()
                 return@putIfAbsent JavaMetaType(
@@ -117,6 +118,17 @@ private class KotlinAnalyzingService {
 
             if (isPrimitiveTypeOrNullablePrimitiveType(unwrapped)) {
                 return@putIfAbsent unwrapped.asPrimitiveMetaType(builtIns)
+            }
+
+            if (isStringOrNullableString(unwrapped)) {
+                return@putIfAbsent JavaMetaType(
+                        kind = CLASS_KIND,
+                        kotlinOriginalType = unwrapped,
+                        typeName = String::class.java.typeName,
+                        className = String::class.java.simpleName,
+                        classPackageName = String::class.java.packageName,
+                        classFullName = String::class.java.name
+                )
             }
 
             when (unwrapped) {

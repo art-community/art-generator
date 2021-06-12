@@ -20,7 +20,6 @@
 
 package io.art.generator.model
 
-import com.sun.tools.javac.code.Type
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import org.jetbrains.kotlin.types.KotlinType
 import javax.lang.model.element.Modifier
@@ -37,7 +36,6 @@ enum class JavaMetaTypeKind {
 }
 
 val JAVA_OBJECT_META_TYPE: JavaMetaType = JavaMetaType(
-        javaOriginalType = Type.JCNoType(),
         typeName = Object::class.java.name,
         kind = JavaMetaTypeKind.CLASS_KIND,
         classFullName = Object::class.java.name,
@@ -46,7 +44,6 @@ val JAVA_OBJECT_META_TYPE: JavaMetaType = JavaMetaType(
 )
 
 val JAVA_VOID_META_TYPE: JavaMetaType = JavaMetaType(
-        javaOriginalType = Type.JCVoidType(),
         typeName = Void.TYPE.typeName,
         kind = JavaMetaTypeKind.PRIMITIVE_KIND,
         classFullName = Void::class.java.name,
@@ -80,10 +77,11 @@ data class JavaMetaType(
         other as JavaMetaType
         javaOriginalType?.let { type -> if (type != other.javaOriginalType) return false }
         kotlinOriginalType?.let { type -> if (type != other.kotlinOriginalType) return false }
+        if (typeName != other.typeName) return false
         return true
     }
 
-    override fun hashCode(): Int = javaOriginalType?.hashCode() ?: kotlinOriginalType.hashCode()
+    override fun hashCode(): Int = javaOriginalType?.hashCode() ?: kotlinOriginalType?.hashCode() ?: typeName.hashCode()
 }
 
 data class JavaMetaClass(
