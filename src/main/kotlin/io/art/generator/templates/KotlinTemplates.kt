@@ -57,64 +57,58 @@ fun kotlinSuperStatement(label: String): CodeBlock = "%L".asCode(label)
 
 fun kotlinNewStatement(type: TypeName): CodeBlock = "%T()".asCode(type)
 
-fun kotlinReturnStatement(label: String): CodeBlock = "return %L;".asCode(label)
+fun kotlinReturnStatement(label: String): CodeBlock = "return %L".asCode(label)
 
 fun kotlinRegisterNewStatement(type: TypeName): CodeBlock = "register(%T())".asCode(type)
 
 fun kotlinNamedSuperStatement(name: String): CodeBlock = "%S".asCode(name)
 
-fun kotlinReturnNewStatement(type: KotlinMetaType): CodeBlock {
-    if (type.typeParameters.isNotEmpty()) {
-        return "return %T<>(".asCode(type.extractClass())
-    }
-    return "return %T(".asCode(type.extractClass())
-}
 
 fun kotlinInvokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
-    return "instance.$method();".asCode()
+    return "instance.$method()".asCode()
 }
 
 fun kotlinInvokeWithoutArgumentsStaticStatement(method: String, type: KotlinMetaType): CodeBlock {
-    return "%T.$method();".asCode(type.extractClass())
+    return "%T.$method()".asCode(type.extractClass())
 }
 
 
 fun kotlinInvokeOneArgumentInstanceStatement(method: String, parameter: KotlinMetaParameter): CodeBlock {
-    return "instance.$method(".join(casted(parameter)).join(");")
+    return "instance.$method(".join(casted(parameter)).join(")")
 }
 
 fun kotlinInvokeOneArgumentStaticStatement(method: String, type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {
-    return "%T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(");")
+    return "%T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(")")
 }
 
 
 fun kotlinInvokeInstanceStatement(method: String, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
-    return "instance.$method(".join(casted(parameters)).join(");")
+    return "instance.$method(".join(casted(parameters)).join(")")
 }
 
 fun kotlinInvokeStaticStatement(method: String, type: KotlinMetaType, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
-    return "%T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(");")
+    return "%T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(")")
 }
 
 
 fun kotlinReturnInvokeWithoutArgumentsConstructorStatement(type: KotlinMetaType): CodeBlock {
-    return kotlinReturnNewStatement(type).join(");")
+    return returnNewStatement(type).join(")")
 }
 
 fun kotlinReturnInvokeOneArgumentConstructorStatement(type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {
-    return kotlinReturnNewStatement(type).join(casted(parameter)).join(");")
+    return returnNewStatement(type).join(casted(parameter)).join(")")
 }
 
 fun kotlinReturnInvokeConstructorStatement(type: KotlinMetaType, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
-    return kotlinReturnNewStatement(type).join(casted(parameters)).join(");")
+    return returnNewStatement(type).join(casted(parameters)).join(")")
 }
 
-fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty): CodeBlock = "register(MetaField<>(%S,"
+fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty): CodeBlock = "register(MetaField(%S,"
         .asCode(name)
         .join(metaTypeStatement(property.type))
         .join("))")
 
-fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: KotlinMetaParameter): CodeBlock = "register(MetaParameter<>($index, %S,"
+fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: KotlinMetaParameter): CodeBlock = "register(MetaParameter($index, %S,"
         .asCode(name)
         .join(metaTypeStatement(parameter.type))
         .join("))")
@@ -173,6 +167,14 @@ private fun CodeBlock.joinBySpace(vararg blocks: CodeBlock): CodeBlock = listOf(
 
 private fun CodeBlock.joinByComma(vararg blocks: CodeBlock): CodeBlock = listOf(this, *blocks).joinToCode(COMMA)
 
+private fun returnNewStatement(type: KotlinMetaType): CodeBlock {
+    if (type.typeParameters.isNotEmpty()) {
+        return "return %T<".asCode(type.extractClass())
+                .join(type.typeParameters.map { "%T".asCode(NOTHING) }.joinToCode(COMMA))
+                .join(">(")
+    }
+    return "return %T(".asCode(type.extractClass())
+}
 
 private fun casted(parameter: KotlinMetaParameter): CodeBlock {
     val parameterClass = parameter.type.extractClass()

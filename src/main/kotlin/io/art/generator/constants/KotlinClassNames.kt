@@ -37,4 +37,3 @@ val KOTLIN_INSTANCE_META_METHOD_CLASS_NAME = bestGuess(InstanceMetaMethod::class
 val KOTLIN_STATIC_META_METHOD_CLASS_NAME = bestGuess(StaticMetaMethod::class.java.name)
 val KOTLIN_META_PARAMETER_CLASS_NAME = bestGuess(MetaParameter::class.java.name)
 val KOTLIN_META_CONSTRUCTOR_CLASS_NAME = bestGuess(MetaConstructor::class.java.name)
-val KOTLIN_OVERRIDE_CLASS_NAME = bestGuess(Override::class.java.name)
