@@ -36,13 +36,12 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass) {
     val className = metaClassName(metaClass.type.className!!)
     val metaClassName = kotlinMetaClassClassName(metaClass.type.className)
     val typeName = metaClass.type.withoutVariables()
-    val constructorStatement = kotlinMetaClassSuperStatement(metaClass)
     TypeSpec.classBuilder(metaClassName)
             .addModifiers(PUBLIC, FINAL)
             .superclass(KOTLIN_META_CLASS_CLASS_NAME.parameterizedBy(typeName))
             .addFunction(constructorBuilder()
                     .addModifiers(PRIVATE)
-                    .addCode(constructorStatement)
+                    .callSuperConstructor(kotlinMetaClassSuperStatement(metaClass))
                     .build())
             .apply { generateConstructors(metaClass, typeName) }
             .apply { generateProperties(metaClass) }
@@ -100,7 +99,7 @@ private fun TypeSpec.Builder.generateConstructors(metaClass: KotlinMetaClass, ty
                         .superclass(KOTLIN_META_CONSTRUCTOR_CLASS_NAME.parameterizedBy(typeName))
                         .addFunction(constructorBuilder()
                                 .addModifiers(PRIVATE)
-                                .addCode(kotlinMetaConstructorSuperStatement(type, constructor.visibility))
+                                .callSuperConstructor(kotlinMetaConstructorSuperStatement(type, constructor.visibility))
                                 .build())
                         .apply { generateConstructorInvocations(type, constructor) }
                         .apply { generateParameters(constructor) }
@@ -125,12 +124,12 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: KotlinMetaType
     val parameters = constructor.parameters
     val template = FunSpec.builder(INVOKE_NAME)
             .addModifiers(PUBLIC)
-            .throws(KOTLIN_THROWABLE_CLASS_NAME)
+            .throws(THROWABLE)
             .addAnnotation(KOTLIN_OVERRIDE_CLASS_NAME)
             .returns(type.withoutVariables())
             .build()
     template.toBuilder()
-            .addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(KOTLIN_ANY_CLASS_NAME))
+            .addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
             .addCode(kotlinReturnInvokeConstructorStatement(type, parameters))
             .build()
             .apply(::addFunction)
@@ -143,7 +142,7 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: KotlinMetaType
         }
         1 -> {
             template.toBuilder()
-                    .addParameter(ARGUMENT_NAME, KOTLIN_ANY_CLASS_NAME)
+                    .addParameter(ARGUMENT_NAME, ANY)
                     .addCode(kotlinReturnInvokeOneArgumentConstructorStatement(type, parameters.values.first()))
                     .build()
                     .apply(::addFunction)

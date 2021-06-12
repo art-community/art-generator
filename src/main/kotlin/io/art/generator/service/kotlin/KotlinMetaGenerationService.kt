@@ -21,6 +21,7 @@
 package io.art.generator.service.kotlin
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
 import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
 import io.art.core.constants.StringConstants.EMPTY_STRING
@@ -45,10 +46,10 @@ object KotlinMetaGenerationService {
                 .addModifiers(PUBLIC)
                 .addAnnotation(kotlinSuppressAnnotation())
                 .superclass(KOTLIN_META_MODULE_CLASS_NAME)
-                .addFunction(FunSpec.constructorBuilder()
+                .addFunction(constructorBuilder()
                         .addModifiers(PUBLIC)
                         .addParameter(ParameterSpec.builder(DEPENDENCIES_NAME, KOTLIN_META_MODULE_ARRAY_CLASS_NAME, VARARG).build())
-                        .addCode(kotlinSuperStatement(DEPENDENCIES_NAME))
+                        .callSuperConstructor(kotlinSuperStatement(DEPENDENCIES_NAME))
                         .build())
                 .addProperty(PropertySpec.builder(META_NAME, reference)
                         .addModifiers(PRIVATE, FINAL)
@@ -100,9 +101,9 @@ object KotlinMetaGenerationService {
         val packageBuilder = classBuilder(packageClassName)
                 .addModifiers(PUBLIC, FINAL)
                 .superclass(KOTLIN_META_PACKAGE_CLASS_NAME)
-                .addFunction(FunSpec.constructorBuilder()
+                .addFunction(constructorBuilder()
+                        .callSuperConstructor(kotlinNamedSuperStatement(packageName))
                         .addModifiers(PRIVATE)
-                        .addCode(kotlinNamedSuperStatement(packageName))
                         .build())
         node.classes.filter(KotlinMetaClass::couldBeGenerated).forEach(packageBuilder::generateClass)
         node.children.values.forEach { child ->

@@ -24,7 +24,6 @@ import io.art.core.constants.CompilerSuppressingWarnings.*
 import io.art.core.constants.StringConstants.*
 import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.constants.CASTER_CLASS_NAME
-import io.art.generator.constants.KOTLIN_ANY_CLASS_NAME
 import io.art.generator.constants.KOTLIN_CASTER_CLASS_NAME
 import io.art.generator.extension.extractClass
 import io.art.generator.extension.hasVariable
@@ -54,21 +53,21 @@ fun kotlinSuppressAnnotation() = AnnotationSpec.builder(Suppress::class)
         .addMember("value", "{\$S,\$S,\$S}", ALL, UNCHECKED, UNUSED)
         .build()
 
-fun kotlinSuperStatement(label: String): CodeBlock = "super(\$L);".asCode(label)
+fun kotlinSuperStatement(label: String): CodeBlock = "\$L".asCode(label)
 
-fun kotlinNewStatement(type: TypeName): CodeBlock = "new \$T()".asCode(type)
+fun kotlinNewStatement(type: TypeName): CodeBlock = "\$T()".asCode(type)
 
 fun kotlinReturnStatement(label: String): CodeBlock = "return \$L;".asCode(label)
 
-fun kotlinRegisterNewStatement(type: TypeName): CodeBlock = "register(new \$T())".asCode(type)
+fun kotlinRegisterNewStatement(type: TypeName): CodeBlock = "register(\$T())".asCode(type)
 
-fun kotlinNamedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
+fun kotlinNamedSuperStatement(name: String): CodeBlock = "\$S".asCode(name)
 
 fun kotlinReturnNewStatement(type: KotlinMetaType): CodeBlock {
     if (type.typeParameters.isNotEmpty()) {
-        return "return new \$T<>(".asCode(type.extractClass())
+        return "return \$T<>(".asCode(type.extractClass())
     }
-    return "return new \$T(".asCode(type.extractClass())
+    return "return \$T(".asCode(type.extractClass())
 }
 
 fun kotlinInvokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
@@ -110,38 +109,32 @@ fun kotlinReturnInvokeConstructorStatement(type: KotlinMetaType, parameters: Map
     return kotlinReturnNewStatement(type).join(casted(parameters)).join(");")
 }
 
-fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty): CodeBlock = "register(new MetaField<>(\$S,"
+fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty): CodeBlock = "register(MetaField<>(\$S,"
         .asCode(name)
         .join(metaTypeStatement(property.type))
         .join("))")
 
-fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: KotlinMetaParameter): CodeBlock = "register(new MetaParameter<>($index, \$S,"
+fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: KotlinMetaParameter): CodeBlock = "register(MetaParameter<>($index, \$S,"
         .asCode(name)
         .join(metaTypeStatement(parameter.type))
         .join("))")
 
-fun kotlinMetaMethodSuperStatement(name: String, type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = "super(\$S,"
+fun kotlinMetaMethodSuperStatement(name: String, type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = "\$S,"
         .asCode(name)
         .join(metaTypeStatement(type))
         .joinByComma(asPublicFlag(visibility))
-        .join(");")
 
-fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = "super("
-        .join(metaTypeStatement(type))
-        .joinByComma(asPublicFlag(visibility))
-        .join(");")
+fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = metaTypeStatement(type).joinByComma(asPublicFlag(visibility))
 
-fun kotlinMetaClassSuperStatement(metaClass: KotlinMetaClass): CodeBlock = "super("
-        .join(metaTypeStatement(metaClass.type))
-        .join(");")
+fun kotlinMetaClassSuperStatement(metaClass: KotlinMetaClass): CodeBlock = metaTypeStatement(metaClass.type)
 
 
 private fun metaVariableBlock(type: KotlinMetaType) = "metaVariable(\$S".asCode(type.typeName).join(")")
 
-private fun metaEnumBlock(className: TypeName) = "metaEnum(\$T.class, \$T::valueOf)"
+private fun metaEnumBlock(className: TypeName) = "metaEnum(\$T::class.java, \$T::valueOf)"
         .asCode(className, className)
 
-private fun metaTypeBlock(className: TypeName, vararg parameters: KotlinMetaType): CodeBlock = "metaType(\$T.class"
+private fun metaTypeBlock(className: TypeName, vararg parameters: KotlinMetaType): CodeBlock = "metaType(\$T::class.java"
         .asCode(className)
         .let { block ->
             if (parameters.isEmpty()) return@let block
@@ -149,7 +142,7 @@ private fun metaTypeBlock(className: TypeName, vararg parameters: KotlinMetaType
         }
         .join(")")
 
-private fun metaArrayBlock(type: KotlinMetaType, className: TypeName): CodeBlock = "metaArray(\$T.class, \$T[]::new, "
+private fun metaArrayBlock(type: KotlinMetaType, className: TypeName): CodeBlock = "metaArray(\$T::class.java, {size: Int -> arrayOfNulls<T>(size)}}, "
         .asCode(className, className)
         .join(metaTypeStatement(type.arrayComponentType!!))
         .join(")")
@@ -161,9 +154,9 @@ private fun metaTypeStatement(type: KotlinMetaType): CodeBlock {
         CLASS_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
         ENUM_KIND -> metaEnumBlock(poetClass)
         VARIABLE_KIND -> metaVariableBlock(type)
-        WILDCARD_KIND -> metaTypeBlock(KOTLIN_ANY_CLASS_NAME)
-        FUNCTION_KIND -> metaTypeBlock(KOTLIN_ANY_CLASS_NAME)
-        UNKNOWN_KIND -> metaTypeBlock(KOTLIN_ANY_CLASS_NAME)
+        WILDCARD_KIND -> metaTypeBlock(ANY)
+        FUNCTION_KIND -> metaTypeBlock(ANY)
+        UNKNOWN_KIND -> metaTypeBlock(ANY)
     }
 }
 
@@ -184,7 +177,7 @@ private fun CodeBlock.joinByComma(vararg blocks: CodeBlock): CodeBlock = listOf(
 private fun casted(parameter: KotlinMetaParameter): CodeBlock {
     val parameterClass = parameter.type.extractClass()
     if (!parameter.type.hasVariable()) {
-        return "(\$T)(argument)".asCode(parameterClass)
+        return "argument as \$T".asCode(parameterClass)
     }
     return "\$T.cast(argument)".asCode(CASTER_CLASS_NAME)
 }
@@ -192,7 +185,7 @@ private fun casted(parameter: KotlinMetaParameter): CodeBlock {
 private fun casted(parameters: Map<String, KotlinMetaParameter>): CodeBlock = parameters.values
         .mapIndexed { index, parameter ->
             if (!parameter.type.hasVariable()) {
-                return@mapIndexed "(\$T)(arguments[$index])".asCode(parameter.type.extractClass())
+                return@mapIndexed "arguments[$index] as \$T".asCode(parameter.type.extractClass())
             }
             return@mapIndexed "\$T.cast(arguments[$index])".asCode(KOTLIN_CASTER_CLASS_NAME)
         }.joinToCode(COMMA)

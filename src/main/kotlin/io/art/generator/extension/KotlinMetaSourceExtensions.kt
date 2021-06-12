@@ -20,8 +20,6 @@ package io.art.generator.extension
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import io.art.generator.constants.KOTLIN_ANY_CLASS_NAME
-import io.art.generator.constants.KOTLIN_UNIT_CLASS_NAME
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.model.*
@@ -47,7 +45,7 @@ fun KotlinMetaType.withoutVariables(): TypeName = when (kind) {
         }
     }
 
-    VARIABLE_KIND -> KOTLIN_ANY_CLASS_NAME
+    VARIABLE_KIND -> ANY
 
     WILDCARD_KIND -> STAR
 
@@ -55,7 +53,7 @@ fun KotlinMetaType.withoutVariables(): TypeName = when (kind) {
 
     FUNCTION_KIND -> LambdaTypeName.get(
             parameters = functionArgumentTypes.map { argument -> argument.withoutVariables() }.toTypedArray(),
-            returnType = functionResultType?.withoutVariables() ?: KOTLIN_UNIT_CLASS_NAME
+            returnType = functionResultType?.withoutVariables() ?: UNIT
     )
 }
 
@@ -104,11 +102,11 @@ fun KotlinMetaType.extractClass(): TypeName = when (kind) {
 
     CLASS_KIND, ENUM_KIND -> ClassName(classPackageName!!, className!!)
 
-    WILDCARD_KIND, VARIABLE_KIND -> KOTLIN_ANY_CLASS_NAME
+    WILDCARD_KIND, VARIABLE_KIND -> ANY
 
     FUNCTION_KIND -> LambdaTypeName.get(
             parameters = functionArgumentTypes.map { argument -> argument.extractClass() }.toTypedArray(),
-            returnType = functionResultType?.extractClass() ?: KOTLIN_UNIT_CLASS_NAME
+            returnType = functionResultType?.extractClass() ?: UNIT
     )
 
     UNKNOWN_KIND -> STAR
