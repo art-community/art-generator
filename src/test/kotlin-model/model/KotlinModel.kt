@@ -774,7 +774,6 @@ data class KotlinOtherModel<V1, V2 : String?, V3, V4 : V2?>(
 
     inline fun f(crossinline body: () -> Unit) {
         val f = Runnable { body() }
-
     }
 
     sealed class InnerModel<T> {
