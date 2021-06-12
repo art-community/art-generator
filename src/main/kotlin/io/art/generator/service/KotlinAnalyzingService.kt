@@ -18,6 +18,7 @@
 
 package io.art.generator.service
 
+import io.art.core.constants.StringConstants.DOT
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.model.*
 import io.art.generator.model.JavaMetaTypeKind.*
@@ -73,6 +74,7 @@ private class KotlinAnalyzingService {
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                 .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                 .filter { descriptor -> !descriptor.isInner }
+                .filter { descriptor -> !descriptor.classId!!.isNestedClass }
                 .map { descriptor -> descriptor.asMetaClass() }
                 .distinctBy { metaClass -> metaClass.type.typeName }
                 .toList()
@@ -81,6 +83,7 @@ private class KotlinAnalyzingService {
                 .asSequence()
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                 .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
+                .filter { descriptor -> !descriptor.classId!!.isNestedClass }
                 .map { descriptor -> descriptor.asMetaClass() }
                 .distinctBy { metaClass -> metaClass.type.typeName }
                 .toList()
@@ -162,7 +165,7 @@ private class KotlinAnalyzingService {
                     kotlinOriginalType = this,
                     kind = ENUM_KIND,
                     classFullName = classId!!.asSingleFqName().asString(),
-                    className = classId.relativeClassName.asString(),
+                    className = classId.relativeClassName.asString().substringAfterLast(DOT),
                     classPackageName = classId.packageFqName.asString(),
                     typeName = classId.asSingleFqName().asString()
             )
@@ -203,7 +206,7 @@ private class KotlinAnalyzingService {
                         kotlinOriginalType = this,
                         kind = CLASS_KIND,
                         classFullName = classId.asSingleFqName().asString(),
-                        className = classId.relativeClassName.asString(),
+                        className = classId.relativeClassName.asString().substringAfterLast(DOT),
                         classPackageName = classId.packageFqName.asString(),
                         typeName = classId.asSingleFqName().asString()
                 )
@@ -302,7 +305,10 @@ private class KotlinAnalyzingService {
 
     private fun FunctionDescriptor.asMetaMethod(constructor: Boolean) = JavaMetaMethod(
             name = name.toString(),
-            returnType = returnType?.asMetaType() ?: JAVA_VOID_META_TYPE,
+            returnType = returnType?.takeIf(::isUnit)
+                    ?.let { JAVA_VOID_META_TYPE }
+                    ?: returnType?.asMetaType()
+                    ?: JAVA_VOID_META_TYPE,
             parameters = valueParameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
             typeParameters = if (!constructor) typeParameters.map { typeParameter -> typeParameter.defaultType.asMetaType() } else emptyList(),
             modifiers = setOf(Modifier.PUBLIC)
