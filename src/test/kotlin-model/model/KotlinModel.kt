@@ -18,8 +18,11 @@
 package model
 
 
-typealias Alias = KotlinModel.IntersectionType
+data class KotlinModel(val icp1: String)
 
+//typealias Alias = KotlinModel.IntersectionType
+
+/*
 open class KotlinModel<V1, V2 : String?, V3, V4 : V2?>(
         val iсp1: Boolean,
         val iсp2: String,
@@ -946,3 +949,4 @@ fun KotlinBase.simpleMethod(p1: Alias): Int {
 }
 
 inline fun KotlinBase.simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1
+*/
