@@ -208,10 +208,10 @@ private class KotlinAnalyzingService {
                         typeName = classId.asSingleFqName().asString()
                 )
             }.apply {
-                if (typeParameters.isNotEmpty()) return@apply
-                arguments
-                        .map { projection -> projection.asMetaType() }
-                        .forEach(typeParameters::add)
+//                if (typeParameters.isNotEmpty()) return@apply
+//                arguments
+//                        .map { projection -> projection.asMetaType() }
+//                        .forEach(typeParameters::add)
             }
         }
 

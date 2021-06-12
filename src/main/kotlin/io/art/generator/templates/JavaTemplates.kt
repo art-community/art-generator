@@ -158,7 +158,7 @@ private fun metaTypeBlock(className: TypeName, vararg parameters: JavaMetaType):
         }
         .join(")")
 
-private fun metaArrayBlock(type: JavaMetaType, className: TypeName): CodeBlock = "metaArray(\$T.class, \$T[]::new, "
+private fun metaArrayBlock(type: JavaMetaType, className: TypeName): CodeBlock = "metaArray(\$T.class, \$T::new, "
         .asCode(className, className)
         .join(metaTypeStatement(type.arrayComponentType!!))
         .join(")")
