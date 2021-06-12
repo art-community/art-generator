@@ -18,63 +18,8 @@
 package model
 
 
-data class KotlinModel<V1, V2 : String?, V3, V4 : V2?>(
-        val iсp1: Boolean,
-        val iсp2: String,
-        val iсp3: V1,
-        val iсp4: V2,
-        val iсp5: V3,
-        val iсp6: List<String>,
-        val iсp7: List<V1>,
-        val iсp8: List<*>,
-        val iсp9: List<String>,
-        val iсp10: List<String>,
-        val iсp11: List<V1>,
-        val iсp12: List<V2>,
-        val iсp13: List<V2>,
-        val iсp14: List<V3>,
-        val iсp15: List<V3>,
-        val iсp16: List<V4>,
-        val iсp17: List<V4>,
-        val iсp18: BooleanArray,
-        val iсp19: Array<V1>,
-        val iсp20: Array<V2>,
-        val iсp21: Array<V3>,
-        val iсp22: Array<List<String>>,
-        val iсp23: Array<List<*>>,
-        val iсp24: Array<List<V1>>,
-        val iсp25: Array<List<String>>,
-        val iсp26: Array<List<String>>,
-        val iсp27: Array<BooleanArray>,
-        val iсp28: Array<Array<V1>>,
-        val iсp29: Array<Array<List<String>>>,
-        val iсp30: Array<Array<List<*>>>,
-        val iсp31: Array<Array<List<V1>>>,
-        val iсp32: Array<Array<List<String>>>,
-        val iсp33: Array<Array<List<String>>>,
-        val iсp34: List<BooleanArray>,
-        val iсp35: List<Array<V1>>,
-        val iсp36: Array<List<Array<String>>>,
-        val iсp37: Array<List<Array<V1>>>,
-        val iсp38: Array<List<Array<String>>>,
-        val iсp39: Array<List<Array<String>>>,
-        val iсp40: List<List<Boolean>>,
-        val iсp41: List<V1>,
-        val iсp42: List<List<String>>,
-        val iсp43: List<List<*>>,
-        val iсp44: List<List<V1>>,
-        val iсp45: List<List<String>>,
-        val iсp46: List<List<String>>,
-        val iсp47: List<List<BooleanArray>>,
-        val iсp48: List<List<Array<V1>>>,
-        val iсp49: List<List<Array<String>>>,
-        val iсp50: List<List<Array<String>>>,
-        val iсp51: List<List<Array<String>>>,
-)
+typealias Alias = KotlinModel.IntersectionType
 
-//typealias Alias = KotlinModel.IntersectionType
-
-/*
 open class KotlinModel<V1, V2 : String?, V3, V4 : V2?>(
         val iсp1: Boolean,
         val iсp2: String,
@@ -1001,4 +946,3 @@ fun KotlinBase.simpleMethod(p1: Alias): Int {
 }
 
 inline fun KotlinBase.simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1
-*/
