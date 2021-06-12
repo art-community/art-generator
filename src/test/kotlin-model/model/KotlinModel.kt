@@ -94,11 +94,11 @@ open class KotlinModel<V1, V2 : String?, V3, V4 : V2?>(
         val iсp71: Map<Enum, List<Enum>>,
         val iсp72: Map<Enum, List<Array<Enum>>>,
         val iсp73: Map<Enum, List<Array<Enum>>>,
-        val icfp1: () -> Unit,
-        val icfp2: () -> Nothing,
-        val icfp3: () -> Any,
-        val icfp4: (input1: String, input2: String, input3: String) -> KotlinModel<*, *, *, *>,
-        val icfp5: Map<Enum, List<Array<Enum>>>.(input1: String, input2: String, input3: String) -> KotlinModel<*, *, *, *>,
+//        val icfp1: () -> Unit,
+//        val icfp2: () -> Nothing,
+//        val icfp3: () -> Any,
+//        val icfp4: (input1: String, input2: String, input3: String) -> KotlinModel<*, *, *, *>,
+//        val icfp5: Map<Enum, List<Array<Enum>>>.(input1: String, input2: String, input3: String) -> KotlinModel<*, *, *, *>,
 ) where V3 : Number?, V3 : Comparator<String> {
     var mp1 = false
     var mp2: String? = null
@@ -324,9 +324,9 @@ open class KotlinModel<V1, V2 : String?, V3, V4 : V2?>(
         return p1[0]
     }
 
-    inline fun f(crossinline body: () -> Unit) {
-        val f = Runnable { body() }
-    }
+//    inline fun f(crossinline body: () -> Unit) {
+//        val f = Runnable { body() }
+//    }
 
     sealed class InnerModel<T> {
         var f1 = false
@@ -536,11 +536,11 @@ data class KotlinOtherModel<V1, V2 : String?, V3, V4 : V2?>(
         val iсp71: Map<Enum, List<Enum>>,
         val iсp72: Map<Enum, List<Array<Enum>>>,
         val iсp73: Map<Enum, List<Array<Enum>>>,
-        val icfp1: () -> Unit,
-        val icfp2: () -> Nothing,
-        val icfp3: () -> Any,
-        val icfp4: (input1: String, input2: String, input3: String) -> KotlinModel<*, *, *, *>,
-        val icfp5: Map<Enum, List<Array<Enum>>>.(input1: String, input2: String, input3: String) -> KotlinModel<*, *, *, *>,
+//        val icfp1: () -> Unit,
+//        val icfp2: () -> Nothing,
+//        val icfp3: () -> Any,
+//        val icfp4: (input1: String, input2: String, input3: String) -> KotlinModel<*, *, *, *>,
+//        val icfp5: Map<Enum, List<Array<Enum>>>.(input1: String, input2: String, input3: String) -> KotlinModel<*, *, *, *>,
 ) where V3 : Number?, V3 : Comparator<String> {
     var mp1 = false
     var mp2: String? = null
@@ -772,9 +772,9 @@ data class KotlinOtherModel<V1, V2 : String?, V3, V4 : V2?>(
         return p1[0]
     }
 
-    inline fun f(crossinline body: () -> Unit) {
-        val f = Runnable { body() }
-    }
+//    inline fun f(crossinline body: () -> Unit) {
+//        val f = Runnable { body() }
+//    }
 
     sealed class InnerModel<T> {
         var f1 = false
@@ -868,9 +868,9 @@ object KotlinObject {
     infix fun simpleMethod(p1: String): String {
         return p1
     }
-
-    inline fun <T> simpleMethod(list: List<T>?, lambda: (p: String) -> String) {
-    }
+//
+//    inline fun <T> simpleMethod(list: List<T>?, lambda: (p: String) -> String) {
+//    }
 
     private tailrec fun factorial(n: Long, accum: Long = 1): Long {
         val soFar = n * accum
@@ -887,12 +887,12 @@ object KotlinObject {
 fun simpleMethod(p1: Alias): Int {
     return 0
 }
-
-inline fun simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1
-
-inline fun <T> simpleMethod(list: List<T>?, lambda: (p: String) -> String) {
-
-}
+//
+//inline fun simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1
+//
+//inline fun <T> simpleMethod(list: List<T>?, lambda: (p: String) -> String) {
+//
+//}
 
 private tailrec fun factorial(n: Long, accum: Long = 1): Long {
     val soFar = n * accum
@@ -945,4 +945,4 @@ fun KotlinBase.simpleMethod(p1: Alias): Int {
     return 0
 }
 
-inline fun KotlinBase.simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1
+//inline fun KotlinBase.simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1

@@ -19,6 +19,7 @@
 package io.art.generator.extension
 
 import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName.bestGuess
 import com.squareup.javapoet.TypeName.*
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
@@ -33,10 +34,10 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.withoutVariables())
 
-    ENUM_KIND -> ClassName.get(classPackageName, className)
+    ENUM_KIND -> bestGuess(classFullName)
 
     CLASS_KIND -> when {
-        typeParameters.isEmpty() -> ClassName.get(classPackageName, className)
+        typeParameters.isEmpty() -> bestGuess(classFullName)
         else -> {
             val parameters = typeParameters.map { parameter ->
                 when (parameter.kind) {
@@ -44,7 +45,7 @@ fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
                     else -> parameter.withoutVariables()
                 }
             }
-            val rawType = ClassName.get(classPackageName, className)
+            val rawType = bestGuess(classFullName)
             ParameterizedTypeName.get(rawType, *parameters.toTypedArray())
         }
     }
@@ -106,7 +107,7 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())
 
-    CLASS_KIND, ENUM_KIND -> ClassName.get(classPackageName, className)
+    CLASS_KIND, ENUM_KIND -> bestGuess(classFullName)
 
     VARIABLE_KIND -> OBJECT_CLASS_NAME
 

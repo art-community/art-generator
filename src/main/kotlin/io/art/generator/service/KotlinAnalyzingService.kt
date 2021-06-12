@@ -25,6 +25,8 @@ import io.art.generator.model.JavaMetaTypeKind.*
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import org.jetbrains.kotlin.analyzer.AnalysisResult
+import org.jetbrains.kotlin.backend.jvm.lower.isPrivate
+import org.jetbrains.kotlin.backend.jvm.lower.isProtected
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.*
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
@@ -75,6 +77,8 @@ private class KotlinAnalyzingService {
                 .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                 .filter { descriptor -> !descriptor.isInner }
                 .filter { descriptor -> !descriptor.classId!!.isNestedClass }
+                .filter { descriptor -> !descriptor.isSealed() }
+                .filter { descriptor -> !descriptor.classId!!.isLocal }
                 .map { descriptor -> descriptor.asMetaClass() }
                 .distinctBy { metaClass -> metaClass.type.typeName }
                 .toList()
@@ -84,6 +88,8 @@ private class KotlinAnalyzingService {
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                 .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                 .filter { descriptor -> !descriptor.classId!!.isNestedClass }
+                .filter { descriptor -> !descriptor.isSealed() }
+                .filter { descriptor -> !descriptor.classId!!.isLocal }
                 .map { descriptor -> descriptor.asMetaClass() }
                 .distinctBy { metaClass -> metaClass.type.typeName }
                 .toList()
@@ -134,6 +140,17 @@ private class KotlinAnalyzingService {
                 )
             }
 
+            if (isNumber(unwrapped)) {
+                return@putIfAbsent JavaMetaType(
+                        kind = CLASS_KIND,
+                        kotlinOriginalType = unwrapped,
+                        typeName = Number::class.java.typeName,
+                        className = Number::class.java.simpleName,
+                        classPackageName = Number::class.java.packageName,
+                        classFullName = Number::class.java.name
+                )
+            }
+
             when (unwrapped) {
                 is SimpleType -> unwrapped.asMetaType()
                 is FlexibleType -> unwrapped.asMetaType()
@@ -146,7 +163,7 @@ private class KotlinAnalyzingService {
             kotlinOriginalType = this,
             kind = PRIMITIVE_KIND,
             typeName = when (this) {
-                builtIns.unitType -> Void::class.java.typeName
+                builtIns.unitType -> Void.TYPE.typeName
                 builtIns.booleanType -> Boolean::class.java.typeName
                 builtIns.intType -> Int::class.java.typeName
                 builtIns.shortType -> Short::class.java.typeName
@@ -160,12 +177,12 @@ private class KotlinAnalyzingService {
 
     private fun SimpleType.asMetaType(): JavaMetaType = when {
         isEnum() -> {
-            val classId = constructor.declarationDescriptor?.classId
+            val classId = constructor.declarationDescriptor?.classId!!
             JavaMetaType(
                     kotlinOriginalType = this,
                     kind = ENUM_KIND,
-                    classFullName = classId!!.asSingleFqName().asString(),
-                    className = classId.relativeClassName.asString().substringAfterLast(DOT),
+                    classFullName = classId.asSingleFqName().asString(),
+                    className = classId.relativeClassName.pathSegments().last().asString(),
                     classPackageName = classId.packageFqName.asString(),
                     typeName = classId.asSingleFqName().asString()
             )
@@ -206,7 +223,7 @@ private class KotlinAnalyzingService {
                         kotlinOriginalType = this,
                         kind = CLASS_KIND,
                         classFullName = classId.asSingleFqName().asString(),
-                        className = classId.relativeClassName.asString().substringAfterLast(DOT),
+                        className = classId.relativeClassName.pathSegments().last().asString(),
                         classPackageName = classId.packageFqName.asString(),
                         typeName = classId.asSingleFqName().asString()
                 )
@@ -285,10 +302,13 @@ private class KotlinAnalyzingService {
                     .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                     .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     .filter { descriptor -> !descriptor.isInner }
+                    .filter { descriptor -> !descriptor.isSealed() }
+                    .filter { descriptor -> !descriptor.classId!!.isLocal }
                     .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
 
             parent = getSuperClassOrAny()
                     .takeIf { descriptor -> descriptor.name.asString() != Any::class.qualifiedName!! }
+                    ?.takeIf { descriptor -> !isNumber(descriptor.defaultType) }
                     ?.takeIf { descriptor -> descriptor.kind != ENUM_ENTRY }
                     ?.takeIf { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     ?.takeIf { descriptor -> descriptor != this }
@@ -296,6 +316,7 @@ private class KotlinAnalyzingService {
 
             interfaces = getSuperInterfaces()
                     .asSequence()
+                    .filter { descriptor -> !isNumber(descriptor.defaultType) }
                     .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                     .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     .filter { descriptor -> descriptor != this }
@@ -311,7 +332,7 @@ private class KotlinAnalyzingService {
                     ?: JAVA_VOID_META_TYPE,
             parameters = valueParameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
             typeParameters = if (!constructor) typeParameters.map { typeParameter -> typeParameter.defaultType.asMetaType() } else emptyList(),
-            modifiers = setOf(Modifier.PUBLIC)
+            modifiers = if (!visibility.isPrivate && !visibility.isProtected && visibility.isPublicAPI) setOf(Modifier.PUBLIC) else setOf()
     )
 
     private fun VariableDescriptorWithAccessors.asMetaProperty() = JavaMetaField(
