@@ -23,8 +23,8 @@ import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
-import io.art.generator.service.common.SourceWatchingService.watchSources
-import io.art.generator.service.common.initialize
+import io.art.generator.service.SourceWatchingService.watchSources
+import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
 import org.junit.jupiter.api.*

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.service.common
+package io.art.generator.service
 
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.META_NAME

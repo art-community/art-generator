@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.service.common
+package io.art.generator.service
 
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 

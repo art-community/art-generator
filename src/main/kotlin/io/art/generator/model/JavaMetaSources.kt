@@ -45,13 +45,13 @@ val JAVA_OBJECT_META_TYPE: JavaMetaType = JavaMetaType(
         classPackageName = Object::class.java.packageName
 )
 
-val JAVA_UNIT_META_TYPE: JavaMetaType = JavaMetaType(
-        javaOriginalType = Type.JCNoType(),
-        typeName = Unit::class.java.name,
-        kind = JavaMetaTypeKind.CLASS_KIND,
-        classFullName = Unit::class.java.name,
-        className = Unit::class.java.simpleName,
-        classPackageName = Unit::class.java.packageName
+val JAVA_VOID_META_TYPE: JavaMetaType = JavaMetaType(
+        javaOriginalType = Type.JCVoidType(),
+        typeName = Void.TYPE.typeName,
+        kind = JavaMetaTypeKind.PRIMITIVE_KIND,
+        classFullName = Void::class.java.name,
+        className = Void::class.java.simpleName,
+        classPackageName = Void::class.java.packageName
 )
 
 data class JavaMetaType(

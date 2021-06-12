@@ -18,7 +18,7 @@
 
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
-package io.art.generator.service.java
+package io.art.generator.service
 
 import com.squareup.javapoet.*
 import com.squareup.javapoet.MethodSpec.constructorBuilder

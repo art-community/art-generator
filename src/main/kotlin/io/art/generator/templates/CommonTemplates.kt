@@ -18,7 +18,6 @@
 
 package io.art.generator.templates
 
-import io.art.core.extensions.StringExtensions.capitalize
 import io.art.core.extensions.StringExtensions.decapitalize
 import io.art.generator.constants.META_NAME
 
@@ -38,5 +37,3 @@ fun metaFieldName(name: String): String = "${name}Field"
 fun metaParameterName(name: String): String = "${name}Parameter"
 
 fun metaMethodName(name: String): String = "${name}Method"
-
-fun metaConstructorClassName(name: String): String = "Meta${capitalize(name)}Cass"

@@ -23,8 +23,8 @@ package io.art.generator
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
-import io.art.generator.service.common.SourceWatchingService.watchSources
-import io.art.generator.service.common.initialize
+import io.art.generator.service.SourceWatchingService.watchSources
+import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
 import io.art.scheduler.manager.Scheduling.scheduleDelayed

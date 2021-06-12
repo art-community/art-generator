@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.service.common
+package io.art.generator.service
 
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.GeneratorLanguages.JAVA
@@ -27,9 +27,7 @@ import io.art.generator.constants.SOURCES_CHANGED
 import io.art.generator.constants.SOURCES_NOT_FOUND
 import io.art.generator.detector.SourcesChanges
 import io.art.generator.detector.detectChanges
-import io.art.generator.service.java.JavaMetaGenerationService.generateJavaMetaClasses
-import io.art.generator.service.java.analyzeJavaSources
-import io.art.generator.service.kotlin.analyzeKotlinSources
+import io.art.generator.service.JavaMetaGenerationService.generateJavaMetaClasses
 import io.art.scheduler.manager.Scheduling.schedule
 import java.nio.file.Path
 

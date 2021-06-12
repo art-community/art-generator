@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.service.kotlin
+package io.art.generator.service
 
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.model.*
@@ -240,7 +240,7 @@ private class KotlinAnalyzingService {
 
     private fun FunctionDescriptor.asMetaMethod(constructor: Boolean) = JavaMetaMethod(
             name = name.toString(),
-            returnType = returnType?.asMetaType() ?: JAVA_UNIT_META_TYPE,
+            returnType = returnType?.asMetaType() ?: JAVA_VOID_META_TYPE,
             parameters = valueParameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
             typeParameters = if (!constructor) typeParameters.map { typeParameter -> typeParameter.defaultType.asMetaType() } else emptyList(),
             modifiers = setOf(Modifier.PUBLIC)
