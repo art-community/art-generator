@@ -24,6 +24,7 @@ import io.art.generator.model.JavaMetaTypeKind.*
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import org.jetbrains.kotlin.analyzer.AnalysisResult
+import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.*
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.jetbrains.kotlin.descriptors.*
@@ -33,15 +34,13 @@ import org.jetbrains.kotlin.load.java.JavaClassesTracker
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
+import org.jetbrains.kotlin.resolve.calls.tower.isSynthesized
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassOrAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
-import org.jetbrains.kotlin.types.FlexibleType
-import org.jetbrains.kotlin.types.KotlinType
-import org.jetbrains.kotlin.types.SimpleType
-import org.jetbrains.kotlin.types.TypeProjection
-import org.jetbrains.kotlin.types.Variance.*
+import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.Variance.OUT_VARIANCE
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import org.jetbrains.kotlin.types.typeUtil.makeNotNullable
 import java.nio.file.Path
@@ -73,6 +72,7 @@ private class KotlinAnalyzingService {
                 .asSequence()
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                 .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
+                .filter { descriptor -> !descriptor.isInner }
                 .map { descriptor -> descriptor.asMetaClass() }
                 .distinctBy { metaClass -> metaClass.type.typeName }
                 .toList()
@@ -106,45 +106,17 @@ private class KotlinAnalyzingService {
         val builtIns = unwrapped.constructor.builtIns
         return putIfAbsent(cache, unwrapped) {
             if (isPrimitiveArray(unwrapped)) {
-                val elementType = builtIns.getArrayElementType(unwrapped)
+                val elementType = builtIns.getArrayElementType(unwrapped).unwrap()
                 return@putIfAbsent JavaMetaType(
                         kotlinOriginalType = unwrapped,
                         kind = ARRAY_KIND,
                         typeName = unwrapped.constructor.declarationDescriptor!!.fqNameSafe.asString(),
-                        arrayComponentType = JavaMetaType(
-                                kotlinOriginalType = elementType,
-                                kind = PRIMITIVE_KIND,
-                                typeName = when (elementType) {
-                                    builtIns.unitType -> Void::class.java.typeName
-                                    builtIns.booleanType -> Boolean::class.java.typeName
-                                    builtIns.intType -> Int::class.java.typeName
-                                    builtIns.shortType -> Short::class.java.typeName
-                                    builtIns.charType -> Char::class.java.typeName
-                                    builtIns.doubleType -> Double::class.java.typeName
-                                    builtIns.floatType -> Float::class.java.typeName
-                                    builtIns.longType -> Long::class.java.typeName
-                                    else -> Byte::class.java.typeName
-                                }
-                        )
+                        arrayComponentType = elementType.asPrimitiveMetaType(builtIns)
                 )
             }
 
             if (isPrimitiveTypeOrNullablePrimitiveType(unwrapped)) {
-                return@putIfAbsent JavaMetaType(
-                        kotlinOriginalType = unwrapped,
-                        kind = PRIMITIVE_KIND,
-                        typeName = when (unwrapped) {
-                            builtIns.unitType -> Void::class.java.typeName
-                            builtIns.booleanType -> Boolean::class.java.typeName
-                            builtIns.intType -> Int::class.java.typeName
-                            builtIns.shortType -> Short::class.java.typeName
-                            builtIns.charType -> Char::class.java.typeName
-                            builtIns.doubleType -> Double::class.java.typeName
-                            builtIns.floatType -> Float::class.java.typeName
-                            builtIns.longType -> Long::class.java.typeName
-                            else -> Byte::class.java.typeName
-                        }
-                )
+                return@putIfAbsent unwrapped.asPrimitiveMetaType(builtIns)
             }
 
             when (unwrapped) {
@@ -154,6 +126,22 @@ private class KotlinAnalyzingService {
             }
         }
     }
+
+    private fun UnwrappedType.asPrimitiveMetaType(builtIns: KotlinBuiltIns) = JavaMetaType(
+            kotlinOriginalType = this,
+            kind = PRIMITIVE_KIND,
+            typeName = when (this) {
+                builtIns.unitType -> Void::class.java.typeName
+                builtIns.booleanType -> Boolean::class.java.typeName
+                builtIns.intType -> Int::class.java.typeName
+                builtIns.shortType -> Short::class.java.typeName
+                builtIns.charType -> Char::class.java.typeName
+                builtIns.doubleType -> Double::class.java.typeName
+                builtIns.floatType -> Float::class.java.typeName
+                builtIns.longType -> Long::class.java.typeName
+                else -> Byte::class.java.typeName
+            }
+    )
 
     private fun SimpleType.asMetaType(): JavaMetaType = when {
         isEnum() -> {
@@ -260,16 +248,19 @@ private class KotlinAnalyzingService {
             fields = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<VariableDescriptorWithAccessors>()
+                    .filter { descriptor -> !descriptor.isSynthesized }
                     .associate { symbol -> symbol.name.toString() to symbol.asMetaProperty() },
 
             constructors = constructors
                     .asSequence()
+                    .filter { descriptor -> !descriptor.isSynthesized }
                     .map { method -> method.asMetaMethod(constructor = true) }
                     .toList(),
 
             methods = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<FunctionDescriptor>()
+                    .filter { descriptor -> !descriptor.isSynthesized }
                     .map { method -> method.asMetaMethod(constructor = false) }
                     .toList(),
 
@@ -278,6 +269,7 @@ private class KotlinAnalyzingService {
                     .filterIsInstance<ClassDescriptor>()
                     .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                     .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
+                    .filter { descriptor -> !descriptor.isInner }
                     .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
 
             parent = getSuperClassOrAny()
