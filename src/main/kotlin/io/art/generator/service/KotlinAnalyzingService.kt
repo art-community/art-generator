@@ -42,6 +42,7 @@ import org.jetbrains.kotlin.types.SimpleType
 import org.jetbrains.kotlin.types.TypeProjection
 import org.jetbrains.kotlin.types.Variance.*
 import org.jetbrains.kotlin.types.typeUtil.isEnum
+import org.jetbrains.kotlin.types.typeUtil.makeNotNullable
 import java.nio.file.Path
 import javax.lang.model.element.Modifier
 
@@ -97,7 +98,10 @@ private class KotlinAnalyzingService {
     }
 
     private fun KotlinType.asMetaType(): JavaMetaType {
-        val unwrapped = unwrap()
+        var unwrapped = unwrap()
+        if (unwrapped.isMarkedNullable) {
+            unwrapped = unwrapped.makeNotNullable().unwrap()
+        }
         return putIfAbsent(cache, unwrapped) {
             when (unwrapped) {
                 is SimpleType -> unwrapped.asMetaType()
@@ -160,6 +164,7 @@ private class KotlinAnalyzingService {
                         typeName = classId.asSingleFqName().asString()
                 )
             }.apply {
+                if (arguments.isNotEmpty()) return@apply
                 val newArguments = arguments.map { projection -> projection.asMetaType() }
                 typeParameters.clear()
                 typeParameters.addAll(newArguments)
@@ -175,6 +180,7 @@ private class KotlinAnalyzingService {
                         typeName = toString()
                 )
             }.apply {
+                if (typeVariableBounds.isNotEmpty()) return@apply
                 val newBounds = when (typeParameterDescriptor.variance) {
                     INVARIANT, IN_VARIANCE -> typeParameterDescriptor
                             .upperBounds
@@ -191,7 +197,7 @@ private class KotlinAnalyzingService {
     }
 
     private fun FlexibleType.asMetaType(): JavaMetaType {
-        return upperBound.asMetaType()
+        return delegate.asMetaType()
     }
 
     private fun TypeProjection.asMetaType(): JavaMetaType {
