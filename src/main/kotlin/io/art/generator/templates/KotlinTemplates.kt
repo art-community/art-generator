@@ -28,6 +28,7 @@ import io.art.generator.constants.KOTLIN_CASTER_CLASS_NAME
 import io.art.generator.extension.extractClass
 import io.art.generator.extension.hasVariable
 import io.art.generator.extension.name
+import io.art.generator.extension.withoutVariables
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaParameter
 import io.art.generator.model.KotlinMetaProperty
@@ -103,15 +104,17 @@ fun kotlinReturnInvokeConstructorStatement(type: KotlinMetaType, parameters: Map
     return returnNewStatement(type).join(casted(parameters)).join(")")
 }
 
-fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty): CodeBlock = "register(MetaField(%S,"
-        .asCode(name)
-        .join(metaTypeStatement(property.type))
-        .join("))")
+fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty, metaType: TypeName): CodeBlock =
+        "register(MetaField(%S,"
+                .asCode(name)
+                .join(metaTypeStatement(property.type))
+                .join("))")
 
-fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: KotlinMetaParameter): CodeBlock = "register(MetaParameter($index, %S,"
-        .asCode(name)
-        .join(metaTypeStatement(parameter.type))
-        .join("))")
+fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: KotlinMetaParameter, metaType: TypeName): CodeBlock =
+        "register(MetaParameter($index, %S,"
+                .asCode(name)
+                .join(metaTypeStatement(parameter.type))
+                .join("))")
 
 fun kotlinMetaMethodSuperStatement(name: String, type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = "%S,"
         .asCode(name)
@@ -125,28 +128,35 @@ fun kotlinMetaClassSuperStatement(metaClass: KotlinMetaClass): CodeBlock = metaT
 
 private fun metaVariableBlock(type: KotlinMetaType) = "metaVariable(%S".asCode(type.typeName).join(")")
 
-private fun metaEnumBlock(className: TypeName) = "metaEnum(%T::class.java, %T::valueOf)"
-        .asCode(className, className)
+private fun metaEnumBlock(type: KotlinMetaType) = "metaEnum(%T::class.java, %T::valueOf)"
+        .asCode(type.extractClass(), type.extractClass())
 
-private fun metaTypeBlock(className: TypeName, vararg parameters: KotlinMetaType): CodeBlock = "metaType(%T::class.java"
-        .asCode(className)
+private fun metaTypeBlock(type: KotlinMetaType, vararg parameters: KotlinMetaType): CodeBlock = "metaType<%T>(%T::class.java"
+        .asCode(type.withoutVariables(), type.extractClass())
         .let { block ->
             if (parameters.isEmpty()) return@let block
             block.joinByComma(*parameters.map(::metaTypeStatement).toTypedArray())
         }
         .join(")")
 
-private fun metaArrayBlock(type: KotlinMetaType, className: TypeName): CodeBlock = "metaArray(%T::class.java, {size: Int -> arrayOfNulls<%T>(size)}, "
-        .asCode(className, className)
+private fun metaTypeBlock(name: TypeName, vararg parameters: KotlinMetaType): CodeBlock = "metaType<%T>(%T::class.java"
+        .asCode(name, name)
+        .let { block ->
+            if (parameters.isEmpty()) return@let block
+            block.joinByComma(*parameters.map(::metaTypeStatement).toTypedArray())
+        }
+        .join(")")
+
+private fun metaArrayBlock(type: KotlinMetaType): CodeBlock = "metaArray<%T>(%T::class.java, {size: Int -> arrayOfNulls<%T>(size)}, "
+        .asCode(type.withoutVariables(), type.extractClass(), type.withoutVariables())
         .join(metaTypeStatement(type.arrayComponentType!!))
         .join(")")
 
 private fun metaTypeStatement(type: KotlinMetaType): CodeBlock {
-    val poetClass = type.extractClass()
     return when (type.kind) {
-        ARRAY_KIND -> metaArrayBlock(type, poetClass)
-        CLASS_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
-        ENUM_KIND -> metaEnumBlock(poetClass)
+        ARRAY_KIND -> metaArrayBlock(type)
+        CLASS_KIND -> metaTypeBlock(type, *type.typeParameters.toTypedArray())
+        ENUM_KIND -> metaEnumBlock(type)
         VARIABLE_KIND -> metaVariableBlock(type)
         WILDCARD_KIND -> metaTypeBlock(ANY)
         FUNCTION_KIND -> metaTypeBlock(ANY)

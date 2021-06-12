@@ -98,7 +98,7 @@ fun KotlinMetaType.excludeVariables(exclusions: Set<String>): KotlinMetaType = w
 }
 
 fun KotlinMetaType.extractClass(): TypeName = when (kind) {
-    ARRAY_KIND -> ARRAY.parameterizedBy(arrayComponentType!!.extractClass())
+    ARRAY_KIND -> ARRAY
 
     CLASS_KIND, ENUM_KIND -> ClassName(classPackageName!!, className!!)
 
