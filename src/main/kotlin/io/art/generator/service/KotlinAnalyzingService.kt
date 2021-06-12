@@ -36,10 +36,11 @@ import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassOrAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
+import org.jetbrains.kotlin.types.FlexibleType
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.SimpleType
 import org.jetbrains.kotlin.types.TypeProjection
-import org.jetbrains.kotlin.types.UnwrappedType
+import org.jetbrains.kotlin.types.Variance.*
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.nio.file.Path
 import javax.lang.model.element.Modifier
@@ -95,10 +96,14 @@ private class KotlinAnalyzingService {
                 .flatMap { nested -> collectClasses(analysisResult, nested.asString()) }
     }
 
-    private fun KotlinType.asMetaType(): JavaMetaType = putIfAbsent(cache, this) {
-        when (val unwrapped: UnwrappedType = unwrap()) {
-            is SimpleType -> unwrapped.asMetaType()
-            else -> JavaMetaType(kotlinOriginalType = unwrapped, kind = UNKNOWN_KIND, typeName = toString())
+    private fun KotlinType.asMetaType(): JavaMetaType {
+        val unwrapped = unwrap()
+        return putIfAbsent(cache, unwrapped) {
+            when (unwrapped) {
+                is SimpleType -> unwrapped.asMetaType()
+                is FlexibleType -> unwrapped.asMetaType()
+                else -> JavaMetaType(kotlinOriginalType = unwrapped, kind = UNKNOWN_KIND, typeName = toString())
+            }
         }
     }
 
@@ -121,25 +126,27 @@ private class KotlinAnalyzingService {
                 arrayComponentType = constructor.builtIns.getArrayElementType(this).asMetaType(),
                 typeName = toString()
         )
-//
-//        constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(cache, this) {
-//            JavaMetaType(
-//                    originalType = this,
-//                    kind = FUNCTION_KIND,
-//                    nullable = isNullableType(this),
-//                    typeName = toString(),
-//                    functionResultType = arguments
-//                            .takeLast(1)
-//                            .firstOrNull()
-//                            ?.asMetaType()
-//            )
-//        }.apply {
-//            val newArguments = arguments
-//                    .dropLast(1)
-//                    .map { type -> type.asMetaType() }
-//            functionArgumentTypes.clear()
-//            functionArgumentTypes.addAll(newArguments)
-//        }
+
+        /*
+        constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(cache, this) {
+            JavaMetaType(
+                    originalType = this,
+                    kind = FUNCTION_KIND,
+                    nullable = isNullableType(this),
+                    typeName = toString(),
+                    functionResultType = arguments
+                            .takeLast(1)
+                            .firstOrNull()
+                            ?.asMetaType()
+            )
+        }.apply {
+            val newArguments = arguments
+                    .dropLast(1)
+                    .map { type -> type.asMetaType() }
+            functionArgumentTypes.clear()
+            functionArgumentTypes.addAll(newArguments)
+        }
+*/
 
         constructor.declarationDescriptor is ClassDescriptor -> {
             val classId = constructor.declarationDescriptor?.classId
@@ -165,15 +172,16 @@ private class KotlinAnalyzingService {
                 JavaMetaType(
                         kotlinOriginalType = this,
                         kind = VARIABLE_KIND,
-                        typeName = toString(),
-//                        typeVariableVariance = when (typeParameterDescriptor.variance) {
-//                            INVARIANT -> KotlinTypeVariableVariance.INVARIANT
-//                            IN_VARIANCE -> IN
-//                            OUT_VARIANCE -> OUT
-//                        },
+                        typeName = toString()
                 )
             }.apply {
-                val newBounds = (typeParameterDescriptor).upperBounds.map { type -> type.asMetaType() }
+                val newBounds = when (typeParameterDescriptor.variance) {
+                    INVARIANT, IN_VARIANCE -> typeParameterDescriptor
+                            .upperBounds
+                            .map { bound -> bound.asMetaType() }
+                            .toMutableList()
+                    OUT_VARIANCE -> mutableListOf()
+                }
                 typeVariableBounds.clear()
                 typeVariableBounds.addAll(newBounds)
             }
@@ -182,16 +190,19 @@ private class KotlinAnalyzingService {
         else -> JavaMetaType(kotlinOriginalType = this, kind = UNKNOWN_KIND, typeName = toString())
     }
 
+    private fun FlexibleType.asMetaType(): JavaMetaType {
+        return upperBound.asMetaType()
+    }
+
     private fun TypeProjection.asMetaType(): JavaMetaType {
-        val unwrapped = type.unwrap()
         if (isStarProjection) {
             return JavaMetaType(
-                    kotlinOriginalType = unwrapped,
+                    kotlinOriginalType = type,
                     kind = WILDCARD_KIND,
                     typeName = toString()
             )
         }
-        return unwrapped.asMetaType()
+        return type.asMetaType()
     }
 
     private fun ClassDescriptor.asMetaClass(): JavaMetaClass = JavaMetaClass(
