@@ -22,6 +22,7 @@ package io.art.generator.model
 
 import com.sun.tools.javac.code.Type
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import org.jetbrains.kotlin.types.KotlinType
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeMirror
 
@@ -36,7 +37,7 @@ enum class JavaMetaTypeKind {
 }
 
 val JAVA_OBJECT_META_TYPE: JavaMetaType = JavaMetaType(
-        originalType = Type.JCNoType(),
+        javaOriginalType = Type.JCNoType(),
         typeName = Object::class.java.name,
         kind = JavaMetaTypeKind.CLASS_KIND,
         classFullName = Object::class.java.name,
@@ -44,8 +45,19 @@ val JAVA_OBJECT_META_TYPE: JavaMetaType = JavaMetaType(
         classPackageName = Object::class.java.packageName
 )
 
+val JAVA_UNIT_META_TYPE: JavaMetaType = JavaMetaType(
+        javaOriginalType = Type.JCNoType(),
+        typeName = Unit::class.java.name,
+        kind = JavaMetaTypeKind.CLASS_KIND,
+        classFullName = Unit::class.java.name,
+        className = Unit::class.java.simpleName,
+        classPackageName = Unit::class.java.packageName
+)
+
 data class JavaMetaType(
-        val originalType: TypeMirror,
+        val javaOriginalType: TypeMirror? = null,
+
+        val kotlinOriginalType: KotlinType? = null,
 
         val typeName: String,
         val kind: JavaMetaTypeKind,
@@ -66,11 +78,12 @@ data class JavaMetaType(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
         other as JavaMetaType
-        if (originalType != other.originalType) return false
+        if (javaOriginalType != other.javaOriginalType) return false
+        if (kotlinOriginalType != other.kotlinOriginalType) return false
         return true
     }
 
-    override fun hashCode(): Int = originalType.hashCode()
+    override fun hashCode(): Int = javaOriginalType?.hashCode() ?: kotlinOriginalType.hashCode()
 }
 
 data class JavaMetaClass(

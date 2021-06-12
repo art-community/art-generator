@@ -75,25 +75,25 @@ private class JavaAnalyzingService {
 
             is Type -> when {
                 isPrimitiveOrVoid -> JavaMetaType(
-                        originalType = this,
+                        javaOriginalType = this,
                         kind = PRIMITIVE_KIND,
                         typeName = tsym.qualifiedName.toString()
                 )
                 else -> JavaMetaType(
-                        originalType = this,
+                        javaOriginalType = this,
                         kind = UNKNOWN_KIND,
                         typeName = tsym?.qualifiedName?.toString() ?: toString()
                 )
             }
 
-            else -> JavaMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
+            else -> JavaMetaType(javaOriginalType = this, kind = UNKNOWN_KIND, typeName = toString())
         }
     }
 
     private fun Type.ClassType.asMetaType(): JavaMetaType {
         val type = putIfAbsent(cache, this) {
             JavaMetaType(
-                    originalType = this,
+                    javaOriginalType = this,
                     classFullName = tsym.qualifiedName.toString(),
                     kind = when {
                         !asElement().isEnum -> CLASS_KIND
@@ -119,7 +119,7 @@ private class JavaAnalyzingService {
     private fun Type.TypeVar.asMetaType(): JavaMetaType {
         val type = putIfAbsent(cache, this) {
             JavaMetaType(
-                    originalType = this,
+                    javaOriginalType = this,
                     kind = VARIABLE_KIND,
                     typeName = tsym.qualifiedName.toString()
             )
@@ -140,7 +140,7 @@ private class JavaAnalyzingService {
 
     private fun Type.ArrayType.asMetaType(): JavaMetaType = putIfAbsent(cache, this) {
         JavaMetaType(
-                originalType = this,
+                javaOriginalType = this,
                 kind = ARRAY_KIND,
                 typeName = tsym.qualifiedName.toString(),
                 arrayComponentType = componentType.asMetaType()
@@ -149,7 +149,7 @@ private class JavaAnalyzingService {
 
     private fun Type.WildcardType.asMetaType(): JavaMetaType = putIfAbsent(cache, this) {
         JavaMetaType(
-                originalType = this,
+                javaOriginalType = this,
                 kind = WILDCARD_KIND,
                 typeName = type.toString(),
                 wildcardSuperBound = superBound?.asMetaType(),

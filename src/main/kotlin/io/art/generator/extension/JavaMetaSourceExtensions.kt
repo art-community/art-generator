@@ -29,7 +29,7 @@ import java.lang.Void.TYPE
 import javax.lang.model.element.Modifier.*
 
 fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
-    PRIMITIVE_KIND -> TypeName.get(originalType)
+    PRIMITIVE_KIND -> TypeName.get(javaOriginalType)
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.withoutVariables())
 
@@ -64,7 +64,7 @@ fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when 
     VARIABLE_KIND -> if (exclusions.contains(typeName)) JAVA_OBJECT_META_TYPE else this
 
     ARRAY_KIND -> JavaMetaType(
-            originalType = originalType,
+            javaOriginalType = javaOriginalType,
             typeName = typeName,
             kind = kind,
             arrayComponentType = arrayComponentType?.excludeVariables(exclusions))
@@ -76,7 +76,7 @@ fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when 
                     .filter { parameter -> parameter.kind != VARIABLE_KIND || !exclusions.contains(parameter.typeName) }
                     .map { parameter -> parameter.excludeVariables(exclusions) }
             JavaMetaType(
-                    originalType = originalType,
+                    javaOriginalType = javaOriginalType,
                     typeName = typeName,
                     kind = kind,
                     classFullName = classFullName,
@@ -88,7 +88,7 @@ fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when 
     }
 
     WILDCARD_KIND -> JavaMetaType(
-            originalType = originalType,
+            javaOriginalType = javaOriginalType,
             typeName = typeName,
             kind = kind,
             wildcardSuperBound = wildcardSuperBound?.excludeVariables(exclusions),
@@ -100,7 +100,7 @@ fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when 
 
 fun JavaMetaType.extractClass(): TypeName = when (kind) {
     PRIMITIVE_KIND -> {
-        if (typeName == TYPE.name) TypeName.get(originalType).box() else TypeName.get(originalType)
+        if (typeName == TYPE.name) TypeName.get(javaOriginalType).box() else TypeName.get(javaOriginalType)
     }
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())

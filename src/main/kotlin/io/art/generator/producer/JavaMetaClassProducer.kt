@@ -217,7 +217,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             static -> javaInvokeStaticStatement(name, type, parameters)
             else -> javaInvokeInstanceStatement(name, parameters)
         }
-        when (method.returnType.originalType.kind) {
+        when (method.returnType.javaOriginalType?.kind) {
             VOID -> addCode(invoke).addCode(javaReturnNullStatement())
             else -> addCode(javaReturnStatement(invoke))
         }
@@ -230,7 +230,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
                 static -> javaInvokeWithoutArgumentsStaticStatement(name, type)
                 else -> javaInvokeWithoutArgumentsInstanceStatement(name)
             }
-            when (method.returnType.originalType.kind) {
+            when (method.returnType.javaOriginalType?.kind) {
                 VOID -> addCode(invoke).addCode(javaReturnNullStatement())
                 else -> addCode(javaReturnStatement(invoke))
             }
@@ -242,7 +242,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
                 static -> javaInvokeOneArgumentStaticStatement(name, type, parameters.values.first())
                 else -> javaInvokeOneArgumentInstanceStatement(name, parameters.values.first())
             }
-            when (method.returnType.originalType.kind) {
+            when (method.returnType.javaOriginalType?.kind) {
                 VOID -> addCode(invoke).addCode(javaReturnNullStatement())
                 else -> addCode(javaReturnStatement(invoke))
             }
