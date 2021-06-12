@@ -208,9 +208,10 @@ private class KotlinAnalyzingService {
                         typeName = classId.asSingleFqName().asString()
                 )
             }.apply {
-                if (arguments.isNotEmpty()) return@apply
-                val newArguments = arguments.map { projection -> projection.asMetaType() }
-                typeParameters.addAll(newArguments)
+                if (typeParameters.isNotEmpty()) return@apply
+                arguments
+                        .map { projection -> projection.asMetaType() }
+                        .forEach(typeParameters::add)
             }
         }
 
@@ -224,14 +225,12 @@ private class KotlinAnalyzingService {
                 )
             }.apply {
                 if (typeVariableBounds.isNotEmpty()) return@apply
-                val newBounds = when (typeParameterDescriptor.variance) {
-                    INVARIANT, IN_VARIANCE -> typeParameterDescriptor
+                if (typeParameterDescriptor.variance != OUT_VARIANCE) {
+                    typeParameterDescriptor
                             .upperBounds
                             .map { bound -> bound.asMetaType() }
-                            .toMutableList()
-                    OUT_VARIANCE -> mutableListOf()
+                            .forEach(typeVariableBounds::add)
                 }
-                typeVariableBounds.addAll(newBounds)
             }
         }
 
