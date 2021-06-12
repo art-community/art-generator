@@ -24,7 +24,7 @@ import io.art.generator.model.JavaMetaTypeKind.*
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import org.jetbrains.kotlin.analyzer.AnalysisResult
-import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
+import org.jetbrains.kotlin.builtins.KotlinBuiltIns.*
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.ClassKind.ANNOTATION_CLASS
@@ -34,6 +34,7 @@ import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
+import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassOrAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
 import org.jetbrains.kotlin.types.FlexibleType
@@ -102,7 +103,50 @@ private class KotlinAnalyzingService {
         if (unwrapped.isMarkedNullable) {
             unwrapped = unwrapped.makeNotNullable().unwrap()
         }
+        val builtIns = unwrapped.constructor.builtIns
         return putIfAbsent(cache, unwrapped) {
+            if (isPrimitiveArray(unwrapped)) {
+                val elementType = builtIns.getArrayElementType(unwrapped)
+                return@putIfAbsent JavaMetaType(
+                        kotlinOriginalType = unwrapped,
+                        kind = ARRAY_KIND,
+                        typeName = unwrapped.constructor.declarationDescriptor!!.fqNameSafe.asString(),
+                        arrayComponentType = JavaMetaType(
+                                kotlinOriginalType = elementType,
+                                kind = PRIMITIVE_KIND,
+                                typeName = when (elementType) {
+                                    builtIns.unitType -> Void::class.java.typeName
+                                    builtIns.booleanType -> Boolean::class.java.typeName
+                                    builtIns.intType -> Int::class.java.typeName
+                                    builtIns.shortType -> Short::class.java.typeName
+                                    builtIns.charType -> Char::class.java.typeName
+                                    builtIns.doubleType -> Double::class.java.typeName
+                                    builtIns.floatType -> Float::class.java.typeName
+                                    builtIns.longType -> Long::class.java.typeName
+                                    else -> Byte::class.java.typeName
+                                }
+                        )
+                )
+            }
+
+            if (isPrimitiveTypeOrNullablePrimitiveType(unwrapped)) {
+                return@putIfAbsent JavaMetaType(
+                        kotlinOriginalType = unwrapped,
+                        kind = PRIMITIVE_KIND,
+                        typeName = when (unwrapped) {
+                            builtIns.unitType -> Void::class.java.typeName
+                            builtIns.booleanType -> Boolean::class.java.typeName
+                            builtIns.intType -> Int::class.java.typeName
+                            builtIns.shortType -> Short::class.java.typeName
+                            builtIns.charType -> Char::class.java.typeName
+                            builtIns.doubleType -> Double::class.java.typeName
+                            builtIns.floatType -> Float::class.java.typeName
+                            builtIns.longType -> Long::class.java.typeName
+                            else -> Byte::class.java.typeName
+                        }
+                )
+            }
+
             when (unwrapped) {
                 is SimpleType -> unwrapped.asMetaType()
                 is FlexibleType -> unwrapped.asMetaType()
@@ -153,12 +197,12 @@ private class KotlinAnalyzingService {
 */
 
         constructor.declarationDescriptor is ClassDescriptor -> {
-            val classId = constructor.declarationDescriptor?.classId
+            val classId = constructor.declarationDescriptor?.classId!!
             putIfAbsent(cache, this) {
                 JavaMetaType(
                         kotlinOriginalType = this,
                         kind = CLASS_KIND,
-                        classFullName = classId!!.asSingleFqName().asString(),
+                        classFullName = classId.asSingleFqName().asString(),
                         className = classId.relativeClassName.asString(),
                         classPackageName = classId.packageFqName.asString(),
                         typeName = classId.asSingleFqName().asString()

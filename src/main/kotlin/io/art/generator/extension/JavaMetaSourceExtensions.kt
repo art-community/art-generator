@@ -19,17 +19,17 @@
 package io.art.generator.extension
 
 import com.squareup.javapoet.*
+import com.squareup.javapoet.TypeName.*
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.constants.OBJECT_CLASS_NAME
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.model.*
 import io.art.generator.model.JavaMetaTypeKind.*
-import java.lang.Void.TYPE
 import javax.lang.model.element.Modifier.*
 
 fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
-    PRIMITIVE_KIND -> TypeName.get(javaOriginalType)
+    PRIMITIVE_KIND -> asPrimitive()
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.withoutVariables())
 
@@ -65,6 +65,7 @@ fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when 
 
     ARRAY_KIND -> JavaMetaType(
             javaOriginalType = javaOriginalType,
+            kotlinOriginalType = kotlinOriginalType,
             typeName = typeName,
             kind = kind,
             arrayComponentType = arrayComponentType?.excludeVariables(exclusions))
@@ -77,6 +78,7 @@ fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when 
                     .map { parameter -> parameter.excludeVariables(exclusions) }
             JavaMetaType(
                     javaOriginalType = javaOriginalType,
+                    kotlinOriginalType = kotlinOriginalType,
                     typeName = typeName,
                     kind = kind,
                     classFullName = classFullName,
@@ -89,6 +91,7 @@ fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when 
 
     WILDCARD_KIND -> JavaMetaType(
             javaOriginalType = javaOriginalType,
+            kotlinOriginalType = kotlinOriginalType,
             typeName = typeName,
             kind = kind,
             wildcardSuperBound = wildcardSuperBound?.excludeVariables(exclusions),
@@ -99,9 +102,7 @@ fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when 
 }
 
 fun JavaMetaType.extractClass(): TypeName = when (kind) {
-    PRIMITIVE_KIND -> {
-        if (typeName == TYPE.name) TypeName.get(javaOriginalType).box() else TypeName.get(javaOriginalType)
-    }
+    PRIMITIVE_KIND -> asPrimitive()
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())
 
@@ -112,6 +113,17 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
     WILDCARD_KIND -> wildcardExtendsBound?.extractClass() ?: OBJECT_CLASS_NAME
 
     UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
+}
+
+private fun JavaMetaType.asPrimitive() = when (typeName) {
+    Boolean::class.java.typeName -> BOOLEAN
+    Int::class.java.typeName -> INT
+    Short::class.java.typeName -> SHORT
+    Double::class.java.typeName -> DOUBLE
+    Byte::class.java.typeName -> BYTE
+    Long::class.java.typeName -> LONG
+    Char::class.java.typeName -> CHAR
+    else -> VOID.box()
 }
 
 fun JavaMetaType.hasVariable(): Boolean = kind == VARIABLE_KIND || arrayComponentType?.hasVariable() ?: false
