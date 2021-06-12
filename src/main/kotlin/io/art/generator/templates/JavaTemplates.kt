@@ -19,17 +19,20 @@
 package io.art.generator.templates
 
 import com.squareup.javapoet.AnnotationSpec
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.CodeBlock.join
 import com.squareup.javapoet.CodeBlock.of
 import com.squareup.javapoet.TypeName
 import io.art.core.constants.CompilerSuppressingWarnings.*
 import io.art.core.constants.StringConstants.*
+import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.constants.CASTER_CLASS_NAME
 import io.art.generator.constants.OBJECT_CLASS_NAME
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.extension.extractClass
 import io.art.generator.extension.hasVariable
+import io.art.generator.extension.name
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaField
 import io.art.generator.model.JavaMetaParameter
@@ -38,6 +41,18 @@ import io.art.generator.model.JavaMetaTypeKind.*
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.Modifier.PUBLIC
 
+
+fun javaMetaModuleClassName(packageName: String, name: String): ClassName =
+        ClassName.get(packageName, "Meta${capitalize(name)}")
+
+fun javaMetaPackageClassName(name: String): ClassName =
+        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Package".name())
+
+fun javaMetaClassClassName(name: String): ClassName =
+        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Class".name())
+
+fun javaMetaMethodClassName(name: String): ClassName =
+        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Method")
 
 fun javaSuppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnings::class.java)
         .addMember("value", "{\$S,\$S,\$S}", ALL, UNCHECKED, UNUSED)
@@ -104,61 +119,61 @@ fun javaReturnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<Str
 
 fun javaRegisterMetaFieldStatement(name: String, field: JavaMetaField): CodeBlock = "register(new MetaField<>(\$S,"
         .asCode(name)
-        .join(javaMetaTypeStatement(field.type))
+        .join(metaTypeStatement(field.type))
         .join("))")
 
 fun javaRegisterMetaParameterStatement(index: Int, name: String, parameter: JavaMetaParameter): CodeBlock = "register(new MetaParameter<>($index, \$S,"
         .asCode(name)
-        .join(javaMetaTypeStatement(parameter.type))
+        .join(metaTypeStatement(parameter.type))
         .join("))")
 
 fun javaMetaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super(\$S,"
         .asCode(name)
-        .join(javaMetaTypeStatement(type))
+        .join(metaTypeStatement(type))
         .joinByComma(asPublicFlag(modifiers))
         .join(");")
 
 fun javaMetaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super("
-        .join(javaMetaTypeStatement(type))
+        .join(metaTypeStatement(type))
         .joinByComma(asPublicFlag(modifiers))
         .join(");")
 
 fun javaMetaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
-        .join(javaMetaTypeStatement(metaClass.type))
+        .join(metaTypeStatement(metaClass.type))
         .join(");")
 
 fun javaNamedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
 
 
-private fun javaMetaVariableBlock(type: JavaMetaType) = "metaVariable(\$S".asCode(type.typeName).join(")")
+private fun metaVariableBlock(type: JavaMetaType) = "metaVariable(\$S".asCode(type.typeName).join(")")
 
-private fun javaMetaEnumBlock(className: TypeName) = "metaEnum(\$T.class, \$T::valueOf)"
+private fun metaEnumBlock(className: TypeName) = "metaEnum(\$T.class, \$T::valueOf)"
         .asCode(className, className)
 
-private fun javaMetaTypeBlock(className: TypeName, vararg parameters: JavaMetaType): CodeBlock = "metaType(\$T.class"
+private fun metaTypeBlock(className: TypeName, vararg parameters: JavaMetaType): CodeBlock = "metaType(\$T.class"
         .asCode(className)
         .let { block ->
             if (parameters.isEmpty()) return@let block
-            block.joinByComma(*parameters.map(::javaMetaTypeStatement).toTypedArray())
+            block.joinByComma(*parameters.map(::metaTypeStatement).toTypedArray())
         }
         .join(")")
 
-private fun javaMetaArrayBlock(type: JavaMetaType, className: TypeName): CodeBlock = "metaArray(\$T.class, \$T[]::new, "
+private fun metaArrayBlock(type: JavaMetaType, className: TypeName): CodeBlock = "metaArray(\$T.class, \$T[]::new, "
         .asCode(className, className)
-        .join(javaMetaTypeStatement(type.arrayComponentType!!))
+        .join(metaTypeStatement(type.arrayComponentType!!))
         .join(")")
 
-private fun javaMetaTypeStatement(type: JavaMetaType): CodeBlock {
+private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
     val poetClass = type.extractClass()
     return when (type.kind) {
-        PRIMITIVE_KIND -> javaMetaTypeBlock(poetClass)
-        ARRAY_KIND -> javaMetaArrayBlock(type, poetClass)
-        CLASS_KIND -> javaMetaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
-        ENUM_KIND -> javaMetaEnumBlock(poetClass)
-        VARIABLE_KIND -> javaMetaVariableBlock(type)
-        WILDCARD_KIND -> type.wildcardExtendsBound?.let(::javaMetaTypeStatement)
-                ?: type.wildcardSuperBound?.let(::javaMetaTypeStatement)
-                ?: javaMetaTypeBlock(OBJECT_CLASS_NAME)
+        PRIMITIVE_KIND -> metaTypeBlock(poetClass)
+        ARRAY_KIND -> metaArrayBlock(type, poetClass)
+        CLASS_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
+        ENUM_KIND -> metaEnumBlock(poetClass)
+        VARIABLE_KIND -> metaVariableBlock(type)
+        WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)
+                ?: type.wildcardSuperBound?.let(::metaTypeStatement)
+                ?: metaTypeBlock(OBJECT_CLASS_NAME)
         UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $type")
     }
 }

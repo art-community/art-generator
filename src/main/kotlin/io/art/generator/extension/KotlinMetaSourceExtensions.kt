@@ -20,7 +20,6 @@ package io.art.generator.extension
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
 import io.art.generator.constants.KOTLIN_ANY_CLASS_NAME
 import io.art.generator.constants.KOTLIN_UNIT_CLASS_NAME
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
@@ -55,7 +54,7 @@ fun KotlinMetaType.withoutVariables(): TypeName = when (kind) {
     UNKNOWN_KIND -> STAR
 
     FUNCTION_KIND -> LambdaTypeName.get(
-            //parameters = functionArgumentTypes.map { argument -> argument.extractClass() },
+            parameters = functionArgumentTypes.map { argument -> argument.withoutVariables() }.toTypedArray(),
             returnType = functionResultType?.withoutVariables() ?: KOTLIN_UNIT_CLASS_NAME
     )
 }
@@ -108,7 +107,7 @@ fun KotlinMetaType.extractClass(): TypeName = when (kind) {
     WILDCARD_KIND, VARIABLE_KIND -> KOTLIN_ANY_CLASS_NAME
 
     FUNCTION_KIND -> LambdaTypeName.get(
-            //parameters = functionArgumentTypes.map { argument -> argument.extractClass() },
+            parameters = functionArgumentTypes.map { argument -> argument.extractClass() }.toTypedArray(),
             returnType = functionResultType?.extractClass() ?: KOTLIN_UNIT_CLASS_NAME
     )
 

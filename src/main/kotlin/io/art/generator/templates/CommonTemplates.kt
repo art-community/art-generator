@@ -18,15 +18,8 @@
 
 package io.art.generator.templates
 
-import com.squareup.javapoet.ClassName
-import com.squareup.kotlinpoet.ClassName.Companion.bestGuess
-import io.art.core.combiner.SectionCombiner
-import io.art.core.combiner.SectionCombiner.*
-import io.art.core.constants.StringConstants.EMPTY_STRING
-import io.art.core.extensions.StringExtensions.capitalize
 import io.art.core.extensions.StringExtensions.decapitalize
 import io.art.generator.constants.META_NAME
-import io.art.generator.extension.name
 
 fun metaModuleClassFullName(name: String): String = "$META_NAME.Meta$name"
 
@@ -44,29 +37,3 @@ fun metaFieldName(name: String): String = "${name}Field"
 fun metaParameterName(name: String): String = "${name}Parameter"
 
 fun metaMethodName(name: String): String = "${name}Method"
-
-
-fun javaMetaModuleClassName(packageName: String, name: String): ClassName =
-        ClassName.get(packageName, "Meta${capitalize(name)}")
-
-fun javaMetaPackageClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Package".name())
-
-fun javaMetaClassClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Class".name())
-
-fun javaMetaMethodClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Method")
-
-
-fun kotlinMetaModuleClassName(packageName: String, name: String) =
-        bestGuess(combine(packageName, "Meta${capitalize(name)}"))
-
-fun kotlinMetaPackageClassName(name: String) =
-        bestGuess("Meta${capitalize(name)}Package".name())
-
-fun kotlinMetaClassClassName(name: String) =
-        bestGuess("Meta${capitalize(name)}Class".name())
-
-fun kotlinMetaMethodClassName(name: String) =
-        bestGuess("Meta${capitalize(name)}Method")

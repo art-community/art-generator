@@ -18,18 +18,17 @@
 
 package io.art.generator.templates
 
-import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.TypeName
-import com.squareup.kotlinpoet.joinToCode
+import com.squareup.kotlinpoet.*
+import io.art.core.combiner.SectionCombiner
 import io.art.core.constants.CompilerSuppressingWarnings.*
 import io.art.core.constants.StringConstants.*
+import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.constants.CASTER_CLASS_NAME
 import io.art.generator.constants.KOTLIN_ANY_CLASS_NAME
 import io.art.generator.constants.KOTLIN_CASTER_CLASS_NAME
-import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.extension.extractClass
 import io.art.generator.extension.hasVariable
+import io.art.generator.extension.name
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaParameter
 import io.art.generator.model.KotlinMetaProperty
@@ -37,6 +36,19 @@ import io.art.generator.model.KotlinMetaType
 import io.art.generator.model.KotlinMetaTypeKind.*
 import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.synthetic.isVisibleOutside
+
+
+fun kotlinMetaModuleClassName(packageName: String, name: String) =
+        ClassName.bestGuess(SectionCombiner.combine(packageName, "Meta${capitalize(name)}"))
+
+fun kotlinMetaPackageClassName(name: String) =
+        ClassName.bestGuess("Meta${capitalize(name)}Package".name())
+
+fun kotlinMetaClassClassName(name: String) =
+        ClassName.bestGuess("Meta${capitalize(name)}Class".name())
+
+fun kotlinMetaMethodClassName(name: String) =
+        ClassName.bestGuess("Meta${capitalize(name)}Method")
 
 fun kotlinSuppressAnnotation() = AnnotationSpec.builder(Suppress::class)
         .addMember("value", "{\$S,\$S,\$S}", ALL, UNCHECKED, UNUSED)
@@ -100,58 +112,58 @@ fun kotlinReturnInvokeConstructorStatement(type: KotlinMetaType, parameters: Map
 
 fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty): CodeBlock = "register(new MetaField<>(\$S,"
         .asCode(name)
-        .join(kotlinMetaTypeStatement(property.type))
+        .join(metaTypeStatement(property.type))
         .join("))")
 
 fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: KotlinMetaParameter): CodeBlock = "register(new MetaParameter<>($index, \$S,"
         .asCode(name)
-        .join(kotlinMetaTypeStatement(parameter.type))
+        .join(metaTypeStatement(parameter.type))
         .join("))")
 
 fun kotlinMetaMethodSuperStatement(name: String, type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = "super(\$S,"
         .asCode(name)
-        .join(kotlinMetaTypeStatement(type))
+        .join(metaTypeStatement(type))
         .joinByComma(asPublicFlag(visibility))
         .join(");")
 
 fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = "super("
-        .join(kotlinMetaTypeStatement(type))
+        .join(metaTypeStatement(type))
         .joinByComma(asPublicFlag(visibility))
         .join(");")
 
 fun kotlinMetaClassSuperStatement(metaClass: KotlinMetaClass): CodeBlock = "super("
-        .join(kotlinMetaTypeStatement(metaClass.type))
+        .join(metaTypeStatement(metaClass.type))
         .join(");")
 
 
-private fun kotlinMetaVariableBlock(type: KotlinMetaType) = "metaVariable(\$S".asCode(type.typeName).join(")")
+private fun metaVariableBlock(type: KotlinMetaType) = "metaVariable(\$S".asCode(type.typeName).join(")")
 
-private fun kotlinMetaEnumBlock(className: TypeName) = "metaEnum(\$T.class, \$T::valueOf)"
+private fun metaEnumBlock(className: TypeName) = "metaEnum(\$T.class, \$T::valueOf)"
         .asCode(className, className)
 
-private fun kotlinMetaTypeBlock(className: TypeName, vararg parameters: KotlinMetaType): CodeBlock = "metaType(\$T.class"
+private fun metaTypeBlock(className: TypeName, vararg parameters: KotlinMetaType): CodeBlock = "metaType(\$T.class"
         .asCode(className)
         .let { block ->
             if (parameters.isEmpty()) return@let block
-            block.joinByComma(*parameters.map(::kotlinMetaTypeStatement).toTypedArray())
+            block.joinByComma(*parameters.map(::metaTypeStatement).toTypedArray())
         }
         .join(")")
 
-private fun kotlinMetaArrayBlock(type: KotlinMetaType, className: TypeName): CodeBlock = "metaArray(\$T.class, \$T[]::new, "
+private fun metaArrayBlock(type: KotlinMetaType, className: TypeName): CodeBlock = "metaArray(\$T.class, \$T[]::new, "
         .asCode(className, className)
-        .join(kotlinMetaTypeStatement(type.arrayComponentType!!))
+        .join(metaTypeStatement(type.arrayComponentType!!))
         .join(")")
 
-private fun kotlinMetaTypeStatement(type: KotlinMetaType): CodeBlock {
+private fun metaTypeStatement(type: KotlinMetaType): CodeBlock {
     val poetClass = type.extractClass()
     return when (type.kind) {
-        ARRAY_KIND -> kotlinMetaArrayBlock(type, poetClass)
-        CLASS_KIND -> kotlinMetaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
-        ENUM_KIND -> kotlinMetaEnumBlock(poetClass)
-        VARIABLE_KIND -> kotlinMetaVariableBlock(type)
-        WILDCARD_KIND -> kotlinMetaTypeBlock(KOTLIN_ANY_CLASS_NAME)
-        FUNCTION_KIND -> kotlinMetaTypeBlock(KOTLIN_ANY_CLASS_NAME)
-        UNKNOWN_KIND -> kotlinMetaTypeBlock(KOTLIN_ANY_CLASS_NAME)
+        ARRAY_KIND -> metaArrayBlock(type, poetClass)
+        CLASS_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
+        ENUM_KIND -> metaEnumBlock(poetClass)
+        VARIABLE_KIND -> metaVariableBlock(type)
+        WILDCARD_KIND -> metaTypeBlock(KOTLIN_ANY_CLASS_NAME)
+        FUNCTION_KIND -> metaTypeBlock(KOTLIN_ANY_CLASS_NAME)
+        UNKNOWN_KIND -> metaTypeBlock(KOTLIN_ANY_CLASS_NAME)
     }
 }
 
