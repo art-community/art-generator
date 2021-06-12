@@ -166,7 +166,6 @@ private class KotlinAnalyzingService {
             }.apply {
                 if (arguments.isNotEmpty()) return@apply
                 val newArguments = arguments.map { projection -> projection.asMetaType() }
-                typeParameters.clear()
                 typeParameters.addAll(newArguments)
             }
         }
@@ -188,7 +187,6 @@ private class KotlinAnalyzingService {
                             .toMutableList()
                     OUT_VARIANCE -> mutableListOf()
                 }
-                typeVariableBounds.clear()
                 typeVariableBounds.addAll(newBounds)
             }
         }

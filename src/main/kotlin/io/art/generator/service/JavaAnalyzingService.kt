@@ -108,11 +108,11 @@ private class JavaAnalyzingService {
                             ?: EMPTY_STRING
             )
         }
-        type.typeParameters.clear()
-        typeArguments
+        if (type.typeParameters.isNotEmpty()) return type
+        val newArguments = typeArguments
                 .asSequence()
                 .map { argument -> argument.asMetaType() }
-                .forEach(type.typeParameters::add)
+        type.typeParameters.addAll(newArguments)
         return type
     }
 
@@ -124,8 +124,8 @@ private class JavaAnalyzingService {
                     typeName = tsym.qualifiedName.toString()
             )
         }
-        type.typeVariableBounds.clear()
-        upperBound
+        if (type.typeVariableBounds.isNotEmpty()) return type
+        val newBounds = upperBound
                 .let { bound ->
                     when (bound) {
                         is IntersectionType -> bound.bounds
@@ -134,7 +134,7 @@ private class JavaAnalyzingService {
                 }
                 .asSequence()
                 .map { argument -> argument.asMetaType() }
-                .forEach(type.typeVariableBounds::add)
+        type.typeVariableBounds.addAll(newBounds)
         return type
     }
 
