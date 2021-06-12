@@ -78,8 +78,8 @@ data class JavaMetaType(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
         other as JavaMetaType
-        if (javaOriginalType != other.javaOriginalType) return false
-        if (kotlinOriginalType != other.kotlinOriginalType) return false
+        javaOriginalType?.let { type -> if (type != other.javaOriginalType) return false }
+        kotlinOriginalType?.let { type -> if (type != other.kotlinOriginalType) return false }
         return true
     }
 
