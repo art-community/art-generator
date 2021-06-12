@@ -136,7 +136,7 @@ private fun metaTypeBlock(className: TypeName, vararg parameters: KotlinMetaType
         }
         .join(")")
 
-private fun metaArrayBlock(type: KotlinMetaType, className: TypeName): CodeBlock = "metaArray(%T::class.java, {size: Int -> arrayOfNulls<T>(size)}}, "
+private fun metaArrayBlock(type: KotlinMetaType, className: TypeName): CodeBlock = "metaArray(%T::class.java, {size: Int -> arrayOfNulls<%T>(size)}, "
         .asCode(className, className)
         .join(metaTypeStatement(type.arrayComponentType!!))
         .join(")")
