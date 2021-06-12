@@ -217,9 +217,9 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             static -> javaInvokeStaticStatement(name, type, parameters)
             else -> javaInvokeInstanceStatement(name, parameters)
         }
-        when (method.returnType.javaOriginalType?.kind) {
-            VOID -> addCode(invoke).addCode(javaReturnNullStatement())
-            else -> addCode(javaReturnStatement(invoke))
+        when (method.returnType.typeName == Void.TYPE.typeName) {
+            true -> addCode(invoke).addCode(javaReturnNullStatement())
+            false -> addCode(javaReturnStatement(invoke))
         }
         addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
         addMethod(build())
@@ -230,9 +230,9 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
                 static -> javaInvokeWithoutArgumentsStaticStatement(name, type)
                 else -> javaInvokeWithoutArgumentsInstanceStatement(name)
             }
-            when (method.returnType.javaOriginalType?.kind) {
-                VOID -> addCode(invoke).addCode(javaReturnNullStatement())
-                else -> addCode(javaReturnStatement(invoke))
+            when (method.returnType.typeName == Void.TYPE.typeName) {
+                true -> addCode(invoke).addCode(javaReturnNullStatement())
+                false -> addCode(javaReturnStatement(invoke))
             }
             addMethod(build())
         }
@@ -242,9 +242,9 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
                 static -> javaInvokeOneArgumentStaticStatement(name, type, parameters.values.first())
                 else -> javaInvokeOneArgumentInstanceStatement(name, parameters.values.first())
             }
-            when (method.returnType.javaOriginalType?.kind) {
-                VOID -> addCode(invoke).addCode(javaReturnNullStatement())
-                else -> addCode(javaReturnStatement(invoke))
+            when (method.returnType.typeName == Void.TYPE.typeName) {
+                true -> addCode(invoke).addCode(javaReturnNullStatement())
+                false -> addCode(javaReturnStatement(invoke))
             }
             addMethod(build())
         }

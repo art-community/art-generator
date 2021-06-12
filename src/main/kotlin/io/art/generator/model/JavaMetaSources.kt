@@ -46,9 +46,9 @@ val JAVA_OBJECT_META_TYPE: JavaMetaType = JavaMetaType(
 val JAVA_VOID_META_TYPE: JavaMetaType = JavaMetaType(
         typeName = Void.TYPE.typeName,
         kind = JavaMetaTypeKind.PRIMITIVE_KIND,
-        classFullName = Void::class.java.name,
-        className = Void::class.java.simpleName,
-        classPackageName = Void::class.java.packageName
+        classFullName = Void.TYPE.name,
+        className = Void.TYPE.simpleName,
+        classPackageName = Void.TYPE.packageName
 )
 
 data class JavaMetaType(

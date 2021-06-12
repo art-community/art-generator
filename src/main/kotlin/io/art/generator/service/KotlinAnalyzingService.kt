@@ -326,7 +326,7 @@ private class KotlinAnalyzingService {
 
     private fun FunctionDescriptor.asMetaMethod(constructor: Boolean) = JavaMetaMethod(
             name = name.toString(),
-            returnType = returnType?.takeIf(::isUnit)
+            returnType = returnType?.takeIf(::isUnitOrNullableUnit)
                     ?.let { JAVA_VOID_META_TYPE }
                     ?: returnType?.asMetaType()
                     ?: JAVA_VOID_META_TYPE,
