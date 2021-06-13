@@ -24,9 +24,6 @@ import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
 import io.art.generator.service.SourceWatchingService.watchSources
-import io.art.generator.service.initialize
-import io.art.launcher.Activator.activator
-import io.art.logging.module.LoggingActivator.logging
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -42,10 +39,7 @@ class JavaGeneratorTest {
     private val generatedClassName = "meta.MetaExample"
 
     @BeforeAll
-    fun setup() {
-        activator().mainModuleId(JavaGeneratorTest::class.simpleName).module(logging()).launch()
-        initialize()
-    }
+    fun setup() = setupTest()
 
     @BeforeEach
     fun prepare() {
@@ -54,7 +48,7 @@ class JavaGeneratorTest {
 
     @AfterEach
     fun cleanup() {
-        generatedFile.toFile().delete()
+        //generatedFile.toFile().delete()
     }
 
     @Test

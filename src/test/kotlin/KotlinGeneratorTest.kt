@@ -18,7 +18,7 @@
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
 import io.art.generator.configuration.configuration
-import io.art.generator.constants.GeneratorLanguages.JAVA
+import io.art.generator.constants.GeneratorLanguages.KOTLIN
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.KotlinCompilerConfiguration
@@ -37,15 +37,12 @@ import java.nio.file.Path
 
 @TestInstance(PER_CLASS)
 class KotlinGeneratorTest {
-    private val root: Path by lazy { configuration.sources[JAVA]!!.first() }
+    private val root: Path by lazy { configuration.sources[KOTLIN]!!.first() }
     private val generatedFile: Path by lazy { root.resolve("meta").resolve("MetaExample.kt") }
     private val generatedClassName = "meta.MetaExample"
 
     @BeforeAll
-    fun setup() {
-        activator().mainModuleId(KotlinGeneratorTest::class.simpleName).module(logging()).launch()
-        initialize()
-    }
+    fun setup() = setupTest()
 
     @BeforeEach
     fun prepare() {
@@ -54,7 +51,7 @@ class KotlinGeneratorTest {
 
     @AfterEach
     fun cleanup() {
-        generatedFile.toFile().delete()
+        //generatedFile.toFile().delete()
     }
 
     @Test
