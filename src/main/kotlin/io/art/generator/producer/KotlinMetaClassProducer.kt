@@ -25,6 +25,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
 import com.squareup.kotlinpoet.jvm.throws
 import io.art.core.constants.StringConstants.EMPTY_STRING
+import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.constants.*
 import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
@@ -32,6 +33,7 @@ import io.art.generator.extension.parentMethods
 import io.art.generator.extension.parentProperties
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaMethod
+import io.art.generator.model.KotlinMetaProperty
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.templates.*
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isUnit
@@ -86,6 +88,12 @@ private fun TypeSpec.Builder.generateProperties(metaClass: KotlinMetaClass) {
                 .addCode(kotlinReturnStatement(fieldName))
                 .build()
                 .let(::addFunction)
+        if (field.value.hasGetter) {
+            generateGetter(field.value, metaClass)
+        }
+        if (field.value.hasSetter) {
+            generateSetter(field.value, metaClass)
+        }
     }
 }
 
@@ -178,6 +186,99 @@ private fun TypeSpec.Builder.generateMethod(method: KotlinMetaMethod, index: Int
                     .build())
             .apply { generateMethodInvocations(ownerClass, method.name, method) }
             .apply { generateParameters(method) }
+            .build()
+            .apply(::addType)
+    PropertySpec.builder(methodName, methodClassName)
+            .addModifiers(PRIVATE, FINAL)
+            .initializer(kotlinRegisterNewStatement(methodClassName))
+            .build()
+            .apply(::addProperty)
+    FunSpec.builder(methodName)
+            .returns(methodClassName)
+            .addCode(kotlinReturnStatement(methodName))
+            .build()
+            .let(::addFunction)
+}
+
+private fun TypeSpec.Builder.generateGetter(property: KotlinMetaProperty, ownerClass: KotlinMetaClass) {
+    val name = GET_NAME + capitalize(property.name)
+    val methodName = metaMethodName(name)
+    val methodClassName = kotlinMetaMethodClassName(name)
+    val returnType = property.type
+    val returnTypeName = returnType.asPoetType()
+    val parent = KOTLIN_INSTANCE_META_METHOD_CLASS_NAME.parameterizedBy(ownerClass.type.asPoetType(), returnTypeName)
+    classBuilder(methodClassName)
+            .superclass(parent)
+            .addFunction(constructorBuilder()
+                    .addModifiers(INTERNAL)
+                    .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType, property.visibility))
+                    .build())
+            .apply {
+                FunSpec.builder(INVOKE_NAME)
+                        .addModifiers(OVERRIDE)
+                        .throws(THROWABLE)
+                        .returns(ANY.copy(nullable = true))
+                        .addParameter(INSTANCE_NAME, ownerClass.type.asPoetType())
+                        .addCode(kotlinReturnGetStatement(INSTANCE_NAME, property))
+                        .build()
+                        .apply(::addFunction)
+                FunSpec.builder(INVOKE_NAME)
+                        .addModifiers(OVERRIDE)
+                        .throws(THROWABLE)
+                        .returns(ANY.copy(nullable = true))
+                        .addParameter(INSTANCE_NAME, ownerClass.type.asPoetType())
+                        .addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
+                        .addCode(kotlinReturnGetStatement(INSTANCE_NAME, property))
+                        .build()
+                        .apply(::addFunction)
+            }
+            .build()
+            .apply(::addType)
+    PropertySpec.builder(methodName, methodClassName)
+            .addModifiers(PRIVATE, FINAL)
+            .initializer(kotlinRegisterNewStatement(methodClassName))
+            .build()
+            .apply(::addProperty)
+    FunSpec.builder(methodName)
+            .returns(methodClassName)
+            .addCode(kotlinReturnStatement(methodName))
+            .build()
+            .let(::addFunction)
+}
+
+private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerClass: KotlinMetaClass) {
+    val name = SET_NAME + capitalize(property.name)
+    val methodName = metaMethodName(name)
+    val methodClassName = kotlinMetaMethodClassName(name)
+    val returnType = property.type
+    val returnTypeName = returnType.asPoetType()
+    val parent = KOTLIN_INSTANCE_META_METHOD_CLASS_NAME.parameterizedBy(ownerClass.type.asPoetType(), returnTypeName)
+    classBuilder(methodClassName)
+            .superclass(parent)
+            .addFunction(constructorBuilder()
+                    .addModifiers(INTERNAL)
+                    .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType, property.visibility))
+                    .build())
+            .apply {
+                FunSpec.builder(INVOKE_NAME)
+                        .addModifiers(OVERRIDE)
+                        .throws(THROWABLE)
+                        .returns(ANY.copy(nullable = true))
+                        .addParameter(INSTANCE_NAME, ownerClass.type.asPoetType())
+                        .addParameter(ARGUMENT_NAME, ANY)
+                        .addCode(kotlinSetStatementBySingle(INSTANCE_NAME, property))
+                        .build()
+                        .apply(::addFunction)
+                FunSpec.builder(INVOKE_NAME)
+                        .addModifiers(OVERRIDE)
+                        .throws(THROWABLE)
+                        .returns(ANY.copy(nullable = true))
+                        .addParameter(INSTANCE_NAME, ownerClass.type.asPoetType())
+                        .addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
+                        .addCode(kotlinSetStatementByArray(INSTANCE_NAME, property))
+                        .build()
+                        .apply(::addFunction)
+            }
             .build()
             .apply(::addType)
     PropertySpec.builder(methodName, methodClassName)

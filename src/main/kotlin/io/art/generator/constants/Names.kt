@@ -42,3 +42,6 @@ val META_METHODS = setOf(
 
 const val CAST_NAME = "cast"
 const val SET_OF_NAME = "setOf"
+
+const val GET_NAME = "get"
+const val SET_NAME = "set"

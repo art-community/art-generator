@@ -23,6 +23,7 @@ import io.art.core.combiner.SectionCombiner
 import io.art.core.constants.CompilerSuppressingWarnings.WARNINGS
 import io.art.core.constants.StringConstants.*
 import io.art.core.extensions.StringExtensions.capitalize
+import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.extension.asPoetType
 import io.art.generator.extension.extractClass
 import io.art.generator.extension.name
@@ -123,10 +124,23 @@ fun kotlinMetaMethodSuperStatement(name: String, type: KotlinMetaType?, visibili
         .join(type?.let(::metaTypeStatement) ?: "%T".asCode(UNIT))
         .joinByComma(asPublicFlag(visibility))
 
-fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = metaTypeStatement(type).joinByComma(asPublicFlag(visibility))
+fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = metaTypeStatement(type)
+        .joinByComma(asPublicFlag(visibility))
 
 fun kotlinMetaClassSuperStatement(metaClass: KotlinMetaClass): CodeBlock = metaTypeStatement(metaClass.type)
 
+
+fun kotlinSetStatementBySingle(owner: String, property: KotlinMetaProperty) = "%L.%L = "
+        .asCode(owner, property.name)
+        .join("argument as %T".asCode(property.type.asPoetType()))
+        .join("\n return null")
+
+fun kotlinSetStatementByArray(owner: String, property: KotlinMetaProperty) = "%L.%L = "
+        .asCode(owner, property.name)
+        .join("arguments[0] as %T".asCode(property.type.asPoetType()))
+        .join("\n return null")
+
+fun kotlinReturnGetStatement(owner: String, property: KotlinMetaProperty) = "return %L.%L".asCode(owner, property.name)
 
 private fun metaEnumBlock(type: KotlinMetaType) = "metaEnum(%T::class.java, %T::valueOf)"
         .asCode(type.extractClass(), type.extractClass())
@@ -159,7 +173,7 @@ private fun metaTypeStatement(type: KotlinMetaType): CodeBlock {
         ENUM_KIND -> metaEnumBlock(type)
         WILDCARD_KIND -> metaTypeBlock(ANY)
         FUNCTION_KIND -> metaTypeBlock(ANY)
-        UNKNOWN_KIND -> metaTypeBlock(ANY)
+        UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $type")
     }
 }
 

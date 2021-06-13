@@ -58,7 +58,6 @@ fun KotlinMetaType.asPoetType(): TypeName {
 
         UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
     }
-    println(typeVariance)
     return when (typeVariance) {
         IN -> consumerOf(rawType)
         OUT -> producerOf(rawType)
