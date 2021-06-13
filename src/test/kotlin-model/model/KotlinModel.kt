@@ -50,11 +50,11 @@ open class KotlinModel(
         val iсp49: List<List<Array<String>>>,
         val iсp50: List<List<Array<String>>>,
         val iсp51: List<List<Array<String>>>,
-        val iсp52: InnerModel<String>,
-        val iсp54: InnerModel<out String>,
-        val iсp55: InnerModel<in String>,
-        val iсp56: List<InnerModel<String>>,
-        val iсp60: KotlinModel,
+        val iсp52: InnerModel,
+        val iсp54: InnerModel,
+        val iсp55: InnerModel,
+        val iсp56: List<InnerModel>,
+        val iсp60: KotlinModel?,
         val iсp61: Map<String, String>,
         val iсp62: Map<*, String>,
         val iсp63: Map<String, *>,
@@ -101,10 +101,10 @@ open class KotlinModel(
     var mp49: List<List<Array<String>>>? = null
     var mp50: List<List<Array<String>>>? = null
     var mp51: List<List<Array<String>>>? = null
-    var mp52: InnerModel<String>? = null
-    var mp54: InnerModel<out String>? = null
-    var mp55: InnerModel<in String>? = null
-    var mp56: List<InnerModel<String>>? = null
+    var mp52: InnerModel? = null
+    var mp54: InnerModel? = null
+    var mp55: InnerModel? = null
+    var mp56: List<InnerModel>? = null
     var mp60: KotlinModel? = null
     var mp61: Map<String, String>? = null
     var mp62: Map<*, String>? = null
@@ -146,10 +146,10 @@ open class KotlinModel(
     val ip49: List<List<Array<String>>>? = null
     val ip50: List<List<Array<String>>>? = null
     val ip51: List<List<Array<String>>>? = null
-    val ip52: InnerModel<String>? = null
-    val ip54: InnerModel<out String>? = null
-    val ip55: InnerModel<in String>? = null
-    val ip56: List<InnerModel<String>>? = null
+    val ip52: InnerModel? = null
+    val ip54: InnerModel? = null
+    val ip55: InnerModel? = null
+    val ip56: List<InnerModel>? = null
     val ip61: Map<String, String>? = null
     val ip62: Map<*, String>? = null
     val ip63: Map<String, *>? = null
@@ -189,10 +189,10 @@ open class KotlinModel(
     lateinit var lp49: List<List<Array<String>>>
     lateinit var lp50: List<List<Array<String>>>
     lateinit var lp51: List<List<Array<String>>>
-    lateinit var lp52: InnerModel<String>
-    lateinit var lp54: InnerModel<out String>
-    lateinit var lp55: InnerModel<in String>
-    lateinit var lp56: List<InnerModel<String>>
+    lateinit var lp52: InnerModel
+    lateinit var lp54: InnerModel
+    lateinit var lp55: InnerModel
+    lateinit var lp56: List<InnerModel>
     lateinit var lp60: KotlinModel
     lateinit var lp61: Map<String, String>
     lateinit var lp62: Map<*, String>
@@ -218,18 +218,17 @@ open class KotlinModel(
         val f = Runnable { body() }
     }
 
-    sealed class InnerModel<T> {
+    sealed class InnerModel {
         var f1 = false
         var f2: String? = null
         var f3 = 0
-        var f4: T? = null
 
         fun simpleMethod(p1: Int): Int {
             return p1
         }
 
         companion object {
-            fun <M : String?> simpleMethod(p1: Int, p2: M): Int {
+            fun simpleMethod(p1: Int): Int {
                 return p1
             }
         }
@@ -250,7 +249,7 @@ open class KotlinModel(
             return p1
         }
 
-        fun <T> simpleMethod(list: List<T>) {
+        fun simpleMethod(list: List<*>) {
 
         }
 
@@ -268,7 +267,7 @@ open class KotlinModel(
             return p1
         }
 
-        fun <T> simpleMethod(list: List<T>?) {
+        fun simpleMethod(list: List<*>?) {
 
         }
 
@@ -312,10 +311,10 @@ data class KotlinOtherModel(
         val iсp49: List<List<Array<String>>>,
         val iсp50: List<List<Array<String>>>,
         val iсp51: List<List<Array<String>>>,
-        val iсp52: KotlinModel.InnerModel<String>,
-        val iсp54: KotlinModel.InnerModel<out String>,
-        val iсp55: KotlinModel.InnerModel<in String>,
-        val iсp56: List<KotlinModel.InnerModel<String>>,
+        val iсp52: KotlinModel.InnerModel,
+        val iсp54: KotlinModel.InnerModel,
+        val iсp55: KotlinModel.InnerModel,
+        val iсp56: List<KotlinModel.InnerModel>,
         val iсp60: KotlinModel,
         val iсp61: Map<String, String>,
         val iсp62: Map<*, String>,
@@ -363,10 +362,10 @@ data class KotlinOtherModel(
     var mp49: List<List<Array<String>>>? = null
     var mp50: List<List<Array<String>>>? = null
     var mp51: List<List<Array<String>>>? = null
-    var mp52: KotlinModel.InnerModel<String>? = null
-    var mp54: KotlinModel.InnerModel<out String>? = null
-    var mp55: KotlinModel.InnerModel<in String>? = null
-    var mp56: List<KotlinModel.InnerModel<String>>? = null
+    var mp52: KotlinModel.InnerModel? = null
+    var mp54: KotlinModel.InnerModel? = null
+    var mp55: KotlinModel.InnerModel? = null
+    var mp56: List<KotlinModel.InnerModel>? = null
     var mp60: KotlinModel? = null
     var mp61: Map<String, String>? = null
     var mp62: Map<*, String>? = null
@@ -408,10 +407,10 @@ data class KotlinOtherModel(
     val ip49: List<List<Array<String>>>? = null
     val ip50: List<List<Array<String>>>? = null
     val ip51: List<List<Array<String>>>? = null
-    val ip52: KotlinModel.InnerModel<String>? = null
-    val ip54: KotlinModel.InnerModel<out String>? = null
-    val ip55: KotlinModel.InnerModel<in String>? = null
-    val ip56: List<KotlinModel.InnerModel<String>>? = null
+    val ip52: KotlinModel.InnerModel? = null
+    val ip54: KotlinModel.InnerModel? = null
+    val ip55: KotlinModel.InnerModel? = null
+    val ip56: List<KotlinModel.InnerModel>? = null
     val ip61: Map<String, String>? = null
     val ip62: Map<*, String>? = null
     val ip63: Map<String, *>? = null
@@ -451,10 +450,10 @@ data class KotlinOtherModel(
     lateinit var lp49: List<List<Array<String>>>
     lateinit var lp50: List<List<Array<String>>>
     lateinit var lp51: List<List<Array<String>>>
-    lateinit var lp52: KotlinModel.InnerModel<String>
-    lateinit var lp54: KotlinModel.InnerModel<out String>
-    lateinit var lp55: KotlinModel.InnerModel<in String>
-    lateinit var lp56: List<KotlinModel.InnerModel<String>>
+    lateinit var lp52: KotlinModel.InnerModel
+    lateinit var lp54: KotlinModel.InnerModel
+    lateinit var lp55: KotlinModel.InnerModel
+    lateinit var lp56: List<KotlinModel.InnerModel>
     lateinit var lp60: KotlinModel
     lateinit var lp61: Map<String, String>
     lateinit var lp62: Map<*, String>
@@ -486,22 +485,19 @@ data class KotlinOtherModel(
         val f = Runnable { body() }
     }
 
-    sealed class InnerModel<T> {
+    sealed class InnerModel {
         var f1 = false
         var f2: String? = null
         var f3 = 0
-        var f4: T? = null
         var f5: KotlinModel? = null
         var f6: KotlinModel? = null
 
         fun simpleMethod(p1: Int): Int = p1
 
         companion object {
-            fun <M : String?> simpleMethod(p1: Int, p2: M): Int = p1
+            fun simpleMethod(p1: Int): Int = p1
         }
     }
-
-    inline fun <reified T> membersOf() = T::class.members
 
     enum class Enum {
         FIRST
@@ -516,7 +512,7 @@ data class KotlinOtherModel(
             return p1
         }
 
-        fun <T> simpleMethod(list: List<T>) {
+        fun simpleMethod(list: List<*>) {
 
         }
 
@@ -534,7 +530,7 @@ data class KotlinOtherModel(
             return p1
         }
 
-        fun <T> simpleMethod(list: List<T>?) {
+        fun simpleMethod(list: List<String>?) {
 
         }
 
@@ -557,7 +553,7 @@ object KotlinObject {
         return p1
     }
 
-    inline fun <T> simpleMethod(list: List<T>?, lambda: (p: String) -> String) {
+    inline fun simpleMethod(list: List<String>?, lambda: (p: String) -> String) {
     }
 
     private tailrec fun factorial(n: Long, accum: Long = 1): Long {
@@ -578,7 +574,7 @@ fun simpleMethod(p1: Alias): Int {
 
 inline fun simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1
 
-inline fun <T> simpleMethod(list: List<T>?, lambda: (p: String) -> String) {
+inline fun simpleMethod(list: List<String>?, lambda: (p: String) -> String) {
 
 }
 
