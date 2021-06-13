@@ -19,6 +19,7 @@
 package io.art.generator.constants
 
 import io.art.generator.model.JavaMetaClass
+import io.art.generator.model.KotlinMetaClass
 import io.art.logging.logger.Logger
 import io.art.logging.module.LoggingModule
 import java.nio.file.Path
@@ -28,6 +29,8 @@ val COMMON_LOGGER: Logger = LoggingModule.logger(GENERATOR_NAME)
 fun Collection<Path>.relativeNames(root: Path) = map { path -> path.toFile().relativeTo(root.toFile()) }.toList()
 
 fun Sequence<JavaMetaClass>.javaClassNames() = map { source -> source.type.classFullName!! }.toList()
+
+fun Sequence<KotlinMetaClass>.kotlinClassNames() = map { source -> source.type.classFullName!! }.toList()
 
 val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)
 val KOTLIN_LOGGER: Logger = LoggingModule.logger(KOTLIN)

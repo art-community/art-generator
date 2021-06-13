@@ -28,6 +28,7 @@ import io.art.generator.constants.SOURCES_NOT_FOUND
 import io.art.generator.detector.SourcesChanges
 import io.art.generator.detector.detectChanges
 import io.art.generator.service.JavaMetaGenerationService.generateJavaMetaClasses
+import io.art.generator.service.KotlinMetaGenerationService.generateKotlinMetaClasses
 import io.art.scheduler.manager.Scheduling.schedule
 import java.nio.file.Path
 
@@ -70,6 +71,6 @@ object SourceWatchingService {
             KOTLIN_LOGGER.info(SOURCES_NOT_FOUND(root))
             return
         }
-        generateJavaMetaClasses(path, sources.asSequence())
+        generateKotlinMetaClasses(path, sources.asSequence())
     }
 }

@@ -18,86 +18,41 @@
 
 package io.art.generator.extension
 
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ArrayTypeName
 import com.squareup.javapoet.ClassName.bestGuess
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeName.*
+import com.squareup.javapoet.WildcardTypeName
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.constants.OBJECT_CLASS_NAME
 import io.art.generator.exception.MetaGeneratorException
-import io.art.generator.model.*
+import io.art.generator.model.JavaMetaClass
+import io.art.generator.model.JavaMetaMethod
+import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.*
 import javax.lang.model.element.Modifier.*
 
-fun JavaMetaType.withoutVariables(): TypeName = when (kind) {
+fun JavaMetaType.asPoetType(): TypeName = when (kind) {
     PRIMITIVE_KIND -> asPrimitive()
 
-    ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.withoutVariables())
+    ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.asPoetType())
 
     ENUM_KIND -> bestGuess(classFullName)
 
     CLASS_KIND -> when {
         typeParameters.isEmpty() -> bestGuess(classFullName)
         else -> {
-            val parameters = typeParameters.map { parameter ->
-                when (parameter.kind) {
-                    VARIABLE_KIND -> subtypeOf(OBJECT_CLASS_NAME)
-                    else -> parameter.withoutVariables()
-                }
-            }
+            val parameters = typeParameters.map { parameter -> parameter.asPoetType() }
             val rawType = bestGuess(classFullName)
             ParameterizedTypeName.get(rawType, *parameters.toTypedArray())
         }
     }
 
-    VARIABLE_KIND -> OBJECT_CLASS_NAME
-
-    WILDCARD_KIND -> wildcardExtendsBound?.withoutVariables()?.let(WildcardTypeName::subtypeOf)
-            ?: wildcardSuperBound?.withoutVariables()?.let(WildcardTypeName::supertypeOf)
+    WILDCARD_KIND -> wildcardExtendsBound?.asPoetType()?.let(WildcardTypeName::subtypeOf)
+            ?: wildcardSuperBound?.asPoetType()?.let(WildcardTypeName::supertypeOf)
             ?: subtypeOf(OBJECT_CLASS_NAME)
-
-    UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
-}
-
-fun JavaMetaType.excludeVariables(exclusions: Set<String>): JavaMetaType = when (kind) {
-    PRIMITIVE_KIND, ENUM_KIND -> this
-
-    VARIABLE_KIND -> if (exclusions.contains(typeName)) JAVA_OBJECT_META_TYPE else this
-
-    ARRAY_KIND -> JavaMetaType(
-            javaOriginalType = javaOriginalType,
-            kotlinOriginalType = kotlinOriginalType,
-            typeName = typeName,
-            kind = kind,
-            arrayComponentType = arrayComponentType?.excludeVariables(exclusions))
-
-    CLASS_KIND -> when {
-        typeParameters.isEmpty() -> this
-        else -> {
-            val parameters = typeParameters
-                    .filter { parameter -> parameter.kind != VARIABLE_KIND || !exclusions.contains(parameter.typeName) }
-                    .map { parameter -> parameter.excludeVariables(exclusions) }
-            JavaMetaType(
-                    javaOriginalType = javaOriginalType,
-                    kotlinOriginalType = kotlinOriginalType,
-                    typeName = typeName,
-                    kind = kind,
-                    classFullName = classFullName,
-                    className = className,
-                    classPackageName = classPackageName,
-                    typeParameters = parameters.toMutableList()
-            )
-        }
-    }
-
-    WILDCARD_KIND -> JavaMetaType(
-            javaOriginalType = javaOriginalType,
-            kotlinOriginalType = kotlinOriginalType,
-            typeName = typeName,
-            kind = kind,
-            wildcardSuperBound = wildcardSuperBound?.excludeVariables(exclusions),
-            wildcardExtendsBound = wildcardExtendsBound?.excludeVariables(exclusions)
-    )
 
     UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
 }
@@ -108,8 +63,6 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())
 
     CLASS_KIND, ENUM_KIND -> bestGuess(classFullName)
-
-    VARIABLE_KIND -> OBJECT_CLASS_NAME
 
     WILDCARD_KIND -> wildcardExtendsBound?.extractClass() ?: OBJECT_CLASS_NAME
 
@@ -126,8 +79,6 @@ private fun JavaMetaType.asPrimitive() = when (typeName) {
     Char::class.java.typeName -> CHAR
     else -> VOID.box()
 }
-
-fun JavaMetaType.hasVariable(): Boolean = kind == VARIABLE_KIND || arrayComponentType?.hasVariable() ?: false
 
 fun JavaMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && modifiers.contains(PUBLIC)
 
@@ -150,9 +101,3 @@ fun JavaMetaClass.parentFields() = parent
                     || !(field.value.modifiers.contains(PRIVATE) && parent.type.classPackageName == type.classPackageName)
         }
         ?: emptyMap()
-
-fun JavaMetaParameter.excludeVariables(exclusions: Set<String>) = JavaMetaParameter(
-        name,
-        type.excludeVariables(exclusions),
-        modifiers
-)

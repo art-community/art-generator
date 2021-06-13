@@ -21,7 +21,6 @@
 package io.art.generator.model
 
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
-import org.jetbrains.kotlin.types.KotlinType
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeMirror
 
@@ -30,7 +29,6 @@ enum class JavaMetaTypeKind {
     ENUM_KIND,
     WILDCARD_KIND,
     PRIMITIVE_KIND,
-    VARIABLE_KIND,
     ARRAY_KIND,
     UNKNOWN_KIND
 }
@@ -54,8 +52,6 @@ val JAVA_VOID_META_TYPE: JavaMetaType = JavaMetaType(
 data class JavaMetaType(
         val javaOriginalType: TypeMirror? = null,
 
-        val kotlinOriginalType: KotlinType? = null,
-
         val typeName: String,
         val kind: JavaMetaTypeKind,
 
@@ -76,12 +72,11 @@ data class JavaMetaType(
         if (javaClass != other?.javaClass) return false
         other as JavaMetaType
         javaOriginalType?.let { type -> if (type != other.javaOriginalType) return false }
-        kotlinOriginalType?.let { type -> if (type != other.kotlinOriginalType) return false }
         if (typeName != other.typeName) return false
         return true
     }
 
-    override fun hashCode(): Int = javaOriginalType?.hashCode() ?: kotlinOriginalType?.hashCode() ?: typeName.hashCode()
+    override fun hashCode(): Int = javaOriginalType?.hashCode() ?: typeName.hashCode()
 }
 
 data class JavaMetaClass(
@@ -112,5 +107,4 @@ data class JavaMetaMethod(
         val returnType: JavaMetaType,
         val parameters: Map<String, JavaMetaParameter>,
         val modifiers: Set<Modifier>,
-        val typeParameters: List<JavaMetaType> = emptyList(),
 )

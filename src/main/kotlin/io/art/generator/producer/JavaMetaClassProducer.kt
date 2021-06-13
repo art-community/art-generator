@@ -24,19 +24,20 @@ import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.constants.*
-import io.art.generator.extension.*
+import io.art.generator.extension.asPoetType
+import io.art.generator.extension.couldBeGenerated
+import io.art.generator.extension.parentFields
+import io.art.generator.extension.parentMethods
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaType
-import io.art.generator.model.JavaMetaTypeKind.VARIABLE_KIND
 import io.art.generator.templates.*
 import javax.lang.model.element.Modifier.*
-import javax.lang.model.type.TypeKind.VOID
 
 fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
     val className = metaClassName(metaClass.type.className!!)
     val metaClassName = javaMetaClassClassName(metaClass.type.className)
-    val typeName = metaClass.type.withoutVariables()
+    val typeName = metaClass.type.asPoetType()
     val constructorStatement = javaMetaClassSuperStatement(metaClass)
     classBuilder(metaClassName)
             .addModifiers(PUBLIC, FINAL, STATIC)
@@ -73,7 +74,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
 private fun TypeSpec.Builder.generateProperties(metaClass: JavaMetaClass) {
     val fields = metaClass.parentFields() + metaClass.fields
     fields.entries.forEach { field ->
-        val fieldTypeName = field.value.type.withoutVariables()
+        val fieldTypeName = field.value.type.asPoetType()
         val fieldMetaType = ParameterizedTypeName.get(META_FIELD_CLASS_NAME, fieldTypeName.box())
         val fieldName = metaFieldName(field.key)
         FieldSpec.builder(fieldMetaType, fieldName)
@@ -129,7 +130,7 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
             .addModifiers(PUBLIC)
             .addException(THROWABLE_CLASS_NAME)
             .addAnnotation(OVERRIDE_CLASS_NAME)
-            .returns(type.withoutVariables())
+            .returns(type.asPoetType())
             .build()
     template.toBuilder()
             .addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
@@ -168,22 +169,18 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
     val methodName = metaMethodName(name)
     val methodClassName = javaMetaMethodClassName(name)
     val returnType = method.returnType
-    val returnTypeName = returnType.withoutVariables().box()
+    val returnTypeName = returnType.asPoetType().box()
     val static = method.modifiers.contains(STATIC)
     val parent = when {
         static -> ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnTypeName)
-        else -> ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, ownerType.withoutVariables(), returnTypeName)
+        else -> ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, ownerType.asPoetType(), returnTypeName)
     }
-    val variableExclusions = method.typeParameters
-            .filter { parameter -> parameter.kind == VARIABLE_KIND }
-            .map { parameter -> parameter.typeName }
-            .toSet()
     classBuilder(methodClassName)
             .addModifiers(PUBLIC, FINAL, STATIC)
             .superclass(parent)
             .addMethod(constructorBuilder()
                     .addModifiers(PRIVATE)
-                    .addCode(javaMetaMethodSuperStatement(method.name, returnType.excludeVariables(variableExclusions), method.modifiers))
+                    .addCode(javaMetaMethodSuperStatement(method.name, returnType, method.modifiers))
                     .build())
             .apply { generateMethodInvocations(ownerType, method.name, method) }
             .apply { generateParameters(method) }
@@ -210,7 +207,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             .addAnnotation(OVERRIDE_CLASS_NAME)
             .addException(THROWABLE_CLASS_NAME)
             .returns(OBJECT_CLASS_NAME)
-            .apply { if (!static) addParameter(type.withoutVariables(), INSTANCE_NAME) }
+            .apply { if (!static) addParameter(type.asPoetType(), INSTANCE_NAME) }
             .build()
     template.toBuilder().apply {
         val invoke = when {
@@ -252,17 +249,13 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
 }
 
 private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
-    val variableExclusions = method.typeParameters
-            .filter { parameter -> parameter.kind == VARIABLE_KIND }
-            .map { parameter -> parameter.typeName }
-            .toSet()
     method.parameters.entries.forEachIndexed { parameterIndex, parameter ->
-        val parameterTypeName = parameter.value.type.withoutVariables()
+        val parameterTypeName = parameter.value.type.asPoetType()
         val metaParameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameterTypeName.box())
         val parameterName = metaParameterName(parameter.key)
         FieldSpec.builder(metaParameterType, parameterName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(javaRegisterMetaParameterStatement(parameterIndex, parameter.key, parameter.value.excludeVariables(variableExclusions)))
+                .initializer(javaRegisterMetaParameterStatement(parameterIndex, parameter.key, parameter.value))
                 .build()
                 .apply(::addField)
         methodBuilder(parameterName)

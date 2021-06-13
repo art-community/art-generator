@@ -31,7 +31,6 @@ import io.art.generator.constants.CASTER_CLASS_NAME
 import io.art.generator.constants.OBJECT_CLASS_NAME
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.extension.extractClass
-import io.art.generator.extension.hasVariable
 import io.art.generator.extension.name
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaField
@@ -145,8 +144,6 @@ fun javaMetaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
 fun javaNamedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
 
 
-private fun metaVariableBlock(type: JavaMetaType) = "metaVariable(\$S".asCode(type.typeName).join(")")
-
 private fun metaEnumBlock(className: TypeName) = "metaEnum(\$T.class, \$T::valueOf)"
         .asCode(className, className)
 
@@ -170,7 +167,6 @@ private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
         ARRAY_KIND -> metaArrayBlock(type, poetClass)
         CLASS_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
         ENUM_KIND -> metaEnumBlock(poetClass)
-        VARIABLE_KIND -> metaVariableBlock(type)
         WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)
                 ?: type.wildcardSuperBound?.let(::metaTypeStatement)
                 ?: metaTypeBlock(OBJECT_CLASS_NAME)
@@ -194,19 +190,12 @@ private fun CodeBlock.joinByComma(vararg blocks: CodeBlock): CodeBlock = join(li
 
 private fun casted(parameter: JavaMetaParameter): CodeBlock {
     val parameterClass = parameter.type.extractClass()
-    if (!parameter.type.hasVariable()) {
-        return "(\$T)(argument)".asCode(parameterClass)
-    }
-    return "\$T.cast(argument)".asCode(CASTER_CLASS_NAME)
+    return "(\$T)(argument)".asCode(parameterClass)
 }
 
 private fun casted(parameters: Map<String, JavaMetaParameter>): CodeBlock = parameters.values
-        .mapIndexed { index, parameter ->
-            if (!parameter.type.hasVariable()) {
-                return@mapIndexed "(\$T)(arguments[$index])".asCode(parameter.type.extractClass())
-            }
-            return@mapIndexed "\$T.cast(arguments[$index])".asCode(CASTER_CLASS_NAME)
-        }
+        .indices
+        .map { index -> "\$T.cast(arguments[$index])".asCode(CASTER_CLASS_NAME) }
         .let { blocks -> join(blocks, COMMA) }
 
 private fun asPublicFlag(modifiers: Set<Modifier>): CodeBlock {

@@ -39,7 +39,6 @@ import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
 import io.art.generator.templates.metaModuleClassFullName
 import java.nio.file.Path
 import javax.lang.model.element.ElementKind.ENUM
-import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeMirror
 
 fun analyzeJavaSources(root: Path, sources: Sequence<Path>) = JavaAnalyzingService().analyzeJavaSources(root, sources)
@@ -56,6 +55,7 @@ private class JavaAnalyzingService {
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
                     .map { element -> (element as ClassSymbol) }
                     .filter { symbol -> symbol.className() != metaModuleClassFullName(configuration.moduleName) }
+                    .filter { symbol -> symbol.typeParameters.isEmpty() }
                     .map { symbol -> symbol.asMetaClass() }
                     .distinctBy { metaClass -> metaClass.type.typeName }
                     .toList()
@@ -65,8 +65,6 @@ private class JavaAnalyzingService {
 
     private fun TypeMirror.asMetaType(): JavaMetaType = putIfAbsent(cache, this) {
         when (this) {
-            is Type.TypeVar -> asMetaType()
-
             is Type.ArrayType -> asMetaType()
 
             is Type.WildcardType -> asMetaType()
@@ -116,28 +114,6 @@ private class JavaAnalyzingService {
         return type
     }
 
-    private fun Type.TypeVar.asMetaType(): JavaMetaType {
-        val type = putIfAbsent(cache, this) {
-            JavaMetaType(
-                    javaOriginalType = this,
-                    kind = VARIABLE_KIND,
-                    typeName = tsym.qualifiedName.toString()
-            )
-        }
-        if (type.typeVariableBounds.isNotEmpty()) return type
-        val newBounds = upperBound
-                .let { bound ->
-                    when (bound) {
-                        is IntersectionType -> bound.bounds
-                        else -> listOf(bound)
-                    }
-                }
-                .asSequence()
-                .map { argument -> argument.asMetaType() }
-        type.typeVariableBounds.addAll(newBounds)
-        return type
-    }
-
     private fun Type.ArrayType.asMetaType(): JavaMetaType = putIfAbsent(cache, this) {
         JavaMetaType(
                 javaOriginalType = this,
@@ -179,6 +155,7 @@ private class JavaAnalyzingService {
                     .filter { method -> !method.isLambdaMethod }
                     .filter { method -> !method.isDynamic }
                     .filter { method -> !asFlagSet(method.flags()).contains(SYNTHETIC) }
+                    .filter { method -> method.typeParameters.isEmpty() }
                     .map { method -> method.asMetaMethod() }
                     .toList(),
 
@@ -191,6 +168,7 @@ private class JavaAnalyzingService {
                     .filter { method -> !method.isLambdaMethod }
                     .filter { method -> !method.isDynamic }
                     .filter { method -> !asFlagSet(method.flags()).contains(SYNTHETIC) }
+                    .filter { method -> method.typeParameters.isEmpty() }
                     .map { method -> method.asMetaMethod() }
                     .toList(),
 
@@ -199,18 +177,23 @@ private class JavaAnalyzingService {
                     .asSequence()
                     .filterIsInstance<ClassSymbol>()
                     .filter { inner -> !asFlagSet(inner.flags()).contains(SYNTHETIC) }
+                    .filter { symbol -> symbol.typeParameters.isEmpty() }
                     .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
 
             parent = superclass
                     ?.let { superclass.tsym as? ClassSymbol }
                     ?.takeIf { superclass.tsym?.qualifiedName.toString() != Object::class.java.name }
+                    ?.takeIf { symbol -> symbol.typeParameters.isEmpty() }
                     ?.asMetaClass(),
 
             interfaces = interfaces
+                    .asSequence()
                     .map { interfaceType -> interfaceType.tsym }
                     .filterIsInstance<ClassSymbol>()
                     .filter { interfaceType -> !asFlagSet(interfaceType.flags()).contains(SYNTHETIC) }
+                    .filter { symbol -> symbol.typeParameters.isEmpty() }
                     .map { interfaceField -> interfaceField.asMetaClass() }
+                    .toList()
 
     )
 
@@ -219,7 +202,6 @@ private class JavaAnalyzingService {
             modifiers = modifiers,
             returnType = returnType.asMetaType(),
             parameters = parameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
-            typeParameters = typeParameters.map { typeParameter -> typeParameter.type.asMetaType() },
     )
 
     private fun VarSymbol.asMetaField() = JavaMetaField(

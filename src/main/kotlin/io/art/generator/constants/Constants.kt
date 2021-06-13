@@ -38,8 +38,7 @@ val META_METHOD_EXCLUSIONS = setOf(
         "equals",
         "canEqual",
         "hashCode",
-        "clone",
-        "membersOf"
+        "clone"
 )
 
 enum class GeneratorLanguages {
