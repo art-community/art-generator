@@ -43,7 +43,7 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass) {
     val className = metaClassName(metaClass.type.className!!)
     val metaClassName = kotlinMetaClassClassName(metaClass.type.className)
     val typeName = metaClass.type.asPoetType()
-    TypeSpec.classBuilder(metaClassName)
+    classBuilder(metaClassName)
             .superclass(KOTLIN_META_CLASS_CLASS_NAME.parameterizedBy(typeName))
             .addFunction(constructorBuilder()
                     .addModifiers(INTERNAL)
@@ -138,20 +138,20 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: KotlinMetaType
             .build()
     template.toBuilder()
             .addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
-            .addCode(kotlinReturnInvokeConstructorStatement(type, parameters))
+            .addCode(kotlinReturnInvokeConstructorStatementMultiple(type, parameters))
             .build()
             .apply(::addFunction)
     when (parameters.size) {
         0 -> {
             template.toBuilder()
-                    .addCode(kotlinReturnInvokeWithoutArgumentsConstructorStatement(type))
+                    .addCode(kotlinReturnInvokeConstructorStatement(type))
                     .build()
                     .apply(::addFunction)
         }
         1 -> {
             template.toBuilder()
                     .addParameter(ARGUMENT_NAME, ANY)
-                    .addCode(kotlinReturnInvokeOneArgumentConstructorStatement(type, parameters.values.first()))
+                    .addCode(kotlinReturnInvokeConstructorStatementSingle(type, parameters.values.first()))
                     .build()
                     .apply(::addFunction)
         }
@@ -304,12 +304,12 @@ private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaCla
             .build()
     template.toBuilder().apply {
         val invoke = when {
-            static -> kotlinInvokeStaticStatement(name, ownerClass.type, parameters)
-            else -> kotlinInvokeInstanceStatement(name, parameters)
+            static -> kotlinInvokeStaticStatementMultiple(name, ownerClass.type, parameters)
+            else -> kotlinInvokeInstanceStatementMultiple(name, parameters)
         }
         when {
-            isNull(method.returnType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
-            isUnit(method.returnType!!.originalType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
+            isNull(method.returnType) -> addLines(invoke, kotlinReturnNullStatement())
+            isUnit(method.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
             else -> addCode(kotlinReturnStatement(invoke))
         }
         addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
@@ -318,12 +318,12 @@ private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaCla
     when (parameters.size) {
         0 -> template.toBuilder().apply {
             val invoke = when {
-                static -> kotlinInvokeWithoutArgumentsStaticStatement(name, ownerClass.type)
-                else -> kotlinInvokeWithoutArgumentsInstanceStatement(name)
+                static -> kotlinInvokeStaticStatement(name, ownerClass.type)
+                else -> kotlinInvokeInstanceStatement(name)
             }
             when {
-                isNull(method.returnType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
-                isUnit(method.returnType!!.originalType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
+                isNull(method.returnType) -> addLines(invoke, kotlinReturnNullStatement())
+                isUnit(method.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
                 else -> addCode(kotlinReturnStatement(invoke))
             }
             addFunction(build())
@@ -331,12 +331,12 @@ private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaCla
         1 -> template.toBuilder().apply {
             addParameter(ARGUMENT_NAME, ANY)
             val invoke = when {
-                static -> kotlinInvokeOneArgumentStaticStatement(name, ownerClass.type, parameters.values.first())
-                else -> kotlinInvokeOneArgumentInstanceStatement(name, parameters.values.first())
+                static -> kotlinInvokeStaticStatementSingle(name, ownerClass.type, parameters.values.first())
+                else -> kotlinInvokeInstanceStatementSingle(name, parameters.values.first())
             }
             when {
-                isNull(method.returnType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
-                isUnit(method.returnType!!.originalType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
+                isNull(method.returnType) -> addLines(invoke, kotlinReturnNullStatement())
+                isUnit(method.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
                 else -> addCode(kotlinReturnStatement(invoke))
             }
             addFunction(build())

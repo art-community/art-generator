@@ -68,40 +68,41 @@ fun kotlinNamedSuperStatement(name: String): CodeBlock = "%S".asCode(name)
 fun kotlinReturnNullStatement() = "return null".asCode()
 
 
-fun kotlinInvokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
+fun kotlinInvokeInstanceStatement(method: String): CodeBlock {
     return "instance.$method()\n".asCode()
 }
 
-fun kotlinInvokeWithoutArgumentsStaticStatement(method: String, type: KotlinMetaType): CodeBlock {
+fun kotlinInvokeInstanceStatementSingle(method: String, parameter: KotlinMetaParameter): CodeBlock {
+    return "instance.$method(".join(casted(parameter)).join(")")
+}
+
+fun kotlinInvokeInstanceStatementMultiple(method: String, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
+    return "instance.$method(".join(casted(parameters)).join(")")
+}
+
+
+fun kotlinInvokeStaticStatement(method: String, type: KotlinMetaType): CodeBlock {
     return "%T.$method()\n".asCode(type.extractClass())
 }
 
-fun kotlinInvokeOneArgumentInstanceStatement(method: String, parameter: KotlinMetaParameter): CodeBlock {
-    return "instance.$method(".join(casted(parameter)).join(")\n")
+fun kotlinInvokeStaticStatementSingle(method: String, type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {
+    return "%T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(")")
 }
 
-fun kotlinInvokeOneArgumentStaticStatement(method: String, type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {
-    return "%T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(")\n")
-}
-
-fun kotlinInvokeInstanceStatement(method: String, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
-    return "instance.$method(".join(casted(parameters)).join(")\n")
-}
-
-fun kotlinInvokeStaticStatement(method: String, type: KotlinMetaType, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
-    return "%T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(")\n")
+fun kotlinInvokeStaticStatementMultiple(method: String, type: KotlinMetaType, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
+    return "%T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(")")
 }
 
 
-fun kotlinReturnInvokeWithoutArgumentsConstructorStatement(type: KotlinMetaType): CodeBlock {
+fun kotlinReturnInvokeConstructorStatement(type: KotlinMetaType): CodeBlock {
     return "return %T(".asCode(type.extractClass()).join(")")
 }
 
-fun kotlinReturnInvokeOneArgumentConstructorStatement(type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {
+fun kotlinReturnInvokeConstructorStatementSingle(type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {
     return "return %T(".asCode(type.extractClass()).join(casted(parameter)).join(")")
 }
 
-fun kotlinReturnInvokeConstructorStatement(type: KotlinMetaType, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
+fun kotlinReturnInvokeConstructorStatementMultiple(type: KotlinMetaType, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
     return "return %T(".asCode(type.extractClass()).join(casted(parameters)).join(")")
 }
 
@@ -133,14 +134,15 @@ fun kotlinMetaClassSuperStatement(metaClass: KotlinMetaClass): CodeBlock = metaT
 fun kotlinSetStatementBySingle(owner: String, property: KotlinMetaProperty) = "%L.%L = "
         .asCode(owner, property.name)
         .join("argument as %T".asCode(property.type.asPoetType()))
-        .join("\n return null")
+        .joinLine(kotlinReturnNullStatement())
 
 fun kotlinSetStatementByArray(owner: String, property: KotlinMetaProperty) = "%L.%L = "
         .asCode(owner, property.name)
         .join("arguments[0] as %T".asCode(property.type.asPoetType()))
-        .join("\n return null")
+        .joinLine(kotlinReturnNullStatement())
 
 fun kotlinReturnGetStatement(owner: String, property: KotlinMetaProperty) = "return %L.%L".asCode(owner, property.name)
+
 
 private fun metaEnumBlock(type: KotlinMetaType) = "metaEnum(%T::class.java, %T::valueOf)"
         .asCode(type.extractClass(), type.extractClass())
@@ -153,28 +155,19 @@ private fun metaTypeBlock(type: KotlinMetaType, vararg parameters: KotlinMetaTyp
         }
         .join(")")
 
-private fun metaTypeBlock(name: TypeName, vararg parameters: KotlinMetaType): CodeBlock = "metaType<%T>(%T::class.java"
-        .asCode(name, name)
-        .let { block ->
-            if (parameters.isEmpty()) return@let block
-            block.joinByComma(*parameters.map(::metaTypeStatement).toTypedArray())
-        }
-        .join(")")
+private fun metaAnyTypeBlock(): CodeBlock = "metaType<%T>(%T::class.java)".asCode(ANY, ANY)
 
 private fun metaArrayBlock(type: KotlinMetaType): CodeBlock = "metaArray<%T>(%T::class.java, { size: Int -> arrayOfNulls<%T>(size) }, "
         .asCode(type.asPoetType(), type.extractClass(), type.asPoetType())
         .join(metaTypeStatement(type.arrayComponentType!!))
         .join(")")
 
-private fun metaTypeStatement(type: KotlinMetaType): CodeBlock {
-    return when (type.kind) {
-        ARRAY_KIND -> metaArrayBlock(type)
-        CLASS_KIND -> metaTypeBlock(type, *type.typeParameters.toTypedArray())
-        ENUM_KIND -> metaEnumBlock(type)
-        WILDCARD_KIND -> metaTypeBlock(ANY)
-        FUNCTION_KIND -> metaTypeBlock(ANY)
-        UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $type")
-    }
+private fun metaTypeStatement(type: KotlinMetaType): CodeBlock = when (type.kind) {
+    ARRAY_KIND -> metaArrayBlock(type)
+    CLASS_KIND -> metaTypeBlock(type, *type.typeParameters.toTypedArray())
+    ENUM_KIND -> metaEnumBlock(type)
+    WILDCARD_KIND, FUNCTION_KIND -> metaAnyTypeBlock()
+    UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $type")
 }
 
 
@@ -186,9 +179,11 @@ private fun CodeBlock.join(vararg blocks: CodeBlock): CodeBlock = listOf(this, *
 
 private fun CodeBlock.join(block: String): CodeBlock = listOf(this, block.asCode()).joinToCode(EMPTY_STRING)
 
-private fun CodeBlock.joinBySpace(vararg blocks: CodeBlock): CodeBlock = listOf(this, *blocks).joinToCode(SPACE)
+private fun CodeBlock.joinLine(vararg blocks: CodeBlock): CodeBlock = listOf(this, *blocks).joinToCode(NEW_LINE)
 
 private fun CodeBlock.joinByComma(vararg blocks: CodeBlock): CodeBlock = listOf(this, *blocks).joinToCode(COMMA)
+
+fun FunSpec.Builder.addLines(vararg code: CodeBlock) = listOf(*code).joinToCode(NEW_LINE)
 
 private fun casted(parameter: KotlinMetaParameter): CodeBlock {
     val parameterClass = parameter.type.asPoetType()

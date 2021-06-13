@@ -134,20 +134,20 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
             .build()
     template.toBuilder()
             .addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
-            .addCode(javaReturnInvokeConstructorStatement(type, parameters))
+            .addCode(javaInvokeConstructorStatement(type, parameters))
             .build()
             .apply(::addMethod)
     when (parameters.size) {
         0 -> {
             template.toBuilder()
-                    .addCode(javaReturnInvokeWithoutArgumentsConstructorStatement(type))
+                    .addCode(javaInvokeConstructorStatement(type))
                     .build()
                     .apply(::addMethod)
         }
         1 -> {
             template.toBuilder()
                     .addParameter(OBJECT_CLASS_NAME, ARGUMENT_NAME)
-                    .addCode(javaReturnInvokeOneArgumentConstructorStatement(type, parameters.values.first()))
+                    .addCode(javaInvokeConstructorStatement(type, parameters.values.first()))
                     .build()
                     .apply(::addMethod)
         }
@@ -215,7 +215,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             else -> javaInvokeInstanceStatement(name, parameters)
         }
         when (method.returnType.typeName == Void.TYPE.typeName) {
-            true -> addCode(invoke).addCode(javaReturnNullStatement())
+            true -> addLines(invoke, javaReturnNullStatement())
             false -> addCode(javaReturnStatement(invoke))
         }
         addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
@@ -224,11 +224,11 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
     when (parameters.size) {
         0 -> template.toBuilder().apply {
             val invoke = when {
-                static -> javaInvokeWithoutArgumentsStaticStatement(name, type)
-                else -> javaInvokeWithoutArgumentsInstanceStatement(name)
+                static -> javaInvokeStaticStatement(name, type)
+                else -> javaInvokeInstanceStatement(name)
             }
             when (method.returnType.typeName == Void.TYPE.typeName) {
-                true -> addCode(invoke).addCode(javaReturnNullStatement())
+                true -> addLines(invoke, javaReturnNullStatement())
                 false -> addCode(javaReturnStatement(invoke))
             }
             addMethod(build())
@@ -236,11 +236,11 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
         1 -> template.toBuilder().apply {
             addParameter(OBJECT_CLASS_NAME, ARGUMENT_NAME)
             val invoke = when {
-                static -> javaInvokeOneArgumentStaticStatement(name, type, parameters.values.first())
-                else -> javaInvokeOneArgumentInstanceStatement(name, parameters.values.first())
+                static -> javaInvokeStaticStatement(name, type, parameters.values.first())
+                else -> javaInvokeInstanceStatement(name, parameters.values.first())
             }
             when (method.returnType.typeName == Void.TYPE.typeName) {
-                true -> addCode(invoke).addCode(javaReturnNullStatement())
+                true -> addLines(invoke, javaReturnNullStatement())
                 false -> addCode(javaReturnStatement(invoke))
             }
             addMethod(build())

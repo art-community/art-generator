@@ -18,12 +18,10 @@
 
 package io.art.generator.templates
 
-import com.squareup.javapoet.AnnotationSpec
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.*
 import com.squareup.javapoet.CodeBlock.join
 import com.squareup.javapoet.CodeBlock.of
-import com.squareup.javapoet.TypeName
+import com.squareup.kotlinpoet.joinToCode
 import io.art.core.constants.CompilerSuppressingWarnings.*
 import io.art.core.constants.StringConstants.*
 import io.art.core.extensions.StringExtensions.capitalize
@@ -77,44 +75,37 @@ fun javaReturnNewStatement(type: JavaMetaType): CodeBlock {
 }
 
 
-fun javaInvokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
-    return "instance.$method();".asCode()
-}
+fun javaInvokeInstanceStatement(method: String): CodeBlock = "instance.$method();".asCode()
 
-fun javaInvokeWithoutArgumentsStaticStatement(method: String, type: JavaMetaType): CodeBlock {
-    return "\$T.$method();".asCode(type.extractClass())
-}
+fun javaInvokeInstanceStatement(method: String, parameter: JavaMetaParameter): CodeBlock =
+        "instance.$method(".join(casted(parameter)).join(");")
 
-
-fun javaInvokeOneArgumentInstanceStatement(method: String, parameter: JavaMetaParameter): CodeBlock {
-    return "instance.$method(".join(casted(parameter)).join(");")
-}
-
-fun javaInvokeOneArgumentStaticStatement(method: String, type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
-    return "\$T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(");")
-}
+fun javaInvokeInstanceStatement(method: String, parameters: Map<String, JavaMetaParameter>): CodeBlock =
+        "instance.$method(".join(casted(parameters)).join(");")
 
 
-fun javaInvokeInstanceStatement(method: String, parameters: Map<String, JavaMetaParameter>): CodeBlock {
-    return "instance.$method(".join(casted(parameters)).join(");")
-}
+fun javaInvokeStaticStatement(method: String, type: JavaMetaType): CodeBlock =
+        "\$T.$method();".asCode(type.extractClass())
 
-fun javaInvokeStaticStatement(method: String, type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
-    return "\$T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(");")
-}
+fun javaInvokeStaticStatement(method: String, type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock =
+        "\$T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(");")
+
+fun javaInvokeStaticStatement(method: String, type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock =
+        "\$T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(");")
 
 
-fun javaReturnInvokeWithoutArgumentsConstructorStatement(type: JavaMetaType): CodeBlock {
+fun javaInvokeConstructorStatement(type: JavaMetaType): CodeBlock {
     return javaReturnNewStatement(type).join(");")
 }
 
-fun javaReturnInvokeOneArgumentConstructorStatement(type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
+fun javaInvokeConstructorStatement(type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock {
     return javaReturnNewStatement(type).join(casted(parameter)).join(");")
 }
 
-fun javaReturnInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
+fun javaInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock {
     return javaReturnNewStatement(type).join(casted(parameters)).join(");")
 }
+
 
 fun javaRegisterMetaFieldStatement(name: String, field: JavaMetaField): CodeBlock = "register(new MetaField<>(\$S,"
         .asCode(name)
@@ -125,6 +116,7 @@ fun javaRegisterMetaParameterStatement(index: Int, name: String, parameter: Java
         .asCode(name)
         .join(metaTypeStatement(parameter.type))
         .join("))")
+
 
 fun javaMetaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super(\$S,"
         .asCode(name)
@@ -186,6 +178,8 @@ private fun CodeBlock.join(block: String): CodeBlock = join(listOf(this, block.a
 private fun CodeBlock.joinBySpace(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), SPACE)
 
 private fun CodeBlock.joinByComma(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), COMMA)
+
+fun MethodSpec.Builder.addLines(vararg code: CodeBlock): CodeBlock = join(listOf(*code), NEW_LINE)
 
 
 private fun casted(parameter: JavaMetaParameter): CodeBlock {
