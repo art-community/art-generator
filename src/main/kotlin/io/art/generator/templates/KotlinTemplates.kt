@@ -145,7 +145,7 @@ fun kotlinSetStatementByArray(owner: String, property: KotlinMetaProperty) = "%L
 fun kotlinReturnGetStatement(owner: String, property: KotlinMetaProperty) = "return %L.%L".asCode(owner, property.name)
 
 
-fun kotlinJoinLines(vararg code: CodeBlock) = listOf(*code).joinToCode(NEW_LINE)
+fun FunSpec.Builder.addLines(vararg code: CodeBlock) = addCode(listOf(*code).joinToCode(NEW_LINE))
 
 
 private fun metaEnumBlock(type: KotlinMetaType) = "$META_ENUM_METHOD_NAME(%T::class.java, %T::valueOf)"

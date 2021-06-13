@@ -215,7 +215,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             else -> javaInvokeInstanceStatement(name, parameters)
         }
         when (method.returnType.typeName == Void.TYPE.typeName) {
-            true -> javaJoinLines(invoke, javaReturnNullStatement())
+            true -> addLines(invoke, javaReturnNullStatement())
             false -> addCode(javaReturnStatement(invoke))
         }
         addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
@@ -228,7 +228,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
                 else -> javaInvokeInstanceStatement(name)
             }
             when (method.returnType.typeName == Void.TYPE.typeName) {
-                true -> javaJoinLines(invoke, javaReturnNullStatement())
+                true -> addLines(invoke, javaReturnNullStatement())
                 false -> addCode(javaReturnStatement(invoke))
             }
             addMethod(build())
@@ -240,7 +240,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
                 else -> javaInvokeInstanceStatement(name, parameters.values.first())
             }
             when (method.returnType.typeName == Void.TYPE.typeName) {
-                true -> javaJoinLines(invoke, javaReturnNullStatement())
+                true -> addLines(invoke, javaReturnNullStatement())
                 false -> addCode(javaReturnStatement(invoke))
             }
             addMethod(build())

@@ -308,8 +308,8 @@ private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaCla
             else -> kotlinInvokeInstanceStatement(name, parameters)
         }
         when {
-            isNull(method.returnType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
-            isUnit(method.returnType!!.originalType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
+            isNull(method.returnType) -> addLines(invoke, kotlinReturnNullStatement())
+            isUnit(method.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
             else -> addCode(kotlinReturnStatement(invoke))
         }
         addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
@@ -322,8 +322,8 @@ private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaCla
                 else -> kotlinInvokeInstanceStatement(name)
             }
             when {
-                isNull(method.returnType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
-                isUnit(method.returnType!!.originalType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
+                isNull(method.returnType) -> addLines(invoke, kotlinReturnNullStatement())
+                isUnit(method.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
                 else -> addCode(kotlinReturnStatement(invoke))
             }
             addFunction(build())
@@ -335,8 +335,8 @@ private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaCla
                 else -> kotlinInvokeInstanceStatement(name, parameters.values.first())
             }
             when {
-                isNull(method.returnType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
-                isUnit(method.returnType!!.originalType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
+                isNull(method.returnType) -> addLines(invoke, kotlinReturnNullStatement())
+                isUnit(method.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
                 else -> addCode(kotlinReturnStatement(invoke))
             }
             addFunction(build())

@@ -18,12 +18,9 @@
 
 package io.art.generator.templates
 
-import com.squareup.javapoet.AnnotationSpec
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.*
 import com.squareup.javapoet.CodeBlock.join
 import com.squareup.javapoet.CodeBlock.of
-import com.squareup.javapoet.TypeName
 import io.art.core.constants.CompilerSuppressingWarnings.*
 import io.art.core.constants.StringConstants.*
 import io.art.core.extensions.StringExtensions.capitalize
@@ -137,7 +134,7 @@ fun javaMetaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
 fun javaNamedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
 
 
-fun javaJoinLines(vararg code: CodeBlock): CodeBlock = join(listOf(*code), NEW_LINE)
+fun MethodSpec.Builder.addLines(vararg code: CodeBlock): MethodSpec.Builder = addCode(join(listOf(*code), NEW_LINE))
 
 
 private fun metaEnumBlock(className: TypeName) = "$META_ENUM_METHOD_NAME(\$T.class, \$T::valueOf)"
