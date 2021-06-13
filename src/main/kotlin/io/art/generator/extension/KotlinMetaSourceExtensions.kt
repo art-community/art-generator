@@ -21,42 +21,57 @@ package io.art.generator.extension
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ClassName.Companion.bestGuess
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.WildcardTypeName.Companion.consumerOf
+import com.squareup.kotlinpoet.WildcardTypeName.Companion.producerOf
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaMethod
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.model.KotlinMetaTypeKind.*
-import org.jetbrains.kotlin.synthetic.isVisibleOutside
+import io.art.generator.model.KotlinTypeVariance
+import io.art.generator.model.KotlinTypeVariance.*
+import org.jetbrains.kotlin.descriptors.Visibilities.Public
 
 fun KotlinMetaType.asPoetType(): TypeName = when (kind) {
-    ARRAY_KIND -> ARRAY.parameterizedBy(arrayComponentType!!.asPoetType())
+    ARRAY_KIND -> ARRAY
+            .parameterizedBy(arrayComponentType!!.asPoetType())
+            .copy(nullable = nullable)
 
-    ENUM_KIND -> bestGuess(classFullName!!)
+    ENUM_KIND -> bestGuess(classFullName!!).copy(nullable = nullable)
 
     CLASS_KIND -> when {
         typeParameters.isEmpty() -> bestGuess(classFullName!!)
         else -> {
-            val parameters = typeParameters.map { parameter -> parameter.asPoetType() }
+            val parameters = typeParameters
+                    .map { parameter ->
+                        val asPoetParameter = when (parameter.typeParameterVariance) {
+                            IN -> consumerOf(parameter.asPoetType())
+                            OUT -> producerOf(parameter.asPoetType())
+                            INVARIANT -> parameter.asPoetType()
+                            null -> parameter.asPoetType()
+                        }
+                        asPoetParameter.copy(nullable = parameter.nullable)
+                    }
             val rawType = bestGuess(classFullName!!)
-            rawType.parameterizedBy(*parameters.toTypedArray())
+            rawType.parameterizedBy(*parameters.toTypedArray()).copy(nullable = nullable)
         }
     }
 
     WILDCARD_KIND -> STAR
 
-    UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
-
     FUNCTION_KIND -> LambdaTypeName.get(
             parameters = functionArgumentTypes.map { argument -> argument.asPoetType() }.toTypedArray(),
             returnType = functionResultType?.asPoetType() ?: UNIT
-    )
+    ).copy(nullable = nullable)
+
+    UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
 }
 
 fun KotlinMetaType.extractClass(): TypeName = when (kind) {
     ARRAY_KIND -> ARRAY
 
-    CLASS_KIND, ENUM_KIND -> ClassName(classPackageName!!, className!!)
+    CLASS_KIND, ENUM_KIND -> bestGuess(classFullName!!)
 
     WILDCARD_KIND -> ANY
 
@@ -68,16 +83,16 @@ fun KotlinMetaType.extractClass(): TypeName = when (kind) {
     UNKNOWN_KIND -> STAR
 }
 
-fun KotlinMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && visibility.isVisibleOutside()
+fun KotlinMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && visibility.delegate == Public
 
-fun KotlinMetaMethod.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) && visibility.isVisibleOutside()
+fun KotlinMetaMethod.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) && visibility.delegate == Public
 
 fun KotlinMetaClass.parentMethods() = parent
         ?.methods
-        ?.filter { method -> method.visibility.isVisibleOutside() }
+        ?.filter { method -> method.visibility.delegate == Public }
         ?: emptyList()
 
 fun KotlinMetaClass.parentProperties() = parent
         ?.properties
-        ?.filter { property -> property.value.visibility.isVisibleOutside() }
+        ?.filter { property -> property.value.visibility.delegate == Public }
         ?: emptyMap()

@@ -29,50 +29,50 @@ open class KotlinModel(
         val iсp10: List<String>,
         val iсp18: BooleanArray,
         val iсp22: Array<List<String>>,
-        val iсp23: Array<List<*>>,
-        val iсp25: Array<List<String>>,
-        val iсp26: Array<List<String>>,
-        val iсp27: Array<BooleanArray>,
-        val iсp29: Array<Array<List<String>>>,
-        val iсp30: Array<Array<List<*>>>,
-        val iсp32: Array<Array<List<String>>>,
-        val iсp33: Array<Array<List<String>>>,
-        val iсp34: List<BooleanArray>,
-        val iсp36: Array<List<Array<String>>>,
-        val iсp38: Array<List<Array<String>>>,
-        val iсp39: Array<List<Array<String>>>,
-        val iсp40: List<List<Boolean>>,
-        val iсp42: List<List<String>>,
-        val iсp43: List<List<*>>,
-        val iсp45: List<List<String>>,
-        val iсp46: List<List<String>>,
-        val iсp47: List<List<BooleanArray>>,
-        val iсp49: List<List<Array<String>>>,
-        val iсp50: List<List<Array<String>>>,
-        val iсp51: List<List<Array<String>>>,
-        val iсp52: InnerModel<String>,
-        val iсp54: InnerModel<out String>,
-        val iсp55: InnerModel<in String>,
-        val iсp56: List<InnerModel<String>>,
-        val iсp60: KotlinModel,
-        val iсp61: Map<String, String>,
-        val iсp62: Map<*, String>,
-        val iсp63: Map<String, *>,
-        val iсp64: Map<in String, String>,
-        val iсp67: Enum,
-        val iсp68: List<Enum>,
-        val iсp69: Array<Enum>,
-        val iсp70: Map<Enum, Enum>,
-        val iсp71: Map<Enum, List<Enum>>,
-        val iсp72: Map<Enum, List<Array<Enum>>>,
-        val iсp73: Map<Enum, List<Array<Enum>>>,
-        val icfp1: () -> Unit,
-        val icfp2: () -> Nothing,
-        val icfp3: () -> Any,
-        val icfp4: (input1: String, input2: String, input3: String) -> KotlinModel,
-        val icfp5: Map<Enum, List<Array<Enum>>>.(input1: String, input2: String, input3: String) -> KotlinModel,
+//        val iсp23: Array<List<*>>,
+//        val iсp25: Array<List<String>>,
+//        val iсp26: Array<List<String>>,
+//        val iсp27: Array<BooleanArray>,
+//        val iсp29: Array<Array<List<String>>>,
+//        val iсp30: Array<Array<List<*>>>,
+//        val iсp32: Array<Array<List<String>>>,
+//        val iсp33: Array<Array<List<String>>>,
+//        val iсp34: List<BooleanArray>,
+//        val iсp36: Array<List<Array<String>>>,
+//        val iсp38: Array<List<Array<String>>>,
+//        val iсp39: Array<List<Array<String>>>,
+//        val iсp40: List<List<Boolean>>,
+//        val iсp42: List<List<String>>,
+//        val iсp43: List<List<*>>,
+//        val iсp45: List<List<String>>,
+//        val iсp46: List<List<String>>,
+//        val iсp47: List<List<BooleanArray>>,
+//        val iсp49: List<List<Array<String>>>,
+//        val iсp50: List<List<Array<String>>>,
+//        val iсp51: List<List<Array<String>>>,
+//        val iсp52: InnerModel<String>,
+//        val iсp54: InnerModel<out String>,
+//        val iсp55: InnerModel<in String>,
+//        val iсp56: List<InnerModel<String>>,
+//        val iсp60: KotlinModel,
+//        val iсp61: Map<String, String>,
+//        val iсp62: Map<*, String>,
+//        val iсp63: Map<String, *>,
+//        val iсp64: Map<in String, String>,
+//        val iсp67: Enum,
+//        val iсp68: List<Enum>,
+//        val iсp69: Array<Enum>,
+//        val iсp70: Map<Enum, Enum>,
+//        val iсp71: Map<Enum, List<Enum>>,
+//        val iсp72: Map<Enum, List<Array<Enum>>>,
+//        val iсp73: Map<Enum, List<Array<Enum>>>,
+//        val icfp1: () -> Unit,
+//        val icfp2: () -> Nothing,
+//        val icfp3: () -> Any,
+//        val icfp4: (input1: String, input2: String, input3: String) -> KotlinModel,
+//        val icfp5: Map<Enum, List<Array<Enum>>>.(input1: String, input2: String, input3: String) -> KotlinModel,
 ) {
-    var mp1 = false
+/*    var mp1 = false
     var mp2: String? = null
     var mp6: List<String>? = null
     var mp8: List<*>? = null
@@ -279,8 +279,10 @@ open class KotlinModel(
         operator fun invoke(): String {
             return "test"
         }
-    }
+    }*/
 }
+
+/*
 
 data class KotlinOtherModel(
         val iсp1: Boolean,
@@ -634,3 +636,4 @@ fun KotlinBase.simpleMethod(p1: Alias): Int {
 }
 
 inline fun KotlinBase.simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1
+*/

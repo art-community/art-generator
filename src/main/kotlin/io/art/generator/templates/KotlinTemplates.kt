@@ -90,15 +90,15 @@ fun kotlinInvokeStaticStatement(method: String, type: KotlinMetaType, parameters
 
 
 fun kotlinReturnInvokeWithoutArgumentsConstructorStatement(type: KotlinMetaType): CodeBlock {
-    return returnNewStatement(type).join(")")
+    return "return %T(".asCode(type.extractClass()).join(")")
 }
 
 fun kotlinReturnInvokeOneArgumentConstructorStatement(type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {
-    return returnNewStatement(type).join(casted(parameter)).join(")")
+    return "return %T(".asCode(type.extractClass()).join(casted(parameter)).join(")")
 }
 
 fun kotlinReturnInvokeConstructorStatement(type: KotlinMetaType, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
-    return returnNewStatement(type).join(casted(parameters)).join(")")
+    return "return %T(".asCode(type.extractClass()).join(casted(parameters)).join(")")
 }
 
 fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty): CodeBlock =
@@ -170,22 +170,13 @@ private fun CodeBlock.joinBySpace(vararg blocks: CodeBlock): CodeBlock = listOf(
 
 private fun CodeBlock.joinByComma(vararg blocks: CodeBlock): CodeBlock = listOf(this, *blocks).joinToCode(COMMA)
 
-private fun returnNewStatement(type: KotlinMetaType): CodeBlock {
-    if (type.typeParameters.isNotEmpty()) {
-        return "return %T<".asCode(type.extractClass())
-                .join(type.typeParameters.map { "%T".asCode(NOTHING) }.joinToCode(COMMA))
-                .join(">(")
-    }
-    return "return %T(".asCode(type.extractClass())
-}
-
 private fun casted(parameter: KotlinMetaParameter): CodeBlock {
-    val parameterClass = parameter.type.extractClass()
+    val parameterClass = parameter.type.asPoetType()
     return "argument as %T".asCode(parameterClass)
 }
 
 private fun casted(parameters: Map<String, KotlinMetaParameter>): CodeBlock = parameters.values
-        .mapIndexed { index, parameter -> "arguments[$index] as %T".asCode(parameter.type.extractClass()) }
+        .mapIndexed { index, parameter -> "arguments[$index] as %T".asCode(parameter.type.asPoetType()) }
         .joinToCode(COMMA)
 
 private fun asPublicFlag(visibility: DescriptorVisibility): CodeBlock {

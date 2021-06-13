@@ -40,9 +40,6 @@ enum class KotlinTypeVariance {
     INVARIANT
 }
 
-lateinit var KOTLIN_ANY_META_TYPE: KotlinMetaType
-fun hasKotlinAnyMetaType() = ::KOTLIN_ANY_META_TYPE.isInitialized
-
 data class KotlinMetaType(
         val originalType: KotlinType,
 

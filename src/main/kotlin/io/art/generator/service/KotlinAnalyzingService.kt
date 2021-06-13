@@ -31,7 +31,6 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.ClassKind.ANNOTATION_CLASS
 import org.jetbrains.kotlin.descriptors.ClassKind.ENUM_ENTRY
-import org.jetbrains.kotlin.load.java.JavaClassesTracker
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
@@ -39,10 +38,7 @@ import org.jetbrains.kotlin.resolve.calls.tower.isSynthesized
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassOrAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
-import org.jetbrains.kotlin.types.FlexibleType
-import org.jetbrains.kotlin.types.KotlinType
-import org.jetbrains.kotlin.types.SimpleType
-import org.jetbrains.kotlin.types.TypeProjection
+import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import org.jetbrains.kotlin.types.typeUtil.makeNotNullable
@@ -54,22 +50,11 @@ fun analyzeKotlinSources(root: Path) = KotlinAnalyzingService().analyzeKotlinSou
 private class KotlinAnalyzingService {
     private val cache = mutableMapOf<KotlinType, KotlinMetaType>()
 
-    private class JavaTracker : JavaClassesTracker {
-        val classes = mutableListOf<JavaClassDescriptor>()
-
-        override fun onCompletedAnalysis(module: ModuleDescriptor) = Unit
-
-        override fun reportClass(classDescriptor: JavaClassDescriptor) {
-            classes += classDescriptor
-        }
-    }
-
     fun analyzeKotlinSources(root: Path): List<KotlinMetaClass> {
-        val javaTracker = JavaTracker()
-        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(root, javaTracker), KotlinToJVMBytecodeCompiler::analyze)
+        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(root), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
                 ?: return emptyList()
-        val kotlinClasses = root.toFile().listFiles()!!
+        return root.toFile().listFiles()!!
                 .map { file -> file.name }
                 .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()
@@ -83,19 +68,6 @@ private class KotlinAnalyzingService {
                 .map { descriptor -> descriptor.asMetaClass() }
                 .distinctBy { metaClass -> metaClass.type.typeName }
                 .toList()
-        val javaClasses = javaTracker.classes
-                .toList()
-                .asSequence()
-                .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
-                .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
-                .filter { descriptor -> !descriptor.classId!!.isNestedClass }
-                .filter { descriptor -> !descriptor.isSealed() }
-                .filter { descriptor -> !descriptor.classId!!.isLocal }
-                .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
-                .map { descriptor -> descriptor.asMetaClass() }
-                .distinctBy { metaClass -> metaClass.type.typeName }
-                .toList()
-        return kotlinClasses + javaClasses
     }
 
     private fun collectClasses(analysisResult: AnalysisResult, packageName: String): List<ClassDescriptor> {
@@ -109,21 +81,21 @@ private class KotlinAnalyzingService {
                 .flatMap { nested -> collectClasses(analysisResult, nested.asString()) }
     }
 
-    private fun KotlinType.asMetaType(): KotlinMetaType {
+    private fun KotlinType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType {
         var unwrapped = unwrap()
         if (unwrapped.isMarkedNullable) {
             unwrapped = unwrapped.makeNotNullable().unwrap()
         }
         return putIfAbsent(cache, unwrapped) {
             when (unwrapped) {
-                is SimpleType -> unwrapped.asMetaType()
-                is FlexibleType -> unwrapped.asMetaType()
+                is SimpleType -> unwrapped.asMetaType(variance)
+                is FlexibleType -> unwrapped.asMetaType(variance)
                 else -> KotlinMetaType(originalType = unwrapped, kind = UNKNOWN_KIND, typeName = toString())
             }
         }
     }
 
-    private fun SimpleType.asMetaType(): KotlinMetaType = when {
+    private fun SimpleType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = when {
         isEnum() -> {
             val classId = constructor.declarationDescriptor?.classId!!
             KotlinMetaType(
@@ -132,7 +104,8 @@ private class KotlinAnalyzingService {
                     classFullName = classId.asSingleFqName().asString(),
                     className = classId.relativeClassName.pathSegments().last().asString(),
                     classPackageName = classId.packageFqName.asString(),
-                    typeName = classId.asSingleFqName().asString()
+                    typeName = classId.asSingleFqName().asString(),
+                    typeParameterVariance = variance
             )
         }
 
@@ -140,7 +113,8 @@ private class KotlinAnalyzingService {
                 originalType = this,
                 kind = ARRAY_KIND,
                 arrayComponentType = constructor.builtIns.getArrayElementType(this).asMetaType(),
-                typeName = toString()
+                typeName = toString(),
+                typeParameterVariance = variance
         )
 
         constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(cache, this) {
@@ -152,7 +126,8 @@ private class KotlinAnalyzingService {
                     functionResultType = arguments
                             .takeLast(1)
                             .firstOrNull()
-                            ?.asMetaType()
+                            ?.asMetaType(),
+                    typeParameterVariance = variance
             )
         }.apply {
             val newArguments = arguments
@@ -160,7 +135,6 @@ private class KotlinAnalyzingService {
                     .map { type -> type.asMetaType() }
             functionArgumentTypes.clear()
             functionArgumentTypes.addAll(newArguments)
-
         }
 
         constructor.declarationDescriptor is ClassDescriptor -> {
@@ -172,26 +146,25 @@ private class KotlinAnalyzingService {
                         classFullName = classId.asSingleFqName().asString(),
                         className = classId.relativeClassName.pathSegments().last().asString(),
                         classPackageName = classId.packageFqName.asString(),
-                        typeName = classId.asSingleFqName().asString()
+                        typeName = classId.asSingleFqName().asString(),
+                        typeParameterVariance = variance
                 )
             }.apply {
-//                if (typeParameters.isNotEmpty()) return@apply
-//                arguments
-//                        .map { projection -> projection.asMetaType() }
-//                        .forEach(typeParameters::add)
+                if (typeParameters.isNotEmpty()) return@apply
+                arguments
+                        .map { projection -> projection.asMetaType() }
+                        .forEach(typeParameters::add)
             }
         }
 
         else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
     }
 
-    private fun FlexibleType.asMetaType()
-            : KotlinMetaType {
-        return delegate.asMetaType()
+    private fun FlexibleType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType {
+        return delegate.asMetaType(variance)
     }
 
-    private fun TypeProjection.asMetaType()
-            : KotlinMetaType {
+    private fun TypeProjection.asMetaType(): KotlinMetaType {
         if (isStarProjection) {
             return KotlinMetaType(
                     originalType = type,
@@ -199,7 +172,11 @@ private class KotlinAnalyzingService {
                     typeName = toString()
             )
         }
-        return type.asMetaType()
+        return type.asMetaType(when (projectionKind) {
+            Variance.INVARIANT -> KotlinTypeVariance.INVARIANT
+            Variance.IN_VARIANCE -> KotlinTypeVariance.IN
+            Variance.OUT_VARIANCE -> KotlinTypeVariance.OUT
+        })
     }
 
     private fun ClassDescriptor.asMetaClass(): KotlinMetaClass = KotlinMetaClass(
@@ -211,7 +188,7 @@ private class KotlinAnalyzingService {
 
             properties = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
-                    .filterIsInstance<VariableDescriptorWithAccessors>()
+                    .filterIsInstance<PropertyDescriptor>()
                     .filter { descriptor -> !descriptor.isSynthesized }
                     .associate { symbol -> symbol.name.toString() to symbol.asMetaProperty() },
 
@@ -267,7 +244,7 @@ private class KotlinAnalyzingService {
             modality = modality,
     )
 
-    private fun VariableDescriptorWithAccessors.asMetaProperty() = KotlinMetaProperty(
+    private fun PropertyDescriptor.asMetaProperty() = KotlinMetaProperty(
             name = name.toString(),
             type = type.asMetaType(),
             visibility = visibility,
