@@ -20,7 +20,7 @@ package io.art.generator.templates
 
 import com.squareup.kotlinpoet.*
 import io.art.core.combiner.SectionCombiner
-import io.art.core.constants.CompilerSuppressingWarnings.*
+import io.art.core.constants.CompilerSuppressingWarnings.WARNINGS
 import io.art.core.constants.StringConstants.*
 import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.extension.asPoetType
@@ -48,7 +48,7 @@ fun kotlinMetaMethodClassName(name: String) =
         ClassName.bestGuess("Meta${capitalize(name)}Method")
 
 fun kotlinSuppressAnnotation() = AnnotationSpec.builder(Suppress::class)
-        .addMember("%S,%S,%S", ALL, UNCHECKED, UNUSED)
+        .addMember("%S", WARNINGS)
         .build()
 
 fun kotlinSuperStatement(label: String): CodeBlock = "%L".asCode(label)
