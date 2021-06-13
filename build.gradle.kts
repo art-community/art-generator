@@ -65,15 +65,17 @@ dependencies {
 }
 
 sourceSets {
-    test {
-        java.srcDirs("src/test/kotlin-model")
+    val kotlinModel by creating {
+        java {
+            srcDir("src/test/kotlin-model")
+        }
     }
-}
-
-val testSourceSet: SourceSet = sourceSets.test.get()
-generator {
-    java(testSourceSet.java)
-    consoleLogging()
+    val testSourceSet: SourceSet = test.get()
+    generator {
+        java(testSourceSet.java.sourceDirectories.first())
+        kotlin(file("src/test/kotlin-model"))
+        consoleLogging()
+    }
 }
 
 executable {

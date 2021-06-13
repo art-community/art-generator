@@ -21,29 +21,29 @@ import io.art.generator.configuration.configuration
 import io.art.generator.constants.GeneratorLanguages.JAVA
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.loader.PathClassLoader
-import io.art.generator.provider.JavaCompilerConfiguration
-import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
+import io.art.generator.provider.KotlinCompilerConfiguration
+import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
+import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 
 
 @TestInstance(PER_CLASS)
-class GeneratorTest {
+class KotlinGeneratorTest {
     private val root: Path by lazy { configuration.sources[JAVA]!!.first() }
-    private val generatedFile: Path by lazy { root.resolve("meta").resolve("MetaExample.java") }
+    private val generatedFile: Path by lazy { root.resolve("meta").resolve("MetaExample.kt") }
     private val generatedClassName = "meta.MetaExample"
 
     @BeforeAll
     fun setup() {
-        activator().mainModuleId(GeneratorTest::class.simpleName).module(logging()).launch()
+        activator().mainModuleId(KotlinGeneratorTest::class.simpleName).module(logging()).launch()
         initialize()
     }
 
@@ -63,11 +63,13 @@ class GeneratorTest {
 
         assertTrue { generatedFile.toFile().exists() }
 
-        val sources = sequenceOf(generatedFile)
-
         assertTrue(root.toFile().exists(), "sources for generation not found")
 
-        useJavaCompiler(JavaCompilerConfiguration(root, sources, tempDirectory)) { task -> assertTrue(task.call()) }
+        useKotlinCompiler(KotlinCompilerConfiguration(root, destination = tempDirectory)) {
+            assertFalse {
+                KotlinToJVMBytecodeCompiler.analyze(this)?.isError() ?: true
+            }
+        }
 
         assertNotNull { PathClassLoader(tempDirectory).loadClass(generatedClassName) }
     }
