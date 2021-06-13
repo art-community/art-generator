@@ -58,7 +58,7 @@ data class KotlinMetaType(
         val functionArgumentTypes: MutableList<KotlinMetaType> = mutableListOf(),
         val functionResultType: KotlinMetaType? = null,
 
-        val typeParameterVariance: KotlinTypeVariance? = null,
+        val typeVariance: KotlinTypeVariance? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

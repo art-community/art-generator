@@ -282,8 +282,6 @@ open class KotlinModel(
     }
 }
 
-/*
-
 data class KotlinOtherModel(
         val iсp1: Boolean,
         val iсp2: String,
@@ -636,4 +634,3 @@ fun KotlinBase.simpleMethod(p1: Alias): Int {
 }
 
 inline fun KotlinBase.simpleMethod(p1: String, noinline lambda: (p: String) -> String, inline: (p: String) -> String) = p1
-*/

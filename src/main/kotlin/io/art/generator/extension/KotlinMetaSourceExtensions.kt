@@ -29,43 +29,42 @@ import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaMethod
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.model.KotlinMetaTypeKind.*
-import io.art.generator.model.KotlinTypeVariance
 import io.art.generator.model.KotlinTypeVariance.*
 import org.jetbrains.kotlin.descriptors.Visibilities.Public
 
-fun KotlinMetaType.asPoetType(): TypeName = when (kind) {
-    ARRAY_KIND -> ARRAY
-            .parameterizedBy(arrayComponentType!!.asPoetType())
-            .copy(nullable = nullable)
+fun KotlinMetaType.asPoetType(): TypeName {
+    val rawType = when (kind) {
+        ARRAY_KIND -> ARRAY
+                .parameterizedBy(arrayComponentType!!.asPoetType())
+                .copy(nullable = nullable)
 
-    ENUM_KIND -> bestGuess(classFullName!!).copy(nullable = nullable)
+        ENUM_KIND -> bestGuess(classFullName!!).copy(nullable = nullable)
 
-    CLASS_KIND -> when {
-        typeParameters.isEmpty() -> bestGuess(classFullName!!)
-        else -> {
-            val parameters = typeParameters
-                    .map { parameter ->
-                        val asPoetParameter = when (parameter.typeParameterVariance) {
-                            IN -> consumerOf(parameter.asPoetType())
-                            OUT -> producerOf(parameter.asPoetType())
-                            INVARIANT -> parameter.asPoetType()
-                            null -> parameter.asPoetType()
-                        }
-                        asPoetParameter.copy(nullable = parameter.nullable)
-                    }
-            val rawType = bestGuess(classFullName!!)
-            rawType.parameterizedBy(*parameters.toTypedArray()).copy(nullable = nullable)
+        CLASS_KIND -> when {
+            typeParameters.isEmpty() -> bestGuess(classFullName!!).copy(nullable = nullable)
+            else -> {
+                val parameters = typeParameters.map { parameter -> parameter.asPoetType().copy(nullable = parameter.nullable) }
+                val rawType = bestGuess(classFullName!!)
+                rawType.parameterizedBy(*parameters.toTypedArray()).copy(nullable = nullable)
+            }
         }
+
+        WILDCARD_KIND -> STAR
+
+        FUNCTION_KIND -> LambdaTypeName.get(
+                parameters = functionArgumentTypes.map { argument -> argument.asPoetType() }.toTypedArray(),
+                returnType = functionResultType?.asPoetType() ?: UNIT
+        ).copy(nullable = nullable)
+
+        UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
     }
-
-    WILDCARD_KIND -> STAR
-
-    FUNCTION_KIND -> LambdaTypeName.get(
-            parameters = functionArgumentTypes.map { argument -> argument.asPoetType() }.toTypedArray(),
-            returnType = functionResultType?.asPoetType() ?: UNIT
-    ).copy(nullable = nullable)
-
-    UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
+    println(typeVariance)
+    return when (typeVariance) {
+        IN -> consumerOf(rawType)
+        OUT -> producerOf(rawType)
+        INVARIANT -> rawType
+        null -> rawType
+    }
 }
 
 fun KotlinMetaType.extractClass(): TypeName = when (kind) {

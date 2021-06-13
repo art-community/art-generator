@@ -24,10 +24,12 @@ import io.art.generator.model.KotlinMetaTypeKind.*
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import org.jetbrains.kotlin.analyzer.AnalysisResult
+import org.jetbrains.kotlin.backend.common.descriptors.isSuspend
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isNumber
 import org.jetbrains.kotlin.builtins.functions.FunctionClassDescriptor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
+import org.jetbrains.kotlin.coroutines.isSuspendLambda
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.ClassKind.ANNOTATION_CLASS
 import org.jetbrains.kotlin.descriptors.ClassKind.ENUM_ENTRY
@@ -42,7 +44,6 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
-import org.jetbrains.kotlin.types.typeUtil.makeNotNullable
 import java.nio.file.Path
 import java.util.Objects.nonNull
 
@@ -82,17 +83,12 @@ private class KotlinAnalyzingService {
                 .flatMap { nested -> collectClasses(analysisResult, nested.asString()) }
     }
 
-    private fun KotlinType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType {
-        var unwrapped = unwrap()
-        if (unwrapped.isMarkedNullable) {
-            unwrapped = unwrapped.makeNotNullable().unwrap()
-        }
-        return putIfAbsent(cache, unwrapped) {
-            when (unwrapped) {
-                is SimpleType -> unwrapped.asMetaType(variance)
-                is FlexibleType -> unwrapped.asMetaType(variance)
-                else -> KotlinMetaType(originalType = unwrapped, kind = UNKNOWN_KIND, typeName = toString())
-            }
+    private fun KotlinType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = putIfAbsent(cache, this) {
+        when (this) {
+            is SimpleType -> asMetaType(variance)
+            is FlexibleType -> asMetaType(variance)
+            is DeferredType -> asMetaType(variance)
+            else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
         }
     }
 
@@ -105,8 +101,7 @@ private class KotlinAnalyzingService {
                     classFullName = classId.asSingleFqName().asString(),
                     className = classId.relativeClassName.pathSegments().last().asString(),
                     classPackageName = classId.packageFqName.asString(),
-                    typeName = classId.asSingleFqName().asString(),
-                    typeParameterVariance = variance
+                    typeName = classId.asSingleFqName().asString()
             )
         }
 
@@ -114,8 +109,7 @@ private class KotlinAnalyzingService {
                 originalType = this,
                 kind = ARRAY_KIND,
                 arrayComponentType = constructor.builtIns.getArrayElementType(this).asMetaType(),
-                typeName = toString(),
-                typeParameterVariance = variance
+                typeName = toString()
         )
 
         constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(cache, this) {
@@ -128,7 +122,7 @@ private class KotlinAnalyzingService {
                             .takeLast(1)
                             .firstOrNull()
                             ?.asMetaType(),
-                    typeParameterVariance = variance
+                    typeVariance = variance
             )
         }.apply {
             val newArguments = arguments
@@ -148,7 +142,7 @@ private class KotlinAnalyzingService {
                         className = classId.relativeClassName.pathSegments().last().asString(),
                         classPackageName = classId.packageFqName.asString(),
                         typeName = classId.asSingleFqName().asString(),
-                        typeParameterVariance = variance,
+                        typeVariance = variance,
                 )
             }.apply {
                 if (typeParameters.isNotEmpty()) return@apply
@@ -162,6 +156,10 @@ private class KotlinAnalyzingService {
     }
 
     private fun FlexibleType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType {
+        return delegate.asMetaType(variance)
+    }
+
+    private fun DeferredType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType {
         return delegate.asMetaType(variance)
     }
 
@@ -199,6 +197,8 @@ private class KotlinAnalyzingService {
                     .asSequence()
                     .filter { descriptor -> !descriptor.isSynthesized }
                     .filter { descriptor -> descriptor.typeParameters.isEmpty() }
+                    .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
+                    .filter { descriptor -> descriptor.typeParameters.isEmpty() }
                     .map { method -> method.asMetaMethod() }
                     .toList(),
 
@@ -206,6 +206,8 @@ private class KotlinAnalyzingService {
                     .asSequence()
                     .filterIsInstance<FunctionDescriptor>()
                     .filter { descriptor -> !descriptor.isSynthesized }
+                    .filter { descriptor -> !descriptor.isSuspend }
+                    .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
                     .filter { descriptor -> descriptor.typeParameters.isEmpty() }
                     .map { method -> method.asMetaMethod() }
                     .toList(),
