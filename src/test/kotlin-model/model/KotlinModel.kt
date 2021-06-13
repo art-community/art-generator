@@ -72,7 +72,7 @@ open class KotlinModel(
 //        val icfp4: (input1: String, input2: String, input3: String) -> KotlinModel,
 //        val icfp5: Map<Enum, List<Array<Enum>>>.(input1: String, input2: String, input3: String) -> KotlinModel,
 ) {
-/*    var mp1 = false
+    var mp1 = false
     var mp2: String? = null
     var mp6: List<String>? = null
     var mp8: List<*>? = null
@@ -279,7 +279,7 @@ open class KotlinModel(
         operator fun invoke(): String {
             return "test"
         }
-    }*/
+    }
 }
 
 /*
