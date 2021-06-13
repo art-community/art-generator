@@ -162,13 +162,28 @@ private fun metaTypeBlock(type: KotlinMetaType, vararg parameters: KotlinMetaTyp
 private fun metaAnyTypeBlock(): CodeBlock = "$META_TYPE_METHOD_NAME<%T>(%T::class.java)".asCode(ANY, ANY)
 
 private fun metaArrayBlock(type: KotlinMetaType): CodeBlock = "$META_ARRAY_METHOD_NAME<%T>(%T::class.java, { size: Int -> $ARRAY_OF_NULLS_METHOD<%T>(size) }, "
-        .asCode(type.asPoetType(), type.extractClass(), type.asPoetType())
-        .join(metaTypeStatement(type.arrayComponentType!!))
+        .asCode(type.asPoetType(), type.extractClass(), type.arrayComponentType!!.asPoetType())
+        .join(metaTypeStatement(type.arrayComponentType))
+        .join(")")
+
+private fun metaArrayBlock(type: TypeName, componentType: TypeName): CodeBlock = "$META_ARRAY_METHOD_NAME<%T>(%T::class.java, { size: Int -> $ARRAY_OF_NULLS_METHOD<%T>(size) }, "
+        .asCode(type, type, componentType)
+        .join("$META_TYPE_METHOD_NAME<%T>(%T::class.javaPrimitiveType)".asCode(componentType, componentType))
         .join(")")
 
 private fun metaTypeStatement(type: KotlinMetaType): CodeBlock = when (type.kind) {
     ARRAY_KIND -> metaArrayBlock(type)
-    CLASS_KIND -> metaTypeBlock(type, *type.typeParameters.toTypedArray())
+    CLASS_KIND -> when (type.typeName) {
+        ByteArray::class.qualifiedName -> metaArrayBlock(ByteArray::class.asTypeName(), Byte::class.asTypeName())
+        BooleanArray::class.qualifiedName -> metaArrayBlock(BooleanArray::class.asTypeName(), Boolean::class.asTypeName())
+        IntArray::class.qualifiedName -> metaArrayBlock(IntArray::class.asTypeName(), Int::class.asTypeName())
+        ShortArray::class.qualifiedName -> metaArrayBlock(ShortArray::class.asTypeName(), Short::class.asTypeName())
+        DoubleArray::class.qualifiedName -> metaArrayBlock(DoubleArray::class.asTypeName(), Double::class.asTypeName())
+        FloatArray::class.qualifiedName -> metaArrayBlock(FloatArray::class.asTypeName(), Float::class.asTypeName())
+        LongArray::class.qualifiedName -> metaArrayBlock(LongArray::class.asTypeName(), Long::class.asTypeName())
+        CharArray::class.qualifiedName -> metaArrayBlock(CharArray::class.asTypeName(), Char::class.asTypeName())
+        else -> metaTypeBlock(type, *type.typeParameters.toTypedArray())
+    }
     ENUM_KIND -> metaEnumBlock(type)
     WILDCARD_KIND, FUNCTION_KIND -> metaAnyTypeBlock()
     UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $type")
