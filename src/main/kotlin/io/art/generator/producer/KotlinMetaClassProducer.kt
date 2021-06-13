@@ -138,20 +138,20 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: KotlinMetaType
             .build()
     template.toBuilder()
             .addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
-            .addCode(kotlinReturnInvokeConstructorStatementMultiple(type, parameters))
+            .addCode(kotlinInvokeConstructorStatement(type, parameters))
             .build()
             .apply(::addFunction)
     when (parameters.size) {
         0 -> {
             template.toBuilder()
-                    .addCode(kotlinReturnInvokeConstructorStatement(type))
+                    .addCode(kotlinInvokeConstructorStatement(type))
                     .build()
                     .apply(::addFunction)
         }
         1 -> {
             template.toBuilder()
                     .addParameter(ARGUMENT_NAME, ANY)
-                    .addCode(kotlinReturnInvokeConstructorStatementSingle(type, parameters.values.first()))
+                    .addCode(kotlinInvokeConstructorStatement(type, parameters.values.first()))
                     .build()
                     .apply(::addFunction)
         }
@@ -304,12 +304,12 @@ private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaCla
             .build()
     template.toBuilder().apply {
         val invoke = when {
-            static -> kotlinInvokeStaticStatementMultiple(name, ownerClass.type, parameters)
-            else -> kotlinInvokeInstanceStatementMultiple(name, parameters)
+            static -> kotlinInvokeStaticStatement(name, ownerClass.type, parameters)
+            else -> kotlinInvokeInstanceStatement(name, parameters)
         }
         when {
-            isNull(method.returnType) -> addLines(invoke, kotlinReturnNullStatement())
-            isUnit(method.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
+            isNull(method.returnType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
+            isUnit(method.returnType!!.originalType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
             else -> addCode(kotlinReturnStatement(invoke))
         }
         addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
@@ -322,8 +322,8 @@ private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaCla
                 else -> kotlinInvokeInstanceStatement(name)
             }
             when {
-                isNull(method.returnType) -> addLines(invoke, kotlinReturnNullStatement())
-                isUnit(method.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
+                isNull(method.returnType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
+                isUnit(method.returnType!!.originalType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
                 else -> addCode(kotlinReturnStatement(invoke))
             }
             addFunction(build())
@@ -331,12 +331,12 @@ private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaCla
         1 -> template.toBuilder().apply {
             addParameter(ARGUMENT_NAME, ANY)
             val invoke = when {
-                static -> kotlinInvokeStaticStatementSingle(name, ownerClass.type, parameters.values.first())
-                else -> kotlinInvokeInstanceStatementSingle(name, parameters.values.first())
+                static -> kotlinInvokeStaticStatement(name, ownerClass.type, parameters.values.first())
+                else -> kotlinInvokeInstanceStatement(name, parameters.values.first())
             }
             when {
-                isNull(method.returnType) -> addLines(invoke, kotlinReturnNullStatement())
-                isUnit(method.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
+                isNull(method.returnType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
+                isUnit(method.returnType!!.originalType) -> kotlinJoinLines(invoke, kotlinReturnNullStatement())
                 else -> addCode(kotlinReturnStatement(invoke))
             }
             addFunction(build())
