@@ -47,6 +47,7 @@ fun kotlinMetaClassClassName(name: String) =
 fun kotlinMetaMethodClassName(name: String) =
         ClassName.bestGuess("Meta${capitalize(name)}Method")
 
+
 fun kotlinSuppressAnnotation() = AnnotationSpec.builder(Suppress::class)
         .addMember("%S", WARNINGS)
         .build()
@@ -55,37 +56,39 @@ fun kotlinSuperStatement(label: String): CodeBlock = "%L".asCode(label)
 
 fun kotlinNewStatement(type: TypeName): CodeBlock = "%T()".asCode(type)
 
+fun kotlinReturnStatement(label: CodeBlock): CodeBlock = "return ".join(label)
+
 fun kotlinReturnStatement(label: String): CodeBlock = "return %L".asCode(label)
 
 fun kotlinRegisterNewStatement(type: TypeName): CodeBlock = "register(%T())".asCode(type)
 
 fun kotlinNamedSuperStatement(name: String): CodeBlock = "%S".asCode(name)
 
+fun kotlinReturnNullStatement() = "return null".asCode()
+
 
 fun kotlinInvokeWithoutArgumentsInstanceStatement(method: String): CodeBlock {
-    return "instance.$method()".asCode()
+    return "instance.$method()\n".asCode()
 }
 
 fun kotlinInvokeWithoutArgumentsStaticStatement(method: String, type: KotlinMetaType): CodeBlock {
-    return "%T.$method()".asCode(type.extractClass())
+    return "%T.$method()\n".asCode(type.extractClass())
 }
 
-
 fun kotlinInvokeOneArgumentInstanceStatement(method: String, parameter: KotlinMetaParameter): CodeBlock {
-    return "instance.$method(".join(casted(parameter)).join(")")
+    return "instance.$method(".join(casted(parameter)).join(")\n")
 }
 
 fun kotlinInvokeOneArgumentStaticStatement(method: String, type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {
-    return "%T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(")")
+    return "%T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(")\n")
 }
 
-
 fun kotlinInvokeInstanceStatement(method: String, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
-    return "instance.$method(".join(casted(parameters)).join(")")
+    return "instance.$method(".join(casted(parameters)).join(")\n")
 }
 
 fun kotlinInvokeStaticStatement(method: String, type: KotlinMetaType, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
-    return "%T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(")")
+    return "%T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(")\n")
 }
 
 
@@ -101,6 +104,7 @@ fun kotlinReturnInvokeConstructorStatement(type: KotlinMetaType, parameters: Map
     return "return %T(".asCode(type.extractClass()).join(casted(parameters)).join(")")
 }
 
+
 fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty): CodeBlock =
         "register(MetaField(%S,"
                 .asCode(name)
@@ -113,14 +117,16 @@ fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: Ko
                 .join(metaTypeStatement(parameter.type))
                 .join("))")
 
-fun kotlinMetaMethodSuperStatement(name: String, type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = "%S,"
+
+fun kotlinMetaMethodSuperStatement(name: String, type: KotlinMetaType?, visibility: DescriptorVisibility): CodeBlock = "%S,"
         .asCode(name)
-        .join(metaTypeStatement(type))
+        .join(type?.let(::metaTypeStatement) ?: "%T".asCode(UNIT))
         .joinByComma(asPublicFlag(visibility))
 
 fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = metaTypeStatement(type).joinByComma(asPublicFlag(visibility))
 
 fun kotlinMetaClassSuperStatement(metaClass: KotlinMetaClass): CodeBlock = metaTypeStatement(metaClass.type)
+
 
 private fun metaEnumBlock(type: KotlinMetaType) = "metaEnum(%T::class.java, %T::valueOf)"
         .asCode(type.extractClass(), type.extractClass())
@@ -172,11 +178,21 @@ private fun CodeBlock.joinByComma(vararg blocks: CodeBlock): CodeBlock = listOf(
 
 private fun casted(parameter: KotlinMetaParameter): CodeBlock {
     val parameterClass = parameter.type.asPoetType()
-    return "argument as %T".asCode(parameterClass)
+    val block = "argument as %T".asCode(parameterClass)
+    if (parameter.varargs) {
+        return "*(".join(block).join(")")
+    }
+    return block
 }
 
 private fun casted(parameters: Map<String, KotlinMetaParameter>): CodeBlock = parameters.values
-        .mapIndexed { index, parameter -> "arguments[$index] as %T".asCode(parameter.type.asPoetType()) }
+        .mapIndexed { index, parameter ->
+            val block = "arguments[$index] as %T".asCode(parameter.type.asPoetType())
+            if (parameter.varargs) {
+                return@mapIndexed "*(".join(block).join(")")
+            }
+            return@mapIndexed block
+        }
         .joinToCode(COMMA)
 
 private fun asPublicFlag(visibility: DescriptorVisibility): CodeBlock {

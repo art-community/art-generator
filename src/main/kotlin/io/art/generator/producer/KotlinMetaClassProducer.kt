@@ -22,14 +22,20 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
 import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
 import com.squareup.kotlinpoet.jvm.throws
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.constants.*
-import io.art.generator.extension.*
+import io.art.generator.extension.asPoetType
+import io.art.generator.extension.couldBeGenerated
+import io.art.generator.extension.parentMethods
+import io.art.generator.extension.parentProperties
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaMethod
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.templates.*
+import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isUnit
+import java.util.Objects.isNull
 
 fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass) {
     val className = metaClassName(metaClass.type.className!!)
@@ -91,7 +97,7 @@ private fun TypeSpec.Builder.generateConstructors(metaClass: KotlinMetaClass, ty
                 var name = CONSTRUCTOR_NAME
                 if (index > 0) name += index
                 val constructorClassName = metaConstructorClassName(name)
-                TypeSpec.classBuilder(constructorClassName)
+                classBuilder(constructorClassName)
                         .superclass(KOTLIN_META_CONSTRUCTOR_CLASS_NAME.parameterizedBy(typeName))
                         .addFunction(constructorBuilder()
                                 .addModifiers(INTERNAL)
@@ -145,101 +151,96 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: KotlinMetaType
 }
 
 private fun TypeSpec.Builder.generateMethods(metaClass: KotlinMetaClass) {
-    val type = metaClass.type
-    val methods = metaClass.methods + metaClass.parentMethods()
-    methods.asSequence()
+    (metaClass.methods + metaClass.parentMethods())
+            .asSequence()
             .filter(KotlinMetaMethod::couldBeGenerated)
             .groupBy { method -> method.name }
-            .map { grouped -> grouped.value.forEachIndexed { methodIndex, method -> generateMethod(method, methodIndex, type) } }
+            .map { grouped -> grouped.value.forEachIndexed { methodIndex, method -> generateMethod(method, methodIndex, metaClass) } }
 }
 
-private fun TypeSpec.Builder.generateMethod(method: KotlinMetaMethod, index: Int, ownerType: KotlinMetaType) {
+private fun TypeSpec.Builder.generateMethod(method: KotlinMetaMethod, index: Int, ownerClass: KotlinMetaClass) {
     var name = method.name
     if (index > 0) name += index
     val methodName = metaMethodName(name)
     val methodClassName = kotlinMetaMethodClassName(name)
     val returnType = method.returnType
-//    val returnTypeName = returnType.withoutVariables()
-//    val static = method.modifiers.contains(STATIC)
-//    val parent = when {
-//        static -> ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnTypeName)
-//        else -> ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, ownerType.withoutVariables(), returnTypeName)
-//    }
-//    val variableExclusions = method.typeParameters
-//            .filter { parameter -> parameter.kind == VARIABLE_KIND }
-//            .map { parameter -> parameter.typeName }
-//            .toSet()
-//    classBuilder(methodClassName)
-//            .addModifiers(PUBLIC, FINAL, STATIC)
-//            .superclass(parent)
-//            .addMethod(constructorBuilder()
-//                    .addModifiers(PRIVATE)
-//                    .addCode(kotlinMetaMethodSuperStatement(method.name, returnType.excludeVariables(variableExclusions), method.modifiers))
-//                    .build())
-//            .apply { generateMethodInvocations(ownerType, method.name, method) }
-//            .apply { generateParameters(method) }
-//            .build()
-//            .apply(::addType)
-//    FieldSpec.builder(methodClassName, methodName)
-//            .addModifiers(PRIVATE, FINAL)
-//            .initializer(kotlinRegisterNewStatement(methodClassName))
-//            .build()
-//            .apply(::addField)
-//    methodBuilder(methodName)
-//            .addModifiers(PUBLIC)
-//            .returns(methodClassName)
-//            .addCode(kotlinReturnStatement(methodName))
-//            .build()
-//            .let(::addMethod)
+    val returnTypeName = returnType?.asPoetType() ?: UNIT
+    val static = ownerClass.isObject
+    val parent = when {
+        static -> KOTLIN_STATIC_META_METHOD_CLASS_NAME.parameterizedBy(returnTypeName)
+        else -> KOTLIN_INSTANCE_META_METHOD_CLASS_NAME.parameterizedBy(ownerClass.type.asPoetType(), returnTypeName)
+    }
+    classBuilder(methodClassName)
+            .superclass(parent)
+            .addFunction(constructorBuilder()
+                    .addModifiers(INTERNAL)
+                    .callSuperConstructor(kotlinMetaMethodSuperStatement(method.name, returnType, method.visibility))
+                    .build())
+            .apply { generateMethodInvocations(ownerClass, method.name, method) }
+            .apply { generateParameters(method) }
+            .build()
+            .apply(::addType)
+    PropertySpec.builder(methodName, methodClassName)
+            .addModifiers(PRIVATE, FINAL)
+            .initializer(kotlinRegisterNewStatement(methodClassName))
+            .build()
+            .apply(::addProperty)
+    FunSpec.builder(methodName)
+            .returns(methodClassName)
+            .addCode(kotlinReturnStatement(methodName))
+            .build()
+            .let(::addFunction)
 }
 
-private fun TypeSpec.Builder.generateMethodInvocations(type: KotlinMetaType, name: String, method: KotlinMetaMethod) {
-/*    val static = method.modifiers.contains(STATIC)
+private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaClass, name: String, method: KotlinMetaMethod) {
+    val static = ownerClass.isObject
     val parameters = method.parameters
-    val template = methodBuilder(INVOKE_NAME)
-            .addModifiers(PUBLIC)
-            .addAnnotation(OVERRIDE_CLASS_NAME)
-            .addException(THROWABLE_CLASS_NAME)
-            .returns(OBJECT_CLASS_NAME)
-            .apply { if (!static) addParameter(type.withoutVariables(), INSTANCE_NAME) }
+    val template = FunSpec.builder(INVOKE_NAME)
+            .addModifiers(OVERRIDE)
+            .throws(THROWABLE)
+            .returns(ANY.copy(nullable = true))
+            .apply { if (!static) addParameter(INSTANCE_NAME, ownerClass.type.asPoetType()) }
             .build()
     template.toBuilder().apply {
         val invoke = when {
-            static -> kotlinInvokeStaticStatement(name, type, parameters)
+            static -> kotlinInvokeStaticStatement(name, ownerClass.type, parameters)
             else -> kotlinInvokeInstanceStatement(name, parameters)
         }
-        when (method.returnType.originalType.kind) {
-            VOID -> addCode(invoke).addCode(kotlinReturnNullStatement())
+        when {
+            isNull(method.returnType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
+            isUnit(method.returnType!!.originalType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
             else -> addCode(kotlinReturnStatement(invoke))
         }
-        addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
-        addMethod(build())
+        addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
+        addFunction(build())
     }
     when (parameters.size) {
         0 -> template.toBuilder().apply {
             val invoke = when {
-                static -> kotlinInvokeWithoutArgumentsStaticStatement(name, type)
+                static -> kotlinInvokeWithoutArgumentsStaticStatement(name, ownerClass.type)
                 else -> kotlinInvokeWithoutArgumentsInstanceStatement(name)
             }
-            when (method.returnType.originalType.kind) {
-                VOID -> addCode(invoke).addCode(kotlinReturnNullStatement())
+            when {
+                isNull(method.returnType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
+                isUnit(method.returnType!!.originalType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
                 else -> addCode(kotlinReturnStatement(invoke))
             }
-            addMethod(build())
+            addFunction(build())
         }
         1 -> template.toBuilder().apply {
-            addParameter(OBJECT_CLASS_NAME, ARGUMENT_NAME)
+            addParameter(ARGUMENT_NAME, ANY)
             val invoke = when {
-                static -> kotlinInvokeOneArgumentStaticStatement(name, type, parameters.values.first())
+                static -> kotlinInvokeOneArgumentStaticStatement(name, ownerClass.type, parameters.values.first())
                 else -> kotlinInvokeOneArgumentInstanceStatement(name, parameters.values.first())
             }
-            when (method.returnType.originalType.kind) {
-                VOID -> addCode(invoke).addCode(kotlinReturnNullStatement())
+            when {
+                isNull(method.returnType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
+                isUnit(method.returnType!!.originalType) -> addCode(invoke).addCode(kotlinReturnNullStatement())
                 else -> addCode(kotlinReturnStatement(invoke))
             }
-            addMethod(build())
+            addFunction(build())
         }
-    }*/
+    }
 }
 
 private fun TypeSpec.Builder.generateParameters(method: KotlinMetaMethod) {

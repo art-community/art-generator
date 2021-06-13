@@ -34,6 +34,7 @@ import org.jetbrains.kotlin.descriptors.ClassKind.ENUM_ENTRY
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
+import org.jetbrains.kotlin.resolve.DescriptorUtils.isObject
 import org.jetbrains.kotlin.resolve.calls.tower.isSynthesized
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassOrAny
@@ -147,7 +148,7 @@ private class KotlinAnalyzingService {
                         className = classId.relativeClassName.pathSegments().last().asString(),
                         classPackageName = classId.packageFqName.asString(),
                         typeName = classId.asSingleFqName().asString(),
-                        typeParameterVariance = variance
+                        typeParameterVariance = variance,
                 )
             }.apply {
                 if (typeParameters.isNotEmpty()) return@apply
@@ -186,6 +187,8 @@ private class KotlinAnalyzingService {
 
             modality = modality,
 
+            isObject = isObject(this),
+
             properties = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<PropertyDescriptor>()
@@ -195,6 +198,7 @@ private class KotlinAnalyzingService {
             constructors = constructors
                     .asSequence()
                     .filter { descriptor -> !descriptor.isSynthesized }
+                    .filter { descriptor -> descriptor.typeParameters.isEmpty() }
                     .map { method -> method.asMetaMethod() }
                     .toList(),
 
@@ -202,6 +206,7 @@ private class KotlinAnalyzingService {
                     .asSequence()
                     .filterIsInstance<FunctionDescriptor>()
                     .filter { descriptor -> !descriptor.isSynthesized }
+                    .filter { descriptor -> descriptor.typeParameters.isEmpty() }
                     .map { method -> method.asMetaMethod() }
                     .toList(),
 
