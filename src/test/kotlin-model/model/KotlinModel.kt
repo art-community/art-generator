@@ -234,8 +234,6 @@ open class KotlinModel(
         }
     }
 
-    inline fun <reified T> membersOf() = T::class.members
-
     enum class Enum {
         FIRST
     }
@@ -259,6 +257,29 @@ open class KotlinModel(
     }
 
     object KotlinObject {
+        var iсp1: Boolean? = null
+        var iсp2: String? = null
+        var iсp6: List<String>? = null
+        var iсp8: List<*>? = null
+        var iсp9: List<String>? = null
+        var iсp10: List<String>? = null
+        var iсp18: BooleanArray? = null
+        var iсp22: Array<List<String>>? = null
+        var iсp23: Array<List<*>>? = null
+        var iсp25: Array<List<String>>? = null
+        var iсp26: Array<List<String>>? = null
+        var iсp27: Array<BooleanArray>? = null
+        var iсp29: Array<Array<List<String>>>? = null
+        var iсp30: Array<Array<List<*>>>? = null
+        var iсp32: Array<Array<List<String>>>? = null
+        var iсp33: Array<Array<List<String>>>? = null
+        var iсp34: List<BooleanArray>? = null
+        var iсp36: Array<List<Array<String>>>? = null
+        var iсp38: Array<List<Array<String>>>? = null
+        var iсp39: Array<List<Array<String>>>? = null
+        var iсp40: List<List<Boolean>>? = null
+        var iсp42: List<List<String>>? = null
+
         fun simpleMethod(p1: Int): Int {
             return p1
         }
