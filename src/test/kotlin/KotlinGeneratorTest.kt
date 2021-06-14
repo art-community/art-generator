@@ -30,11 +30,12 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
+import java.nio.file.Paths
 
 
 @TestInstance(PER_CLASS)
 class KotlinGeneratorTest {
-    private val root: Path by lazy { configuration.sources[KOTLIN]!!.first() }
+    private val root: Path = Paths.get("test")
     private val generatedFile: Path by lazy { root.resolve("meta").resolve("MetaExample.kt") }
     private val generatedClassName = "meta.MetaExample"
 

@@ -19,6 +19,7 @@
 package model.other;
 
 import lombok.*;
+import model.*;
 
 @Getter
 @Setter
@@ -31,7 +32,7 @@ public abstract class JavaClass {
     protected boolean protectedField;
     public boolean publicField;
     boolean internalField;
-    model.JavaInterface importedField;
+    MixedJavaInterface importedField;
 
     //Must be ignored
     private boolean privateMethod() {

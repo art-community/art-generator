@@ -45,9 +45,9 @@ val configuration: Configuration by lazy {
         Configuration(
                 sources = getNestedArray("sources") { source ->
                     SourceSet(
-                            languages = source.getStringArray("language").map { language -> GeneratorLanguage.valueOf(language.uppercase()) }.toSet(),
+                            languages = source.getStringArray("languages").map { language -> GeneratorLanguage.valueOf(language.uppercase()) }.toSet(),
                             root = get(source.getString("path")),
-                            module = getString("module"),
+                            module = source.getString("module"),
                     )
                 }.toSet(),
                 classpath = getString("classpath").split(if (isWindows()) SEMICOLON else COLON).map { path -> get(path) }.toSet(),

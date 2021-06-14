@@ -18,5 +18,5 @@
 
 package model;
 
-public class JavaEmptyClass {
+public class MixedJavaEmptyClass {
 }

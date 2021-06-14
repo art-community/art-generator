@@ -28,7 +28,7 @@ import java.util.*;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class JavaModel extends JavaClass implements JavaInterface {
+public class JavaModel extends MixedJavaClass implements MixedJavaInterface {
     boolean f1;
     String f2;
     List<String> f3;
@@ -138,7 +138,7 @@ public class JavaModel extends JavaClass implements JavaInterface {
         boolean f1;
         String f2;
         int f3;
-        JavaModel f5;
+        MixedJavaModel f5;
 
         public static int staticMethod(int argument) {
             return argument;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package model.other;
+package model.model;
 
 import lombok.*;
 
@@ -26,12 +26,11 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @EqualsAndHashCode
-public abstract class JavaClass {
+public abstract class MixedJavaClass {
     private boolean privateField;
     protected boolean protectedField;
     public boolean publicField;
     boolean internalField;
-    model.JavaInterface importedField;
 
     //Must be ignored
     private boolean privateMethod() {

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package model;
+package model.model;
 
 import lombok.*;
 import java.util.*;
@@ -28,7 +28,7 @@ import java.util.*;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class JavaModel extends JavaClass implements JavaInterface {
+public class MixedJavaModel extends MixedJavaClass implements MixedJavaInterface {
     boolean f1;
     String f2;
     List<String> f3;

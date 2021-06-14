@@ -46,8 +46,8 @@ object SourceWatchingService {
                     .map { language ->
                         if (source.languages.size > 1) {
                             language to MetaModuleClassNames(
-                                    name = metaModuleClassName + language.metaModuleClassNameSuffix,
-                                    fullName = metaModuleClassFullName + language.metaModuleClassNameSuffix
+                                    name = metaModuleClassName + language.suffix,
+                                    fullName = metaModuleClassFullName + language.suffix
                             )
                             return@forEach
                         }

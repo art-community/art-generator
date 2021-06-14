@@ -39,7 +39,7 @@ val META_METHOD_EXCLUSIONS = setOf(
         "clone"
 )
 
-enum class GeneratorLanguage(val metaModuleClassNameSuffix: String) {
+enum class GeneratorLanguage(val suffix: String) {
     JAVA("Java"),
     KOTLIN("Kotlin")
 }

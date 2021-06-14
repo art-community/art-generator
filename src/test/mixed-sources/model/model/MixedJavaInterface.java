@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-package model.other;
+package model.model;
 
-public interface JavaInterface {
+public interface MixedJavaInterface {
     String implementableMethod(String argument);
 
     default String defaultMethod(String argument) {

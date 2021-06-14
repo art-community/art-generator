@@ -26,7 +26,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @EqualsAndHashCode
-public abstract class JavaClass {
+public abstract class MixedJavaClass {
     private boolean privateField;
     protected boolean protectedField;
     public boolean publicField;

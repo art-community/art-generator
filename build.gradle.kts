@@ -67,13 +67,18 @@ dependencies {
 sourceSets {
     test {
         java {
-//            srcDir("src/test/kotlin-sources")
-//            srcDir("src/test/java-sources")
+            srcDir("src/test/kotlin-sources")
+            srcDir("src/test/java-sources")
             srcDir("src/test/mixed-sources")
         }
     }
     generator {
-//        java(file("src/test/java-sources"))
+        module("Example")
+
+        java(file("src/test/java-sources"))
+        kotlin(file("src/test/kotlin-sources"))
+
+        java(file("src/test/mixed-sources"))
         kotlin(file("src/test/mixed-sources"))
         consoleLogging()
     }

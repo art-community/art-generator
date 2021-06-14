@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-package model;
+package model.model;
 
 // Must be ignored
-public class JavaGeneric<T> {
+public class MixedJavaGeneric<T> {
 }

@@ -16,12 +16,8 @@
  * limitations under the License.
  */
 
-package model.model;
+package model.other;
 
-public interface JavaInterface {
-    String implementableMethod(String argument);
-
-    default String defaultMethod(String argument) {
-        return "test";
-    }
+// Must be ignored
+public class MixedJavaGeneric<T> {
 }
