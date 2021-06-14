@@ -34,6 +34,7 @@ import io.art.generator.extension.parentProperties
 import io.art.generator.model.*
 import io.art.generator.templates.*
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isUnit
+import org.jetbrains.kotlin.descriptors.Modality.ABSTRACT
 import org.jetbrains.kotlin.descriptors.Visibilities.Public
 import java.util.Objects.isNull
 
@@ -47,7 +48,7 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass) {
                     .addModifiers(INTERNAL)
                     .callSuperConstructor(kotlinMetaClassSuperStatement(metaClass))
                     .build())
-            .apply { generateConstructors(metaClass, typeName) }
+            .apply { if (metaClass.modality != ABSTRACT) generateConstructors(metaClass, typeName) }
             .apply { generateProperties(metaClass) }
             .apply { generateMethods(metaClass) }
             .apply {

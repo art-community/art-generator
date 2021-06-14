@@ -65,15 +65,16 @@ dependencies {
 }
 
 sourceSets {
-    val testSourceSet: SourceSet = test.get()
     test {
         java {
-            srcDir("src/test/kotlin-model")
+//            srcDir("src/test/kotlin-sources")
+//            srcDir("src/test/java-sources")
+            srcDir("src/test/mixed-sources")
         }
     }
     generator {
-        java(testSourceSet.java.sourceDirectories.first())
-        kotlin(file("src/test/kotlin-model"))
+//        java(file("src/test/java-sources"))
+        kotlin(file("src/test/mixed-sources"))
         consoleLogging()
     }
 }

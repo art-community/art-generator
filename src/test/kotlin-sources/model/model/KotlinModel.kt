@@ -15,17 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package model
+package model.model
 
 import java.time.Duration
 
+// Must be ignored
+const val outsideProperty = "test"
+
+// Must be ignored
+fun outsideMethod(argument: Int) {
+
+}
+
+// Must be ignored
 private class PrivateClass {}
+
+// Must be ignored
+internal class InternalClass {}
 
 class EmptyClass {}
 
 object EmptyObject {}
-
-internal class InternalClass {}
 
 sealed class KotlinModelParent(protected val protectedIcp: Boolean, val icp: Boolean) {
     protected val protectedIp: Boolean? = null
@@ -36,6 +46,7 @@ sealed class KotlinModelParent(protected val protectedIcp: Boolean, val icp: Boo
     lateinit var selfP: KotlinModelParent
     abstract var abstractProperty: String
 
+    // Must be ignored
     protected fun protectedInstanceMethod(argument: Int): Int {
         return argument
     }
@@ -147,10 +158,12 @@ data class KotlinModel(
     lateinit var mp20: NestedModel
     lateinit var mp22: Enum
 
+    // Must be ignored
     var specificProperty1: String
         get() = ""
         private set(value) = TODO()
 
+    // Must be ignored
     var specificProperty2: String
         get() = ""
         internal set(value) = TODO()
@@ -195,6 +208,7 @@ data class KotlinModel(
     }
 
     tailrec fun recursiveMethod(argument1: Long, argument2: Long = 1): Long {
+        // Must be ignored
         class LocalClass {}
 
         val soFar = argument1 * argument2
@@ -225,6 +239,7 @@ data class KotlinModel(
         }
     }
 
+    // Must be ignored as class (type will be available)
     inner class InnerModel {
         var p1 = false
         var p2: String? = null
@@ -235,10 +250,13 @@ data class KotlinModel(
         }
     }
 
+    // Must be ignored
     private class PrivateClass {}
 
+    // Must be ignored
     protected class ProtectedClass {}
 
+    // Must be ignored
     internal class InternalClass {}
 
     enum class Enum {
@@ -291,6 +309,7 @@ data class KotlinModel(
 interface KotlinInterface {
     val interfaceProperty: String
 
+    // Must be ignored
     private fun privateMethod() {
 
     }
@@ -303,6 +322,13 @@ interface KotlinInterface {
 }
 
 object KotlinObject : KotlinModelParent(false, true), KotlinInterface {
+    const val constantProperty = "test"
+
+    // Must be ignored
+    init {
+
+    }
+
     override var abstractProperty: String
         get() = TODO("Not yet implemented")
         set(value) {}
@@ -327,6 +353,7 @@ object KotlinObject : KotlinModelParent(false, true), KotlinInterface {
         TODO("Not yet implemented")
     }
 
+    // Must be ignored
     private fun privateMethod() {
 
     }
@@ -337,12 +364,20 @@ object KotlinObject : KotlinModelParent(false, true), KotlinInterface {
 }
 
 open class KotlinClass(override var abstractProperty: String) : KotlinModelParent(false, true), KotlinInterface {
+    // Must be ignored
     val KotlinObject.extensionProperty: String
         get() {
             TODO()
         }
 
+    constructor(input: Int) : this("") {
+
+    }
+
+    // Must be ignored
     fun KotlinObject.extensionFunction() = "test"
+
+    val genericProperty: KotlinGeneric<*>? = null
 
     override fun protectedAbstractMethod(argument: Int): Int {
         TODO("Not yet implemented")
@@ -364,6 +399,7 @@ open class KotlinClass(override var abstractProperty: String) : KotlinModelParen
         TODO("Not yet implemented")
     }
 
+    // Must be ignored
     private fun privateMethod() {
 
     }
@@ -372,15 +408,28 @@ open class KotlinClass(override var abstractProperty: String) : KotlinModelParen
 
     }
 
+    // Must be ignored
     suspend fun suspendFunction() {
 
     }
 
+    // Must be ignored
     suspend fun suspendFunctionParameter(parameter: suspend String.() -> Unit) {
 
     }
+
+    // Must be ignored
+    fun <T> genericMethod(): T? = null
+
+    // Must be ignored
+    fun <T> genericMethod(parameter: T.() -> Unit): Unit? = null
+
+    // Must be ignored
+    fun <T> genericMethod(parameter: T): Unit? = null
+
+    // Must be ignored as class
+    class KotlinGeneric<T>
 }
 
-fun outsideMethod(argument: Int) {
-
-}
+// Must be ignored as class
+class KotlinGeneric<T>

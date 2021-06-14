@@ -30,6 +30,8 @@ import org.jetbrains.kotlin.backend.common.descriptors.isSuspend
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
 import org.jetbrains.kotlin.builtins.functions.FunctionClassDescriptor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
+import org.jetbrains.kotlin.codegen.coroutines.isLocalSuspendFunctionNotSuspendLambda
+import org.jetbrains.kotlin.codegen.coroutines.isSuspendLambdaOrLocalFunction
 import org.jetbrains.kotlin.coroutines.isSuspendLambda
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.ClassKind.ANNOTATION_CLASS
@@ -204,6 +206,7 @@ private class KotlinAnalyzingService {
 
             constructors = constructors
                     .asSequence()
+                    .filter { descriptor -> !descriptor.isSuspendLambdaOrLocalFunction() }
                     .filter { descriptor -> !descriptor.isSynthesized }
                     .filter { descriptor -> descriptor.typeParameters.isEmpty() }
                     .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
@@ -214,6 +217,7 @@ private class KotlinAnalyzingService {
             functions = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<FunctionDescriptor>()
+                    .filter { descriptor -> !descriptor.isSuspendLambdaOrLocalFunction() }
                     .filter { descriptor -> !descriptor.isSynthesized }
                     .filter { descriptor -> !descriptor.isSuspend }
                     .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }

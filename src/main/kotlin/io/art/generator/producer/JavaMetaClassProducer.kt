@@ -46,7 +46,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
                     .addModifiers(PRIVATE)
                     .addCode(constructorStatement)
                     .build())
-            .apply { generateConstructors(metaClass, typeName) }
+            .apply { if (!metaClass.modifiers.contains(ABSTRACT)) generateConstructors(metaClass, typeName) }
             .apply { generateProperties(metaClass) }
             .apply { generateMethods(metaClass) }
             .apply {
