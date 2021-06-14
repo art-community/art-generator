@@ -27,8 +27,6 @@ object EmptyObject {}
 
 internal class InternalClass {}
 
-typealias Alias = KotlinModel
-
 sealed class KotlinModelParent(protected val protectedIcp: Boolean, val icp: Boolean) {
     protected val protectedIp: Boolean? = null
     val ip: Boolean? = null
@@ -75,7 +73,7 @@ data class KotlinModel(
         val icp15: Map<Boolean, List<*>>,
         val icp16: Map<in Boolean, List<*>>,
         val icp17: Map<out Boolean, List<*>>,
-        val icp18: Alias?,
+        val icp18: KotlinModel?,
         val icp19: InnerModel,
         val icp20: NestedModel,
         val icp21: Enum,
@@ -102,7 +100,7 @@ data class KotlinModel(
     val ip15: Map<Boolean, List<*>>? = null
     val ip16: Map<in Boolean, List<*>>? = null
     val ip17: Map<out Boolean, List<*>>? = null
-    val ip18: Alias? = null
+    val ip18: KotlinModel? = null
     val ip19: InnerModel? = null
     val ip20: NestedModel? = null
     val ip21: Enum? = null
@@ -123,10 +121,10 @@ data class KotlinModel(
     lateinit var mp15: Map<Boolean, List<*>>
     lateinit var mp16: Map<in Boolean, List<*>>
     lateinit var mp17: Map<out Boolean, List<*>>
-    lateinit var mp18: Alias
+    lateinit var mp18: KotlinModel
     lateinit var mp19: InnerModel
     lateinit var mp20: NestedModel
-    lateinit var mp21: Enum
+    lateinit var mp22: Enum
 
     var specificProperty1: String
         get() = ""
