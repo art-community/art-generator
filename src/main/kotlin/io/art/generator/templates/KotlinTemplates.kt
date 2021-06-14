@@ -70,7 +70,7 @@ fun kotlinReturnNullStatement() = "return null".asCode()
 
 
 fun kotlinInvokeInstanceStatement(method: String): CodeBlock {
-    return "$INSTANCE_NAME.$method()\n".asCode()
+    return "$INSTANCE_NAME.$method()".asCode()
 }
 
 fun kotlinInvokeInstanceStatement(method: String, parameter: KotlinMetaParameter): CodeBlock {
@@ -83,7 +83,7 @@ fun kotlinInvokeInstanceStatement(method: String, parameters: Map<String, Kotlin
 
 
 fun kotlinInvokeStaticStatement(method: String, type: KotlinMetaType): CodeBlock {
-    return "%T.$method()\n".asCode(type.extractClass())
+    return "%T.$method()".asCode(type.extractClass())
 }
 
 fun kotlinInvokeStaticStatement(method: String, type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {

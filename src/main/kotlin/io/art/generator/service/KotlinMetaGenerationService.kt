@@ -63,7 +63,6 @@ object KotlinMetaGenerationService {
                     FileSpec.builder(META_NAME, metaClass.name!!)
                             .addType(metaClass)
                             .addImport(KOTLIN_META_TYPE_CLASS_NAME, *META_METHODS.toTypedArray())
-                            .addImport(KOTLIN_CASTER_CLASS_NAME, CAST_METHOD_NAME)
                             .build()
                             .writeTo(root)
                     KOTLIN_LOGGER.info(GENERATED_MESSAGE(metaModuleClassFullName(moduleName)))

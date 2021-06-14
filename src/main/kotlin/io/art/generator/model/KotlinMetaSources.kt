@@ -34,6 +34,11 @@ enum class KotlinMetaTypeKind {
     UNKNOWN_KIND
 }
 
+enum class KotlinMetaPropertyFunctionKind {
+    GETTER,
+    SETTER
+}
+
 enum class KotlinTypeVariance {
     IN,
     OUT,
@@ -74,9 +79,9 @@ data class KotlinMetaType(
 data class KotlinMetaClass(
         val type: KotlinMetaType,
         val properties: Map<String, KotlinMetaProperty>,
-        val constructors: List<KotlinMetaMethod>,
+        val constructors: List<KotlinMetaFunction>,
         val innerClasses: Map<String, KotlinMetaClass>,
-        val methods: List<KotlinMetaMethod>,
+        val functions: List<KotlinMetaFunction>,
         val visibility: DescriptorVisibility,
         val modality: Modality,
         val parent: KotlinMetaClass? = null,
@@ -88,8 +93,13 @@ data class KotlinMetaProperty(
         val name: String,
         val type: KotlinMetaType,
         val visibility: DescriptorVisibility,
-        val hasGetter: Boolean,
-        val hasSetter: Boolean,
+        val getter: KotlinMetaPropertyFunction?,
+        val setter: KotlinMetaPropertyFunction?,
+)
+
+data class KotlinMetaPropertyFunction(
+        val kind: KotlinMetaPropertyFunctionKind,
+        val visibility: DescriptorVisibility,
 )
 
 data class KotlinMetaParameter(
@@ -99,7 +109,7 @@ data class KotlinMetaParameter(
         val varargs: Boolean,
 )
 
-data class KotlinMetaMethod(
+data class KotlinMetaFunction(
         val name: String,
         val returnType: KotlinMetaType?,
         val parameters: Map<String, KotlinMetaParameter>,

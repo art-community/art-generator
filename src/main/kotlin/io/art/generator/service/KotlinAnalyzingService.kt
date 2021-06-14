@@ -20,6 +20,8 @@ package io.art.generator.service
 
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.model.*
+import io.art.generator.model.KotlinMetaPropertyFunctionKind.GETTER
+import io.art.generator.model.KotlinMetaPropertyFunctionKind.SETTER
 import io.art.generator.model.KotlinMetaTypeKind.*
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
@@ -191,7 +193,7 @@ private class KotlinAnalyzingService {
                     .asSequence()
                     .filterIsInstance<PropertyDescriptor>()
                     .filter { descriptor -> !descriptor.isSynthesized }
-                    .associate { symbol -> symbol.name.toString() to symbol.asMetaProperty() },
+                    .associate { descriptor -> descriptor.name.toString() to descriptor.asMetaProperty() },
 
             constructors = constructors
                     .asSequence()
@@ -199,17 +201,17 @@ private class KotlinAnalyzingService {
                     .filter { descriptor -> descriptor.typeParameters.isEmpty() }
                     .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
                     .filter { descriptor -> descriptor.typeParameters.isEmpty() }
-                    .map { method -> method.asMetaMethod() }
+                    .map { descriptor -> descriptor.asMetaFunction() }
                     .toList(),
 
-            methods = getAllDescriptors(defaultType.memberScope)
+            functions = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<FunctionDescriptor>()
                     .filter { descriptor -> !descriptor.isSynthesized }
                     .filter { descriptor -> !descriptor.isSuspend }
                     .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
                     .filter { descriptor -> descriptor.typeParameters.isEmpty() }
-                    .map { method -> method.asMetaMethod() }
+                    .map { descriptor -> descriptor.asMetaFunction() }
                     .toList(),
 
             innerClasses = getAllDescriptors(defaultType.memberScope)
@@ -221,7 +223,7 @@ private class KotlinAnalyzingService {
                     .filter { descriptor -> !descriptor.isSealed() }
                     .filter { descriptor -> !descriptor.classId!!.isLocal }
                     .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
-                    .associate { symbol -> symbol.name.toString() to symbol.asMetaClass() },
+                    .associate { descriptor -> descriptor.name.toString() to descriptor.asMetaClass() },
 
             parent = getSuperClassOrAny()
                     .takeIf { descriptor -> descriptor.name.asString() != Any::class.qualifiedName!! }
@@ -239,11 +241,11 @@ private class KotlinAnalyzingService {
                     .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     .filter { descriptor -> descriptor != this }
                     .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
-                    .map { interfaceType -> interfaceType.asMetaClass() }
+                    .map { descriptor -> descriptor.asMetaClass() }
                     .toList()
     )
 
-    private fun FunctionDescriptor.asMetaMethod() = KotlinMetaMethod(
+    private fun FunctionDescriptor.asMetaFunction() = KotlinMetaFunction(
             name = name.toString(),
             returnType = returnType?.asMetaType(),
             parameters = valueParameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
@@ -255,8 +257,8 @@ private class KotlinAnalyzingService {
             name = name.toString(),
             type = type.asMetaType(),
             visibility = visibility,
-            hasGetter = nonNull(getter),
-            hasSetter = nonNull(setter)
+            getter = getter?.let { function -> KotlinMetaPropertyFunction(kind = GETTER, visibility = function.visibility) },
+            setter = setter?.let { function -> KotlinMetaPropertyFunction(kind = SETTER, visibility = function.visibility) },
     )
 
     private fun ValueParameterDescriptor.asMetaParameter() = KotlinMetaParameter(

@@ -26,7 +26,8 @@ import com.squareup.kotlinpoet.WildcardTypeName.Companion.producerOf
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.model.KotlinMetaClass
-import io.art.generator.model.KotlinMetaMethod
+import io.art.generator.model.KotlinMetaFunction
+import io.art.generator.model.KotlinMetaPropertyFunction
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.model.KotlinMetaTypeKind.*
 import io.art.generator.model.KotlinTypeVariance.*
@@ -83,10 +84,12 @@ fun KotlinMetaType.extractClass(): TypeName = when (kind) {
 
 fun KotlinMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && visibility.delegate == Public
 
-fun KotlinMetaMethod.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) && visibility.delegate == Public
+fun KotlinMetaFunction.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) && visibility.delegate == Public
+
+fun KotlinMetaPropertyFunction.couldBeGenerated() = visibility.delegate == Public
 
 fun KotlinMetaClass.parentMethods() = parent
-        ?.methods
+        ?.functions
         ?.filter { method -> method.visibility.delegate == Public }
         ?: emptyList()
 
