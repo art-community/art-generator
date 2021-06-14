@@ -126,7 +126,7 @@ data class KotlinModel(
     lateinit var mp18: Alias
     lateinit var mp19: InnerModel
     lateinit var mp20: NestedModel
-    lateinit var ip22: Enum
+    lateinit var mp21: Enum
 
     var specificProperty1: String
         get() = ""
