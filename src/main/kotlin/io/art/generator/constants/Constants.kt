@@ -46,4 +46,4 @@ enum class GeneratorLanguage(val suffix: String) {
 
 val EMPTY_DISPOSABLE = Disposable {}
 
-const val KOTLIN_COMPILER_MODULE_NAME = "kotlin-analyzer"
+const val KOTLIN_ANALYZER_MODULE_NAME = "kotlin-analyzer"
