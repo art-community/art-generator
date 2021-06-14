@@ -161,15 +161,15 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: KotlinMetaType
 
 private fun TypeSpec.Builder.generateFunctions(metaClass: KotlinMetaClass) {
     val parentFunctions = metaClass.parentFunctions().toSet()
-    val functions = metaClass.functions.filter(parentFunctions::contains)
+    val functions = metaClass.functions.filter { function -> !parentFunctions.contains(function) }
     (functions + parentFunctions)
             .asSequence()
             .filter(KotlinMetaFunction::couldBeGenerated)
             .groupBy { method -> method.name }
-            .map { grouped -> grouped.value.forEachIndexed { methodIndex, method -> generateMethod(method, methodIndex, metaClass) } }
+            .map { grouped -> grouped.value.forEachIndexed { methodIndex, method -> generateFunction(method, methodIndex, metaClass) } }
 }
 
-private fun TypeSpec.Builder.generateMethod(function: KotlinMetaFunction, index: Int, ownerClass: KotlinMetaClass) {
+private fun TypeSpec.Builder.generateFunction(function: KotlinMetaFunction, index: Int, ownerClass: KotlinMetaClass) {
     var name = function.name
     if (index > 0) name += index
     val methodName = metaMethodName(name)
@@ -187,7 +187,7 @@ private fun TypeSpec.Builder.generateMethod(function: KotlinMetaFunction, index:
                     .addModifiers(INTERNAL)
                     .callSuperConstructor(kotlinMetaMethodSuperStatement(function.name, returnType))
                     .build())
-            .apply { generateMethodInvocations(ownerClass, function.name, function) }
+            .apply { generateFunctionInvocations(ownerClass, function.name, function) }
             .apply { generateParameters(function) }
             .build()
             .apply(::addType)
@@ -296,7 +296,7 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
             .let(::addFunction)
 }
 
-private fun TypeSpec.Builder.generateMethodInvocations(ownerClass: KotlinMetaClass, name: String, function: KotlinMetaFunction) {
+private fun TypeSpec.Builder.generateFunctionInvocations(ownerClass: KotlinMetaClass, name: String, function: KotlinMetaFunction) {
     val static = ownerClass.isObject
     val parameters = function.parameters
     val template = FunSpec.builder(INVOKE_NAME)

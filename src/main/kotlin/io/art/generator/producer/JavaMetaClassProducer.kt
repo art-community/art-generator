@@ -158,8 +158,9 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
 
 private fun TypeSpec.Builder.generateMethods(metaClass: JavaMetaClass) {
     val type = metaClass.type
-    val methods = metaClass.methods + metaClass.parentMethods()
-    methods.asSequence()
+    val parentMethods = metaClass.parentMethods().toSet()
+    val methods = metaClass.methods.filter { method -> !parentMethods.contains(method) }
+    (methods + parentMethods)
             .filter(JavaMetaMethod::couldBeGenerated)
             .groupBy { method -> method.name }
             .map { grouped -> grouped.value.forEachIndexed { methodIndex, method -> generateMethod(method, methodIndex, type) } }
