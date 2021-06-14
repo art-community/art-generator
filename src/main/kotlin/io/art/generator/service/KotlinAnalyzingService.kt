@@ -69,7 +69,6 @@ private class KotlinAnalyzingService {
                 .map { file -> file.name }
                 .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()
-                .apply { println(toList()) }
                 .filter { descriptor -> descriptor.defaultType.resolved() }
                 .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != metaClassName }
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }

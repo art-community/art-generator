@@ -42,7 +42,7 @@ sealed class MixedKotlinModelParent(protected val protectedIcp: Boolean, val icp
     val ip: Boolean? = null
     lateinit var protectedMp: String
     lateinit var publicMp: String
-    lateinit var childP: KotlinModel
+    lateinit var childP: MixedKotlinModel
     lateinit var selfP: KotlinModelParent
     abstract var abstractProperty: String
 
@@ -84,15 +84,15 @@ data class MixedKotlinModel(
         val icp15: Map<Boolean, List<*>>,
         val icp16: Map<in Boolean, List<*>>,
         val icp17: Map<out Boolean, List<*>>,
-        val icp18: KotlinModel?,
+        val icp18: MixedKotlinModel?,
         val icp19: InnerModel,
         val icp20: NestedModel,
         val icp21: Enum,
         val icfp1: () -> Unit,
         val icfp2: () -> Nothing,
         val icfp3: () -> Any,
-        val icfp4: (String, String, String) -> KotlinModel,
-        val icfp5: Map<Enum, List<Array<Enum>>>.(String, String, String) -> KotlinModel, override var abstractProperty: String,
+        val icfp4: (String, String, String) -> MixedKotlinModel,
+        val icfp5: Map<Enum, List<Array<Enum>>>.(String, String, String) -> MixedKotlinModel, override var abstractProperty: String,
 ) : KotlinModelParent(icp1, icp1) {
     val ip1: Boolean? = null
     val ip2: String? = null
@@ -111,7 +111,7 @@ data class MixedKotlinModel(
     val ip15: Map<Boolean, List<*>>? = null
     val ip16: Map<in Boolean, List<*>>? = null
     val ip17: Map<out Boolean, List<*>>? = null
-    val ip18: KotlinModel? = null
+    val ip18: MixedKotlinModel? = null
     val ip19: InnerModel? = null
     val ip20: NestedModel? = null
     val ip21: Enum? = null
@@ -132,7 +132,7 @@ data class MixedKotlinModel(
     val lip15: Map<Boolean, List<*>>? by lazy { null }
     val lip16: Map<in Boolean, List<*>>? by lazy { null }
     val lip17: Map<out Boolean, List<*>>? by lazy { null }
-    val lip18: KotlinModel? by lazy { null }
+    val lip18: MixedKotlinModel? by lazy { null }
     val lip19: InnerModel? by lazy { null }
     val lip20: NestedModel? by lazy { null }
     val lip21: Enum? by lazy { null }
@@ -153,7 +153,7 @@ data class MixedKotlinModel(
     lateinit var mp15: Map<Boolean, List<*>>
     lateinit var mp16: Map<in Boolean, List<*>>
     lateinit var mp17: Map<out Boolean, List<*>>
-    lateinit var mp18: KotlinModel
+    lateinit var mp18: MixedKotlinModel
     lateinit var mp19: InnerModel
     lateinit var mp20: NestedModel
     lateinit var mp22: Enum
@@ -321,7 +321,7 @@ interface MixedKotlinInterface {
     fun implementableMethod()
 }
 
-object MixedKotlinObject : KotlinModelParent(false, true), KotlinInterface {
+object MixedKotlinObject : KotlinModelParent(false, true), MixedKotlinInterface {
     const val constantProperty = "test"
 
     // Must be ignored
@@ -363,9 +363,9 @@ object MixedKotlinObject : KotlinModelParent(false, true), KotlinInterface {
     }
 }
 
-open class MixedKotlinClass(override var abstractProperty: String) : KotlinModelParent(false, true), KotlinInterface {
+open class MixedKotlinClass(override var abstractProperty: String) : KotlinModelParent(false, true), MixedKotlinInterface {
     // Must be ignored
-    val KotlinObject.extensionProperty: String
+    val MixedKotlinObject.extensionProperty: String
         get() {
             TODO()
         }
@@ -375,9 +375,9 @@ open class MixedKotlinClass(override var abstractProperty: String) : KotlinModel
     }
 
     // Must be ignored
-    fun KotlinObject.extensionFunction() = "test"
+    fun MixedKotlinObject.extensionFunction() = "test"
 
-    val genericProperty: KotlinGeneric<*>? = null
+    val genericProperty: MixedKotlinGeneric<*>? = null
 
     override fun protectedAbstractMethod(argument: Int): Int {
         TODO("Not yet implemented")
@@ -428,7 +428,7 @@ open class MixedKotlinClass(override var abstractProperty: String) : KotlinModel
     fun <T> genericMethod(parameter: T): Unit? = null
 
     // Must be ignored as class
-    class KotlinGeneric<T>
+    class MixedKotlinGeneric<T>
 }
 
 // Must be ignored as class
