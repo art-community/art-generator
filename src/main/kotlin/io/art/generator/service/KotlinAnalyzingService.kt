@@ -49,7 +49,8 @@ import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.nio.file.Path
-import java.util.Objects.nonNull
+import java.util.*
+import java.util.Objects.*
 
 fun analyzeKotlinSources(root: Path) = KotlinAnalyzingService().analyzeKotlinSources(root)
 
@@ -198,6 +199,7 @@ private class KotlinAnalyzingService {
                     .filter { descriptor -> !descriptor.isSuspend }
                     .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
                     .filter { descriptor -> descriptor.typeParameters.isEmpty() }
+                    .filter { descriptor -> isNull(descriptor.extensionReceiverParameter) }
                     .associate { descriptor -> descriptor.name.toString() to descriptor.asMetaProperty() },
 
             constructors = constructors
@@ -216,6 +218,7 @@ private class KotlinAnalyzingService {
                     .filter { descriptor -> !descriptor.isSuspend }
                     .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
                     .filter { descriptor -> descriptor.typeParameters.isEmpty() }
+                    .filter { descriptor -> isNull(descriptor.extensionReceiverParameter) }
                     .map { descriptor -> descriptor.asMetaFunction() }
                     .toList(),
 

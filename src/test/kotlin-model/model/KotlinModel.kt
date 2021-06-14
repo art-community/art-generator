@@ -104,6 +104,27 @@ data class KotlinModel(
     val ip19: InnerModel? = null
     val ip20: NestedModel? = null
     val ip21: Enum? = null
+    val lip1: Boolean? by lazy { null }
+    val lip2: String? by lazy { null }
+    val lip3: BooleanArray? by lazy { null }
+    val lip4: Array<String>? by lazy { null }
+    val lip5: Array<*>? by lazy { null }
+    val lip6: Array<in String>? by lazy { null }
+    val lip7: Array<out String>? by lazy { null }
+    val lip8: List<Boolean>? by lazy { null }
+    val lip9: List<String>? by lazy { null }
+    val lip10: List<*>? by lazy { null }
+    val lip11: Map<Boolean, String>? by lazy { null }
+    val lip12: Map<*, String>? by lazy { null }
+    val lip13: Map<Boolean, *>? by lazy { null }
+    val lip14: Map<Boolean, BooleanArray>? by lazy { null }
+    val lip15: Map<Boolean, List<*>>? by lazy { null }
+    val lip16: Map<in Boolean, List<*>>? by lazy { null }
+    val lip17: Map<out Boolean, List<*>>? by lazy { null }
+    val lip18: KotlinModel? by lazy { null }
+    val lip19: InnerModel? by lazy { null }
+    val lip20: NestedModel? by lazy { null }
+    val lip21: Enum? by lazy { null }
     lateinit var mp1: Duration
     lateinit var mp2: String
     lateinit var mp3: BooleanArray
@@ -156,6 +177,14 @@ data class KotlinModel(
 
     inline fun inlineMethod(crossinline body: () -> Unit) {
         val runnable = Runnable { body() }
+    }
+
+    inline fun inlineMethodWithCrossInline(crossinline body: () -> Unit) {
+        val runnable = Runnable { body() }
+    }
+
+    inline fun inlineMethodWithNoInline(noinline body1: () -> Unit, body2: () -> Unit) {
+        val runnable = Runnable { body1() }
     }
 
     infix fun infixMethod(argument: String): String {
@@ -293,6 +322,7 @@ object KotlinObject : KotlinModelParent(false, true), KotlinInterface {
         get() = TODO("Not yet implemented")
         set(value) = TODO("Not yet implemented")
 
+    @Throws(NullPointerException::class)
     override fun implementableMethod() {
         TODO("Not yet implemented")
     }
@@ -306,12 +336,19 @@ object KotlinObject : KotlinModelParent(false, true), KotlinInterface {
     }
 }
 
-class KotlinClass(override var abstractProperty: String) : KotlinModelParent(false, true), KotlinInterface {
+open class KotlinClass(override var abstractProperty: String) : KotlinModelParent(false, true), KotlinInterface {
+    val KotlinObject.extensionProperty: String
+        get() {
+            TODO()
+        }
+
+    fun KotlinObject.extensionFunction() = "test"
+
     override fun protectedAbstractMethod(argument: Int): Int {
         TODO("Not yet implemented")
     }
 
-    override fun abstractMethod(argument: Int): Int {
+    final override fun abstractMethod(argument: Int): Int {
         TODO("Not yet implemented")
     }
 
@@ -322,6 +359,7 @@ class KotlinClass(override var abstractProperty: String) : KotlinModelParent(fal
         get() = TODO("Not yet implemented")
         set(value) = TODO("Not yet implemented")
 
+    @Throws(NullPointerException::class)
     override fun implementableMethod() {
         TODO("Not yet implemented")
     }
@@ -331,6 +369,14 @@ class KotlinClass(override var abstractProperty: String) : KotlinModelParent(fal
     }
 
     fun publicSelfMethod() {
+
+    }
+
+    suspend fun suspendFunction() {
+
+    }
+
+    suspend fun suspendFunctionParameter(parameter: suspend String.() -> Unit) {
 
     }
 }
