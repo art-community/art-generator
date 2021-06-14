@@ -28,15 +28,16 @@ import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.extension.parentFields
 import io.art.generator.extension.parentMethods
+import io.art.generator.factory.NameFactory
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaType
 import io.art.generator.templates.*
 import javax.lang.model.element.Modifier.*
 
-fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
+fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFactory) {
     val className = metaClassName(metaClass.type.className!!)
-    val metaClassName = javaMetaClassClassName(metaClass.type.className)
+    val metaClassName = javaMetaClassClassName(metaClass.type.className, nameFactory)
     val typeName = metaClass.type.asPoetType()
     val constructorStatement = javaMetaClassSuperStatement(metaClass)
     classBuilder(metaClassName)
@@ -53,7 +54,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
                 metaClass.innerClasses
                         .values
                         .filter(JavaMetaClass::couldBeGenerated)
-                        .forEach { inner -> generateClass(inner) }
+                        .forEach { inner -> generateClass(inner, nameFactory) }
             }
             .build()
             .apply { alwaysQualify(metaClass.type.classFullName) }

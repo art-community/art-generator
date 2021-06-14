@@ -26,7 +26,8 @@ import io.art.generator.constants.*
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.extension.asPoetType
 import io.art.generator.extension.extractClass
-import io.art.generator.extension.name
+import io.art.generator.factory.NameFactory
+import io.art.generator.factory.name
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaParameter
 import io.art.generator.model.KotlinMetaProperty
@@ -34,11 +35,11 @@ import io.art.generator.model.KotlinMetaType
 import io.art.generator.model.KotlinMetaTypeKind.*
 
 
-fun kotlinMetaPackageClassName(name: String) =
-        ClassName.bestGuess("Meta${capitalize(name)}Package".name())
+fun kotlinMetaPackageClassName(name: String, factory: NameFactory) =
+        ClassName.bestGuess("Meta${capitalize(name)}Package".name(factory))
 
-fun kotlinMetaClassClassName(name: String) =
-        ClassName.bestGuess("Meta${capitalize(name)}Class".name())
+fun kotlinMetaClassClassName(name: String, factory: NameFactory) =
+        ClassName.bestGuess("Meta${capitalize(name)}Class".name(factory))
 
 fun kotlinMetaMethodClassName(name: String) =
         ClassName.bestGuess("Meta${capitalize(name)}Method")

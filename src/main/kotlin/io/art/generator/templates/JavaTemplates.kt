@@ -28,18 +28,19 @@ import io.art.generator.constants.*
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.extension.asPoetType
 import io.art.generator.extension.extractClass
-import io.art.generator.extension.name
+import io.art.generator.factory.NameFactory
+import io.art.generator.factory.name
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaField
 import io.art.generator.model.JavaMetaParameter
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.*
 
-fun javaMetaPackageClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Package".name())
+fun javaMetaPackageClassName(name: String, nameFactory: NameFactory): ClassName =
+        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Package".name(nameFactory))
 
-fun javaMetaClassClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Class".name())
+fun javaMetaClassClassName(name: String, nameFactory: NameFactory): ClassName =
+        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Class".name(nameFactory))
 
 fun javaMetaMethodClassName(name: String): ClassName =
         ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Method")

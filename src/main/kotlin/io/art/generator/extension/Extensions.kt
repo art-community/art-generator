@@ -57,15 +57,3 @@ val File.isJar: Boolean
 
 val String.packages: List<String>
     get() = split(DOT)
-
-private val NAMES = mutableMapOf<String, Int>()
-
-fun String.name(): String {
-    if (!NAMES.containsKey(this)) {
-        NAMES[this] = 0
-        return this
-    }
-    val index = NAMES[this]!! + 1
-    NAMES[this] = index
-    return this + index
-}

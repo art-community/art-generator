@@ -27,8 +27,6 @@ import io.art.generator.constants.SOURCES_CHANGED
 import io.art.generator.constants.SOURCES_NOT_FOUND
 import io.art.generator.detector.SourcesChanges
 import io.art.generator.detector.detectChanges
-import io.art.generator.service.JavaMetaGenerationService.generateJavaMetaClasses
-import io.art.generator.service.KotlinMetaGenerationService.generateKotlinMetaClasses
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.generator.templates.metaModuleClassName
 import io.art.scheduler.manager.Scheduling.schedule

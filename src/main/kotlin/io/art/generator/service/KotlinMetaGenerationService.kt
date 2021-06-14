@@ -27,6 +27,7 @@ import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.constants.*
 import io.art.generator.extension.couldBeGenerated
+import io.art.generator.factory.NameFactory
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaNode
 import io.art.generator.model.asTree
@@ -34,7 +35,9 @@ import io.art.generator.producer.generateClass
 import io.art.generator.templates.*
 import java.nio.file.Path
 
-object KotlinMetaGenerationService {
+fun generateKotlinMetaClasses(root: Path, classes: Sequence<KotlinMetaClass>, metaClassName: String) = KotlinMetaGenerationService().generateKotlinMetaClasses(root, classes, metaClassName)
+
+private class KotlinMetaGenerationService(private val nameFactory: NameFactory = NameFactory()) {
     fun generateKotlinMetaClasses(root: Path, classes: Sequence<KotlinMetaClass>, metaClassName: String) {
         KOTLIN_LOGGER.info(GENERATING_METAS_MESSAGE(classes.kotlinClassNames()))
         root.toFile().parentFile.mkdirs()
@@ -79,7 +82,7 @@ object KotlinMetaGenerationService {
             return
         }
         val metaPackageName = metaPackageName(packageName)
-        val packageClassName = kotlinMetaPackageClassName(packageName)
+        val packageClassName = kotlinMetaPackageClassName(packageName, nameFactory)
         PropertySpec.builder(metaPackageName, packageClassName)
                 .addModifiers(PRIVATE)
                 .initializer(kotlinRegisterNewStatement(packageClassName))
@@ -96,7 +99,9 @@ object KotlinMetaGenerationService {
                         .callSuperConstructor(kotlinNamedSuperStatement(packageName))
                         .addModifiers(INTERNAL)
                         .build())
-        node.classes.filter(KotlinMetaClass::couldBeGenerated).forEach(packageBuilder::generateClass)
+        node.classes
+                .filter(KotlinMetaClass::couldBeGenerated)
+                .forEach { metaClass -> packageBuilder.generateClass(metaClass, nameFactory) }
         node.children.values.forEach { child ->
             packageBuilder.generateTree(child.packageShortName, child)
         }

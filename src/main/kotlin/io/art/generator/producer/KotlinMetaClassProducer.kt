@@ -31,6 +31,7 @@ import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.extension.parentMethods
 import io.art.generator.extension.parentProperties
+import io.art.generator.factory.NameFactory
 import io.art.generator.model.*
 import io.art.generator.templates.*
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isUnit
@@ -38,9 +39,9 @@ import org.jetbrains.kotlin.descriptors.Modality.ABSTRACT
 import org.jetbrains.kotlin.descriptors.Visibilities.Public
 import java.util.Objects.isNull
 
-fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass) {
+fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: NameFactory) {
     val className = metaClassName(metaClass.type.className!!)
-    val metaClassName = kotlinMetaClassClassName(metaClass.type.className)
+    val metaClassName = kotlinMetaClassClassName(metaClass.type.className, nameFactory)
     val typeName = metaClass.type.asPoetType()
     classBuilder(metaClassName)
             .superclass(KOTLIN_META_CLASS_CLASS_NAME.parameterizedBy(typeName))
@@ -55,7 +56,7 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass) {
                 metaClass.innerClasses
                         .values
                         .filter(KotlinMetaClass::couldBeGenerated)
-                        .forEach { inner -> generateClass(inner) }
+                        .forEach { inner -> generateClass(inner, nameFactory) }
             }
             .build()
             .apply(::addType)
