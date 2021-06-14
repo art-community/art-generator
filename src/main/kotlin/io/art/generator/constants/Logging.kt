@@ -18,31 +18,31 @@
 
 package io.art.generator.constants
 
+import io.art.core.constants.StringConstants.NEW_LINE
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.KotlinMetaClass
 import io.art.logging.logger.Logger
-import io.art.logging.module.LoggingModule
+import io.art.logging.module.LoggingModule.logger
 import java.nio.file.Path
-
-val COMMON_LOGGER: Logger = LoggingModule.logger(GENERATOR_NAME)
-
-fun Collection<Path>.relativeNames(root: Path) = map { path -> path.toFile().relativeTo(root.toFile()) }.toList()
 
 fun Sequence<JavaMetaClass>.javaClassNames() = map { source -> source.type.classFullName!! }.toList()
 
 fun Sequence<KotlinMetaClass>.kotlinClassNames() = map { source -> source.type.classFullName!! }.toList()
 
-val JAVA_LOGGER: Logger = LoggingModule.logger(JAVA)
-val KOTLIN_LOGGER: Logger = LoggingModule.logger(KOTLIN)
+val JAVA_LOGGER: Logger = logger(JAVA)
 
-val SOURCES_CHANGED = { root: Path, modified: List<Path>, deleted: List<Path> -> "Sources changed\nModified: ${modified.relativeNames(root)}\nDeleted: ${deleted.relativeNames(root)}" }
+val KOTLIN_LOGGER: Logger = logger(KOTLIN)
+
+val SOURCES_CHANGED = { root: Path, modified: List<Path>, deleted: List<Path> -> "Sources changed\nModified:\n${modified.relativeNames(root)}\n\nDeleted:\n${deleted.relativeNames(root)}" }
 
 val SOURCES_NOT_FOUND = { root: Path -> "Sources not found inside $root" }
 
 val ANALYZING_MESSAGE = { root: Path -> "Analyzing sources inside $root" }
 
-val ANALYZE_COMPLETED = { sources: List<String> -> "Analyze completed\nClasses: $sources" }
+val ANALYZE_COMPLETED = { sources: List<String> -> "Analyze completed. Classes:\n${sources.joinToString(NEW_LINE)}" }
 
-val GENERATING_METAS_MESSAGE = { classes: List<String> -> "Generating meta classes\nSources: $classes" }
+val GENERATING_METAS_MESSAGE = { classes: List<String> -> "Generating meta classes for:\n${classes.joinToString(NEW_LINE)}" }
 
 val GENERATED_MESSAGE = { name: String -> "Generated meta class: $name" }
+
+private fun Collection<Path>.relativeNames(root: Path) = map { path -> path.toFile().relativeTo(root.toFile()) }.toList().joinToString(NEW_LINE)

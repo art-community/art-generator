@@ -29,14 +29,14 @@ import java.nio.file.Path
 fun collectJavaSources(root: Path, excludedClassNames: Set<String>) = root.toFile()
         .walkTopDown()
         .asSequence()
-        .filter { file -> excludedClassNames.none { name -> metaModuleJavaFile(root, name).exists() || file == metaModuleJavaFile(root, name) } }
+        .filter { file -> excludedClassNames.none { name -> metaModuleJavaFile(root, name).exists() && file == metaModuleJavaFile(root, name) } }
         .filter { file -> file.isJava }
         .map { file -> file.toPath() }
 
 fun collectKotlinSources(root: Path, excludedClassNames: Set<String>) = root.toFile()
         .walkTopDown()
         .asSequence()
-        .filter { file -> excludedClassNames.none { name -> metaModuleKotlinFile(root, name).exists() || file == metaModuleKotlinFile(root, name) } }
+        .filter { file -> excludedClassNames.none { name -> metaModuleKotlinFile(root, name).exists() && file == metaModuleKotlinFile(root, name) } }
         .filter { file -> file.isKotlin }
         .map { file -> file.toPath() }
 
