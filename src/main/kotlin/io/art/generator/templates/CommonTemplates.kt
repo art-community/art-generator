@@ -24,6 +24,8 @@ import io.art.generator.constants.META_NAME
 
 fun metaModuleClassFullName(name: String): String = "$META_NAME.Meta$name"
 
+fun metaModuleClassName(name: String): String = "Meta$name"
+
 fun metaClassName(name: String): String = "${decapitalize(name)}Class"
 
 fun metaPackageName(name: String): String = "${name}Package"

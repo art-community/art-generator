@@ -18,7 +18,7 @@
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
 import io.art.generator.configuration.configuration
-import io.art.generator.constants.GeneratorLanguages.JAVA
+import io.art.generator.constants.GeneratorLanguage.JAVA
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.JavaCompilerConfiguration

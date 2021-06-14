@@ -25,7 +25,6 @@ import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
 import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
 import io.art.core.constants.StringConstants.EMPTY_STRING
-import io.art.generator.configuration.configuration
 import io.art.generator.constants.*
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.model.KotlinMetaClass
@@ -36,12 +35,11 @@ import io.art.generator.templates.*
 import java.nio.file.Path
 
 object KotlinMetaGenerationService {
-    fun generateKotlinMetaClasses(root: Path, classes: Sequence<KotlinMetaClass>) {
+    fun generateKotlinMetaClasses(root: Path, classes: Sequence<KotlinMetaClass>, metaClassName: String) {
         KOTLIN_LOGGER.info(GENERATING_METAS_MESSAGE(classes.kotlinClassNames()))
         root.toFile().parentFile.mkdirs()
-        val moduleName = configuration.moduleName
-        val metaModuleClassName = kotlinMetaModuleClassName(META_NAME, moduleName)
-        val reference = kotlinMetaModuleClassName(EMPTY_STRING, moduleName)
+        val metaModuleClassName = ClassName(META_NAME, metaClassName)
+        val reference = ClassName(EMPTY_STRING, metaClassName)
         classBuilder(metaModuleClassName)
                 .addAnnotation(kotlinSuppressAnnotation())
                 .superclass(KOTLIN_META_MODULE_CLASS_NAME)
@@ -65,7 +63,7 @@ object KotlinMetaGenerationService {
                             .addImport(KOTLIN_META_TYPE_CLASS_NAME, *META_METHODS.toTypedArray())
                             .build()
                             .writeTo(root)
-                    KOTLIN_LOGGER.info(GENERATED_MESSAGE(metaModuleClassFullName(moduleName)))
+                    KOTLIN_LOGGER.info(GENERATED_MESSAGE("$META_NAME.$metaClassName"))
                 }
     }
 

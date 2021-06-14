@@ -18,15 +18,12 @@
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
 import io.art.generator.configuration.configuration
-import io.art.generator.constants.GeneratorLanguages.KOTLIN
+import io.art.generator.constants.GeneratorLanguage.KOTLIN
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import io.art.generator.service.SourceWatchingService.watchSources
-import io.art.generator.service.initialize
-import io.art.launcher.Activator.activator
-import io.art.logging.module.LoggingActivator.logging
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*

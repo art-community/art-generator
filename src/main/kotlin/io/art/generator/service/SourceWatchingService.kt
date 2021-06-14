@@ -19,8 +19,8 @@
 package io.art.generator.service
 
 import io.art.generator.configuration.configuration
-import io.art.generator.constants.GeneratorLanguages.JAVA
-import io.art.generator.constants.GeneratorLanguages.KOTLIN
+import io.art.generator.constants.GeneratorLanguage.JAVA
+import io.art.generator.constants.GeneratorLanguage.KOTLIN
 import io.art.generator.constants.JAVA_LOGGER
 import io.art.generator.constants.KOTLIN_LOGGER
 import io.art.generator.constants.SOURCES_CHANGED
@@ -29,48 +29,74 @@ import io.art.generator.detector.SourcesChanges
 import io.art.generator.detector.detectChanges
 import io.art.generator.service.JavaMetaGenerationService.generateJavaMetaClasses
 import io.art.generator.service.KotlinMetaGenerationService.generateKotlinMetaClasses
+import io.art.generator.templates.metaModuleClassFullName
+import io.art.generator.templates.metaModuleClassName
 import io.art.scheduler.manager.Scheduling.schedule
 import java.nio.file.Path
 
 object SourceWatchingService {
+    private data class MetaModuleClassNames(val name: String, val fullName: String)
+
     fun watchSources(asynchronous: Boolean = true) {
-        configuration.sources[JAVA]?.forEach { path ->
-            detectChanges(path, collectJavaSources(path)).changed {
-                JAVA_LOGGER.info(SOURCES_CHANGED(path, modified, deleted))
-                if (asynchronous) {
-                    schedule { handleJavaSources(path) }
-                    return@changed
+        configuration.sources.forEach { source ->
+            val metaModuleClassName = metaModuleClassName(source.module)
+            val metaModuleClassFullName = metaModuleClassFullName(source.module)
+            val metaModuleClassNames = source
+                    .languages
+                    .map { language ->
+                        if (source.languages.size > 1) {
+                            language to MetaModuleClassNames(
+                                    name = metaModuleClassName + language.metaModuleClassNameSuffix,
+                                    fullName = metaModuleClassFullName + language.metaModuleClassNameSuffix
+                            )
+                            return@forEach
+                        }
+                        language to MetaModuleClassNames(metaModuleClassName, metaModuleClassFullName)
+                    }
+                    .toMap()
+            val excludedClassNames = metaModuleClassNames
+                    .map { entry -> entry.value.name }
+                    .toSet()
+
+            if (source.languages.contains(JAVA)) {
+                detectChanges(source.root, collectJavaSources(source.root, excludedClassNames)).changed {
+                    JAVA_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
+                    if (asynchronous) {
+                        schedule { handleJavaSources(source.root, metaModuleClassNames[JAVA]!!.fullName) }
+                        return@changed
+                    }
+                    handleJavaSources(source.root, metaModuleClassNames[JAVA]!!.fullName)
                 }
-                handleJavaSources(path)
             }
-        }
-        configuration.sources[KOTLIN]?.forEach { path ->
-            detectChanges(path, collectKotlinSources(path) + collectJavaSources(path)).changed {
-                KOTLIN_LOGGER.info(SOURCES_CHANGED(path, modified, deleted))
-                if (asynchronous) {
-                    schedule { handleKotlinSources(path) }
-                    return@changed
+
+            if (source.languages.contains(KOTLIN)) {
+                detectChanges(source.root, collectKotlinSources(source.root, excludedClassNames)).changed {
+                    KOTLIN_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
+                    if (asynchronous) {
+                        schedule { handleKotlinSources(source.root, metaModuleClassNames[KOTLIN]!!.fullName) }
+                        return@changed
+                    }
+                    handleKotlinSources(source.root, metaModuleClassNames[KOTLIN]!!.fullName)
                 }
-                handleKotlinSources(path)
             }
         }
     }
 
-    private fun SourcesChanges.handleJavaSources(path: Path) {
-        val sources = analyzeJavaSources(path, existed.asSequence())
+    private fun SourcesChanges.handleJavaSources(path: Path, metaClassName: String) {
+        val sources = analyzeJavaSources(path, existed.asSequence(), metaClassName)
         if (sources.isEmpty()) {
             JAVA_LOGGER.info(SOURCES_NOT_FOUND(root))
             return
         }
-        generateJavaMetaClasses(path, sources.asSequence())
+        generateJavaMetaClasses(path, sources.asSequence(), metaClassName)
     }
 
-    private fun SourcesChanges.handleKotlinSources(path: Path) {
-        val sources = analyzeKotlinSources(path)
+    private fun SourcesChanges.handleKotlinSources(path: Path, metaClassName: String) {
+        val sources = analyzeKotlinSources(path, metaClassName)
         if (sources.isEmpty()) {
             KOTLIN_LOGGER.info(SOURCES_NOT_FOUND(root))
             return
         }
-        generateKotlinMetaClasses(path, sources.asSequence())
+        generateKotlinMetaClasses(path, sources.asSequence(), metaClassName)
     }
 }

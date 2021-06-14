@@ -22,28 +22,35 @@ import io.art.configurator.module.ConfiguratorModule.configuration
 import io.art.core.constants.StringConstants.COLON
 import io.art.core.constants.StringConstants.SEMICOLON
 import io.art.core.determiner.SystemDeterminer.isWindows
-import io.art.generator.constants.GeneratorLanguages
+import io.art.generator.constants.GeneratorLanguage
 import java.nio.file.Path
 import java.nio.file.Paths.get
 import java.time.Duration
 import java.time.Duration.ofMillis
 
+data class SourceSet(
+        val languages: Set<GeneratorLanguage>,
+        val root: Path,
+        val module: String,
+)
+
 data class Configuration(
-        val sources: Map<GeneratorLanguages, Set<Path>>,
+        val sources: Set<SourceSet>,
         val classpath: Set<Path>,
-        val moduleName: String,
-        val watcherPeriod: Duration
+        val watcherPeriod: Duration,
 )
 
 val configuration: Configuration by lazy {
     with(configuration()) {
         Configuration(
-                sources = getNested("sources").keys.associate { key ->
-                    val paths = getStringArray("sources.$key")
-                    GeneratorLanguages.valueOf(key) to paths.map { path -> get(path) }.toSet()
-                },
+                sources = getNestedArray("sources") { source ->
+                    SourceSet(
+                            languages = source.getStringArray("language").map { language -> GeneratorLanguage.valueOf(language.uppercase()) }.toSet(),
+                            root = get(source.getString("path")),
+                            module = getString("module"),
+                    )
+                }.toSet(),
                 classpath = getString("classpath").split(if (isWindows()) SEMICOLON else COLON).map { path -> get(path) }.toSet(),
-                moduleName = getString("module.name"),
                 watcherPeriod = ofMillis(getLong("watcher.period"))
         )
     }

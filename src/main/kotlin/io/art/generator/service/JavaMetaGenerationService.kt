@@ -25,7 +25,6 @@ import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.constants.StringConstants.EMPTY_STRING
-import io.art.generator.configuration.configuration
 import io.art.generator.constants.*
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.model.JavaMetaClass
@@ -37,12 +36,11 @@ import java.nio.file.Path
 import javax.lang.model.element.Modifier.*
 
 object JavaMetaGenerationService {
-    fun generateJavaMetaClasses(root: Path, classes: Sequence<JavaMetaClass>) {
+    fun generateJavaMetaClasses(root: Path, classes: Sequence<JavaMetaClass>, metaClassName: String) {
         JAVA_LOGGER.info(GENERATING_METAS_MESSAGE(classes.javaClassNames()))
         root.toFile().parentFile.mkdirs()
-        val moduleName = configuration.moduleName
-        val metaModuleClassName = javaMetaModuleClassName(META_NAME, moduleName)
-        val reference = javaMetaModuleClassName(EMPTY_STRING, moduleName)
+        val metaModuleClassName = ClassName.get(META_NAME, metaClassName)
+        val reference = ClassName.get(EMPTY_STRING, metaClassName)
         classBuilder(metaModuleClassName)
                 .addModifiers(PUBLIC)
                 .addAnnotation(javaSuppressAnnotation())
@@ -70,7 +68,7 @@ object JavaMetaGenerationService {
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)
-                    JAVA_LOGGER.info(GENERATED_MESSAGE(metaModuleClassFullName(moduleName)))
+                    JAVA_LOGGER.info(GENERATED_MESSAGE("$META_NAME.$metaClassName"))
                 }
     }
 

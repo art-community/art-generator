@@ -30,7 +30,6 @@ import org.jetbrains.kotlin.backend.common.descriptors.isSuspend
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
 import org.jetbrains.kotlin.builtins.functions.FunctionClassDescriptor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
-import org.jetbrains.kotlin.codegen.coroutines.isLocalSuspendFunctionNotSuspendLambda
 import org.jetbrains.kotlin.codegen.coroutines.isSuspendLambdaOrLocalFunction
 import org.jetbrains.kotlin.coroutines.isSuspendLambda
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
@@ -51,15 +50,15 @@ import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.nio.file.Path
-import java.util.*
-import java.util.Objects.*
+import java.util.Objects.isNull
+import java.util.Objects.nonNull
 
-fun analyzeKotlinSources(root: Path) = KotlinAnalyzingService().analyzeKotlinSources(root)
+fun analyzeKotlinSources(root: Path, metaClassName: String) = KotlinAnalyzingService().analyzeKotlinSources(root, metaClassName)
 
 private class KotlinAnalyzingService {
     private val cache = mutableMapOf<KotlinType, KotlinMetaType>()
 
-    fun analyzeKotlinSources(root: Path): List<KotlinMetaClass> {
+    fun analyzeKotlinSources(root: Path, metaClassName: String): List<KotlinMetaClass> {
         val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(root), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
                 ?: return emptyList()
@@ -67,6 +66,7 @@ private class KotlinAnalyzingService {
                 .map { file -> file.name }
                 .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()
+                .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != metaClassName }
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                 .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                 .filter { descriptor -> !descriptor.isInner }
