@@ -26,13 +26,13 @@ import com.squareup.javapoet.TypeName.*
 import com.squareup.javapoet.WildcardTypeName
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
-import io.art.generator.constants.OBJECT_CLASS_NAME
+import io.art.generator.constants.JAVA_OBJECT_CLASS_NAME
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.*
-import javax.lang.model.element.Modifier.*
+import javax.lang.model.element.Modifier.PUBLIC
 
 fun JavaMetaType.asPoetType(): TypeName = when (kind) {
     PRIMITIVE_KIND -> asPrimitive()
@@ -52,7 +52,7 @@ fun JavaMetaType.asPoetType(): TypeName = when (kind) {
 
     WILDCARD_KIND -> wildcardExtendsBound?.asPoetType()?.let(WildcardTypeName::subtypeOf)
             ?: wildcardSuperBound?.asPoetType()?.let(WildcardTypeName::supertypeOf)
-            ?: subtypeOf(OBJECT_CLASS_NAME)
+            ?: subtypeOf(JAVA_OBJECT_CLASS_NAME)
 
     UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
 }
@@ -64,7 +64,7 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
 
     CLASS_KIND, ENUM_KIND -> bestGuess(classFullName)
 
-    WILDCARD_KIND -> wildcardExtendsBound?.extractClass() ?: OBJECT_CLASS_NAME
+    WILDCARD_KIND -> wildcardExtendsBound?.extractClass() ?: JAVA_OBJECT_CLASS_NAME
 
     UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
 }
@@ -77,6 +77,7 @@ private fun JavaMetaType.asPrimitive() = when (typeName) {
     Byte::class.java.typeName -> BYTE
     Long::class.java.typeName -> LONG
     Char::class.java.typeName -> CHAR
+    Float::class.java.typeName -> FLOAT
     else -> VOID.box()
 }
 
@@ -86,18 +87,9 @@ fun JavaMetaMethod.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) &
 
 fun JavaMetaClass.parentMethods() = parent
         ?.methods
-        ?.filter { method ->
-            method.modifiers.contains(PUBLIC)
-                    || method.modifiers.contains(PROTECTED)
-                    || !(method.modifiers.contains(PRIVATE) && parent.type.classPackageName == type.classPackageName)
-        }
+        ?.filter { method -> method.modifiers.contains(PUBLIC) }
         ?: emptyList()
 
 fun JavaMetaClass.parentFields() = parent
         ?.fields
-        ?.filter { field ->
-            field.value.modifiers.contains(PUBLIC)
-                    || field.value.modifiers.contains(PROTECTED)
-                    || !(field.value.modifiers.contains(PRIVATE) && parent.type.classPackageName == type.classPackageName)
-        }
         ?: emptyMap()

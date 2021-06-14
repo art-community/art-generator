@@ -18,16 +18,9 @@
 
 package io.art.generator.constants
 
-import com.squareup.kotlinpoet.ARRAY
 import com.squareup.kotlinpoet.ClassName.Companion.bestGuess
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import io.art.core.caster.Caster
-import io.art.core.factory.SetFactory
 import io.art.meta.model.*
 
-
-val KOTLIN_SET_FACTORY_CLASS_NAME = bestGuess(SetFactory::class.java.name)
-val KOTLIN_CASTER_CLASS_NAME = bestGuess(Caster::class.java.name)
 val KOTLIN_META_FIELD_CLASS_NAME = bestGuess(MetaField::class.java.name)
 val KOTLIN_META_CLASS_CLASS_NAME = bestGuess(MetaClass::class.java.name)
 val KOTLIN_META_TYPE_CLASS_NAME = bestGuess(MetaType::class.java.name)

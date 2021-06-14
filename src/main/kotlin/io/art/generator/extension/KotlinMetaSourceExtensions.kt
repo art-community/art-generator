@@ -95,5 +95,4 @@ fun KotlinMetaClass.parentMethods() = parent
 
 fun KotlinMetaClass.parentProperties() = parent
         ?.properties
-        ?.filter { property -> property.value.visibility.delegate == Public }
         ?: emptyMap()

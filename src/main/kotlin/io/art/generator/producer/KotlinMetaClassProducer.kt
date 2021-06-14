@@ -34,6 +34,7 @@ import io.art.generator.extension.parentProperties
 import io.art.generator.model.*
 import io.art.generator.templates.*
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isUnit
+import org.jetbrains.kotlin.descriptors.Visibilities.Public
 import java.util.Objects.isNull
 
 fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass) {
@@ -70,27 +71,28 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass) {
 }
 
 private fun TypeSpec.Builder.generateProperties(metaClass: KotlinMetaClass) {
-    val fields = metaClass.parentProperties() + metaClass.properties
-    fields.entries.forEach { field ->
-        val fieldTypeName = field.value.type.asPoetType()
-        val fieldMetaType = KOTLIN_META_FIELD_CLASS_NAME.parameterizedBy(fieldTypeName)
-        val fieldName = metaFieldName(field.key)
-        PropertySpec.builder(fieldName, fieldMetaType)
+    val properties = metaClass.parentProperties() + metaClass.properties
+    properties.entries.forEach { property ->
+        val propertyTypeName = property.value.type.asPoetType()
+        val propertyMetaType = KOTLIN_META_FIELD_CLASS_NAME.parameterizedBy(propertyTypeName)
+        val propertyName = metaFieldName(property.key)
+        PropertySpec.builder(propertyName, propertyMetaType)
                 .addModifiers(PRIVATE)
-                .initializer(kotlinRegisterMetaFieldStatement(field.key, field.value))
+                .initializer(kotlinRegisterMetaFieldStatement(property.key, property.value))
                 .build()
                 .apply(::addProperty)
-        FunSpec.builder(fieldName)
-                .returns(fieldMetaType)
-                .addCode(kotlinReturnStatement(fieldName))
+        FunSpec.builder(propertyName)
+                .returns(propertyMetaType)
+                .addCode(kotlinReturnStatement(propertyName))
                 .build()
                 .let(::addFunction)
-        field.value.getter
+        if (property.value.visibility.delegate != Public) return@forEach
+        property.value.getter
                 ?.takeIf(KotlinMetaPropertyFunction::couldBeGenerated)
-                ?.apply { generateGetter(field.value, metaClass) }
-        field.value.setter
+                ?.apply { generateGetter(property.value, metaClass) }
+        property.value.setter
                 ?.takeIf(KotlinMetaPropertyFunction::couldBeGenerated)
-                ?.apply { generateSetter(field.value, metaClass) }
+                ?.apply { generateSetter(property.value, metaClass) }
     }
 }
 
@@ -106,7 +108,7 @@ private fun TypeSpec.Builder.generateConstructors(metaClass: KotlinMetaClass, ty
                         .superclass(KOTLIN_META_CONSTRUCTOR_CLASS_NAME.parameterizedBy(typeName))
                         .addFunction(constructorBuilder()
                                 .addModifiers(INTERNAL)
-                                .callSuperConstructor(kotlinMetaConstructorSuperStatement(type, constructor.visibility))
+                                .callSuperConstructor(kotlinMetaConstructorSuperStatement(type))
                                 .build())
                         .apply { generateConstructorInvocations(type, constructor) }
                         .apply { generateParameters(constructor) }
@@ -179,7 +181,7 @@ private fun TypeSpec.Builder.generateMethod(function: KotlinMetaFunction, index:
             .superclass(parent)
             .addFunction(constructorBuilder()
                     .addModifiers(INTERNAL)
-                    .callSuperConstructor(kotlinMetaMethodSuperStatement(function.name, returnType, function.visibility))
+                    .callSuperConstructor(kotlinMetaMethodSuperStatement(function.name, returnType))
                     .build())
             .apply { generateMethodInvocations(ownerClass, function.name, function) }
             .apply { generateParameters(function) }
@@ -208,7 +210,7 @@ private fun TypeSpec.Builder.generateGetter(property: KotlinMetaProperty, ownerC
             .superclass(parent)
             .addFunction(constructorBuilder()
                     .addModifiers(INTERNAL)
-                    .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType, property.visibility))
+                    .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType))
                     .build())
             .apply {
                 FunSpec.builder(INVOKE_NAME)
@@ -254,7 +256,7 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
             .superclass(parent)
             .addFunction(constructorBuilder()
                     .addModifiers(INTERNAL)
-                    .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType, property.visibility))
+                    .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType))
                     .build())
             .apply {
                 FunSpec.builder(INVOKE_NAME)

@@ -18,22 +18,18 @@
 package io.art.generator.constants
 
 import com.squareup.javapoet.ClassName
-import io.art.core.caster.Caster
-import io.art.core.factory.SetFactory
 import io.art.meta.model.*
 
 
-val SET_FACTORY_CLASS_NAME = ClassName.get(SetFactory::class.java)!!
-val CASTER_CLASS_NAME = ClassName.get(Caster::class.java)!!
-val OBJECT_CLASS_NAME = ClassName.get(Object::class.java)!!
-val META_FIELD_CLASS_NAME = ClassName.get(MetaField::class.java)!!
-val META_CLASS_CLASS_NAME = ClassName.get(MetaClass::class.java)!!
-val META_TYPE_CLASS_NAME = ClassName.get(MetaType::class.java)!!
-val META_PACKAGE_CLASS_NAME = ClassName.get(MetaPackage::class.java)!!
-val META_MODULE_CLASS_NAME = ClassName.get(MetaModule::class.java)!!
-val INSTANCE_META_METHOD_CLASS_NAME = ClassName.get(InstanceMetaMethod::class.java)!!
-val STATIC_META_METHOD_CLASS_NAME = ClassName.get(StaticMetaMethod::class.java)!!
-val META_PARAMETER_CLASS_NAME = ClassName.get(MetaParameter::class.java)!!
-val META_CONSTRUCTOR_CLASS_NAME = ClassName.get(MetaConstructor::class.java)!!
-val THROWABLE_CLASS_NAME = ClassName.get(Throwable::class.java)!!
-val OVERRIDE_CLASS_NAME = ClassName.get(Override::class.java)!!
+val JAVA_OBJECT_CLASS_NAME = ClassName.get(Object::class.java)!!
+val JAVA_META_FIELD_CLASS_NAME = ClassName.get(MetaField::class.java)!!
+val JAVA_META_CLASS_CLASS_NAME = ClassName.get(MetaClass::class.java)!!
+val JAVA_META_TYPE_CLASS_NAME = ClassName.get(MetaType::class.java)!!
+val JAVA_META_PACKAGE_CLASS_NAME = ClassName.get(MetaPackage::class.java)!!
+val JAVA_META_MODULE_CLASS_NAME = ClassName.get(MetaModule::class.java)!!
+val JAVA_INSTANCE_META_METHOD_CLASS_NAME = ClassName.get(InstanceMetaMethod::class.java)!!
+val JAVA_STATIC_META_METHOD_CLASS_NAME = ClassName.get(StaticMetaMethod::class.java)!!
+val JAVA_META_PARAMETER_CLASS_NAME = ClassName.get(MetaParameter::class.java)!!
+val JAVA_META_CONSTRUCTOR_CLASS_NAME = ClassName.get(MetaConstructor::class.java)!!
+val JAVA_THROWABLE_CLASS_NAME = ClassName.get(Throwable::class.java)!!
+val JAVA_OVERRIDE_CLASS_NAME = ClassName.get(Override::class.java)!!

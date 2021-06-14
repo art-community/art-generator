@@ -41,7 +41,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass) {
     val constructorStatement = javaMetaClassSuperStatement(metaClass)
     classBuilder(metaClassName)
             .addModifiers(PUBLIC, FINAL, STATIC)
-            .superclass(ParameterizedTypeName.get(META_CLASS_CLASS_NAME, typeName.box()))
+            .superclass(ParameterizedTypeName.get(JAVA_META_CLASS_CLASS_NAME, typeName.box()))
             .addMethod(constructorBuilder()
                     .addModifiers(PRIVATE)
                     .addCode(constructorStatement)
@@ -75,7 +75,7 @@ private fun TypeSpec.Builder.generateProperties(metaClass: JavaMetaClass) {
     val fields = metaClass.parentFields() + metaClass.fields
     fields.entries.forEach { field ->
         val fieldTypeName = field.value.type.asPoetType()
-        val fieldMetaType = ParameterizedTypeName.get(META_FIELD_CLASS_NAME, fieldTypeName.box())
+        val fieldMetaType = ParameterizedTypeName.get(JAVA_META_FIELD_CLASS_NAME, fieldTypeName.box())
         val fieldName = metaFieldName(field.key)
         FieldSpec.builder(fieldMetaType, fieldName)
                 .addModifiers(PRIVATE, FINAL)
@@ -98,26 +98,27 @@ private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, type
             .mapIndexed { index, constructor ->
                 var name = CONSTRUCTOR_NAME
                 if (index > 0) name += index
-                classBuilder(name)
+                val constructorClassName = metaConstructorClassName(name)
+                classBuilder(constructorClassName)
                         .addModifiers(PUBLIC, FINAL, STATIC)
-                        .superclass(ParameterizedTypeName.get(META_CONSTRUCTOR_CLASS_NAME, typeName.box()))
+                        .superclass(ParameterizedTypeName.get(JAVA_META_CONSTRUCTOR_CLASS_NAME, typeName.box()))
                         .addMethod(constructorBuilder()
                                 .addModifiers(PRIVATE)
-                                .addCode(javaMetaConstructorSuperStatement(type, constructor.modifiers))
+                                .addCode(javaMetaConstructorSuperStatement(type))
                                 .build())
                         .apply { generateConstructorInvocations(type, constructor) }
                         .apply { generateParameters(constructor) }
                         .build()
                         .apply(::addType)
-                val constructorClassName = ClassName.get(EMPTY_STRING, name)
-                FieldSpec.builder(constructorClassName, name)
+                val reference = ClassName.get(EMPTY_STRING, constructorClassName)
+                FieldSpec.builder(reference, name)
                         .addModifiers(PRIVATE, FINAL)
-                        .initializer(javaRegisterNewStatement(constructorClassName))
+                        .initializer(javaRegisterNewStatement(reference))
                         .build()
                         .apply(::addField)
                 methodBuilder(name)
                         .addModifiers(PUBLIC)
-                        .returns(constructorClassName)
+                        .returns(reference)
                         .addCode(javaReturnStatement(name))
                         .build()
                         .let(::addMethod)
@@ -128,12 +129,12 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
     val parameters = constructor.parameters
     val template = methodBuilder(INVOKE_NAME)
             .addModifiers(PUBLIC)
-            .addException(THROWABLE_CLASS_NAME)
-            .addAnnotation(OVERRIDE_CLASS_NAME)
+            .addException(JAVA_THROWABLE_CLASS_NAME)
+            .addAnnotation(JAVA_OVERRIDE_CLASS_NAME)
             .returns(type.asPoetType())
             .build()
     template.toBuilder()
-            .addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
+            .addParameter(ArrayTypeName.of(JAVA_OBJECT_CLASS_NAME), ARGUMENTS_NAME)
             .addCode(javaInvokeConstructorStatement(type, parameters))
             .build()
             .apply(::addMethod)
@@ -146,7 +147,7 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
         }
         1 -> {
             template.toBuilder()
-                    .addParameter(OBJECT_CLASS_NAME, ARGUMENT_NAME)
+                    .addParameter(JAVA_OBJECT_CLASS_NAME, ARGUMENT_NAME)
                     .addCode(javaInvokeConstructorStatement(type, parameters.values.first()))
                     .build()
                     .apply(::addMethod)
@@ -172,15 +173,15 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
     val returnTypeName = returnType.asPoetType().box()
     val static = method.modifiers.contains(STATIC)
     val parent = when {
-        static -> ParameterizedTypeName.get(STATIC_META_METHOD_CLASS_NAME, returnTypeName)
-        else -> ParameterizedTypeName.get(INSTANCE_META_METHOD_CLASS_NAME, ownerType.asPoetType(), returnTypeName)
+        static -> ParameterizedTypeName.get(JAVA_STATIC_META_METHOD_CLASS_NAME, returnTypeName)
+        else -> ParameterizedTypeName.get(JAVA_INSTANCE_META_METHOD_CLASS_NAME, ownerType.asPoetType(), returnTypeName)
     }
     classBuilder(methodClassName)
             .addModifiers(PUBLIC, FINAL, STATIC)
             .superclass(parent)
             .addMethod(constructorBuilder()
                     .addModifiers(PRIVATE)
-                    .addCode(javaMetaMethodSuperStatement(method.name, returnType, method.modifiers))
+                    .addCode(javaMetaMethodSuperStatement(method.name, returnType))
                     .build())
             .apply { generateMethodInvocations(ownerType, method.name, method) }
             .apply { generateParameters(method) }
@@ -204,9 +205,9 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
     val parameters = method.parameters
     val template = methodBuilder(INVOKE_NAME)
             .addModifiers(PUBLIC)
-            .addAnnotation(OVERRIDE_CLASS_NAME)
-            .addException(THROWABLE_CLASS_NAME)
-            .returns(OBJECT_CLASS_NAME)
+            .addAnnotation(JAVA_OVERRIDE_CLASS_NAME)
+            .addException(JAVA_THROWABLE_CLASS_NAME)
+            .returns(JAVA_OBJECT_CLASS_NAME)
             .apply { if (!static) addParameter(type.asPoetType(), INSTANCE_NAME) }
             .build()
     template.toBuilder().apply {
@@ -218,7 +219,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             true -> addLines(invoke, javaReturnNullStatement())
             false -> addCode(javaReturnStatement(invoke))
         }
-        addParameter(ArrayTypeName.of(OBJECT_CLASS_NAME), ARGUMENTS_NAME)
+        addParameter(ArrayTypeName.of(JAVA_OBJECT_CLASS_NAME), ARGUMENTS_NAME)
         addMethod(build())
     }
     when (parameters.size) {
@@ -234,7 +235,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
             addMethod(build())
         }
         1 -> template.toBuilder().apply {
-            addParameter(OBJECT_CLASS_NAME, ARGUMENT_NAME)
+            addParameter(JAVA_OBJECT_CLASS_NAME, ARGUMENT_NAME)
             val invoke = when {
                 static -> javaInvokeStaticStatement(name, type, parameters.values.first())
                 else -> javaInvokeInstanceStatement(name, parameters.values.first())
@@ -251,7 +252,7 @@ private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name:
 private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
     method.parameters.entries.forEachIndexed { parameterIndex, parameter ->
         val parameterTypeName = parameter.value.type.asPoetType()
-        val metaParameterType = ParameterizedTypeName.get(META_PARAMETER_CLASS_NAME, parameterTypeName.box())
+        val metaParameterType = ParameterizedTypeName.get(JAVA_META_PARAMETER_CLASS_NAME, parameterTypeName.box())
         val parameterName = metaParameterName(parameter.key)
         FieldSpec.builder(metaParameterType, parameterName)
                 .addModifiers(PRIVATE, FINAL)

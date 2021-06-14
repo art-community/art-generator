@@ -24,11 +24,6 @@ import io.art.generator.constants.META_NAME
 
 fun metaModuleClassFullName(name: String): String = "$META_NAME.Meta$name"
 
-fun metaModuleJavaFileName(name: String): String = "Meta$name.java"
-
-fun metaModuleKotlinFileName(name: String): String = "Meta$name.kt"
-
-
 fun metaClassName(name: String): String = "${decapitalize(name)}Class"
 
 fun metaPackageName(name: String): String = "${name}Package"

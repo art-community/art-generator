@@ -33,8 +33,9 @@ import io.art.generator.model.KotlinMetaParameter
 import io.art.generator.model.KotlinMetaProperty
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.model.KotlinMetaTypeKind.*
-import org.jetbrains.kotlin.descriptors.DescriptorVisibility
-import org.jetbrains.kotlin.synthetic.isVisibleOutside
+
+
+fun metaModuleKotlinFileName(name: String): String = "Meta$name.kt"
 
 
 fun kotlinMetaModuleClassName(packageName: String, name: String) =
@@ -121,13 +122,11 @@ fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: Ko
                 .join("))")
 
 
-fun kotlinMetaMethodSuperStatement(name: String, type: KotlinMetaType?, visibility: DescriptorVisibility): CodeBlock = "%S,"
+fun kotlinMetaMethodSuperStatement(name: String, returnType: KotlinMetaType?): CodeBlock = "%S,"
         .asCode(name)
-        .join(type?.let(::metaTypeStatement) ?: "%T".asCode(UNIT))
-        .joinByComma(asPublicFlag(visibility))
+        .join(returnType?.let(::metaTypeStatement) ?: "%T".asCode(UNIT))
 
-fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType, visibility: DescriptorVisibility): CodeBlock = metaTypeStatement(type)
-        .joinByComma(asPublicFlag(visibility))
+fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType): CodeBlock = metaTypeStatement(type)
 
 fun kotlinMetaClassSuperStatement(metaClass: KotlinMetaClass): CodeBlock = metaTypeStatement(metaClass.type)
 
@@ -221,10 +220,3 @@ private fun casted(parameters: Map<String, KotlinMetaParameter>): CodeBlock = pa
             return@mapIndexed block
         }
         .joinToCode(COMMA)
-
-private fun asPublicFlag(visibility: DescriptorVisibility): CodeBlock {
-    if (visibility.isVisibleOutside()) {
-        return "true".asCode()
-    }
-    return "false".asCode()
-}

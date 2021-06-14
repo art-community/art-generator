@@ -26,6 +26,7 @@ import io.art.core.constants.StringConstants.*
 import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.constants.*
 import io.art.generator.exception.MetaGeneratorException
+import io.art.generator.extension.asPoetType
 import io.art.generator.extension.extractClass
 import io.art.generator.extension.name
 import io.art.generator.model.JavaMetaClass
@@ -33,9 +34,8 @@ import io.art.generator.model.JavaMetaField
 import io.art.generator.model.JavaMetaParameter
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.*
-import javax.lang.model.element.Modifier
-import javax.lang.model.element.Modifier.PUBLIC
 
+fun metaModuleJavaFileName(name: String): String = "Meta$name.java"
 
 fun javaMetaModuleClassName(packageName: String, name: String): ClassName =
         ClassName.get(packageName, "Meta${capitalize(name)}")
@@ -116,15 +116,13 @@ fun javaRegisterMetaParameterStatement(index: Int, name: String, parameter: Java
         .join("))")
 
 
-fun javaMetaMethodSuperStatement(name: String, type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super(\$S,"
+fun javaMetaMethodSuperStatement(name: String, type: JavaMetaType): CodeBlock = "super(\$S,"
         .asCode(name)
         .join(metaTypeStatement(type))
-        .joinByComma(asPublicFlag(modifiers))
         .join(");")
 
-fun javaMetaConstructorSuperStatement(type: JavaMetaType, modifiers: Set<Modifier>): CodeBlock = "super("
+fun javaMetaConstructorSuperStatement(type: JavaMetaType): CodeBlock = "super("
         .join(metaTypeStatement(type))
-        .joinByComma(asPublicFlag(modifiers))
         .join(");")
 
 fun javaMetaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
@@ -162,7 +160,7 @@ private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
         ENUM_KIND -> metaEnumBlock(poetClass)
         WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)
                 ?: type.wildcardSuperBound?.let(::metaTypeStatement)
-                ?: metaTypeBlock(OBJECT_CLASS_NAME)
+                ?: metaTypeBlock(JAVA_OBJECT_CLASS_NAME)
         UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $type")
     }
 }
@@ -187,13 +185,5 @@ private fun casted(parameter: JavaMetaParameter): CodeBlock {
 }
 
 private fun casted(parameters: Map<String, JavaMetaParameter>): CodeBlock = parameters.values
-        .indices
-        .map { index -> "\$T.$CAST_METHOD_NAME($ARGUMENTS_NAME[$index])".asCode(CASTER_CLASS_NAME) }
+        .mapIndexed { index, parameter -> "(\$T)($ARGUMENTS_NAME[$index])".asCode(parameter.type.asPoetType()) }
         .let { blocks -> join(blocks, COMMA) }
-
-private fun asPublicFlag(modifiers: Set<Modifier>): CodeBlock {
-    if (modifiers.contains(PUBLIC)) {
-        return "true".asCode()
-    }
-    return "false".asCode()
-}
