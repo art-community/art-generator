@@ -28,20 +28,22 @@ import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.backend.common.descriptors.isSuspend
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
-import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isNumber
 import org.jetbrains.kotlin.builtins.functions.FunctionClassDescriptor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.jetbrains.kotlin.coroutines.isSuspendLambda
-import org.jetbrains.kotlin.descriptors.*
+import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.ClassKind.ANNOTATION_CLASS
 import org.jetbrains.kotlin.descriptors.ClassKind.ENUM_ENTRY
+import org.jetbrains.kotlin.descriptors.FunctionDescriptor
+import org.jetbrains.kotlin.descriptors.PropertyDescriptor
+import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
 import org.jetbrains.kotlin.resolve.DescriptorUtils.isObject
 import org.jetbrains.kotlin.resolve.calls.tower.isSynthesized
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
-import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassOrAny
+import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
@@ -66,7 +68,6 @@ private class KotlinAnalyzingService {
                 .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                 .filter { descriptor -> !descriptor.isInner }
                 .filter { descriptor -> !descriptor.classId!!.isNestedClass }
-                .filter { descriptor -> !descriptor.isSealed() }
                 .filter { descriptor -> !descriptor.classId!!.isLocal }
                 .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
                 .map { descriptor -> descriptor.asMetaClass() }
@@ -127,11 +128,12 @@ private class KotlinAnalyzingService {
                     typeVariance = variance
             )
         }.apply {
-            val newArguments = arguments
+            if (functionArgumentTypes.isNotEmpty()) return@apply
+            arguments
                     .dropLast(1)
+                    .asSequence()
                     .map { type -> type.asMetaType() }
-            functionArgumentTypes.clear()
-            functionArgumentTypes.addAll(newArguments)
+                    .forEach(functionArgumentTypes::add)
         }
 
         constructor.declarationDescriptor is ClassDescriptor -> {
@@ -193,6 +195,9 @@ private class KotlinAnalyzingService {
                     .asSequence()
                     .filterIsInstance<PropertyDescriptor>()
                     .filter { descriptor -> !descriptor.isSynthesized }
+                    .filter { descriptor -> !descriptor.isSuspend }
+                    .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
+                    .filter { descriptor -> descriptor.typeParameters.isEmpty() }
                     .associate { descriptor -> descriptor.name.toString() to descriptor.asMetaProperty() },
 
             constructors = constructors
@@ -220,25 +225,25 @@ private class KotlinAnalyzingService {
                     .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                     .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     .filter { descriptor -> !descriptor.isInner }
-                    .filter { descriptor -> !descriptor.isSealed() }
                     .filter { descriptor -> !descriptor.classId!!.isLocal }
                     .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
                     .associate { descriptor -> descriptor.name.toString() to descriptor.asMetaClass() },
 
-            parent = getSuperClassOrAny()
-                    .takeIf { descriptor -> descriptor.name.asString() != Any::class.qualifiedName!! }
-                    ?.takeIf { descriptor -> !isNumber(descriptor.defaultType) }
+            parent = getSuperClassNotAny()
                     ?.takeIf { descriptor -> descriptor.kind != ENUM_ENTRY }
                     ?.takeIf { descriptor -> descriptor.kind != ANNOTATION_CLASS }
+                    ?.takeIf { descriptor -> !descriptor.isInner }
+                    ?.takeIf { descriptor -> !descriptor.classId!!.isLocal }
                     ?.takeIf { descriptor -> descriptor != this }
                     ?.takeIf { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
                     ?.asMetaClass(),
 
             interfaces = getSuperInterfaces()
                     .asSequence()
-                    .filter { descriptor -> !isNumber(descriptor.defaultType) }
                     .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                     .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
+                    .filter { descriptor -> !descriptor.isInner }
+                    .filter { descriptor -> !descriptor.classId!!.isLocal }
                     .filter { descriptor -> descriptor != this }
                     .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
                     .map { descriptor -> descriptor.asMetaClass() }
