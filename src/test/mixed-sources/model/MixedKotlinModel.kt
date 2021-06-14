@@ -176,7 +176,7 @@ data class MixedKotlinModel(
         return argument
     }
 
-    override fun protectedAbstractMethod(argument: Int): Int {
+    public override fun protectedAbstractMethod(argument: Int): Int {
         TODO("Not yet implemented")
     }
 

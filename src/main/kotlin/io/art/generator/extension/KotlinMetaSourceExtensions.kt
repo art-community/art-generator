@@ -88,7 +88,7 @@ fun KotlinMetaFunction.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(nam
 
 fun KotlinMetaPropertyFunction.couldBeGenerated() = visibility.delegate == Public
 
-fun KotlinMetaClass.parentMethods() = parent
+fun KotlinMetaClass.parentFunctions() = parent
         ?.functions
         ?.filter { method -> method.visibility.delegate == Public }
         ?: emptyList()

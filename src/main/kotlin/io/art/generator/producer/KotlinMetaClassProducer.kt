@@ -29,7 +29,7 @@ import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.constants.*
 import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
-import io.art.generator.extension.parentMethods
+import io.art.generator.extension.parentFunctions
 import io.art.generator.extension.parentProperties
 import io.art.generator.factory.NameFactory
 import io.art.generator.model.*
@@ -51,7 +51,7 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: Name
                     .build())
             .apply { if (metaClass.modality != ABSTRACT) generateConstructors(metaClass, typeName) }
             .apply { generateProperties(metaClass) }
-            .apply { generateMethods(metaClass) }
+            .apply { generateFunctions(metaClass) }
             .apply {
                 metaClass.innerClasses
                         .values
@@ -159,8 +159,10 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: KotlinMetaType
     }
 }
 
-private fun TypeSpec.Builder.generateMethods(metaClass: KotlinMetaClass) {
-    (metaClass.functions + metaClass.parentMethods())
+private fun TypeSpec.Builder.generateFunctions(metaClass: KotlinMetaClass) {
+    val parentFunctions = metaClass.parentFunctions().toSet()
+    val functions = metaClass.functions.filter(parentFunctions::contains)
+    (functions + parentFunctions)
             .asSequence()
             .filter(KotlinMetaFunction::couldBeGenerated)
             .groupBy { method -> method.name }
