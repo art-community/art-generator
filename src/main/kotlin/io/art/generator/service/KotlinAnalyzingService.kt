@@ -20,7 +20,6 @@ package io.art.generator.service
 
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.constants.ANALYZING_MESSAGE
-import io.art.generator.constants.JAVA_LOGGER
 import io.art.generator.constants.KOTLIN_LOGGER
 import io.art.generator.model.*
 import io.art.generator.model.KotlinMetaPropertyFunctionKind.GETTER
@@ -70,6 +69,8 @@ private class KotlinAnalyzingService {
                 .map { file -> file.name }
                 .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()
+                .apply { println(toList()) }
+                .filter { descriptor -> descriptor.defaultType.resolved() }
                 .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != metaClassName }
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                 .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
@@ -189,6 +190,8 @@ private class KotlinAnalyzingService {
         })
     }
 
+    private fun KotlinType.resolved(): Boolean = this !is UnresolvedType && arguments.all { argument -> argument.type.resolved() }
+
     private fun ClassDescriptor.asMetaClass(): KotlinMetaClass = KotlinMetaClass(
             type = defaultType.asMetaType(),
 
@@ -201,6 +204,7 @@ private class KotlinAnalyzingService {
             properties = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<PropertyDescriptor>()
+                    .filter { descriptor -> descriptor.type.resolved() }
                     .filter { descriptor -> !descriptor.isSynthesized }
                     .filter { descriptor -> !descriptor.isSuspend }
                     .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
@@ -210,6 +214,7 @@ private class KotlinAnalyzingService {
 
             constructors = constructors
                     .asSequence()
+                    .filter { descriptor -> descriptor.returnType.resolved() && descriptor.valueParameters.all { parameter -> parameter.type.resolved() } }
                     .filter { descriptor -> !descriptor.isSuspendLambdaOrLocalFunction() }
                     .filter { descriptor -> !descriptor.isSynthesized }
                     .filter { descriptor -> descriptor.typeParameters.isEmpty() }
@@ -221,6 +226,10 @@ private class KotlinAnalyzingService {
             functions = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<FunctionDescriptor>()
+                    .filter { descriptor ->
+                        (descriptor.returnType?.resolved()
+                                ?: true) && descriptor.valueParameters.all { parameter -> parameter.type.resolved() }
+                    }
                     .filter { descriptor -> !descriptor.isSuspendLambdaOrLocalFunction() }
                     .filter { descriptor -> !descriptor.isSynthesized }
                     .filter { descriptor -> !descriptor.isSuspend }
@@ -233,6 +242,7 @@ private class KotlinAnalyzingService {
             innerClasses = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<ClassDescriptor>()
+                    .filter { descriptor -> descriptor.defaultType.resolved() }
                     .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                     .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     .filter { descriptor -> !descriptor.isInner }
@@ -241,6 +251,7 @@ private class KotlinAnalyzingService {
                     .associate { descriptor -> descriptor.name.toString() to descriptor.asMetaClass() },
 
             parent = getSuperClassNotAny()
+                    ?.takeIf { descriptor -> descriptor.defaultType.resolved() }
                     ?.takeIf { descriptor -> descriptor.kind != ENUM_ENTRY }
                     ?.takeIf { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     ?.takeIf { descriptor -> !descriptor.isInner }
@@ -251,6 +262,7 @@ private class KotlinAnalyzingService {
 
             interfaces = getSuperInterfaces()
                     .asSequence()
+                    .filter { descriptor -> descriptor.defaultType.resolved() }
                     .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                     .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                     .filter { descriptor -> !descriptor.isInner }

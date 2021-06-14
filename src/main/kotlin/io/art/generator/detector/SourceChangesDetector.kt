@@ -22,11 +22,14 @@ import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.core.extensions.FileExtensions.readFileBytes
 import io.art.core.extensions.HashExtensions.xx64
 import io.art.core.factory.MapFactory.concurrentMap
+import io.art.generator.constants.GeneratorLanguage
 import java.nio.file.Path
 
 
-private val detectors = concurrentMap<Path, SourceChangesDetector>()
-fun detectChanges(root: Path, sources: Sequence<Path>) = putIfAbsent(detectors, root) { SourceChangesDetector(root) }.detectChanges(sources)
+data class DetectorKey(val language: GeneratorLanguage, val path: Path)
+
+private val detectors = concurrentMap<DetectorKey, SourceChangesDetector>()
+fun detectChanges(language: GeneratorLanguage, root: Path, sources: Sequence<Path>) = putIfAbsent(detectors, DetectorKey(language, root)) { SourceChangesDetector(root) }.detectChanges(sources)
 
 private class SourceChangesDetector(private val root: Path) {
     private data class Cache(@Volatile var hashes: Map<Path, Long>)

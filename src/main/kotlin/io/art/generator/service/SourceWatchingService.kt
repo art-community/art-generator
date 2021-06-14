@@ -39,25 +39,22 @@ object SourceWatchingService {
         configuration.sources.forEach { source ->
             val metaModuleClassName = metaModuleClassName(source.module)
             val metaModuleClassFullName = metaModuleClassFullName(source.module)
-            val metaModuleClassNames = source
-                    .languages
-                    .map { language ->
-                        if (source.languages.size > 1) {
-                            language to MetaModuleClassNames(
-                                    name = metaModuleClassName + language.suffix,
-                                    fullName = metaModuleClassFullName + language.suffix
-                            )
-                            return@forEach
-                        }
-                        language to MetaModuleClassNames(metaModuleClassName, metaModuleClassFullName)
-                    }
-                    .toMap()
+            val metaModuleClassNames = source.languages.associate { language ->
+                if (source.languages.size > 1) {
+                    return@associate language to MetaModuleClassNames(
+                            name = metaModuleClassName + language.suffix,
+                            fullName = metaModuleClassFullName + language.suffix
+                    )
+                }
+                language to MetaModuleClassNames(metaModuleClassName, metaModuleClassFullName)
+            }
+
             val excludedClassNames = metaModuleClassNames
                     .map { entry -> entry.value.name }
                     .toSet()
 
             if (source.languages.contains(JAVA)) {
-                detectChanges(source.root, collectJavaSources(source.root, excludedClassNames)).changed {
+                detectChanges(JAVA, source.root, collectJavaSources(source.root, excludedClassNames)).changed {
                     JAVA_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
                     if (asynchronous) {
                         schedule { handleJavaSources(source.root, metaModuleClassNames[JAVA]!!) }
@@ -68,7 +65,7 @@ object SourceWatchingService {
             }
 
             if (source.languages.contains(KOTLIN)) {
-                detectChanges(source.root, collectKotlinSources(source.root, excludedClassNames)).changed {
+                detectChanges(KOTLIN, source.root, collectKotlinSources(source.root, excludedClassNames)).changed {
                     KOTLIN_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
                     if (asynchronous) {
                         schedule { handleKotlinSources(source.root, metaModuleClassNames[KOTLIN]!!) }
