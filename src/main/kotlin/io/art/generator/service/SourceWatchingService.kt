@@ -65,7 +65,7 @@ object SourceWatchingService {
                         schedule { handleJavaSources(source.root, metaModuleClassNames[JAVA]!!.fullName) }
                         return@changed
                     }
-                    handleJavaSources(source.root, metaModuleClassNames[JAVA]!!.fullName)
+                    handleJavaSources(source.root, metaModuleClassNames[JAVA]!!.name)
                 }
             }
 
@@ -76,7 +76,7 @@ object SourceWatchingService {
                         schedule { handleKotlinSources(source.root, metaModuleClassNames[KOTLIN]!!.fullName) }
                         return@changed
                     }
-                    handleKotlinSources(source.root, metaModuleClassNames[KOTLIN]!!.fullName)
+                    handleKotlinSources(source.root, metaModuleClassNames[KOTLIN]!!.name)
                 }
             }
         }

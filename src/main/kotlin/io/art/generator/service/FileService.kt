@@ -18,6 +18,8 @@
 
 package io.art.generator.service
 
+import io.art.generator.constants.JAVA
+import io.art.generator.constants.KOTLIN_EXTENSION
 import io.art.generator.constants.META_NAME
 import io.art.generator.extension.isJava
 import io.art.generator.extension.isKotlin
@@ -38,5 +40,6 @@ fun collectKotlinSources(root: Path, excludedClassNames: Set<String>) = root.toF
         .filter { file -> file.isKotlin }
         .map { file -> file.toPath() }
 
-private fun metaModuleJavaFile(root: Path, name: String): File = root.resolve(META_NAME).resolve(name).toFile()
-private fun metaModuleKotlinFile(root: Path, name: String): File = root.resolve(META_NAME).resolve(name).toFile()
+fun metaModuleJavaFile(root: Path, name: String): File = root.resolve(META_NAME).resolve("$name.$JAVA").toFile()
+
+fun metaModuleKotlinFile(root: Path, name: String): File = root.resolve(META_NAME).resolve("$name.$KOTLIN_EXTENSION").toFile()

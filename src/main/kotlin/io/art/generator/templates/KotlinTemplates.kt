@@ -19,7 +19,6 @@
 package io.art.generator.templates
 
 import com.squareup.kotlinpoet.*
-import io.art.core.combiner.SectionCombiner
 import io.art.core.constants.CompilerSuppressingWarnings.WARNINGS
 import io.art.core.constants.StringConstants.*
 import io.art.core.extensions.StringExtensions.capitalize
@@ -34,12 +33,6 @@ import io.art.generator.model.KotlinMetaProperty
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.model.KotlinMetaTypeKind.*
 
-
-fun metaModuleKotlinFileName(name: String): String = "Meta$name.kt"
-
-
-fun kotlinMetaModuleClassName(packageName: String, name: String) =
-        ClassName.bestGuess(SectionCombiner.combine(packageName, "Meta${capitalize(name)}"))
 
 fun kotlinMetaPackageClassName(name: String) =
         ClassName.bestGuess("Meta${capitalize(name)}Package".name())

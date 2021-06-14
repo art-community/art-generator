@@ -63,7 +63,7 @@ object KotlinMetaGenerationService {
                             .addImport(KOTLIN_META_TYPE_CLASS_NAME, *META_METHODS.toTypedArray())
                             .build()
                             .writeTo(root)
-                    KOTLIN_LOGGER.info(GENERATED_MESSAGE("$META_NAME.$metaClassName"))
+                    KOTLIN_LOGGER.info(GENERATED_MESSAGE(metaModuleKotlinFile(root, metaClassName).absolutePath))
                 }
     }
 

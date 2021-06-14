@@ -19,6 +19,9 @@
 package io.art.generator.service
 
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import io.art.generator.constants.ANALYZING_MESSAGE
+import io.art.generator.constants.JAVA_LOGGER
+import io.art.generator.constants.KOTLIN_LOGGER
 import io.art.generator.model.*
 import io.art.generator.model.KotlinMetaPropertyFunctionKind.GETTER
 import io.art.generator.model.KotlinMetaPropertyFunctionKind.SETTER
@@ -59,6 +62,7 @@ private class KotlinAnalyzingService {
     private val cache = mutableMapOf<KotlinType, KotlinMetaType>()
 
     fun analyzeKotlinSources(root: Path, metaClassName: String): List<KotlinMetaClass> {
+        KOTLIN_LOGGER.info(ANALYZING_MESSAGE(root))
         val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(root), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
                 ?: return emptyList()

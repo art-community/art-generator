@@ -35,11 +35,6 @@ import io.art.generator.model.JavaMetaParameter
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.*
 
-fun metaModuleJavaFileName(name: String): String = "Meta$name.java"
-
-fun javaMetaModuleClassName(packageName: String, name: String): ClassName =
-        ClassName.get(packageName, "Meta${capitalize(name)}")
-
 fun javaMetaPackageClassName(name: String): ClassName =
         ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Package".name())
 

@@ -68,7 +68,7 @@ object JavaMetaGenerationService {
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)
-                    JAVA_LOGGER.info(GENERATED_MESSAGE("$META_NAME.$metaClassName"))
+                    JAVA_LOGGER.info(GENERATED_MESSAGE(metaModuleJavaFile(root, metaClassName).absolutePath))
                 }
     }
 
