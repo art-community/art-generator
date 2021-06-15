@@ -1,4 +1,5 @@
 import io.art.gradle.common.constants.WRITE_CONFIGURATION_TASK
+import io.art.gradle.common.logger.info
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -98,5 +99,6 @@ executable {
 tasks.test {
     dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
+    addTestOutputListener { _, outputEvent -> info(outputEvent.message) }
     jvmArgs("-Dconfiguration=${generator.configurationPath.toFile().absolutePath}")
 }
