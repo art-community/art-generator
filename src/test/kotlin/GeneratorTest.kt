@@ -29,6 +29,7 @@ import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.collectJavaSources
+import io.art.logging.module.LoggingModule.logger
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -55,12 +56,15 @@ class GeneratorTest {
 
     @Test
     fun testMetaGeneration(@TempDir tempDirectory: Path) {
+        val logger = logger("test")
+
         watchSources(asynchronous = false)
+        logger.info("Meta sources Generated")
 
         assertTrue { generatedFiles().filter { file -> file.exists() }.size == 4 }
 
         configuration.sources.forEach { source ->
-            if (tempDirectory.toFile().exists())  {
+            if (tempDirectory.toFile().exists()) {
                 recursiveDelete(tempDirectory)
                 tempDirectory.toFile().mkdirs()
             }
@@ -68,24 +72,26 @@ class GeneratorTest {
                 val javaSources = collectJavaSources(source.root, emptySet()).asSequence()
 
                 useJavaCompiler(JavaCompilerConfiguration(source.root, javaSources, tempDirectory)) { task -> assertTrue(task.call()) }
+                logger.info("Java sources compiled")
 
                 var generatedClassName = "meta.MetaExample"
                 if (source.languages.size > 1) generatedClassName += "Java"
 
-                assertNotNull { PathClassLoader(tempDirectory).loadClass(generatedClassName) }
+                assertNotNull { PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("Loaded Java class: $name") } }
             }
 
-            if (tempDirectory.toFile().exists())  {
+            if (tempDirectory.toFile().exists()) {
                 recursiveDelete(tempDirectory)
                 tempDirectory.toFile().mkdirs()
             }
             if (source.languages.contains(KOTLIN)) {
                 useKotlinCompiler(KotlinCompilerConfiguration(source.root, destination = tempDirectory)) { analyzeAndGenerate(this) }
+                logger.info("Kotlin sources compiled")
 
                 var generatedClassName = "meta.MetaExample"
                 if (source.languages.size > 1) generatedClassName += "Kotlin"
 
-                assertNotNull { PathClassLoader(tempDirectory).loadClass(generatedClassName) }
+                assertNotNull { PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("Loaded Kotlin class: $name") } }
             }
         }
     }
