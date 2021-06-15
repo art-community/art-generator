@@ -107,4 +107,17 @@ data class JavaMetaMethod(
         val returnType: JavaMetaType,
         val parameters: Map<String, JavaMetaParameter>,
         val modifiers: Set<Modifier>,
+) {
+    fun withoutModifiers() = JavaMetaMethodWithoutModifiers(
+            name,
+            returnType,
+            parameters
+    )
+}
+
+
+data class JavaMetaMethodWithoutModifiers(
+        val name: String,
+        val returnType: JavaMetaType,
+        val parameters: Map<String, JavaMetaParameter>,
 )

@@ -87,7 +87,6 @@ fun JavaMetaMethod.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) &
 
 fun JavaMetaClass.parentMethods() = parent
         ?.methods
-        ?.filter { method -> method.modifiers.contains(PUBLIC) }
         ?: emptyList()
 
 fun JavaMetaClass.parentFields() = parent
