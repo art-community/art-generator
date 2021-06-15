@@ -28,15 +28,15 @@ import java.nio.file.Paths.get
 import java.time.Duration
 import java.time.Duration.ofMillis
 
-data class SourceSet(
+data class SourceConfiguration(
         val languages: Set<GeneratorLanguage>,
         val root: Path,
         val module: String,
+        val classpath: Set<Path>,
 )
 
 data class Configuration(
-        val sources: Set<SourceSet>,
-        val classpath: Set<Path>,
+        val sources: Set<SourceConfiguration>,
         val watcherPeriod: Duration,
 )
 
@@ -44,13 +44,13 @@ val configuration: Configuration by lazy {
     with(configuration()) {
         Configuration(
                 sources = getNestedArray("sources") { source ->
-                    SourceSet(
+                    SourceConfiguration(
                             languages = source.getStringArray("languages").map { language -> GeneratorLanguage.valueOf(language.uppercase()) }.toSet(),
                             root = get(source.getString("path")),
                             module = source.getString("module"),
+                            classpath = source.getString("classpath").split(if (isWindows()) SEMICOLON else COLON).map { path -> get(path) }.toSet(),
                     )
                 }.toSet(),
-                classpath = getString("classpath").split(if (isWindows()) SEMICOLON else COLON).map { path -> get(path) }.toSet(),
                 watcherPeriod = ofMillis(getLong("watcher.period"))
         )
     }
