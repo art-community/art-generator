@@ -40,8 +40,8 @@ object MixedEmptyObject {}
 sealed class MixedKotlinModelParent(protected val protectedIcp: Boolean, val icp: Boolean) {
     protected val protectedIp: Boolean? = null
     val ip: Boolean? = null
-    lateinit var protectedMp: String
-    lateinit var publicMp: String
+    lateinit var protectedMr: String
+    lateinit var publicMr: String
     lateinit var childP: MixedKotlinModel
     lateinit var selfP: MixedKotlinModelParent
     abstract var abstractProperty: String
