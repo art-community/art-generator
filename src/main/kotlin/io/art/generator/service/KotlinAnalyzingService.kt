@@ -158,6 +158,7 @@ private class KotlinAnalyzingService {
             }.apply {
                 if (typeParameters.isNotEmpty()) return@apply
                 arguments
+                        .asSequence()
                         .map { projection -> projection.asMetaType() }
                         .forEach(typeParameters::add)
             }
@@ -225,10 +226,8 @@ private class KotlinAnalyzingService {
             functions = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
                     .filterIsInstance<FunctionDescriptor>()
-                    .filter { descriptor ->
-                        (descriptor.returnType?.resolved()
-                                ?: true) && descriptor.valueParameters.all { parameter -> parameter.type.resolved() }
-                    }
+                    .filter { descriptor -> descriptor.returnType?.resolved() ?: true }
+                    .filter { descriptor -> descriptor.valueParameters.all { parameter -> parameter.type.resolved() } }
                     .filter { descriptor -> !descriptor.isSuspendLambdaOrLocalFunction() }
                     .filter { descriptor -> !descriptor.isSynthesized }
                     .filter { descriptor -> !descriptor.isSuspend }
