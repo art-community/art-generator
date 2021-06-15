@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
+import kotlin.io.path.name
 
 
 @TestInstance(PER_CLASS)
@@ -72,12 +73,12 @@ class GeneratorTest {
                 val javaSources = collectJavaSources(source.root, emptySet()).asSequence()
 
                 useJavaCompiler(JavaCompilerConfiguration(source.root, javaSources, tempDirectory)) { task -> assertTrue(task.call()) }
-                logger.info("Java sources compiled")
+                logger.info("[${source.root.name}: Java sources compiled")
 
                 var generatedClassName = "meta.MetaExample"
                 if (source.languages.size > 1) generatedClassName += "Java"
 
-                assertNotNull { PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("Loaded Java class: $name") } }
+                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("${source.root.name}:Loaded Java class: $name") })
             }
 
             if (tempDirectory.toFile().exists()) {
@@ -86,12 +87,12 @@ class GeneratorTest {
             }
             if (source.languages.contains(KOTLIN)) {
                 useKotlinCompiler(KotlinCompilerConfiguration(source.root, destination = tempDirectory)) { analyzeAndGenerate(this) }
-                logger.info("Kotlin sources compiled")
+                logger.info("${source.root.name}: Kotlin sources compiled")
 
                 var generatedClassName = "meta.MetaExample"
                 if (source.languages.size > 1) generatedClassName += "Kotlin"
 
-                assertNotNull { PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("Loaded Kotlin class: $name") } }
+                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("${source.root.name}: Loaded Kotlin class: $name") })
             }
         }
     }
