@@ -72,16 +72,17 @@ sourceSets {
             srcDir("src/test/mixed-sources")
         }
     }
-    generator {
-        module("Example")
+}
 
-        java(file("src/test/java-sources"))
-        kotlin(file("src/test/kotlin-sources"))
+generator {
+    module("Example")
 
-        java(file("src/test/mixed-sources"))
-        kotlin(file("src/test/mixed-sources"))
-        consoleLogging()
-    }
+    java(file("src/test/java-sources"))
+    kotlin(file("src/test/kotlin-sources"))
+
+    java(file("src/test/mixed-sources"))
+    kotlin(file("src/test/mixed-sources"))
+    consoleLogging()
 }
 
 executable {
