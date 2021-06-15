@@ -54,6 +54,8 @@ object KotlinCompilerProvider {
         compilerConfiguration.put(JVM_TARGET, JVM_11)
         compilerConfiguration.put(RETAIN_OUTPUT_IN_MEMORY, false)
         compilerConfiguration.put(DISABLE_INLINE, true)
+        compilerConfiguration.put(DISABLE_CALL_ASSERTIONS, true)
+        compilerConfiguration.put(DISABLE_PARAM_ASSERTIONS, true)
         compilerConfiguration.put(DISABLE_OPTIMIZATION, true)
         compilerConfiguration.put(NO_RESET_JAR_TIMESTAMPS, true)
         compilerConfiguration.put(NO_OPTIMIZED_CALLABLE_REFERENCES, true)

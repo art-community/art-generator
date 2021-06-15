@@ -156,7 +156,8 @@ data class MixedKotlinModel(
     lateinit var mp18: MixedKotlinModel
     lateinit var mp19: InnerModel
     lateinit var mp20: NestedModel
-    lateinit var mp23: Enum
+    lateinit var mp21: Enum
+    lateinit var mp22: Array<Array<Array<List<Array<String>>>>>
 
     // Must be ignored
     var specificProperty1: String

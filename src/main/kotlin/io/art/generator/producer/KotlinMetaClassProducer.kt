@@ -163,8 +163,7 @@ private fun TypeSpec.Builder.generateFunctions(metaClass: KotlinMetaClass) {
     val parentFunctions = metaClass.parentFunctions()
     val functions = metaClass
             .functions
-            .asSequence()
-            .filter { function -> parentFunctions.none { parent -> parent.withoutVisibility() == function.withoutVisibility() } }
+            .filter { function -> parentFunctions.none { parent -> parent.withoutModifiers() == function.withoutModifiers() } }
     (functions + parentFunctions)
             .asSequence()
             .filter(KotlinMetaFunction::couldBeGenerated)
