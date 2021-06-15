@@ -90,7 +90,6 @@ fun KotlinMetaPropertyFunction.couldBeGenerated() = visibility.delegate == Publi
 
 fun KotlinMetaClass.parentFunctions() = parent
         ?.functions
-        ?.filter { method -> method.visibility.delegate == Public }
         ?: emptyList()
 
 fun KotlinMetaClass.parentProperties() = parent

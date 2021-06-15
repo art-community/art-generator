@@ -43,7 +43,7 @@ sealed class MixedKotlinModelParent(protected val protectedIcp: Boolean, val icp
     lateinit var protectedMp: String
     lateinit var publicMp: String
     lateinit var childP: MixedKotlinModel
-    lateinit var selfP: KotlinModelParent
+    lateinit var selfP: MixedKotlinModelParent
     abstract var abstractProperty: String
 
     // Must be ignored
@@ -93,7 +93,7 @@ data class MixedKotlinModel(
         val icfp3: () -> Any,
         val icfp4: (String, String, String) -> MixedKotlinModel,
         val icfp5: Map<Enum, List<Array<Enum>>>.(String, String, String) -> MixedKotlinModel, override var abstractProperty: String,
-) : KotlinModelParent(icp1, icp1) {
+) : MixedKotlinModelParent(icp1, icp1) {
     val ip1: Boolean? = null
     val ip2: String? = null
     val ip3: BooleanArray? = null
@@ -321,7 +321,7 @@ interface MixedKotlinInterface {
     fun implementableMethod()
 }
 
-object MixedKotlinObject : KotlinModelParent(false, true), MixedKotlinInterface {
+object MixedKotlinObject : MixedKotlinModelParent(false, true), MixedKotlinInterface {
     const val constantProperty = "test"
 
     // Must be ignored
@@ -363,7 +363,7 @@ object MixedKotlinObject : KotlinModelParent(false, true), MixedKotlinInterface 
     }
 }
 
-open class MixedKotlinClass(override var abstractProperty: String) : KotlinModelParent(false, true), MixedKotlinInterface {
+open class MixedKotlinClass(override var abstractProperty: String) : MixedKotlinModelParent(false, true), MixedKotlinInterface {
     // Must be ignored
     val MixedKotlinObject.extensionProperty: String
         get() {

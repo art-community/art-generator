@@ -115,4 +115,18 @@ data class KotlinMetaFunction(
         val parameters: Map<String, KotlinMetaParameter>,
         val visibility: DescriptorVisibility,
         val modality: Modality,
+) {
+    fun withoutVisibility(): KotlinMetaFunctionWithoutVisibility = KotlinMetaFunctionWithoutVisibility(
+            name,
+            returnType,
+            parameters,
+            modality
+    )
+}
+
+data class KotlinMetaFunctionWithoutVisibility(
+        val name: String,
+        val returnType: KotlinMetaType?,
+        val parameters: Map<String, KotlinMetaParameter>,
+        val modality: Modality,
 )

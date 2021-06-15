@@ -160,13 +160,16 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: KotlinMetaType
 }
 
 private fun TypeSpec.Builder.generateFunctions(metaClass: KotlinMetaClass) {
-    val parentFunctions = metaClass.parentFunctions().toSet()
-    val functions = metaClass.functions.filter { function -> !parentFunctions.contains(function) }
+    val parentFunctions = metaClass.parentFunctions()
+    val functions = metaClass
+            .functions
+            .asSequence()
+            .filter { function -> parentFunctions.none { parent -> parent.withoutVisibility() == function.withoutVisibility() } }
     (functions + parentFunctions)
             .asSequence()
             .filter(KotlinMetaFunction::couldBeGenerated)
-            .groupBy { method -> method.name }
-            .map { grouped -> grouped.value.forEachIndexed { methodIndex, method -> generateFunction(method, methodIndex, metaClass) } }
+            .groupBy { function -> function.name }
+            .map { grouped -> grouped.value.forEachIndexed { index, function -> generateFunction(function, index, metaClass) } }
 }
 
 private fun TypeSpec.Builder.generateFunction(function: KotlinMetaFunction, index: Int, ownerClass: KotlinMetaClass) {

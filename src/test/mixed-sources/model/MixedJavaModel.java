@@ -131,6 +131,10 @@ public class MixedJavaModel extends MixedJavaClass implements MixedJavaInterface
         return null;
     }
 
+
+    void voidMethod() {
+    }
+
     @Getter
     @ToString
     @AllArgsConstructor
