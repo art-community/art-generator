@@ -18,7 +18,6 @@
 
 package io.art.generator.provider
 
-import io.art.generator.configuration.configuration
 import io.art.generator.constants.EMPTY_DISPOSABLE
 import io.art.generator.constants.KOTLIN_ANALYZER_MODULE_NAME
 import io.art.generator.logging.emptyMessageCollector
@@ -37,13 +36,12 @@ import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR_EXTENDED_CHEC
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
 import org.jetbrains.kotlin.config.JvmTarget.JVM_11
-import org.jetbrains.kotlin.load.java.JavaClassesTracker
 import java.nio.file.Path
 
 
 class KotlinCompilerConfiguration(
         val root: Path,
-        val javaClassesTracker: JavaClassesTracker? = null,
+        val classpath: Set<Path>,
         val destination: Path? = null,
 )
 
@@ -65,10 +63,9 @@ object KotlinCompilerProvider {
         compilerConfiguration.put(USE_FIR_EXTENDED_CHECKERS, false)
         compilerConfiguration.put(IR, true)
 
-        kotlinCompilerConfiguration.javaClassesTracker?.let { tracker -> compilerConfiguration.put(JAVA_CLASSES_TRACKER, tracker) }
         kotlinCompilerConfiguration.destination?.let { destination -> compilerConfiguration.put(OUTPUT_DIRECTORY, destination.toFile()) }
 
-        val classpath = configuration.classpath.map { path -> path.toFile() }
+        val classpath = kotlinCompilerConfiguration.classpath.map { path -> path.toFile() }
 
         compilerConfiguration.addKotlinSourceRoots(listOf(kotlinCompilerConfiguration.root.toFile().absolutePath))
         compilerConfiguration.addJvmClasspathRoots(classpath)

@@ -27,6 +27,7 @@ import com.sun.tools.javac.code.Type
 import io.art.core.constants.StringConstants.DOT
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZE_COMPLETED
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.JAVA_LOGGER
@@ -39,15 +40,16 @@ import java.nio.file.Path
 import javax.lang.model.element.ElementKind.ENUM
 import javax.lang.model.type.TypeMirror
 
-fun analyzeJavaSources(root: Path, sources: Sequence<Path>, metaClassName: String) = JavaAnalyzingService().analyzeJavaSources(root, sources, metaClassName)
+fun analyzeJavaSources(source: SourceConfiguration, sources: Sequence<Path>, metaClassName: String) = JavaAnalyzingService()
+        .analyzeJavaSources(source, sources, metaClassName)
 
 private class JavaAnalyzingService {
     private val cache = mutableMapOf<TypeMirror, JavaMetaType>()
 
-    fun analyzeJavaSources(root: Path, sources: Sequence<Path>, metaClassName: String): List<JavaMetaClass> {
-        if (!root.toFile().exists()) return emptyList()
-        JAVA_LOGGER.info(ANALYZING_MESSAGE(root))
-        return useJavaCompiler(JavaCompilerConfiguration(root, sources)) { task ->
+    fun analyzeJavaSources(source: SourceConfiguration, sources: Sequence<Path>, metaClassName: String): List<JavaMetaClass> {
+        if (!source.root.toFile().exists()) return emptyList()
+        JAVA_LOGGER.info(ANALYZING_MESSAGE(source.root))
+        return useJavaCompiler(JavaCompilerConfiguration(source.root, sources, source.classpath)) { task ->
             task.analyze()
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }

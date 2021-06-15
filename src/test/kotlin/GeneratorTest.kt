@@ -72,7 +72,7 @@ class GeneratorTest {
             if (source.languages.contains(JAVA)) {
                 val javaSources = collectJavaSources(source.root, emptySet()).asSequence()
 
-                useJavaCompiler(JavaCompilerConfiguration(source.root, javaSources, tempDirectory)) { task -> assertTrue(task.call()) }
+                useJavaCompiler(JavaCompilerConfiguration(source.root, javaSources, source.classpath, tempDirectory)) { task -> assertTrue(task.call()) }
                 logger.info("[${source.root.name}]: Java sources compiled")
 
                 var generatedClassName = "meta.MetaExample"
@@ -86,7 +86,7 @@ class GeneratorTest {
                 tempDirectory.toFile().mkdirs()
             }
             if (source.languages.contains(KOTLIN)) {
-                useKotlinCompiler(KotlinCompilerConfiguration(source.root, destination = tempDirectory)) { analyzeAndGenerate(this) }
+                useKotlinCompiler(KotlinCompilerConfiguration(source.root, source.classpath, destination = tempDirectory)) { analyzeAndGenerate(this) }
                 logger.info("[${source.root.name}]: Kotlin sources compiled")
 
                 var generatedClassName = "meta.MetaExample"

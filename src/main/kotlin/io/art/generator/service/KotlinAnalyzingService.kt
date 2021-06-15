@@ -19,6 +19,7 @@
 package io.art.generator.service
 
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.KOTLIN_LOGGER
 import io.art.generator.model.*
@@ -51,21 +52,21 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
-import java.nio.file.Path
 import java.util.Objects.isNull
 import java.util.Objects.nonNull
 
-fun analyzeKotlinSources(root: Path, metaClassName: String) = KotlinAnalyzingService().analyzeKotlinSources(root, metaClassName)
+fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String) = KotlinAnalyzingService()
+        .analyzeKotlinSources(source, metaClassName)
 
 private class KotlinAnalyzingService {
     private val cache = mutableMapOf<KotlinType, KotlinMetaType>()
 
-    fun analyzeKotlinSources(root: Path, metaClassName: String): List<KotlinMetaClass> {
-        KOTLIN_LOGGER.info(ANALYZING_MESSAGE(root))
-        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(root), KotlinToJVMBytecodeCompiler::analyze)
+    fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String): List<KotlinMetaClass> {
+        KOTLIN_LOGGER.info(ANALYZING_MESSAGE(source.root))
+        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(source.root, source.classpath), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
                 ?: return emptyList()
-        return root.toFile().listFiles()!!
+        return source.root.toFile().listFiles()!!
                 .map { file -> file.name }
                 .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()

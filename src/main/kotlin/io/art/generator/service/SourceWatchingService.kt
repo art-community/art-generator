@@ -18,6 +18,7 @@
 
 package io.art.generator.service
 
+import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.GeneratorLanguage.JAVA
 import io.art.generator.constants.GeneratorLanguage.KOTLIN
@@ -57,10 +58,10 @@ object SourceWatchingService {
                 detectChanges(JAVA, source.root, collectJavaSources(source.root, excludedClassNames)).changed {
                     JAVA_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
                     if (asynchronous) {
-                        schedule { handleJavaSources(source.root, metaModuleClassNames[JAVA]!!) }
+                        schedule { handleJavaSources(source, metaModuleClassNames[JAVA]!!) }
                         return@changed
                     }
-                    handleJavaSources(source.root, metaModuleClassNames[JAVA]!!)
+                    handleJavaSources(source, metaModuleClassNames[JAVA]!!)
                 }
             }
 
@@ -68,30 +69,30 @@ object SourceWatchingService {
                 detectChanges(KOTLIN, source.root, collectKotlinSources(source.root, excludedClassNames)).changed {
                     KOTLIN_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
                     if (asynchronous) {
-                        schedule { handleKotlinSources(source.root, metaModuleClassNames[KOTLIN]!!) }
+                        schedule { handleKotlinSources(source, metaModuleClassNames[KOTLIN]!!) }
                         return@changed
                     }
-                    handleKotlinSources(source.root, metaModuleClassNames[KOTLIN]!!)
+                    handleKotlinSources(source, metaModuleClassNames[KOTLIN]!!)
                 }
             }
         }
     }
 
-    private fun SourcesChanges.handleJavaSources(path: Path, metaClassName: MetaModuleClassNames) {
-        val sources = analyzeJavaSources(path, existed.asSequence(), metaClassName.fullName)
+    private fun SourcesChanges.handleJavaSources(source: SourceConfiguration, metaClassName: MetaModuleClassNames) {
+        val sources = analyzeJavaSources(source, existed.asSequence(), metaClassName.fullName)
         if (sources.isEmpty()) {
             JAVA_LOGGER.info(SOURCES_NOT_FOUND(root))
             return
         }
-        generateJavaMetaClasses(path, sources.asSequence(), metaClassName.name)
+        generateJavaMetaClasses(source.root, sources.asSequence(), metaClassName.name)
     }
 
-    private fun SourcesChanges.handleKotlinSources(path: Path, metaClassName: MetaModuleClassNames) {
-        val sources = analyzeKotlinSources(path, metaClassName.fullName)
+    private fun SourcesChanges.handleKotlinSources(source: SourceConfiguration, metaClassName: MetaModuleClassNames) {
+        val sources = analyzeKotlinSources(source, metaClassName.fullName)
         if (sources.isEmpty()) {
             KOTLIN_LOGGER.info(SOURCES_NOT_FOUND(root))
             return
         }
-        generateKotlinMetaClasses(path, sources.asSequence(), metaClassName.name)
+        generateKotlinMetaClasses(source.root, sources.asSequence(), metaClassName.name)
     }
 }

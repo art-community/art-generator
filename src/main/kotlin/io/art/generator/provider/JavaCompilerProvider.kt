@@ -42,19 +42,19 @@ import javax.tools.StandardLocation.*
 class JavaCompilerConfiguration(
         val root: Path,
         val sources: Sequence<Path>,
-        val destination: Path = context().configuration().workingDirectory
+        val classpath: Set<Path>,
+        val destination: Path = context().configuration().workingDirectory,
 )
 
 object JavaCompilerProvider {
     fun <T> useJavaCompiler(compilerConfiguration: JavaCompilerConfiguration, action: JavaCompiler.(task: JavacTask) -> T): T {
         val tool = JavacTool.create()
-        val classpath = configuration.classpath.map { path -> path.toFile() }
         val context = JavaCompilerContext().apply {
             Options.instance(this).apply { setUTF8Encoding(this) }
         }
         val fileManager = tool.getStandardFileManager(EmptyDiagnosticListener, Locale.getDefault(), defaultCharset()).apply {
             setLocation(SOURCE_PATH, listOf(compilerConfiguration.root.toFile()))
-            setLocation(CLASS_PATH, classpath)
+            setLocation(CLASS_PATH, compilerConfiguration.classpath.map { path -> path.toFile() })
             setLocation(CLASS_OUTPUT, listOf(compilerConfiguration.destination.toFile()))
         }
         val options = listOf(PARAMETERS_OPTION)
