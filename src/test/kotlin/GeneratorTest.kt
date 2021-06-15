@@ -73,12 +73,12 @@ class GeneratorTest {
                 val javaSources = collectJavaSources(source.root, emptySet()).asSequence()
 
                 useJavaCompiler(JavaCompilerConfiguration(source.root, javaSources, tempDirectory)) { task -> assertTrue(task.call()) }
-                logger.info("[${source.root.name}: Java sources compiled")
+                logger.info("[${source.root.name}]: Java sources compiled")
 
                 var generatedClassName = "meta.MetaExample"
                 if (source.languages.size > 1) generatedClassName += "Java"
 
-                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("${source.root.name}:Loaded Java class: $name") })
+                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("[${source.root.name}]: Loaded Java class: $name") })
             }
 
             if (tempDirectory.toFile().exists()) {
@@ -87,12 +87,12 @@ class GeneratorTest {
             }
             if (source.languages.contains(KOTLIN)) {
                 useKotlinCompiler(KotlinCompilerConfiguration(source.root, destination = tempDirectory)) { analyzeAndGenerate(this) }
-                logger.info("${source.root.name}: Kotlin sources compiled")
+                logger.info("[${source.root.name}]: Kotlin sources compiled")
 
                 var generatedClassName = "meta.MetaExample"
                 if (source.languages.size > 1) generatedClassName += "Kotlin"
 
-                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("${source.root.name}: Loaded Kotlin class: $name") })
+                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("[${source.root.name}]: Loaded Kotlin class: $name") })
             }
         }
     }
