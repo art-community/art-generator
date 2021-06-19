@@ -29,16 +29,28 @@ import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
 import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
+import java.nio.channels.FileChannel.open
+import java.nio.file.StandardOpenOption.READ
+import kotlin.io.path.createFile
+import kotlin.io.path.exists
 
 object Generator {
     @JvmStatic
     fun main(arguments: Array<String>) {
-        activator(arguments)
-                .mainModuleId(Generator::class.simpleName)
-                .module(scheduler().with(logging()))
-                .launch()
-        initialize()
-        scheduleDelayed(configuration.watcherPeriod, ::watchSources)
-        block()
+        if (configuration.lock.exists()) {
+            return
+        }
+        configuration.lock.createFile()
+        open(configuration.lock, READ).use { channel ->
+            channel.lock()
+            activator(arguments)
+                    .mainModuleId(Generator::class.simpleName)
+                    .module(scheduler().with(logging()))
+                    .onUnload { if (configuration.lock.exists()) configuration.lock.toFile().delete() }
+                    .launch()
+            initialize()
+            scheduleDelayed(configuration.watcherPeriod, ::watchSources)
+            block()
+        }
     }
 }

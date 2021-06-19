@@ -38,6 +38,7 @@ data class SourceConfiguration(
 data class Configuration(
         val sources: Set<SourceConfiguration>,
         val watcherPeriod: Duration,
+        val lock: Path,
 )
 
 val configuration: Configuration by lazy {
@@ -45,12 +46,20 @@ val configuration: Configuration by lazy {
         Configuration(
                 sources = getNestedArray("sources") { source ->
                     SourceConfiguration(
-                            languages = source.getStringArray("languages").map { language -> GeneratorLanguage.valueOf(language.uppercase()) }.toSet(),
+                            languages = source
+                                    .getStringArray("languages")
+                                    .map { language -> GeneratorLanguage.valueOf(language.uppercase()) }
+                                    .toSet(),
+                            classpath = source.getString("classpath")
+                                    .split(if (isWindows()) SEMICOLON else COLON)
+                                    .map { path -> get(path) }
+                                    .toSet(),
                             root = get(source.getString("path")),
                             module = source.getString("module"),
-                            classpath = source.getString("classpath").split(if (isWindows()) SEMICOLON else COLON).map { path -> get(path) }.toSet(),
-                    )
+
+                            )
                 }.toSet(),
+                lock = get(getString("lock")),
                 watcherPeriod = ofMillis(getLong("watcher.period"))
         )
     }
