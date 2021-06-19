@@ -56,6 +56,7 @@ object Generator {
                 .mainModuleId(Generator::class.simpleName)
                 .module(scheduler().with(logging()))
                 .onUnload {
+                    reconfigure()
                     if (configuration.lock.exists() && ::channel.isInitialized && ::lock.isInitialized) {
                         lock.release()
                         channel.close()

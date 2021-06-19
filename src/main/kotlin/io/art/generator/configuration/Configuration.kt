@@ -60,7 +60,7 @@ private fun load() = with(configuration()) {
                                 .split(if (isWindows()) SEMICOLON else COLON)
                                 .map { path -> get(path) }
                                 .toSet(),
-                        root = get(source.getString("path")),
+                        root = get(source.getString("root")),
                         module = source.getString("module"),
 
                         )

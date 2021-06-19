@@ -77,12 +77,6 @@ sourceSets {
 
 generator {
     module("Example")
-
-    java(file("src/test/java-sources"))
-    kotlin(file("src/test/kotlin-sources"))
-
-    java(file("src/test/mixed-sources"))
-    kotlin(file("src/test/mixed-sources"))
     consoleLogging()
 }
 
