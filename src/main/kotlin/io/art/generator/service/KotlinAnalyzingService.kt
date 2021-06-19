@@ -55,9 +55,6 @@ import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.util.Objects.isNull
 import java.util.Objects.nonNull
-import kotlin.time.ExperimentalTime
-import kotlin.time.measureTime
-import kotlin.time.measureTimedValue
 
 fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String) = KotlinAnalyzingService()
         .analyzeKotlinSources(source, metaClassName)
@@ -65,7 +62,6 @@ fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String) = K
 private class KotlinAnalyzingService {
     private val cache = mutableMapOf<KotlinType, KotlinMetaType>()
 
-    @OptIn(ExperimentalTime::class)
     fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String): List<KotlinMetaClass> {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(source.root))
 

@@ -67,16 +67,16 @@ object Generator {
         reconfigure()
         if (configuration.lock.exists()) return
 
-        val lastModifiedTime = readAttributes(configuration.lock, BasicFileAttributes::class.java).lastModifiedTime()
-        if (lastModifiedTime.toMillis() > toMillis(now().minus(LOCK_FILE_LAST_MODIFICATION_TIMESTAMP))) {
-            return
-        }
-
         configuration.lock.createFile().apply { toFile().deleteOnExit() }
         channel = open(configuration.lock, READ, WRITE)
         lock = channel.lock()
 
         if (!lock.isValid) {
+            return
+        }
+
+        val lastModifiedTime = readAttributes(configuration.lock, BasicFileAttributes::class.java).lastModifiedTime()
+        if (lastModifiedTime.toMillis() < toMillis(now().minus(LOCK_FILE_LAST_MODIFICATION_TIMESTAMP))) {
             return
         }
 
