@@ -19,14 +19,13 @@
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.Generator
 import io.art.generator.configuration.configuration
+import io.art.generator.configuration.reconfigure
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
-import io.art.scheduler.Scheduling
-import io.art.scheduler.Scheduling.*
+import io.art.scheduler.Scheduling.scheduleFixedRate
 import io.art.scheduler.module.SchedulerActivator.scheduler
-import io.art.scheduler.module.SchedulerModule
 
 fun main() {
     activator()
@@ -34,6 +33,9 @@ fun main() {
             .module(scheduler().with(logging()))
             .launch()
     initialize()
-    scheduleFixedRate(configuration.watcherPeriod, ::watchSources)
+    scheduleFixedRate(configuration.watcherPeriod) {
+        reconfigure()
+        watchSources()
+    }
     block()
 }

@@ -41,9 +41,9 @@ dependencies {
     embedded("io.art.java:scheduler:main")
     embedded("io.art.java:logging:main")
     embedded("io.art.java:meta:main")
+    embedded("org.projectlombok", "lombok", lombokVersion)
     embedded("com.squareup", "javapoet", javaPoetVersion)
     embedded(files("libraries/kotlinpoet-1.9.0-SNAPSHOT.jar"))
-    embedded("org.projectlombok", "lombok", lombokVersion)
 
     testImplementation(kotlin("stdlib-jdk8"))
     testImplementation(kotlin("compiler-embeddable"))
@@ -90,7 +90,7 @@ executable {
     jar {
         configureRun {
             dependsOn(WRITE_CONFIGURATION_TASK)
-            jvmArgs("-Dconfiguration=${generator.configurationPath.toFile().absolutePath}")
+            jvmArgs("-Dconfiguration=${generator.workingDirectory.resolve("module.yml").toFile().absolutePath}")
         }
     }
     main("io.art.generator.Generator")
@@ -100,5 +100,5 @@ tasks.test {
     dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
     addTestOutputListener { _, outputEvent -> info(outputEvent.message) }
-    jvmArgs("-Dconfiguration=${generator.configurationPath.toFile().absolutePath}")
+    jvmArgs("-Dconfiguration=${generator.workingDirectory.resolve("module.yml").toFile().absolutePath}")
 }

@@ -19,6 +19,7 @@
 
 import io.art.core.extensions.FileExtensions.recursiveDelete
 import io.art.generator.configuration.configuration
+import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.GeneratorLanguage.JAVA
 import io.art.generator.constants.GeneratorLanguage.KOTLIN
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
@@ -47,6 +48,7 @@ class GeneratorTest {
 
     @BeforeEach
     fun prepare() {
+        reconfigure()
         generatedFiles().forEach { file -> file.delete() }
     }
 
@@ -60,6 +62,7 @@ class GeneratorTest {
         val logger = logger("test")
 
         watchSources(asynchronous = false)
+
         logger.info("Meta sources Generated")
 
         assertTrue { generatedFiles().filter { file -> file.exists() }.size == 4 }
