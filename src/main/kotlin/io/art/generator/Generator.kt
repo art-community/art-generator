@@ -29,7 +29,6 @@ import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
-import io.art.logging.module.LoggingModule
 import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
 import java.nio.channels.FileChannel
@@ -40,6 +39,8 @@ import java.nio.file.StandardOpenOption.WRITE
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
 import kotlin.system.exitProcess
+
+fun isStopped() = configuration.stopMarker.exists()
 
 object Generator {
     lateinit var channel: FileChannel
@@ -84,7 +85,7 @@ object Generator {
         }
 
         scheduleDelayed(STOP_CHECKING_PERIOD) {
-            if (configuration.stopMarker.exists()) {
+            if (isStopped()) {
                 exitProcess(0)
             }
         }
