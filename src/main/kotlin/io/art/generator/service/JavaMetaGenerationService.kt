@@ -36,7 +36,8 @@ import io.art.generator.templates.*
 import java.nio.file.Path
 import javax.lang.model.element.Modifier.*
 
-fun generateJavaMetaClasses(root: Path, classes: Sequence<JavaMetaClass>, metaClassName: String) = JavaMetaGenerationService().generateJavaMetaClasses(root, classes, metaClassName)
+fun generateJavaMetaClasses(root: Path, classes: Sequence<JavaMetaClass>, metaClassName: String) = JavaMetaGenerationService()
+        .generateJavaMetaClasses(root, classes, metaClassName)
 
 private class JavaMetaGenerationService(private val nameFactory: NameFactory = NameFactory()) {
     fun generateJavaMetaClasses(root: Path, classes: Sequence<JavaMetaClass>, metaClassName: String) {

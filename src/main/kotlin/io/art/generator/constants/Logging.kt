@@ -43,6 +43,6 @@ val ANALYZE_COMPLETED = { sources: List<String> -> "Analyze completed. Classes:\
 
 val GENERATING_METAS_MESSAGE = { classes: List<String> -> "Generating meta classes for:\n${classes.joinToString(NEW_LINE)}" }
 
-val GENERATED_MESSAGE = { name: String -> "Generated meta class: $name" }
+val GENERATED_MESSAGE = { name: String -> "Generated meta module class: $name" }
 
 private fun Collection<Path>.relativeNames(root: Path) = map { path -> path.toFile().relativeTo(root.toFile()) }.toList().joinToString(NEW_LINE)
