@@ -70,6 +70,10 @@ object Generator {
         channel = open(configuration.lockMarker, READ, WRITE)
         lock = channel.lock().apply { if (!isValid) return }
 
+        if (configuration.stopMarker.exists()) {
+            configuration.stopMarker.toFile().delete()
+        }
+
         scheduleDelayed(configuration.watcherPeriod) {
             reconfigure()
             watchSources()
