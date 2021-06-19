@@ -29,6 +29,7 @@ import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
+import io.art.logging.module.LoggingModule
 import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
 import java.nio.channels.FileChannel
@@ -51,9 +52,12 @@ object Generator {
                 .module(scheduler().with(logging()))
                 .onUnload {
                     reconfigure()
-                    if (configuration.lockMarker.exists() && ::channel.isInitialized && ::lock.isInitialized) {
+                    if (::channel.isInitialized && ::lock.isInitialized) {
                         lock.release()
                         channel.close()
+                        configuration.lockMarker.toFile().delete()
+                    }
+                    if (configuration.lockMarker.exists()) {
                         configuration.lockMarker.toFile().delete()
                     }
                     if (configuration.stopMarker.exists()) {
@@ -67,12 +71,12 @@ object Generator {
         if (configuration.lockMarker.exists()) return
         configuration.lockMarker.createFile().apply { toFile().deleteOnExit() }
 
-        channel = open(configuration.lockMarker, READ, WRITE)
-        lock = channel.lock().apply { if (!isValid) return }
-
         if (configuration.stopMarker.exists()) {
             configuration.stopMarker.toFile().delete()
         }
+
+        channel = open(configuration.lockMarker, READ, WRITE)
+        lock = channel.lock().apply { if (!isValid) return }
 
         scheduleDelayed(configuration.watcherPeriod) {
             reconfigure()
@@ -81,6 +85,7 @@ object Generator {
 
         scheduleDelayed(STOP_CHECKING_PERIOD) {
             if (configuration.stopMarker.exists()) {
+                LoggingModule.logger("generator").info("stop file existed")
                 exitProcess(0)
             }
         }
