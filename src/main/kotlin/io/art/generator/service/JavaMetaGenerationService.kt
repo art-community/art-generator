@@ -44,7 +44,6 @@ private class JavaMetaGenerationService(private val nameFactory: NameFactory = N
         JAVA_LOGGER.info(GENERATING_METAS_MESSAGE(classes.javaClassNames()))
         root.toFile().parentFile.mkdirs()
         val metaModuleClassName = ClassName.get(META_NAME, metaClassName)
-        val reference = ClassName.get(EMPTY_STRING, metaClassName)
         classBuilder(metaModuleClassName)
                 .addModifiers(PUBLIC)
                 .addAnnotation(javaSuppressAnnotation())

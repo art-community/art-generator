@@ -19,6 +19,8 @@
 package io.art.generator.constants
 
 import org.jetbrains.kotlin.com.intellij.openapi.Disposable
+import java.time.Duration
+import java.time.Duration.ofMillis
 
 const val KOTLIN_EXTENSION = "kt"
 const val KOTLIN_SCRIPT_EXTENSION = "kts"
@@ -47,3 +49,5 @@ enum class GeneratorLanguage(val suffix: String) {
 val EMPTY_DISPOSABLE = Disposable {}
 
 const val KOTLIN_ANALYZER_MODULE_NAME = "kotlin-analyzer"
+
+val STOP_CHECKING_PERIOD: Duration = ofMillis(300)

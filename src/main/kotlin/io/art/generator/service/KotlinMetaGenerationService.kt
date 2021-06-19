@@ -24,7 +24,6 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
 import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
-import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.constants.*
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.factory.NameFactory
@@ -43,7 +42,6 @@ private class KotlinMetaGenerationService(private val nameFactory: NameFactory =
         KOTLIN_LOGGER.info(GENERATING_METAS_MESSAGE(classes.kotlinClassNames()))
         root.toFile().parentFile.mkdirs()
         val metaModuleClassName = ClassName(META_NAME, metaClassName)
-        val reference = ClassName(EMPTY_STRING, metaClassName)
         classBuilder(metaModuleClassName)
                 .addAnnotation(kotlinSuppressAnnotation())
                 .superclass(KOTLIN_META_MODULE_CLASS_NAME)

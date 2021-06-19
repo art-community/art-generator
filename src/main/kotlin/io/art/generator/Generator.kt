@@ -24,6 +24,7 @@ import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import io.art.generator.constants.STOP_CHECKING_PERIOD
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
@@ -37,6 +38,7 @@ import java.nio.file.StandardOpenOption.READ
 import java.nio.file.StandardOpenOption.WRITE
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
+import kotlin.system.exitProcess
 
 object Generator {
     lateinit var channel: FileChannel
@@ -49,25 +51,34 @@ object Generator {
                 .module(scheduler().with(logging()))
                 .onUnload {
                     reconfigure()
-                    if (configuration.lock.exists() && ::channel.isInitialized && ::lock.isInitialized) {
+                    if (configuration.lockMarker.exists() && ::channel.isInitialized && ::lock.isInitialized) {
                         lock.release()
                         channel.close()
-                        configuration.lock.toFile().delete()
+                        configuration.lockMarker.toFile().delete()
+                    }
+                    if (configuration.stopMarker.exists()) {
+                        configuration.stopMarker.toFile().delete()
                     }
                 }
                 .launch()
         initialize()
         reconfigure()
 
-        if (configuration.lock.exists()) return
-        configuration.lock.createFile().apply { toFile().deleteOnExit() }
+        if (configuration.lockMarker.exists()) return
+        configuration.lockMarker.createFile().apply { toFile().deleteOnExit() }
 
-        channel = open(configuration.lock, READ, WRITE)
+        channel = open(configuration.lockMarker, READ, WRITE)
         lock = channel.lock().apply { if (!isValid) return }
 
         scheduleDelayed(configuration.watcherPeriod) {
             reconfigure()
             watchSources()
+        }
+
+        scheduleDelayed(STOP_CHECKING_PERIOD) {
+            if (configuration.stopMarker.exists()) {
+                exitProcess(0)
+            }
         }
 
         block()
