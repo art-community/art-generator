@@ -24,8 +24,9 @@ import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.extensions.DateTimeExtensions.toMillis
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.configuration.configuration
-import io.art.generator.configuration.configure
+import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import io.art.generator.constants.LOCK_FILE_LAST_MODIFICATION_TIMESTAMP
 import io.art.generator.constants.LOCK_FILE_MODIFICATION_PERIOD
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
@@ -33,6 +34,7 @@ import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
 import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
+import java.nio.channels.FileChannel
 import java.nio.channels.FileChannel.open
 import java.nio.channels.FileLock
 import java.nio.file.Files.readAttributes
@@ -45,6 +47,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.writeText
 
 object Generator {
+    lateinit var channel: FileChannel
     lateinit var lock: FileLock
 
     @JvmStatic
@@ -53,31 +56,39 @@ object Generator {
                 .mainModuleId(Generator::class.simpleName)
                 .module(scheduler().with(logging()))
                 .onUnload {
-                    if (configuration.lock.exists() && ::lock.isInitialized) {
+                    if (configuration.lock.exists() && ::channel.isInitialized && ::lock.isInitialized) {
                         lock.release()
+                        channel.close()
                         configuration.lock.toFile().delete()
                     }
                 }
-                .afterReload {
-                    configure()
-                }
                 .launch()
         initialize()
-        configure()
+        reconfigure()
         if (configuration.lock.exists()) return
-        val lockAttributes = readAttributes(configuration.lock, BasicFileAttributes::class.java)
-        if (lockAttributes.lastModifiedTime().toMillis() > toMillis(now().minus(LOCK_FILE_MODIFICATION_PERIOD))) {
+
+        val lastModifiedTime = readAttributes(configuration.lock, BasicFileAttributes::class.java).lastModifiedTime()
+        if (lastModifiedTime.toMillis() > toMillis(now().minus(LOCK_FILE_LAST_MODIFICATION_TIMESTAMP))) {
             return
         }
+
         configuration.lock.createFile().apply { toFile().deleteOnExit() }
-        open(configuration.lock, READ, WRITE).use { channel ->
-            lock = channel.lock()
-            if (!lock.isValid) {
-                return
-            }
-            scheduleDelayed(configuration.watcherPeriod, ::watchSources)
-            scheduleDelayed(LOCK_FILE_MODIFICATION_PERIOD) { configuration.lock.writeText(EMPTY_STRING) }
-            block()
+        channel = open(configuration.lock, READ, WRITE)
+        lock = channel.lock()
+
+        if (!lock.isValid) {
+            return
         }
+
+        scheduleDelayed(configuration.watcherPeriod) {
+            reconfigure()
+            watchSources()
+        }
+
+        scheduleDelayed(LOCK_FILE_MODIFICATION_PERIOD) {
+            configuration.lock.writeText(EMPTY_STRING)
+        }
+
+        block()
     }
 }

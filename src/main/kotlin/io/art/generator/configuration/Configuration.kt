@@ -44,7 +44,7 @@ data class Configuration(
 lateinit var configuration: Configuration
     private set
 
-fun configure() {
+fun reconfigure() {
     configuration = load()
 }
 
