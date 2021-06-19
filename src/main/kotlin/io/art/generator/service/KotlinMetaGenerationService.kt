@@ -35,7 +35,8 @@ import io.art.generator.producer.generateClass
 import io.art.generator.templates.*
 import java.nio.file.Path
 
-fun generateKotlinMetaClasses(root: Path, classes: Sequence<KotlinMetaClass>, metaClassName: String) = KotlinMetaGenerationService().generateKotlinMetaClasses(root, classes, metaClassName)
+fun generateKotlinMetaClasses(root: Path, classes: Sequence<KotlinMetaClass>, metaClassName: String) = KotlinMetaGenerationService()
+        .generateKotlinMetaClasses(root, classes, metaClassName)
 
 private class KotlinMetaGenerationService(private val nameFactory: NameFactory = NameFactory()) {
     fun generateKotlinMetaClasses(root: Path, classes: Sequence<KotlinMetaClass>, metaClassName: String) {

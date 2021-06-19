@@ -125,17 +125,17 @@ fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType): CodeBlock = metaT
 fun kotlinMetaClassSuperStatement(metaClass: KotlinMetaClass): CodeBlock = metaTypeStatement(metaClass.type)
 
 
-fun kotlinSetStatementBySingle(owner: String, property: KotlinMetaProperty) = "%L.%L = "
-        .asCode(owner, property.name)
+fun kotlinSetStatementBySingle(owner: String, property: KotlinMetaProperty, propertyName: MemberName) = "%L.%N = "
+        .asCode(owner, propertyName)
         .join("$ARGUMENT_NAME as %T".asCode(property.type.asPoetType()))
         .joinLine(kotlinReturnNullStatement())
 
-fun kotlinSetStatementByArray(owner: String, property: KotlinMetaProperty) = "%L.%L = "
-        .asCode(owner, property.name)
+fun kotlinSetStatementByArray(owner: String, property: KotlinMetaProperty, propertyName: MemberName) = "%L.%N = "
+        .asCode(owner, propertyName)
         .join("$ARGUMENTS_NAME[0] as %T".asCode(property.type.asPoetType()))
         .joinLine(kotlinReturnNullStatement())
 
-fun kotlinReturnGetStatement(owner: String, property: KotlinMetaProperty) = "return %L.%L".asCode(owner, property.name)
+fun kotlinReturnGetStatement(owner: String, property: MemberName) = "return %L.%N".asCode(owner, property)
 
 
 fun FunSpec.Builder.addLines(vararg code: CodeBlock) = addCode(listOf(*code).joinToCode(NEW_LINE))

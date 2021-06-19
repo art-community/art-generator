@@ -21,6 +21,7 @@ package io.art.generator.producer
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
 import com.squareup.kotlinpoet.KModifier.*
+import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
 import com.squareup.kotlinpoet.jvm.throws
@@ -211,7 +212,8 @@ private fun TypeSpec.Builder.generateGetter(property: KotlinMetaProperty, ownerC
     val methodClassName = kotlinMetaMethodClassName(name)
     val returnType = property.type
     val returnTypeName = returnType.asPoetType()
-    val parent = KOTLIN_INSTANCE_META_METHOD_CLASS_NAME.parameterizedBy(ownerClass.type.asPoetType(), returnTypeName)
+    val ownerType = ownerClass.type.asPoetType() as ClassName
+    val parent = KOTLIN_INSTANCE_META_METHOD_CLASS_NAME.parameterizedBy(ownerType, returnTypeName)
     classBuilder(methodClassName)
             .superclass(parent)
             .addFunction(constructorBuilder()
@@ -223,17 +225,17 @@ private fun TypeSpec.Builder.generateGetter(property: KotlinMetaProperty, ownerC
                         .addModifiers(OVERRIDE)
                         .throws(THROWABLE)
                         .returns(ANY.copy(nullable = true))
-                        .addParameter(INSTANCE_NAME, ownerClass.type.asPoetType())
-                        .addCode(kotlinReturnGetStatement(INSTANCE_NAME, property))
+                        .addParameter(INSTANCE_NAME, ownerType)
+                        .addCode(kotlinReturnGetStatement(INSTANCE_NAME, ownerType.member(property.name)))
                         .build()
                         .apply(::addFunction)
                 FunSpec.builder(INVOKE_NAME)
                         .addModifiers(OVERRIDE)
                         .throws(THROWABLE)
                         .returns(ANY.copy(nullable = true))
-                        .addParameter(INSTANCE_NAME, ownerClass.type.asPoetType())
+                        .addParameter(INSTANCE_NAME, ownerType)
                         .addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
-                        .addCode(kotlinReturnGetStatement(INSTANCE_NAME, property))
+                        .addCode(kotlinReturnGetStatement(INSTANCE_NAME, ownerType.member(property.name)))
                         .build()
                         .apply(::addFunction)
             }
@@ -257,7 +259,8 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
     val methodClassName = kotlinMetaMethodClassName(name)
     val returnType = property.type
     val returnTypeName = returnType.asPoetType()
-    val parent = KOTLIN_INSTANCE_META_METHOD_CLASS_NAME.parameterizedBy(ownerClass.type.asPoetType(), returnTypeName)
+    val ownerType = ownerClass.type.asPoetType() as ClassName
+    val parent = KOTLIN_INSTANCE_META_METHOD_CLASS_NAME.parameterizedBy(ownerType, returnTypeName)
     classBuilder(methodClassName)
             .superclass(parent)
             .addFunction(constructorBuilder()
@@ -269,18 +272,18 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
                         .addModifiers(OVERRIDE)
                         .throws(THROWABLE)
                         .returns(ANY.copy(nullable = true))
-                        .addParameter(INSTANCE_NAME, ownerClass.type.asPoetType())
+                        .addParameter(INSTANCE_NAME, ownerType)
                         .addParameter(ARGUMENT_NAME, ANY)
-                        .addCode(kotlinSetStatementBySingle(INSTANCE_NAME, property))
+                        .addCode(kotlinSetStatementBySingle(INSTANCE_NAME, property, ownerType.member(property.name)))
                         .build()
                         .apply(::addFunction)
                 FunSpec.builder(INVOKE_NAME)
                         .addModifiers(OVERRIDE)
                         .throws(THROWABLE)
                         .returns(ANY.copy(nullable = true))
-                        .addParameter(INSTANCE_NAME, ownerClass.type.asPoetType())
+                        .addParameter(INSTANCE_NAME, ownerType)
                         .addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
-                        .addCode(kotlinSetStatementByArray(INSTANCE_NAME, property))
+                        .addCode(kotlinSetStatementByArray(INSTANCE_NAME, property, ownerType.member(property.name)))
                         .build()
                         .apply(::addFunction)
             }
