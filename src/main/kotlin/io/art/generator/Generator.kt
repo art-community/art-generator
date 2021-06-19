@@ -29,6 +29,7 @@ import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
+import io.art.logging.module.LoggingModule
 import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
 import java.nio.channels.FileChannel
@@ -56,7 +57,6 @@ object Generator {
                     if (::channel.isInitialized && ::lock.isInitialized) {
                         lock.release()
                         channel.close()
-                        configuration.lockMarker.toFile().delete()
                     }
                     if (configuration.lockMarker.exists()) {
                         configuration.lockMarker.toFile().delete()
