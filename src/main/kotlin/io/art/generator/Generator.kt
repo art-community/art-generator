@@ -85,7 +85,6 @@ object Generator {
 
         scheduleDelayed(STOP_CHECKING_PERIOD) {
             if (configuration.stopMarker.exists()) {
-                LoggingModule.logger("generator").info("stop file existed")
                 exitProcess(0)
             }
         }
