@@ -53,7 +53,7 @@ object Generator {
                 .launch()
         initialize()
         if (configuration.lock.exists()) return
-        configuration.lock.createFile()
+        configuration.lock.createFile().apply { toFile().deleteOnExit() }
         open(configuration.lock, READ, WRITE).use { channel ->
             lock = channel.lock()
             if (!lock.isValid) {
