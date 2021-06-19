@@ -48,7 +48,7 @@ fun reconfigure() {
     configuration = load()
 }
 
-private fun load() = with(configuration()) {
+private fun load() = with(configuration().apply { refresh() }) {
     Configuration(
             sources = getNestedArray("sources") { source ->
                 SourceConfiguration(
@@ -61,9 +61,8 @@ private fun load() = with(configuration()) {
                                 .map { path -> get(path) }
                                 .toSet(),
                         root = get(source.getString("root")),
-                        module = source.getString("module"),
-
-                        )
+                        module = source.getString("module")
+                )
             }.toSet(),
             lock = get(getString("lock")),
             watcherPeriod = ofMillis(getLong("watcher.period"))
