@@ -22,6 +22,7 @@ import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.KOTLIN_LOGGER
+import io.art.generator.constants.META_NAME
 import io.art.generator.model.*
 import io.art.generator.model.KotlinMetaPropertyFunctionKind.GETTER
 import io.art.generator.model.KotlinMetaPropertyFunctionKind.SETTER
@@ -68,14 +69,14 @@ private class KotlinAnalyzingService {
     fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String): List<KotlinMetaClass> {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(source.root))
 
-        val analysisResult = measureTimedValue {
-            useKotlinCompiler(KotlinCompilerConfiguration(source.root, source.classpath), KotlinToJVMBytecodeCompiler::analyze)
-                    ?.takeIf { result -> !result.isError() }
-                    ?: return emptyList()
-        }.apply { KOTLIN_LOGGER.info("Compiler time: ${this.duration.inWholeSeconds}") }
+        val roots = source.root.toFile().listFiles()!!.filter { packageName -> packageName.name != META_NAME }.toSet()
+        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(roots, source.classpath), KotlinToJVMBytecodeCompiler::analyze)
+                ?.takeIf { result -> !result.isError() }
+                ?: return emptyList()
+
         return source.root.toFile().listFiles()!!
                 .map { file -> file.name }
-                .flatMap { packageName -> collectClasses(analysisResult.value, packageName) }
+                .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()
                 .filter { descriptor -> descriptor.defaultType.resolved() }
                 .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != metaClassName }

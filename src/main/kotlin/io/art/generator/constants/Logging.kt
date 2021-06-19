@@ -33,7 +33,16 @@ val JAVA_LOGGER: Logger = logger(JAVA)
 
 val KOTLIN_LOGGER: Logger = logger(KOTLIN)
 
-val SOURCES_CHANGED = { root: Path, modified: List<Path>, deleted: List<Path> -> "Sources changed\nModified:\n${modified.relativeNames(root)}\n\nDeleted:\n${deleted.relativeNames(root)}" }
+val SOURCES_CHANGED = { root: Path, modified: List<Path>, deleted: List<Path> ->
+    var message = "Sources changed"
+    if (modified.isNotEmpty()) {
+        message += "\nModified:\n${modified.relativeNames(root)}"
+    }
+    if (deleted.isNotEmpty()) {
+        message += "\nDeleted:\n${deleted.relativeNames(root)}"
+    }
+    message
+}
 
 val SOURCES_NOT_FOUND = { root: Path -> "Sources not found inside $root" }
 

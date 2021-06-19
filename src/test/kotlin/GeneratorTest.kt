@@ -86,7 +86,7 @@ class GeneratorTest {
                 tempDirectory.toFile().mkdirs()
             }
             if (source.languages.contains(KOTLIN)) {
-                useKotlinCompiler(KotlinCompilerConfiguration(source.root, source.classpath, destination = tempDirectory)) { analyzeAndGenerate(this) }
+                useKotlinCompiler(KotlinCompilerConfiguration(setOf(source.root.toFile()), source.classpath, destination = tempDirectory)) { analyzeAndGenerate(this) }
                 logger.info("[${source.root.name}]: Kotlin sources compiled")
 
                 var generatedClassName = "meta.MetaExample"

@@ -42,7 +42,7 @@ dependencies {
     embedded("io.art.java:logging:main")
     embedded("io.art.java:meta:main")
     embedded("com.squareup", "javapoet", javaPoetVersion)
-    embedded("com.squareup", "kotlinpoet", kotlinPoetVersion)
+    embedded(files("libraries/kotlinpoet-1.9.0-SNAPSHOT.jar"))
     embedded("org.projectlombok", "lombok", lombokVersion)
 
     testImplementation(kotlin("stdlib-jdk8"))

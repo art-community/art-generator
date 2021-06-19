@@ -304,6 +304,7 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
 private fun TypeSpec.Builder.generateFunctionInvocations(ownerClass: KotlinMetaClass, name: String, function: KotlinMetaFunction) {
     val static = ownerClass.isObject
     val parameters = function.parameters
+    val ownerTypeName = ownerClass.type.asPoetType() as ClassName
     val template = FunSpec.builder(INVOKE_NAME)
             .addModifiers(OVERRIDE)
             .throws(THROWABLE)
@@ -312,8 +313,8 @@ private fun TypeSpec.Builder.generateFunctionInvocations(ownerClass: KotlinMetaC
             .build()
     template.toBuilder().apply {
         val invoke = when {
-            static -> kotlinInvokeStaticStatement(name, ownerClass.type, parameters)
-            else -> kotlinInvokeInstanceStatement(name, parameters)
+            static -> kotlinInvokeStaticStatement(ownerTypeName.member(name), ownerClass.type, parameters)
+            else -> kotlinInvokeInstanceStatement(ownerTypeName.member(name), parameters)
         }
         when {
             isNull(function.returnType) -> addLines(invoke, kotlinReturnNullStatement())
@@ -326,8 +327,8 @@ private fun TypeSpec.Builder.generateFunctionInvocations(ownerClass: KotlinMetaC
     when (parameters.size) {
         0 -> template.toBuilder().apply {
             val invoke = when {
-                static -> kotlinInvokeStaticStatement(name, ownerClass.type)
-                else -> kotlinInvokeInstanceStatement(name)
+                static -> kotlinInvokeStaticStatement(ownerTypeName.member(name), ownerClass.type)
+                else -> kotlinInvokeInstanceStatement(ownerTypeName.member(name))
             }
             when {
                 isNull(function.returnType) -> addLines(invoke, kotlinReturnNullStatement())
@@ -339,8 +340,8 @@ private fun TypeSpec.Builder.generateFunctionInvocations(ownerClass: KotlinMetaC
         1 -> template.toBuilder().apply {
             addParameter(ARGUMENT_NAME, ANY)
             val invoke = when {
-                static -> kotlinInvokeStaticStatement(name, ownerClass.type, parameters.values.first())
-                else -> kotlinInvokeInstanceStatement(name, parameters.values.first())
+                static -> kotlinInvokeStaticStatement(ownerTypeName.member(name), ownerClass.type, parameters.values.first())
+                else -> kotlinInvokeInstanceStatement(ownerTypeName.member(name), parameters.values.first())
             }
             when {
                 isNull(function.returnType) -> addLines(invoke, kotlinReturnNullStatement())

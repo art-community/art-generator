@@ -64,29 +64,29 @@ fun kotlinNamedSuperStatement(name: String): CodeBlock = "%S".asCode(name)
 fun kotlinReturnNullStatement() = "return null".asCode()
 
 
-fun kotlinInvokeInstanceStatement(method: String): CodeBlock {
-    return "$INSTANCE_NAME.$method()".asCode()
+fun kotlinInvokeInstanceStatement(method: MemberName): CodeBlock {
+    return "$INSTANCE_NAME.%N()".asCode(method)
 }
 
-fun kotlinInvokeInstanceStatement(method: String, parameter: KotlinMetaParameter): CodeBlock {
-    return "$INSTANCE_NAME.$method(".join(casted(parameter)).join(")")
+fun kotlinInvokeInstanceStatement(method: MemberName, parameter: KotlinMetaParameter): CodeBlock {
+    return "$INSTANCE_NAME.%N(".asCode(method).join(casted(parameter)).join(")")
 }
 
-fun kotlinInvokeInstanceStatement(method: String, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
-    return "$INSTANCE_NAME.$method(".join(casted(parameters)).join(")")
+fun kotlinInvokeInstanceStatement(method: MemberName, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
+    return "$INSTANCE_NAME.%N(".asCode(method).join(casted(parameters)).join(")")
 }
 
 
-fun kotlinInvokeStaticStatement(method: String, type: KotlinMetaType): CodeBlock {
-    return "%T.$method()".asCode(type.extractClass())
+fun kotlinInvokeStaticStatement(method: MemberName, type: KotlinMetaType): CodeBlock {
+    return "%T.%N()".asCode(type.extractClass(), method)
 }
 
-fun kotlinInvokeStaticStatement(method: String, type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {
-    return "%T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(")")
+fun kotlinInvokeStaticStatement(method: MemberName, type: KotlinMetaType, parameter: KotlinMetaParameter): CodeBlock {
+    return "%T.%N(".asCode(type.extractClass(), method).join(casted(parameter)).join(")")
 }
 
-fun kotlinInvokeStaticStatement(method: String, type: KotlinMetaType, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
-    return "%T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(")")
+fun kotlinInvokeStaticStatement(method: MemberName, type: KotlinMetaType, parameters: Map<String, KotlinMetaParameter>): CodeBlock {
+    return "%T.%N(".asCode(type.extractClass(), method).join(casted(parameters)).join(")")
 }
 
 

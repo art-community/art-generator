@@ -27,6 +27,7 @@ import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_F
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.Companion.createForProduction
 import org.jetbrains.kotlin.cli.jvm.config.addJavaSourceRoot
+import org.jetbrains.kotlin.cli.jvm.config.addJavaSourceRoots
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.DISABLE_INLINE
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.MODULE_NAME
@@ -36,11 +37,12 @@ import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR_EXTENDED_CHEC
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
 import org.jetbrains.kotlin.config.JvmTarget.JVM_11
+import java.io.File
 import java.nio.file.Path
 
 
 class KotlinCompilerConfiguration(
-        val root: Path,
+        val roots: Set<File>,
         val classpath: Set<Path>,
         val destination: Path? = null,
 )
@@ -52,7 +54,7 @@ object KotlinCompilerProvider {
         compilerConfiguration.put(MODULE_NAME, KOTLIN_ANALYZER_MODULE_NAME)
         compilerConfiguration.put(REPORT_OUTPUT_FILES, false)
         compilerConfiguration.put(JVM_TARGET, JVM_11)
-        compilerConfiguration.put(RETAIN_OUTPUT_IN_MEMORY, false)
+        compilerConfiguration.put(RETAIN_OUTPUT_IN_MEMORY, true)
         compilerConfiguration.put(DISABLE_INLINE, true)
         compilerConfiguration.put(DISABLE_CALL_ASSERTIONS, true)
         compilerConfiguration.put(DISABLE_PARAM_ASSERTIONS, true)
@@ -65,13 +67,16 @@ object KotlinCompilerProvider {
         compilerConfiguration.put(USE_FIR_EXTENDED_CHECKERS, false)
         compilerConfiguration.put(IR, true)
 
-        kotlinCompilerConfiguration.destination?.let { destination -> compilerConfiguration.put(OUTPUT_DIRECTORY, destination.toFile()) }
+        kotlinCompilerConfiguration.destination?.let { destination ->
+            compilerConfiguration.put(RETAIN_OUTPUT_IN_MEMORY, false)
+            compilerConfiguration.put(OUTPUT_DIRECTORY, destination.toFile())
+        }
 
         val classpath = kotlinCompilerConfiguration.classpath.map { path -> path.toFile() }
 
-        compilerConfiguration.addKotlinSourceRoots(listOf(kotlinCompilerConfiguration.root.toFile().absolutePath))
+        compilerConfiguration.addKotlinSourceRoots(kotlinCompilerConfiguration.roots.map { root -> root.absolutePath })
         compilerConfiguration.addJvmClasspathRoots(classpath)
-        compilerConfiguration.addJavaSourceRoot(kotlinCompilerConfiguration.root.toFile())
+        compilerConfiguration.addJavaSourceRoots(kotlinCompilerConfiguration.roots.toList())
 
         return action(createForProduction(EMPTY_DISPOSABLE, compilerConfiguration, JVM_CONFIG_FILES))
     }
