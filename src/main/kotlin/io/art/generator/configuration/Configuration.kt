@@ -68,4 +68,3 @@ private fun load() = with(configuration().apply { refresh() }) {
             watcherPeriod = ofMillis(getLong("watcher.period"))
     )
 }
-

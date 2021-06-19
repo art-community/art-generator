@@ -76,7 +76,6 @@ object KotlinCompilerProvider {
 
         compilerConfiguration.addKotlinSourceRoots(kotlinCompilerConfiguration.roots.map { root -> root.absolutePath })
         compilerConfiguration.addJvmClasspathRoots(classpath)
-        compilerConfiguration.addJavaSourceRoots(kotlinCompilerConfiguration.roots.toList())
 
         return action(createForProduction(EMPTY_DISPOSABLE, compilerConfiguration, JVM_CONFIG_FILES))
     }

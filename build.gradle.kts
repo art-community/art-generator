@@ -77,6 +77,8 @@ sourceSets {
 
 generator {
     module("Example")
+    exclude("main")
+    exclude("kotlin")
     consoleLogging()
 }
 
