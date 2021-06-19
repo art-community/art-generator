@@ -30,25 +30,35 @@ import io.art.logging.module.LoggingActivator.logging
 import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
 import java.nio.channels.FileChannel.open
-import java.nio.file.StandardOpenOption
+import java.nio.channels.FileLock
 import java.nio.file.StandardOpenOption.READ
 import java.nio.file.StandardOpenOption.WRITE
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
 
 object Generator {
+    lateinit var lock: FileLock
+
     @JvmStatic
     fun main(arguments: Array<String>) {
         activator(arguments)
                 .mainModuleId(Generator::class.simpleName)
                 .module(scheduler().with(logging()))
-                .onUnload { if (configuration.lock.exists()) configuration.lock.toFile().delete() }
+                .onUnload {
+                    if (configuration.lock.exists() && ::lock.isInitialized) {
+                        lock.release()
+                        configuration.lock.toFile().delete()
+                    }
+                }
                 .launch()
         initialize()
         if (configuration.lock.exists()) return
         configuration.lock.createFile()
         open(configuration.lock, READ, WRITE).use { channel ->
-            channel.lock()
+            lock = channel.lock()
+            if (!lock.isValid) {
+                return
+            }
             scheduleDelayed(configuration.watcherPeriod, ::watchSources)
             block()
         }
