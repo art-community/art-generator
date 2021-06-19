@@ -30,8 +30,7 @@ import io.art.generator.detector.SourcesChanges
 import io.art.generator.detector.detectChanges
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.generator.templates.metaModuleClassName
-import io.art.scheduler.manager.Scheduling.schedule
-import java.nio.file.Path
+import io.art.scheduler.Scheduling.schedule
 
 object SourceWatchingService {
     private data class MetaModuleClassNames(val name: String, val fullName: String)

@@ -54,6 +54,9 @@ import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.util.Objects.isNull
 import java.util.Objects.nonNull
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
+import kotlin.time.measureTimedValue
 
 fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String) = KotlinAnalyzingService()
         .analyzeKotlinSources(source, metaClassName)
@@ -61,14 +64,18 @@ fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String) = K
 private class KotlinAnalyzingService {
     private val cache = mutableMapOf<KotlinType, KotlinMetaType>()
 
+    @OptIn(ExperimentalTime::class)
     fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String): List<KotlinMetaClass> {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(source.root))
-        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(source.root, source.classpath), KotlinToJVMBytecodeCompiler::analyze)
-                ?.takeIf { result -> !result.isError() }
-                ?: return emptyList()
+
+        val analysisResult = measureTimedValue {
+            useKotlinCompiler(KotlinCompilerConfiguration(source.root, source.classpath), KotlinToJVMBytecodeCompiler::analyze)
+                    ?.takeIf { result -> !result.isError() }
+                    ?: return emptyList()
+        }.apply { KOTLIN_LOGGER.info("Compiler time: ${this.duration.inWholeSeconds}") }
         return source.root.toFile().listFiles()!!
                 .map { file -> file.name }
-                .flatMap { packageName -> collectClasses(analysisResult, packageName) }
+                .flatMap { packageName -> collectClasses(analysisResult.value, packageName) }
                 .asSequence()
                 .filter { descriptor -> descriptor.defaultType.resolved() }
                 .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != metaClassName }
