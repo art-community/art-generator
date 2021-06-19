@@ -22,6 +22,7 @@ package io.art.generator
 
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.configuration.configuration
+import io.art.generator.configuration.configure
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
@@ -50,8 +51,12 @@ object Generator {
                         configuration.lock.toFile().delete()
                     }
                 }
+                .afterReload {
+                    configure()
+                }
                 .launch()
         initialize()
+        configure()
         if (configuration.lock.exists()) return
         configuration.lock.createFile().apply { toFile().deleteOnExit() }
         open(configuration.lock, READ, WRITE).use { channel ->
