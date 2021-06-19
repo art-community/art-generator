@@ -80,6 +80,9 @@ object Generator {
         lock = channel.lock().apply { if (!isValid) return }
 
         scheduleDelayed(configuration.watcherPeriod) {
+            if (isStopped()) {
+                return@scheduleDelayed
+            }
             reconfigure()
             watchSources()
         }
