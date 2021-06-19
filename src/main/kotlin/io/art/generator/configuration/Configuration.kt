@@ -42,6 +42,7 @@ data class Configuration(
 )
 
 lateinit var configuration: Configuration
+    private set
 
 fun configure() {
     configuration = load()

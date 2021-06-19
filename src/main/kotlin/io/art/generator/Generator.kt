@@ -20,10 +20,13 @@
 
 package io.art.generator
 
+import io.art.core.constants.StringConstants.EMPTY_STRING
+import io.art.core.extensions.DateTimeExtensions.toMillis
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.configure
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import io.art.generator.constants.LOCK_FILE_MODIFICATION_PERIOD
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
@@ -32,10 +35,14 @@ import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
 import java.nio.channels.FileChannel.open
 import java.nio.channels.FileLock
+import java.nio.file.Files.readAttributes
 import java.nio.file.StandardOpenOption.READ
 import java.nio.file.StandardOpenOption.WRITE
+import java.nio.file.attribute.BasicFileAttributes
+import java.time.LocalDateTime.now
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
+import kotlin.io.path.writeText
 
 object Generator {
     lateinit var lock: FileLock
@@ -58,6 +65,10 @@ object Generator {
         initialize()
         configure()
         if (configuration.lock.exists()) return
+        val lockAttributes = readAttributes(configuration.lock, BasicFileAttributes::class.java)
+        if (lockAttributes.lastModifiedTime().toMillis() > toMillis(now().minus(LOCK_FILE_MODIFICATION_PERIOD))) {
+            return
+        }
         configuration.lock.createFile().apply { toFile().deleteOnExit() }
         open(configuration.lock, READ, WRITE).use { channel ->
             lock = channel.lock()
@@ -65,6 +76,7 @@ object Generator {
                 return
             }
             scheduleDelayed(configuration.watcherPeriod, ::watchSources)
+            scheduleDelayed(LOCK_FILE_MODIFICATION_PERIOD) { configuration.lock.writeText(EMPTY_STRING) }
             block()
         }
     }
