@@ -28,7 +28,6 @@ dependencies {
     val lombokVersion: String by project
     val junitVersion: String by project
     val javaPoetVersion: String by project
-    val kotlinPoetVersion: String by project
 
     embedded(kotlin("stdlib-jdk8"))
     embedded(kotlin("compiler-embeddable"))
