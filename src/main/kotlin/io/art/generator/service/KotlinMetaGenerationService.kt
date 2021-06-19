@@ -51,14 +51,6 @@ private class KotlinMetaGenerationService(private val nameFactory: NameFactory =
                         .addParameter(ParameterSpec.builder(DEPENDENCIES_NAME, KOTLIN_META_MODULE_CLASS_NAME, VARARG).build())
                         .callSuperConstructor(kotlinSuperStatement(DEPENDENCIES_NAME))
                         .build())
-                .addProperty(PropertySpec.builder(META_NAME, reference)
-                        .addModifiers(PRIVATE)
-                        .initializer(kotlinNewStatement(metaModuleClassName))
-                        .build())
-                .addFunction(FunSpec.builder(META_NAME)
-                        .returns(reference)
-                        .addCode(kotlinReturnStatement(META_NAME))
-                        .build())
                 .apply { generateTree(classes) }
                 .build()
                 .let { metaClass ->

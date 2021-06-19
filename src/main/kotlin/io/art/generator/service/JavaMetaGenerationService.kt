@@ -55,15 +55,6 @@ private class JavaMetaGenerationService(private val nameFactory: NameFactory = N
                         .varargs()
                         .addCode(javaSuperStatement(DEPENDENCIES_NAME))
                         .build())
-                .addField(FieldSpec.builder(reference, META_NAME)
-                        .addModifiers(PRIVATE, FINAL, STATIC)
-                        .initializer(javaNewStatement(metaModuleClassName))
-                        .build())
-                .addMethod(methodBuilder(META_NAME)
-                        .addModifiers(PUBLIC, STATIC)
-                        .returns(reference)
-                        .addCode(javaReturnStatement(META_NAME))
-                        .build())
                 .apply { generateTree(classes) }
                 .build()
                 .let { metaClass ->
