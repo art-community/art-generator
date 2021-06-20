@@ -78,7 +78,6 @@ generator {
     module("Example")
     exclude("main")
     exclude("kotlin")
-    jvm()
     consoleLogging()
     useLocalJar(file("build/executable/art-generator.jar").toPath())
 }
