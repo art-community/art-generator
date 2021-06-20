@@ -23,7 +23,6 @@ import java.util.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @Builder
 @AllArgsConstructor
 @ToString(callSuper = true)

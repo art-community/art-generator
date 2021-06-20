@@ -36,11 +36,14 @@ object SourceWatchingService {
     private data class MetaModuleClassNames(val name: String, val fullName: String)
 
     fun watchSources(asynchronous: Boolean = true) {
+        val languagesByModule = configuration.sources
+                .groupBy { source -> source.module }
+                .mapValues { sources -> sources.value.flatMap { source -> source.languages }.toSet() }
         configuration.sources.forEach { source ->
             val metaModuleClassName = metaModuleClassName(source.module)
             val metaModuleClassFullName = metaModuleClassFullName(source.module)
             val metaModuleClassNames = source.languages.associate { language ->
-                if (source.languages.size > 1) {
+                if (languagesByModule[source.module]!!.size > 1) {
                     return@associate language to MetaModuleClassNames(
                             name = metaModuleClassName + language.suffix,
                             fullName = metaModuleClassFullName + language.suffix
