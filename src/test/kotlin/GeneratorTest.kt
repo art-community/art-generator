@@ -72,15 +72,14 @@ class GeneratorTest {
                 recursiveDelete(tempDirectory)
                 tempDirectory.toFile().mkdirs()
             }
+
             if (source.languages.contains(JAVA)) {
                 val javaSources = collectJavaSources(source.root, emptySet()).asSequence()
 
                 useJavaCompiler(JavaCompilerConfiguration(source.root, javaSources, source.classpath, tempDirectory)) { task -> assertTrue(task.call()) }
                 logger.info("[${source.root.name}]: Java sources compiled")
 
-                var generatedClassName = "meta.MetaExample"
-                if (source.languages.size > 1) generatedClassName += "Java"
-
+                val generatedClassName = "meta.MetaExampleJava"
                 assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("[${source.root.name}]: Loaded Java class: $name") })
             }
 
@@ -88,13 +87,12 @@ class GeneratorTest {
                 recursiveDelete(tempDirectory)
                 tempDirectory.toFile().mkdirs()
             }
+
             if (source.languages.contains(KOTLIN)) {
                 useKotlinCompiler(KotlinCompilerConfiguration(setOf(source.root.toFile()), source.classpath, destination = tempDirectory)) { analyzeAndGenerate(this) }
                 logger.info("[${source.root.name}]: Kotlin sources compiled")
 
-                var generatedClassName = "meta.MetaExample"
-                if (source.languages.size > 1) generatedClassName += "Kotlin"
-
+                val generatedClassName = "meta.MetaExampleKotlin"
                 assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("[${source.root.name}]: Loaded Kotlin class: $name") })
             }
         }
