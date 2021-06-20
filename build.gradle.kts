@@ -80,6 +80,7 @@ generator {
     exclude("kotlin")
     jvm()
     consoleLogging()
+    useLocalJar(file("build/executable/art-generator.jar").toPath())
 }
 
 executable {
@@ -91,6 +92,8 @@ executable {
     }
     main("io.art.generator.Generator")
 }
+
+tasks["build"].dependsOn("build-executable-jar")
 
 tasks.test {
     dependsOn(WRITE_CONFIGURATION_TASK)
