@@ -69,3 +69,4 @@ zookeeper/
 tarantool/lua
 local/
 local.properties
+src/test/resources/module.yml
