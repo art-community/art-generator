@@ -33,9 +33,7 @@ fun main() {
             .module(scheduler().with(logging()))
             .launch()
     initialize()
-    scheduleFixedRate(configuration.watcherPeriod) {
-        reconfigure()
-        watchSources()
-    }
+    reconfigure()
+    scheduleFixedRate(configuration.watcherPeriod, ::watchSources)
     block()
 }
