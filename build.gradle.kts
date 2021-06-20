@@ -78,6 +78,7 @@ generator {
     module("Example")
     exclude("main")
     exclude("kotlin")
+    jvm()
     consoleLogging()
 }
 
