@@ -63,7 +63,7 @@ class GeneratorTest {
 
         watchSources(asynchronous = false)
 
-        logger.info("Meta sources Generated")
+        logger.info("Meta sources generated")
 
         assertTrue { generatedFiles().filter { file -> file.exists() }.size == 4 }
 
