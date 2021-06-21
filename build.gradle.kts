@@ -1,3 +1,4 @@
+import io.art.gradle.common.constants.BUILD_EXECUTABLE_JAR_TASK
 import io.art.gradle.common.constants.WRITE_CONFIGURATION_TASK
 import io.art.gradle.common.logger.info
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -97,8 +98,10 @@ tasks["build"].dependsOn("build-executable-jar")
 tasks.findByName("publish")?.dependsOn("build-executable-jar")
 
 tasks.test {
+    dependsOn(BUILD_EXECUTABLE_JAR_TASK)
     dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
     addTestOutputListener { _, outputEvent -> info(outputEvent.message) }
     jvmArgs("-Dconfiguration=${generator.workingDirectory.resolve("module.yml").toFile().absolutePath}")
+    jvmArgs("-DjarPath=${buildDir.resolve("executable").resolve("art-generator.jar").absolutePath}")
 }

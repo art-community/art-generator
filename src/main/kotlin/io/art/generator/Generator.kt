@@ -47,8 +47,6 @@ object Generator {
         initialize()
         reconfigure()
 
-        if (!controllerFileExists()) return
-
         if (!lockIsValid()) return
 
         scheduleDelayed(LOCK_VALIDATION_PERIOD) {

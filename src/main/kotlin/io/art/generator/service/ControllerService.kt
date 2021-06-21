@@ -34,7 +34,10 @@ import kotlin.io.path.writeText
 object ControllerService {
     fun controllerFileExists() = configuration.controller.exists()
 
-    fun loadState() = GeneratorState.valueOf(configuration.controller.readText().split(SPACE)[0])
+    fun loadState(): GeneratorState {
+        if (!controllerFileExists()) return AVAILABLE
+        return GeneratorState.valueOf(configuration.controller.readText().split(SPACE)[0])
+    }
 
     fun isAvailable() = loadState() == AVAILABLE
 

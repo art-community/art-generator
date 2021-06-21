@@ -42,9 +42,9 @@ import kotlin.io.path.name
 
 
 @TestInstance(PER_CLASS)
-class GeneratorTest {
+class GenerationTest {
     @BeforeAll
-    fun setup() = setupTest()
+    fun setup() = initializeTest()
 
     @BeforeEach
     fun prepare() {
@@ -80,7 +80,9 @@ class GeneratorTest {
                 logger.info("[${source.root.name}]: Java sources compiled")
 
                 val generatedClassName = "meta.MetaExampleJava"
-                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("[${source.root.name}]: Loaded Java class: $name") })
+                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
+                    logger.info("[${source.root.name}]: Loaded Java class: $name")
+                })
             }
 
             if (tempDirectory.toFile().exists()) {
@@ -89,11 +91,15 @@ class GeneratorTest {
             }
 
             if (source.languages.contains(KOTLIN)) {
-                useKotlinCompiler(KotlinCompilerConfiguration(setOf(source.root.toFile()), source.classpath, destination = tempDirectory)) { analyzeAndGenerate(this) }
+                useKotlinCompiler(KotlinCompilerConfiguration(setOf(source.root.toFile()), source.classpath, destination = tempDirectory)) {
+                    analyzeAndGenerate(this)
+                }
                 logger.info("[${source.root.name}]: Kotlin sources compiled")
 
                 val generatedClassName = "meta.MetaExampleKotlin"
-                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply { logger.info("[${source.root.name}]: Loaded Kotlin class: $name") })
+                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
+                    logger.info("[${source.root.name}]: Loaded Kotlin class: $name")
+                })
             }
         }
     }
@@ -108,6 +114,4 @@ class GeneratorTest {
                         ?: emptyList()
             }
             .toSet()
-
-
 }

@@ -1,3 +1,9 @@
+import io.art.core.property.LazyProperty
+import io.art.core.property.LazyProperty.lazy
+import io.art.generator.service.initialize
+import io.art.launcher.Activator.activator
+import io.art.logging.module.LoggingActivator.logging
+
 /*
  * ART
  *
@@ -16,15 +22,9 @@
  * limitations under the License.
  */
 
-import io.art.core.property.LazyProperty
-import io.art.core.property.LazyProperty.lazy
-import io.art.generator.service.initialize
-import io.art.launcher.Activator.activator
-import io.art.logging.module.LoggingActivator
-
 val initialize: LazyProperty<Unit> = lazy {
-    activator().module(LoggingActivator.logging()).launch()
+    activator().module(logging()).launch()
     initialize()
 }
 
-fun setupTest(): Unit = initialize.get()
+fun initializeTest(): Unit = initialize.get()
