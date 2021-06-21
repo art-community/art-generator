@@ -77,8 +77,7 @@ sourceSets {
 generator {
     module("Example")
     jvm()
-    exclude("main")
-    exclude("kotlin")
+    pattern { exclude("**/main/*", "**/kotlin/*") }
     consoleLogging()
     useLocalJar(file("build/executable/art-generator.jar").toPath())
     disableAutoRun()
