@@ -38,8 +38,7 @@ data class SourceConfiguration(
 data class Configuration(
         val sources: Set<SourceConfiguration>,
         val watcherPeriod: Duration,
-        val lockMarker: Path,
-        val stopMarker: Path,
+        val controller: Path,
 )
 
 lateinit var configuration: Configuration
@@ -65,8 +64,7 @@ private fun load() = with(configuration().apply { refresh() }) {
                         module = source.getString("module")
                 )
             }.toSet(),
-            lockMarker = get(getString("marker.lock")),
-            stopMarker = get(getString("marker.stop")),
+            controller = get(getString("controller")),
             watcherPeriod = ofMillis(getLong("watcher.period"))
     )
 }

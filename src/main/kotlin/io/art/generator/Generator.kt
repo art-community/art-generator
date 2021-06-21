@@ -24,73 +24,45 @@ import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
-import io.art.generator.constants.STOP_CHECKING_PERIOD
+import io.art.generator.constants.LOCK_VALIDATION_PERIOD
+import io.art.generator.service.ControllerService.controllerFileExists
+import io.art.generator.service.ControllerService.isStopping
+import io.art.generator.service.ControllerService.lockIsValid
+import io.art.generator.service.ControllerService.updateLock
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
-import io.art.logging.module.LoggingModule
 import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
-import java.nio.channels.FileChannel
-import java.nio.channels.FileChannel.open
-import java.nio.channels.FileLock
-import java.nio.file.StandardOpenOption.READ
-import java.nio.file.StandardOpenOption.WRITE
-import kotlin.io.path.createFile
-import kotlin.io.path.exists
 import kotlin.system.exitProcess
 
-fun isStopped() = configuration.stopMarker.exists()
-
 object Generator {
-    lateinit var channel: FileChannel
-    lateinit var lock: FileLock
-
     @JvmStatic
     fun main(arguments: Array<String>) {
         activator(arguments)
                 .mainModuleId(Generator::class.simpleName)
                 .module(scheduler().with(logging()))
-                .onUnload {
-                    reconfigure()
-                    if (::channel.isInitialized && ::lock.isInitialized) {
-                        lock.release()
-                        channel.close()
-                    }
-                    if (configuration.lockMarker.exists()) {
-                        configuration.lockMarker.toFile().delete()
-                    }
-                    if (configuration.stopMarker.exists()) {
-                        configuration.stopMarker.toFile().delete()
-                    }
-                }
                 .launch()
         initialize()
         reconfigure()
 
-        if (configuration.lockMarker.exists()) return
-        configuration.lockMarker.createFile().apply { toFile().deleteOnExit() }
+        if (!controllerFileExists()) return
 
-        if (configuration.stopMarker.exists()) {
-            configuration.stopMarker.toFile().delete()
+        if (!lockIsValid()) return
+
+        scheduleDelayed(LOCK_VALIDATION_PERIOD) {
+            if (!isStopping()) {
+                updateLock()
+            }
         }
 
-        channel = open(configuration.lockMarker, READ, WRITE)
-        lock = channel.lock().apply { if (!isValid) return }
-
         scheduleDelayed(configuration.watcherPeriod) {
-            if (isStopped()) {
-                return@scheduleDelayed
+            if (isStopping()) {
+                exitProcess(0)
             }
             reconfigure()
             watchSources()
-        }
-
-        scheduleDelayed(STOP_CHECKING_PERIOD) {
-            if (isStopped()) {
-                exitProcess(0)
-            }
         }
 
         block()
