@@ -94,6 +94,7 @@ executable {
 }
 
 tasks["build"].dependsOn("build-executable-jar")
+tasks["publish"].dependsOn("build-executable-jar")
 
 tasks.test {
     dependsOn(WRITE_CONFIGURATION_TASK)
