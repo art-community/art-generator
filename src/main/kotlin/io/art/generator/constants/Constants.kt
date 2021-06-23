@@ -42,9 +42,9 @@ val META_METHOD_EXCLUSIONS = setOf(
         "clone"
 )
 
-enum class GeneratorLanguage(val suffix: String) {
-    JAVA("Java"),
-    KOTLIN("Kotlin")
+enum class GeneratorLanguage {
+    JAVA,
+    KOTLIN
 }
 
 enum class GeneratorState {

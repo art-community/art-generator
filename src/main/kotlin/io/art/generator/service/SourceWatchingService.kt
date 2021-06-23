@@ -28,6 +28,7 @@ import io.art.generator.constants.SOURCES_CHANGED
 import io.art.generator.constants.SOURCES_NOT_FOUND
 import io.art.generator.detector.SourcesChanges
 import io.art.generator.detector.detectChanges
+import io.art.generator.extension.normalizeToClassSuffix
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.generator.templates.metaModuleClassName
 import io.art.scheduler.Scheduling.schedule
@@ -36,17 +37,15 @@ object SourceWatchingService {
     private data class MetaModuleClassNames(val name: String, val fullName: String)
 
     fun watchSources(asynchronous: Boolean = true) {
-        val languagesByModule = configuration.sources
-                .groupBy { source -> source.module }
-                .mapValues { sources -> sources.value.flatMap { source -> source.languages }.toSet() }
+        val sourcesByModule = configuration.sources.groupBy { source -> source.module }
         configuration.sources.forEach { source ->
             val metaModuleClassName = metaModuleClassName(source.module)
             val metaModuleClassFullName = metaModuleClassFullName(source.module)
             val metaModuleClassNames = source.languages.associate { language ->
-                if (languagesByModule[source.module]!!.size > 1) {
+                if (sourcesByModule[source.module]!!.size > 1) {
                     return@associate language to MetaModuleClassNames(
-                            name = metaModuleClassName + language.suffix,
-                            fullName = metaModuleClassFullName + language.suffix
+                            name = metaModuleClassName + source.root.toFile().name.normalizeToClassSuffix(),
+                            fullName = metaModuleClassFullName + source.root.toFile().name.normalizeToClassSuffix()
                     )
                 }
                 language to MetaModuleClassNames(metaModuleClassName, metaModuleClassFullName)

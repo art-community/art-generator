@@ -25,9 +25,9 @@ import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.constants.LOCK_VALIDATION_PERIOD
-import io.art.generator.service.ControllerService.controllerFileExists
 import io.art.generator.service.ControllerService.isStopping
 import io.art.generator.service.ControllerService.lockIsValid
+import io.art.generator.service.ControllerService.markAvailable
 import io.art.generator.service.ControllerService.updateLock
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
@@ -43,6 +43,7 @@ object Generator {
         activator(arguments)
                 .mainModuleId(Generator::class.simpleName)
                 .module(scheduler().with(logging()))
+                .onUnload(::markAvailable)
                 .launch()
         initialize()
         reconfigure()

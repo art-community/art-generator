@@ -39,20 +39,22 @@ object ControllerService {
         return GeneratorState.valueOf(configuration.controller.readText().split(SPACE)[0])
     }
 
+    fun loadTimeStamp(): LocalDateTime? = loadState()
+            .takeIf { state -> state != AVAILABLE }
+            ?.let { parse(configuration.controller.readText().split(SPACE)[1], DEFAULT_FORMATTER) }
+
     fun isAvailable() = loadState() == AVAILABLE
 
     fun isStopping() = loadState() == STOPPING
 
     fun isLocked() = loadState() == LOCKED
 
-    fun lockedTimeStamp(): LocalDateTime? = loadState()
-            .takeIf { isLocked() }
-            ?.let { parse(configuration.controller.readText().split(SPACE)[1], DEFAULT_FORMATTER) }
-
     fun lockIsValid(): Boolean {
         if (isAvailable()) return true
-        return lockedTimeStamp()!!.isAfter(now().minus(LOCK_VALIDATION_DURATION))
+        return loadTimeStamp()!!.isAfter(now().minus(LOCK_VALIDATION_DURATION))
     }
 
     fun updateLock() = configuration.controller.writeText("$LOCKED ${now().format(DEFAULT_FORMATTER)}")
+
+    fun markAvailable() = configuration.controller.writeText("$AVAILABLE")
 }

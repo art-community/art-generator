@@ -18,8 +18,9 @@
 
 package io.art.generator.extension
 
-import io.art.core.constants.StringConstants.DOT
+import io.art.core.constants.StringConstants.*
 import io.art.core.extensions.FileExtensions.parseExtension
+import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.constants.*
 import java.io.File
 import java.nio.file.Path
@@ -57,3 +58,5 @@ val File.isJar: Boolean
 
 val String.packages: List<String>
     get() = split(DOT)
+
+fun String.normalizeToClassSuffix() = replace(UNDERSCORE, DASH).replace(DOT, DASH).split(DASH).joinToString(EMPTY_STRING, transform = ::capitalize)
