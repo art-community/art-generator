@@ -20,6 +20,7 @@
 
 package io.art.generator
 
+import io.art.core.context.Context.shutdown
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
@@ -35,7 +36,6 @@ import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
 import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
-import kotlin.system.exitProcess
 
 object Generator {
     @JvmStatic
@@ -58,7 +58,8 @@ object Generator {
 
         scheduleDelayed(configuration.watcherPeriod) {
             if (isStopping()) {
-                exitProcess(0)
+                shutdown()
+                return@scheduleDelayed
             }
             reconfigure()
             watchSources()
