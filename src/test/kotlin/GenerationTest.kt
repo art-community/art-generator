@@ -23,6 +23,7 @@ import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.GeneratorLanguage.JAVA
 import io.art.generator.constants.GeneratorLanguage.KOTLIN
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import io.art.generator.extension.normalizeToClassSuffix
 import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
@@ -31,6 +32,7 @@ import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.collectJavaSources
 import io.art.generator.service.initialize
+import io.art.generator.templates.metaModuleClassFullName
 import io.art.launcher.TestingActivator.testing
 import io.art.logging.module.LoggingModule.logger
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
@@ -83,7 +85,7 @@ class GenerationTest {
                 useJavaCompiler(JavaCompilerConfiguration(source.root, javaSources, source.classpath, tempDirectory)) { task -> assertTrue(task.call()) }
                 logger.info("[${source.root.name}]: Java sources compiled")
 
-                val generatedClassName = "meta.MetaExampleJava"
+                val generatedClassName = metaModuleClassFullName(source.module + source.root.toFile().name.normalizeToClassSuffix())
                 assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
                     logger.info("[${source.root.name}]: Loaded Java class: $name")
                 })
@@ -100,7 +102,7 @@ class GenerationTest {
                 }
                 logger.info("[${source.root.name}]: Kotlin sources compiled")
 
-                val generatedClassName = "meta.MetaExampleKotlin"
+                val generatedClassName = metaModuleClassFullName(source.module + source.root.toFile().name.normalizeToClassSuffix())
                 assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
                     logger.info("[${source.root.name}]: Loaded Kotlin class: $name")
                 })
