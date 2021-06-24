@@ -97,12 +97,9 @@ fun KotlinMetaClass.parentProperties() = parent
         ?: emptyMap()
 
 private fun KotlinMetaType.extractClassName(): ClassName {
-    val nestedClasses = classFullName!!.substringAfter("$classPackageName.$className")
+    val classes = classFullName!!.substringAfter(classPackageName!!)
             .split(DOT)
             .filter { part -> part.isNotBlank() }
             .toTypedArray()
-    if (nestedClasses.isEmpty()) {
-        return ClassName(classPackageName!!, className!!)
-    }
-    return ClassName(classPackageName!!, className!!, *nestedClasses)
+    return ClassName(classPackageName, *classes)
 }
