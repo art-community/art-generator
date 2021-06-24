@@ -18,15 +18,12 @@
 
 package io.art.generator.extension
 
-import com.squareup.javapoet.ArrayTypeName
-import com.squareup.javapoet.ClassName.bestGuess
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.*
 import com.squareup.javapoet.TypeName.*
-import com.squareup.javapoet.WildcardTypeName
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
-import io.art.generator.constants.META_METHOD_EXCLUSIONS
+import io.art.core.constants.StringConstants.DOT
 import io.art.generator.constants.JAVA_OBJECT_CLASS_NAME
+import io.art.generator.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaMethod
@@ -39,13 +36,13 @@ fun JavaMetaType.asPoetType(): TypeName = when (kind) {
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.asPoetType())
 
-    ENUM_KIND -> bestGuess(classFullName)
+    ENUM_KIND -> extractClassName()
 
     CLASS_KIND -> when {
-        typeParameters.isEmpty() -> bestGuess(classFullName)
+        typeParameters.isEmpty() -> extractClassName()
         else -> {
             val parameters = typeParameters.map { parameter -> parameter.asPoetType() }
-            val rawType = bestGuess(classFullName)
+            val rawType = extractClassName()
             ParameterizedTypeName.get(rawType, *parameters.toTypedArray())
         }
     }
@@ -62,23 +59,11 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())
 
-    CLASS_KIND, ENUM_KIND -> bestGuess(classFullName)
+    CLASS_KIND, ENUM_KIND -> extractClassName()
 
     WILDCARD_KIND -> wildcardExtendsBound?.extractClass() ?: JAVA_OBJECT_CLASS_NAME
 
     UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
-}
-
-private fun JavaMetaType.asPrimitive() = when (typeName) {
-    Boolean::class.java.typeName -> BOOLEAN
-    Int::class.java.typeName -> INT
-    Short::class.java.typeName -> SHORT
-    Double::class.java.typeName -> DOUBLE
-    Byte::class.java.typeName -> BYTE
-    Long::class.java.typeName -> LONG
-    Char::class.java.typeName -> CHAR
-    Float::class.java.typeName -> FLOAT
-    else -> VOID.box()
 }
 
 fun JavaMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && modifiers.contains(PUBLIC)
@@ -92,3 +77,24 @@ fun JavaMetaClass.parentMethods() = parent
 fun JavaMetaClass.parentFields() = parent
         ?.fields
         ?: emptyMap()
+
+
+private fun JavaMetaType.extractClassName(): ClassName {
+    val nestedClasses = classFullName!!.substringAfter("$classPackageName.$className").split(DOT).toTypedArray()
+    if (nestedClasses.isEmpty()) {
+        return ClassName.get(classPackageName!!, className!!)
+    }
+    return ClassName.get(classPackageName!!, className!!, *nestedClasses)
+}
+
+private fun JavaMetaType.asPrimitive() = when (typeName) {
+    Boolean::class.java.typeName -> BOOLEAN
+    Int::class.java.typeName -> INT
+    Short::class.java.typeName -> SHORT
+    Double::class.java.typeName -> DOUBLE
+    Byte::class.java.typeName -> BYTE
+    Long::class.java.typeName -> LONG
+    Char::class.java.typeName -> CHAR
+    Float::class.java.typeName -> FLOAT
+    else -> VOID.box()
+}

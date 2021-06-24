@@ -19,10 +19,10 @@
 package io.art.generator.extension
 
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ClassName.Companion.bestGuess
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.WildcardTypeName.Companion.consumerOf
 import com.squareup.kotlinpoet.WildcardTypeName.Companion.producerOf
+import io.art.core.constants.StringConstants.DOT
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.model.KotlinMetaClass
@@ -33,19 +33,27 @@ import io.art.generator.model.KotlinMetaTypeKind.*
 import io.art.generator.model.KotlinTypeVariance.*
 import org.jetbrains.kotlin.descriptors.Visibilities.Public
 
+private fun KotlinMetaType.extractClassName(): ClassName {
+    val nestedClasses = classFullName!!.substringAfter("$classPackageName.$className").split(DOT).toTypedArray()
+    if (nestedClasses.isEmpty()) {
+        return ClassName(classPackageName!!, className!!)
+    }
+    return ClassName(classPackageName!!, className!!, *nestedClasses)
+}
+
 fun KotlinMetaType.asPoetType(): TypeName {
     val rawType = when (kind) {
         ARRAY_KIND -> ARRAY
                 .parameterizedBy(arrayComponentType!!.asPoetType())
                 .copy(nullable = nullable)
 
-        ENUM_KIND -> bestGuess(classFullName!!).copy(nullable = nullable)
+        ENUM_KIND -> extractClassName().copy(nullable = nullable)
 
         CLASS_KIND -> when {
-            typeParameters.isEmpty() -> bestGuess(classFullName!!).copy(nullable = nullable)
+            typeParameters.isEmpty() -> extractClassName().copy(nullable = nullable)
             else -> {
                 val parameters = typeParameters.map { parameter -> parameter.asPoetType().copy(nullable = parameter.nullable) }
-                val rawType = bestGuess(classFullName!!)
+                val rawType = extractClassName()
                 rawType.parameterizedBy(*parameters.toTypedArray()).copy(nullable = nullable)
             }
         }
@@ -70,7 +78,7 @@ fun KotlinMetaType.asPoetType(): TypeName {
 fun KotlinMetaType.extractClass(): TypeName = when (kind) {
     ARRAY_KIND -> ARRAY
 
-    CLASS_KIND, ENUM_KIND -> bestGuess(classFullName!!)
+    CLASS_KIND, ENUM_KIND -> extractClassName()
 
     WILDCARD_KIND -> ANY
 

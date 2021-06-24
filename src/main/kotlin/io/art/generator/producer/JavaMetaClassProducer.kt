@@ -48,7 +48,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
                     .addCode(constructorStatement)
                     .build())
             .apply { if (!metaClass.modifiers.contains(ABSTRACT)) generateConstructors(metaClass, typeName) }
-            .apply { generateProperties(metaClass) }
+            .apply { generateFields(metaClass) }
             .apply { generateMethods(metaClass) }
             .apply {
                 metaClass.innerClasses
@@ -72,7 +72,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
             .let(::addMethod)
 }
 
-private fun TypeSpec.Builder.generateProperties(metaClass: JavaMetaClass) {
+private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
     val fields = metaClass.parentFields() + metaClass.fields
     fields.entries.forEach { field ->
         val fieldTypeName = field.value.type.asPoetType()
