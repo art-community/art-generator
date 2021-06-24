@@ -28,7 +28,7 @@ import java.util.*;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class JavaModel extends MixedJavaClass implements MixedJavaInterface {
+public class JavaModel extends MixedJavaClass implements JavaInterface {
     boolean f1;
     String f2;
     List<String> f3;

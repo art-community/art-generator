@@ -32,7 +32,7 @@ public abstract class JavaClass {
     protected boolean protectedField;
     public boolean publicField;
     boolean internalField;
-    MixedJavaInterface importedField;
+    JavaInterface importedField;
 
     //Must be ignored
     private boolean privateMethod() {
