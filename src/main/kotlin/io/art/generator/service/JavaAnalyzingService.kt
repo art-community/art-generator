@@ -102,7 +102,7 @@ private class JavaAnalyzingService {
                     className = tsym.simpleName.toString(),
                     classPackageName = tsym.qualifiedName
                             .toString()
-                            .takeIf { name -> name.contains(DOT) }?.substringBefore(tsym.simpleName.toString())
+                            .takeIf { name -> name.contains(DOT) }?.substringBefore(".${tsym.simpleName}")
                             ?: EMPTY_STRING
             )
         }
