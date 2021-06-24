@@ -20,7 +20,7 @@
 
 package io.art.generator
 
-import io.art.core.context.Context.shutdown
+import io.art.core.context.Context.scheduleTermination
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
@@ -58,7 +58,7 @@ object Generator {
 
         scheduleDelayed(configuration.watcherPeriod) {
             if (isStopping()) {
-                shutdown()
+                scheduleTermination()
                 return@scheduleDelayed
             }
             reconfigure()
