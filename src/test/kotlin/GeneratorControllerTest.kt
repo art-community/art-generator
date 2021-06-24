@@ -58,6 +58,7 @@ class GeneratorControllerTest {
         assertTrue { configuration.controller.readText().split(" ")[0] == "LOCKED" }
         waitTime(ofSeconds(10))
         configuration.controller.writeText("STOPPING")
+        waitTime(ofSeconds(10))
         assertTrue { configuration.controller.readText().split(" ")[0] == "AVAILABLE" }
     }
 
