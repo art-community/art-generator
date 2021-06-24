@@ -4,6 +4,7 @@ import io.art.core.waiter.Waiter.waitCondition
 import io.art.core.waiter.Waiter.waitTime
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
+import io.art.launcher.TestingActivator.testing
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -40,7 +41,7 @@ import kotlin.io.path.writeText
 class GeneratorControllerTest {
     @BeforeAll
     fun setup() {
-        initializeTest()
+        testing { activator -> activator.kit() }
         reconfigure()
         configuration.controller.toFile().apply { if (exists()) delete() }
     }
@@ -54,23 +55,27 @@ class GeneratorControllerTest {
     fun testGeneratorController() {
         assertTrue { runGenerator().isAlive }
         waitTime(ofSeconds(10))
+
         assertTrue { configuration.controller.exists() }
         assertTrue { configuration.controller.readText().split(" ")[0] == "LOCKED" }
 
         configuration.controller.writeText("STOPPING")
-        assertTrue { waitCondition(ofSeconds(30)) { configuration.controller.readText().split(" ")[0] == "AVAILABLE" } }
+        waitTime(ofSeconds(10))
+        assertTrue { configuration.controller.readText().split(" ")[0] == "AVAILABLE" }
+
 
         assertTrue { runGenerator().isAlive }
         waitTime(ofSeconds(10))
         assertTrue { configuration.controller.readText().split(" ")[0] == "LOCKED" }
+        waitTime(ofSeconds(10))
         configuration.controller.writeText("STOPPING")
-        assertTrue { waitCondition(ofSeconds(30)) { configuration.controller.readText().split(" ")[0] == "AVAILABLE" } }
+        assertTrue { configuration.controller.readText().split(" ")[0] == "AVAILABLE" }
 
-        configuration.controller.writeText("LOCKED ${DEFAULT_FORMATTER.format(now().plusMinutes(1))}")
         assertTrue { runGenerator().isAlive }
         waitTime(ofSeconds(10))
         configuration.controller.writeText("STOPPING")
-        assertTrue { waitCondition(ofSeconds(30)) { configuration.controller.readText().split(" ")[0] == "AVAILABLE" } }
+        waitTime(ofSeconds(10))
+        assertTrue { configuration.controller.readText().split(" ")[0] == "AVAILABLE" }
     }
 
     private fun runGenerator(): Process {

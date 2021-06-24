@@ -30,6 +30,7 @@ import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.collectJavaSources
+import io.art.launcher.TestingActivator.testing
 import io.art.logging.module.LoggingModule.logger
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
 import org.junit.jupiter.api.*
@@ -44,7 +45,7 @@ import kotlin.io.path.name
 @TestInstance(PER_CLASS)
 class GenerationTest {
     @BeforeAll
-    fun setup() = initializeTest()
+    fun setup() = testing { activator -> activator.kit() }
 
     @BeforeEach
     fun prepare() {
