@@ -55,26 +55,9 @@ class GeneratorControllerTest {
     fun testGeneratorController() {
         assertTrue { runGenerator().isAlive }
         waitTime(ofSeconds(10))
-
-        assertTrue { configuration.controller.exists() }
-        assertTrue { configuration.controller.readText().split(" ")[0] == "LOCKED" }
-
-        configuration.controller.writeText("STOPPING")
-        waitTime(ofSeconds(10))
-        assertTrue { configuration.controller.readText().split(" ")[0] == "AVAILABLE" }
-
-
-        assertTrue { runGenerator().isAlive }
-        waitTime(ofSeconds(10))
         assertTrue { configuration.controller.readText().split(" ")[0] == "LOCKED" }
         waitTime(ofSeconds(10))
         configuration.controller.writeText("STOPPING")
-        assertTrue { configuration.controller.readText().split(" ")[0] == "AVAILABLE" }
-
-        assertTrue { runGenerator().isAlive }
-        waitTime(ofSeconds(10))
-        configuration.controller.writeText("STOPPING")
-        waitTime(ofSeconds(10))
         assertTrue { configuration.controller.readText().split(" ")[0] == "AVAILABLE" }
     }
 
