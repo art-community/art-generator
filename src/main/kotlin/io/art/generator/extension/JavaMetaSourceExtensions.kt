@@ -78,9 +78,11 @@ fun JavaMetaClass.parentFields() = parent
         ?.fields
         ?: emptyMap()
 
-
 private fun JavaMetaType.extractClassName(): ClassName {
-    val nestedClasses = classFullName!!.substringAfter("$classPackageName.$className").split(DOT).toTypedArray()
+    val nestedClasses = classFullName!!.substringAfter("$classPackageName.$className")
+            .split(DOT)
+            .filter { part -> part.isNotBlank() }
+            .toTypedArray()
     if (nestedClasses.isEmpty()) {
         return ClassName.get(classPackageName!!, className!!)
     }

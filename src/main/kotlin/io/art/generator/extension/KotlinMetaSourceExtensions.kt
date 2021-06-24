@@ -33,14 +33,6 @@ import io.art.generator.model.KotlinMetaTypeKind.*
 import io.art.generator.model.KotlinTypeVariance.*
 import org.jetbrains.kotlin.descriptors.Visibilities.Public
 
-private fun KotlinMetaType.extractClassName(): ClassName {
-    val nestedClasses = classFullName!!.substringAfter("$classPackageName.$className").split(DOT).toTypedArray()
-    if (nestedClasses.isEmpty()) {
-        return ClassName(classPackageName!!, className!!)
-    }
-    return ClassName(classPackageName!!, className!!, *nestedClasses)
-}
-
 fun KotlinMetaType.asPoetType(): TypeName {
     val rawType = when (kind) {
         ARRAY_KIND -> ARRAY
@@ -103,3 +95,14 @@ fun KotlinMetaClass.parentFunctions() = parent
 fun KotlinMetaClass.parentProperties() = parent
         ?.properties
         ?: emptyMap()
+
+private fun KotlinMetaType.extractClassName(): ClassName {
+    val nestedClasses = classFullName!!.substringAfter("$classPackageName.$className")
+            .split(DOT)
+            .filter { part -> part.isNotBlank() }
+            .toTypedArray()
+    if (nestedClasses.isEmpty()) {
+        return ClassName(classPackageName!!, className!!)
+    }
+    return ClassName(classPackageName!!, className!!, *nestedClasses)
+}
