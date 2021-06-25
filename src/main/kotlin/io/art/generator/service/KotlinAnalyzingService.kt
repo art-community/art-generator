@@ -53,29 +53,35 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
+import java.nio.file.Path
 import java.util.Objects.isNull
 import java.util.Objects.nonNull
 
-fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String) = KotlinAnalyzingService()
-        .analyzeKotlinSources(source, metaClassName)
+data class KotlinAnalyzingRequest(
+        val roots: Set<Path>,
+        val configuration: SourceConfiguration,
+        val metaClassName: String,
+)
+
+fun analyzeKotlinSources(request: KotlinAnalyzingRequest) = KotlinAnalyzingService().analyzeKotlinSources(request)
 
 private class KotlinAnalyzingService {
     private val cache = mutableMapOf<KotlinType, KotlinMetaType>()
 
-    fun analyzeKotlinSources(source: SourceConfiguration, metaClassName: String): List<KotlinMetaClass> {
-        KOTLIN_LOGGER.info(ANALYZING_MESSAGE(source.root))
+    fun analyzeKotlinSources(request: KotlinAnalyzingRequest): List<KotlinMetaClass> {
+        KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
 
-        val roots = source.root.toFile().listFiles()!!.filter { packageName -> packageName.name != META_NAME }.toSet()
-        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(roots, source.classpath), KotlinToJVMBytecodeCompiler::analyze)
+        val roots = request.roots.flatMap { root -> root.toFile().listFiles()!!.filter { packageName -> packageName.name != META_NAME } }.toSet()
+        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(roots, request.configuration.classpath), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
                 ?: return emptyList()
 
-        return source.root.toFile().listFiles()!!
+        return request.configuration.root.toFile().listFiles()!!
                 .map { file -> file.name }
                 .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()
                 .filter { descriptor -> descriptor.defaultType.resolved() }
-                .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != metaClassName }
+                .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != request.metaClassName }
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
                 .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
                 .filter { descriptor -> !descriptor.isInner }

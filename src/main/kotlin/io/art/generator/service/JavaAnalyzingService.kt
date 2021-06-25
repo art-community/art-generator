@@ -35,24 +35,33 @@ import io.art.generator.model.JavaMetaTypeKind.*
 import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
 import java.nio.file.Path
+import java.nio.file.Paths.get
 import javax.lang.model.element.ElementKind.ENUM
 import javax.lang.model.type.TypeMirror
+import javax.tools.JavaFileObject.Kind.SOURCE
 
-fun analyzeJavaSources(source: SourceConfiguration, sources: Sequence<Path>, metaClassName: String) = JavaAnalyzingService()
-        .analyzeJavaSources(source, sources, metaClassName)
+data class JavaAnalyzingRequest(
+        val roots: Set<Path>,
+        val configuration: SourceConfiguration,
+        val sources: Sequence<Path>,
+        val metaClassName: String,
+)
+
+fun analyzeJavaSources(request: JavaAnalyzingRequest) = JavaAnalyzingService().analyzeJavaSources(request)
 
 private class JavaAnalyzingService {
     private val cache = mutableMapOf<TypeMirror, JavaMetaType>()
 
-    fun analyzeJavaSources(source: SourceConfiguration, sources: Sequence<Path>, metaClassName: String): List<JavaMetaClass> {
-        if (!source.root.toFile().exists()) return emptyList()
-        JAVA_LOGGER.info(ANALYZING_MESSAGE(source.root))
-        return useJavaCompiler(JavaCompilerConfiguration(source.root, sources, source.classpath)) { task ->
+    fun analyzeJavaSources(request: JavaAnalyzingRequest): List<JavaMetaClass> {
+        if (!request.configuration.root.toFile().exists()) return emptyList()
+        JAVA_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
+        return useJavaCompiler(JavaCompilerConfiguration(request.roots, request.sources, request.configuration.classpath)) { task ->
             task.analyze()
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
                     .map { element -> (element as ClassSymbol) }
-                    .filter { symbol -> symbol.className() != metaClassName }
+                    .filter { symbol -> symbol.sourcefile.kind == SOURCE && get(symbol.sourcefile.name).startsWith(request.configuration.root) }
+                    .filter { symbol -> symbol.className() != request.metaClassName }
                     .filter { symbol -> symbol.typeParameters.isEmpty() }
                     .map { symbol -> symbol.asMetaClass() }
                     .distinctBy { metaClass -> metaClass.type.typeName }

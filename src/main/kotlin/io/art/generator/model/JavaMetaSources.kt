@@ -49,7 +49,6 @@ data class JavaMetaType(
         val wildcardSuperBound: JavaMetaType? = null,
 
         val typeParameters: MutableList<JavaMetaType> = mutableListOf(),
-        val typeVariableBounds: MutableList<JavaMetaType> = mutableListOf(),
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

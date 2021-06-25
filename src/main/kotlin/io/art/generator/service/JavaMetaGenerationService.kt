@@ -24,7 +24,6 @@ import com.squareup.javapoet.*
 import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
-import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.constants.*
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.factory.NameFactory

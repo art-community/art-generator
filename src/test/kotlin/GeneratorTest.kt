@@ -84,7 +84,7 @@ class GeneratorTest {
             if (source.languages.contains(JAVA)) {
                 val javaSources = collectJavaSources(source.root, emptySet()).asSequence()
 
-                useJavaCompiler(JavaCompilerConfiguration(source.root, javaSources, source.classpath, tempDirectory)) { task -> assertTrue(task.call()) }
+                useJavaCompiler(JavaCompilerConfiguration(setOf(source.root), javaSources, source.classpath, tempDirectory)) { task -> assertTrue(task.call()) }
                 logger.info("[${source.root.name}]: Java sources compiled")
 
                 var name = source.module + source.root.toFile().name.normalizeToClassSuffix()

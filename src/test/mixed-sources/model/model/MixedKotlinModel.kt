@@ -244,6 +244,7 @@ data class MixedKotlinModel(
         var p1 = false
         var p2: String? = null
         var p3 = 0
+        var p4: KotlinModel? = null
 
         fun instanceMethod(argument: Int): Int {
             return argument

@@ -24,14 +24,12 @@ import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
 import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.generator.constants.*
-import io.art.generator.extension.asPoetType
-import io.art.generator.extension.couldBeGenerated
-import io.art.generator.extension.parentFields
-import io.art.generator.extension.parentMethods
+import io.art.generator.extension.*
 import io.art.generator.factory.NameFactory
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaType
+import io.art.generator.model.JavaMetaTypeKind.PRIMITIVE_KIND
 import io.art.generator.templates.*
 import javax.lang.model.element.Modifier.*
 
@@ -57,7 +55,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
                         .forEach { inner -> generateClass(inner, nameFactory) }
             }
             .build()
-            .apply { alwaysQualify(metaClass.type.classFullName) }
+            .apply { qualifyImports(metaClass) }
             .apply(::addType)
     FieldSpec.builder(metaClassName, className)
             .addModifiers(PRIVATE, FINAL)
@@ -70,6 +68,39 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
             .addCode(javaReturnStatement(className))
             .build()
             .let(::addMethod)
+}
+
+private fun TypeSpec.Builder.qualifyImports(metaClass: JavaMetaClass) {
+    qualifyImports(metaClass.type)
+    metaClass.constructors.forEach { constructor ->
+        constructor.parameters.values.forEach { parameter ->
+            qualifyImports(parameter.type)
+        }
+    }
+    metaClass.methods.forEach { method ->
+        qualifyImports(method.returnType)
+        method.parameters.values.forEach { parameter ->
+            qualifyImports(parameter.type)
+        }
+    }
+    metaClass.fields.forEach { field ->
+        qualifyImports(field.value.type)
+    }
+    metaClass.innerClasses.values.forEach(::qualifyImports)
+    metaClass.parent?.let(::qualifyImports)
+    metaClass.interfaces.forEach(::qualifyImports)
+}
+
+private fun TypeSpec.Builder.qualifyImports(metaType: JavaMetaType) {
+    if (metaType.kind == PRIMITIVE_KIND) return
+    metaType.className?.let { name ->
+        alwaysQualify(metaType.extractOwnerClassName())
+        alwaysQualify(name)
+    }
+    metaType.typeParameters.forEach(::qualifyImports)
+    metaType.arrayComponentType?.let(::qualifyImports)
+    metaType.wildcardExtendsBound?.let(::qualifyImports)
+    metaType.wildcardSuperBound?.let(::qualifyImports)
 }
 
 private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {

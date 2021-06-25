@@ -1,24 +1,3 @@
-import io.art.core.constants.DateTimeConstants.DEFAULT_FORMATTER
-import io.art.core.context.Context.context
-import io.art.core.waiter.Waiter.waitCondition
-import io.art.core.waiter.Waiter.waitTime
-import io.art.generator.configuration.configuration
-import io.art.generator.configuration.reconfigure
-import io.art.launcher.TestingActivator.testing
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
-import java.lang.Runtime.getRuntime
-import java.lang.System.getProperty
-import java.time.Duration.ofSeconds
-import java.time.LocalDateTime.now
-import kotlin.io.path.exists
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
-
 /*
  * ART
  *
@@ -37,6 +16,23 @@ import kotlin.io.path.writeText
  * limitations under the License.
  */
 
+import io.art.core.context.Context.context
+import io.art.core.waiter.Waiter.waitTime
+import io.art.generator.configuration.configuration
+import io.art.generator.configuration.reconfigure
+import io.art.launcher.TestingActivator.testing
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
+import java.lang.Runtime.getRuntime
+import java.lang.System.getProperty
+import java.time.Duration.ofSeconds
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
+
 @TestInstance(PER_CLASS)
 class GeneratorControllerTest {
     @BeforeAll
@@ -54,11 +50,11 @@ class GeneratorControllerTest {
     @Test
     fun testGeneratorController() {
         assertTrue { runGenerator().isAlive }
-        waitTime(ofSeconds(10))
+        waitTime(ofSeconds(20))
         assertTrue { configuration.controller.readText().split(" ")[0] == "LOCKED" }
-        waitTime(ofSeconds(10))
+        waitTime(ofSeconds(20))
         configuration.controller.writeText("STOPPING")
-        waitTime(ofSeconds(15))
+        waitTime(ofSeconds(20))
         assertTrue { configuration.controller.readText().split(" ")[0] == "AVAILABLE" }
     }
 
@@ -67,6 +63,7 @@ class GeneratorControllerTest {
         return getRuntime().exec(
                 arrayOf(
                         executable.toFile().absolutePath,
+                        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005",
                         "-Dconfiguration=${getProperty("configuration")}",
                         "-jar", getProperty("jarPath")
                 )

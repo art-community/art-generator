@@ -26,8 +26,6 @@ import com.sun.tools.javac.comp.CompileStates.CompileState.GENERATE
 import com.sun.tools.javac.main.JavaCompiler
 import com.sun.tools.javac.util.Log.WriterKind.ERROR
 import com.sun.tools.javac.util.Options
-import io.art.core.context.Context.context
-import io.art.generator.configuration.configuration
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.constants.PARAMETERS_OPTION
 import io.art.generator.logging.EmptyDiagnosticListener
@@ -40,10 +38,10 @@ import java.util.*
 import javax.tools.StandardLocation.*
 
 class JavaCompilerConfiguration(
-        val root: Path,
+        val roots: Set<Path>,
         val sources: Sequence<Path>,
         val classpath: Set<Path>,
-        val destination: Path = context().configuration().workingDirectory,
+        val destination: Path? = null,
 )
 
 object JavaCompilerProvider {
@@ -53,9 +51,9 @@ object JavaCompilerProvider {
             Options.instance(this).apply { setUTF8Encoding(this) }
         }
         val fileManager = tool.getStandardFileManager(EmptyDiagnosticListener, Locale.getDefault(), defaultCharset()).apply {
-            setLocation(SOURCE_PATH, listOf(compilerConfiguration.root.toFile()))
+            setLocation(SOURCE_PATH, compilerConfiguration.roots.map { root -> root.toFile() })
             setLocation(CLASS_PATH, compilerConfiguration.classpath.map { path -> path.toFile() })
-            setLocation(CLASS_OUTPUT, listOf(compilerConfiguration.destination.toFile()))
+            compilerConfiguration.destination?.let { destination -> setLocation(CLASS_OUTPUT, listOf(destination.toFile())) }
         }
         val options = listOf(PARAMETERS_OPTION)
         val files = fileManager.getJavaFileObjects(*compilerConfiguration.sources.map(Path::toFile).toList().toTypedArray())

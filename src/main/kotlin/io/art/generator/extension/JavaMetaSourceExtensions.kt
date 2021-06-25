@@ -36,13 +36,13 @@ fun JavaMetaType.asPoetType(): TypeName = when (kind) {
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.asPoetType())
 
-    ENUM_KIND -> extractClassName()
+    ENUM_KIND -> asClassName()
 
     CLASS_KIND -> when {
-        typeParameters.isEmpty() -> extractClassName()
+        typeParameters.isEmpty() -> asClassName()
         else -> {
             val parameters = typeParameters.map { parameter -> parameter.asPoetType() }
-            val rawType = extractClassName()
+            val rawType = asClassName()
             ParameterizedTypeName.get(rawType, *parameters.toTypedArray())
         }
     }
@@ -59,7 +59,7 @@ fun JavaMetaType.extractClass(): TypeName = when (kind) {
 
     ARRAY_KIND -> ArrayTypeName.of(arrayComponentType!!.extractClass())
 
-    CLASS_KIND, ENUM_KIND -> extractClassName()
+    CLASS_KIND, ENUM_KIND -> asClassName()
 
     WILDCARD_KIND -> wildcardExtendsBound?.extractClass() ?: JAVA_OBJECT_CLASS_NAME
 
@@ -78,7 +78,12 @@ fun JavaMetaClass.parentFields() = parent
         ?.fields
         ?: emptyMap()
 
-private fun JavaMetaType.extractClassName(): ClassName {
+fun JavaMetaType.extractOwnerClassName(): String = classFullName!!.substringAfter(classPackageName!!)
+        .split(DOT)
+        .filter { part -> part.isNotBlank() }
+        .toTypedArray()[0]
+
+private fun JavaMetaType.asClassName(): ClassName {
     val nestedClasses = classFullName!!.substringAfter(classPackageName!!)
             .split(DOT)
             .filter { part -> part.isNotBlank() }

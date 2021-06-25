@@ -138,7 +138,7 @@ public class MixedJavaModel extends MixedJavaClass implements MixedJavaInterface
         boolean f1;
         String f2;
         int f3;
-        JavaModel f5;
+        JavaModel.InnerModel f5;
 
         public static int staticMethod(int argument) {
             return argument;

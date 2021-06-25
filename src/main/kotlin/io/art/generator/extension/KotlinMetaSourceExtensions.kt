@@ -39,13 +39,13 @@ fun KotlinMetaType.asPoetType(): TypeName {
                 .parameterizedBy(arrayComponentType!!.asPoetType())
                 .copy(nullable = nullable)
 
-        ENUM_KIND -> extractClassName().copy(nullable = nullable)
+        ENUM_KIND -> asClassName().copy(nullable = nullable)
 
         CLASS_KIND -> when {
-            typeParameters.isEmpty() -> extractClassName().copy(nullable = nullable)
+            typeParameters.isEmpty() -> asClassName().copy(nullable = nullable)
             else -> {
                 val parameters = typeParameters.map { parameter -> parameter.asPoetType().copy(nullable = parameter.nullable) }
-                val rawType = extractClassName()
+                val rawType = asClassName()
                 rawType.parameterizedBy(*parameters.toTypedArray()).copy(nullable = nullable)
             }
         }
@@ -70,7 +70,7 @@ fun KotlinMetaType.asPoetType(): TypeName {
 fun KotlinMetaType.extractClass(): TypeName = when (kind) {
     ARRAY_KIND -> ARRAY
 
-    CLASS_KIND, ENUM_KIND -> extractClassName()
+    CLASS_KIND, ENUM_KIND -> asClassName()
 
     WILDCARD_KIND -> ANY
 
@@ -96,7 +96,7 @@ fun KotlinMetaClass.parentProperties() = parent
         ?.properties
         ?: emptyMap()
 
-private fun KotlinMetaType.extractClassName(): ClassName {
+private fun KotlinMetaType.asClassName(): ClassName {
     val classes = classFullName!!.substringAfter(classPackageName!!)
             .split(DOT)
             .filter { part -> part.isNotBlank() }
