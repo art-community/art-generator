@@ -60,3 +60,5 @@ const val KOTLIN_ANALYZER_MODULE_NAME = "kotlin-analyzer"
 val LOCK_VALIDATION_DURATION: Duration = ofMinutes(1)
 
 val LOCK_VALIDATION_PERIOD: Duration = ofSeconds(30)
+
+val STOPPING_TIMEOUT: Duration = ofSeconds(30)

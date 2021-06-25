@@ -22,10 +22,12 @@ package io.art.generator
 
 import io.art.core.context.Context.scheduleTermination
 import io.art.core.extensions.ThreadExtensions.block
+import io.art.core.waiter.Waiter.waitCondition
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.constants.LOCK_VALIDATION_PERIOD
+import io.art.generator.constants.STOPPING_TIMEOUT
 import io.art.generator.service.ControllerService.isStopping
 import io.art.generator.service.ControllerService.lockIsValid
 import io.art.generator.service.ControllerService.markAvailable
@@ -47,6 +49,10 @@ object Generator {
                 .launch()
         initialize()
         reconfigure()
+
+        if (isStopping()) {
+            if (!waitCondition(STOPPING_TIMEOUT) { !isStopping() }) return
+        }
 
         if (!lockIsValid()) return
 
