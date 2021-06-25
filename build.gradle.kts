@@ -93,7 +93,10 @@ executable {
     main("io.art.generator.Generator")
 }
 
-tasks["build"].dependsOn("build-executable-jar")
+tasks.build {
+    dependsOn("build-executable-jar")
+}
+
 tasks.findByName("publish")?.dependsOn("build-executable-jar")
 
 tasks.test {
@@ -103,5 +106,5 @@ tasks.test {
     addTestOutputListener { _, outputEvent -> info(outputEvent.message) }
     jvmArgs("-Xms2g", "-Xmx2g")
     jvmArgs("-Dconfiguration=${generator.workingDirectory.resolve("module.yml").toFile().absolutePath}")
-    jvmArgs("-DjarPath=${buildDir.resolve("executable").resolve("art-generator.jar").absolutePath}")
+    jvmArgs("-Djar=${buildDir.resolve("executable").resolve("art-generator.jar").absolutePath}")
 }

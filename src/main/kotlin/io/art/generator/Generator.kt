@@ -21,27 +21,56 @@
 package io.art.generator
 
 import io.art.core.context.Context.scheduleTermination
+import io.art.core.extensions.ThreadExtensions.block
+import io.art.core.waiter.Waiter.waitCondition
+import io.art.generator.configuration.configuration
+import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import io.art.generator.constants.LOCK_VALIDATION_PERIOD
+import io.art.generator.constants.STOPPING_TIMEOUT
+import io.art.generator.service.ControllerService.isStopping
+import io.art.generator.service.ControllerService.lockIsValid
+import io.art.generator.service.ControllerService.markAvailable
+import io.art.generator.service.ControllerService.updateLock
+import io.art.generator.service.SourceWatchingService.watchSources
+import io.art.generator.service.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
-import io.art.scheduler.Scheduling.schedule
+import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
-import java.lang.System.setProperty
 
 object Generator {
     @JvmStatic
     fun main(arguments: Array<String>) {
-        setProperty("configuration", "G:\\Development\\Projects\\art\\art-environment\\local\\projects\\sandbox\\build\\generator\\module.yml")
         activator(arguments)
                 .mainModuleId(Generator::class.simpleName)
                 .module(scheduler().with(logging()))
+                .onUnload(::markAvailable)
                 .launch()
+        initialize()
+        reconfigure()
 
-        schedule {
-            while (!Thread.interrupted()) {
+        if (isStopping()) {
+            if (!waitCondition(STOPPING_TIMEOUT) { !lockIsValid() }) return
+        }
+
+        if (!lockIsValid()) return
+
+        scheduleDelayed(LOCK_VALIDATION_PERIOD) {
+            if (!isStopping()) {
+                updateLock()
             }
         }
 
-        scheduleTermination()
+        scheduleDelayed(configuration.watcherPeriod) {
+            if (isStopping()) {
+                scheduleTermination()
+                return@scheduleDelayed
+            }
+            reconfigure()
+            watchSources()
+        }
+
+        block()
     }
 }

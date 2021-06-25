@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import io.art.core.constants.StringConstants.*
+import io.art.core.constants.StringConstants.SHARP
 import io.art.core.context.Context.context
 import io.art.core.waiter.Waiter.waitTime
 import io.art.generator.configuration.configuration
@@ -24,6 +24,7 @@ import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.META_NAME
 import io.art.launcher.TestingActivator.testing
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
@@ -31,6 +32,7 @@ import java.lang.Runtime.getRuntime
 import java.lang.System.getProperty
 import java.time.Duration.ofSeconds
 import kotlin.io.path.readText
+import kotlin.io.path.writeText
 
 @TestInstance(PER_CLASS)
 @TestMethodOrder(OrderAnnotation::class)
@@ -45,7 +47,7 @@ class GeneratorControllerTest {
         configuration.controller.toFile().apply { if (exists()) delete() }
     }
 
-    @AfterAll
+    @AfterEach
     fun cleanup() {
         configuration.sources
                 .map { source -> source.root.resolve(META_NAME).toFile() }
@@ -53,11 +55,29 @@ class GeneratorControllerTest {
     }
 
     @Test
-    @Order(0)
     fun testGeneratorControllerLocked() {
-        assertTrue { runGenerator().isAlive }
+        assertTrue(runGenerator().isAlive)
         waitTime(ofSeconds(10))
-        assertTrue { configuration.controller.readText().split(SHARP)[0] == "LOCKED" }
+        assertTrue(configuration.controller.readText().split(SHARP)[0] == "LOCKED")
+    }
+
+    @Test
+    fun testGeneratorControllerStopped() {
+        assertTrue(runGenerator().isAlive)
+        waitTime(ofSeconds(30))
+        configuration.controller.writeText("STOPPING")
+        waitTime(ofSeconds(30))
+        assertTrue(configuration.controller.readText().split(SHARP)[0] == "AVAILABLE")
+    }
+
+    @Test
+    fun testGeneratorControllerSingleton() {
+        assertTrue(runGenerator().isAlive)
+        waitTime(ofSeconds(10))
+        assertTrue(configuration.controller.readText().split(SHARP)[0] == "LOCKED")
+        val second = runGenerator()
+        waitTime(ofSeconds(10))
+        assertFalse(second.isAlive)
     }
 
     private fun runGenerator(): Process {
@@ -66,7 +86,7 @@ class GeneratorControllerTest {
                 arrayOf(
                         executable.toFile().absolutePath,
                         "-Dconfiguration=${getProperty("configuration")}",
-                        "-jar", getProperty("jarPath")
+                        "-jar", getProperty("jar")
                 )
         )
     }
