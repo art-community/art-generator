@@ -74,8 +74,9 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: Name
 }
 
 private fun TypeSpec.Builder.generateProperties(metaClass: KotlinMetaClass) {
-    metaClass.parentProperties().forEach { property -> generateProperty(property.value, true, metaClass) }
-    metaClass.properties.entries.forEach { property -> generateProperty(property.value, true, metaClass) }
+    val parentProperties = metaClass.parentProperties()
+    parentProperties.forEach { property -> generateProperty(property.value, true, metaClass) }
+    metaClass.properties.entries.filter { property -> !parentProperties.containsKey(property.key) }.forEach { property -> generateProperty(property.value, false, metaClass) }
 }
 
 private fun TypeSpec.Builder.generateProperty(property: KotlinMetaProperty, inherited: Boolean, owner: KotlinMetaClass) {

@@ -107,7 +107,7 @@ private fun TypeSpec.Builder.qualifyImports(metaType: JavaMetaType) {
 private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
     val parentFields = metaClass.parentFields()
     parentFields.entries.forEach { field -> generateField(field.value, true) }
-    metaClass.fields.entries.forEach { field -> generateField(field.value, false) }
+    metaClass.fields.entries.filter { field -> !parentFields.containsKey(field.key) }.forEach { field -> generateField(field.value, false) }
 }
 
 private fun TypeSpec.Builder.generateField(field: JavaMetaField, inherited: Boolean) {
