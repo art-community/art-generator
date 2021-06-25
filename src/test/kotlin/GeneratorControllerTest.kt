@@ -59,7 +59,6 @@ class GeneratorControllerTest {
         return getRuntime().exec(
                 arrayOf(
                         executable.toFile().absolutePath,
-                        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005",
                         "-Dconfiguration=${getProperty("configuration")}",
                         "-jar", getProperty("jarPath")
                 )
