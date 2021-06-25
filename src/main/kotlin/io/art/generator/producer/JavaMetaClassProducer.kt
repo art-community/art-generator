@@ -27,6 +27,7 @@ import io.art.generator.constants.*
 import io.art.generator.extension.*
 import io.art.generator.factory.NameFactory
 import io.art.generator.model.JavaMetaClass
+import io.art.generator.model.JavaMetaField
 import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.PRIMITIVE_KIND
@@ -104,23 +105,26 @@ private fun TypeSpec.Builder.qualifyImports(metaType: JavaMetaType) {
 }
 
 private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
-    val fields = metaClass.parentFields() + metaClass.fields
-    fields.entries.forEach { field ->
-        val fieldTypeName = field.value.type.asPoetType()
-        val fieldMetaType = ParameterizedTypeName.get(JAVA_META_FIELD_CLASS_NAME, fieldTypeName.box())
-        val fieldName = metaFieldName(field.key)
-        FieldSpec.builder(fieldMetaType, fieldName)
-                .addModifiers(PRIVATE, FINAL)
-                .initializer(javaRegisterMetaFieldStatement(field.key, field.value))
-                .build()
-                .apply(::addField)
-        methodBuilder(fieldName)
-                .addModifiers(PUBLIC)
-                .returns(fieldMetaType)
-                .addCode(javaReturnStatement(fieldName))
-                .build()
-                .let(::addMethod)
-    }
+    val parentFields = metaClass.parentFields()
+    parentFields.entries.forEach { field -> generateField(field.value, true) }
+    metaClass.fields.entries.forEach { field -> generateField(field.value, false) }
+}
+
+private fun TypeSpec.Builder.generateField(field: JavaMetaField, inherited: Boolean) {
+    val fieldTypeName = field.type.asPoetType()
+    val fieldMetaType = ParameterizedTypeName.get(JAVA_META_FIELD_CLASS_NAME, fieldTypeName.box())
+    val fieldName = metaFieldName(field.name)
+    FieldSpec.builder(fieldMetaType, fieldName)
+            .addModifiers(PRIVATE, FINAL)
+            .initializer(javaRegisterMetaFieldStatement(field, inherited))
+            .build()
+            .apply(::addField)
+    methodBuilder(fieldName)
+            .addModifiers(PUBLIC)
+            .returns(fieldMetaType)
+            .addCode(javaReturnStatement(fieldName))
+            .build()
+            .let(::addMethod)
 }
 
 private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, typeName: TypeName) {
@@ -291,7 +295,7 @@ private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
         val parameterName = metaParameterName(parameter.key)
         FieldSpec.builder(metaParameterType, parameterName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(javaRegisterMetaParameterStatement(parameterIndex, parameter.key, parameter.value))
+                .initializer(javaRegisterMetaParameterStatement(parameterIndex, parameter.value))
                 .build()
                 .apply(::addField)
         methodBuilder(parameterName)

@@ -101,13 +101,14 @@ fun javaInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String, J
 }
 
 
-fun javaRegisterMetaFieldStatement(name: String, field: JavaMetaField): CodeBlock = "register(new $META_FIELD_NAME<>(\$S,"
-        .asCode(name)
+fun javaRegisterMetaFieldStatement(field: JavaMetaField, inherited: Boolean): CodeBlock = "register(new $META_FIELD_NAME<>(\$S,"
+        .asCode(field.name)
         .join(metaTypeStatement(field.type))
+        .joinByComma(inheritedStatement(inherited))
         .join("))")
 
-fun javaRegisterMetaParameterStatement(index: Int, name: String, parameter: JavaMetaParameter): CodeBlock = "register(new $META_PARAMETER_NAME<>($index, \$S,"
-        .asCode(name)
+fun javaRegisterMetaParameterStatement(index: Int, parameter: JavaMetaParameter): CodeBlock = "register(new $META_PARAMETER_NAME<>($index, \$S,"
+        .asCode(parameter.name)
         .join(metaTypeStatement(parameter.type))
         .join("))")
 
@@ -183,3 +184,5 @@ private fun casted(parameter: JavaMetaParameter): CodeBlock {
 private fun casted(parameters: Map<String, JavaMetaParameter>): CodeBlock = parameters.values
         .mapIndexed { index, parameter -> "(\$T)($ARGUMENTS_NAME[$index])".asCode(parameter.type.asPoetType()) }
         .let { blocks -> join(blocks, COMMA) }
+
+private fun inheritedStatement(inherited: Boolean) = "\$L".asCode(inherited)

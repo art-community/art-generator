@@ -103,15 +103,16 @@ fun kotlinInvokeConstructorStatement(type: KotlinMetaType, parameters: Map<Strin
 }
 
 
-fun kotlinRegisterMetaFieldStatement(name: String, property: KotlinMetaProperty): CodeBlock =
+fun kotlinRegisterMetaFieldStatement(property: KotlinMetaProperty, inherited: Boolean): CodeBlock =
         "register($META_FIELD_NAME(%S,"
-                .asCode(name)
+                .asCode(property.name)
                 .join(metaTypeStatement(property.type))
+                .joinByComma(inheritedStatement(inherited))
                 .join("))")
 
-fun kotlinRegisterMetaParameterStatement(index: Int, name: String, parameter: KotlinMetaParameter): CodeBlock =
+fun kotlinRegisterMetaParameterStatement(index: Int, parameter: KotlinMetaParameter): CodeBlock =
         "register($META_PARAMETER_NAME($index, %S,"
-                .asCode(name)
+                .asCode(parameter.name)
                 .join(metaTypeStatement(parameter.type))
                 .join("))")
 
@@ -214,3 +215,5 @@ private fun casted(parameters: Map<String, KotlinMetaParameter>): CodeBlock = pa
             return@mapIndexed block
         }
         .joinToCode(COMMA)
+
+private fun inheritedStatement(inherited: Boolean) = "\$L".asCode(inherited)

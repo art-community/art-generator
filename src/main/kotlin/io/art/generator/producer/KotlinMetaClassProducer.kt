@@ -74,29 +74,31 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: Name
 }
 
 private fun TypeSpec.Builder.generateProperties(metaClass: KotlinMetaClass) {
-    val properties = metaClass.parentProperties() + metaClass.properties
-    properties.entries.forEach { property ->
-        val propertyTypeName = property.value.type.asPoetType()
-        val propertyMetaType = KOTLIN_META_FIELD_CLASS_NAME.parameterizedBy(propertyTypeName)
-        val propertyName = metaFieldName(property.key)
-        PropertySpec.builder(propertyName, propertyMetaType)
-                .addModifiers(PRIVATE)
-                .initializer(kotlinRegisterMetaFieldStatement(property.key, property.value))
-                .build()
-                .apply(::addProperty)
-        FunSpec.builder(propertyName)
-                .returns(propertyMetaType)
-                .addCode(kotlinReturnStatement(propertyName))
-                .build()
-                .let(::addFunction)
-        if (property.value.visibility.delegate != Public) return@forEach
-        property.value.getter
-                ?.takeIf(KotlinMetaPropertyFunction::couldBeGenerated)
-                ?.apply { generateGetter(property.value, metaClass) }
-        property.value.setter
-                ?.takeIf(KotlinMetaPropertyFunction::couldBeGenerated)
-                ?.apply { generateSetter(property.value, metaClass) }
-    }
+    metaClass.parentProperties().forEach { property -> generateProperty(property.value, true, metaClass) }
+    metaClass.properties.entries.forEach { property -> generateProperty(property.value, true, metaClass) }
+}
+
+private fun TypeSpec.Builder.generateProperty(property: KotlinMetaProperty, inherited: Boolean, owner: KotlinMetaClass) {
+    val propertyTypeName = property.type.asPoetType()
+    val propertyMetaType = KOTLIN_META_FIELD_CLASS_NAME.parameterizedBy(propertyTypeName)
+    val propertyName = metaFieldName(property.name)
+    PropertySpec.builder(propertyName, propertyMetaType)
+            .addModifiers(PRIVATE)
+            .initializer(kotlinRegisterMetaFieldStatement(property, inherited))
+            .build()
+            .apply(::addProperty)
+    FunSpec.builder(propertyName)
+            .returns(propertyMetaType)
+            .addCode(kotlinReturnStatement(propertyName))
+            .build()
+            .let(::addFunction)
+    if (property.visibility.delegate != Public) return
+    property.getter
+            ?.takeIf(KotlinMetaPropertyFunction::couldBeGenerated)
+            ?.apply { generateGetter(property, owner) }
+    property.setter
+            ?.takeIf(KotlinMetaPropertyFunction::couldBeGenerated)
+            ?.apply { generateSetter(property, owner) }
 }
 
 private fun TypeSpec.Builder.generateConstructors(metaClass: KotlinMetaClass, typeName: TypeName) {
@@ -360,7 +362,7 @@ private fun TypeSpec.Builder.generateParameters(function: KotlinMetaFunction) {
         val parameterName = metaParameterName(parameter.key)
         PropertySpec.builder(parameterName, metaParameterType)
                 .addModifiers(PRIVATE)
-                .initializer(kotlinRegisterMetaParameterStatement(parameterIndex, parameter.key, parameter.value))
+                .initializer(kotlinRegisterMetaParameterStatement(parameterIndex, parameter.value))
                 .build()
                 .apply(::addProperty)
         FunSpec.builder(parameterName)
