@@ -33,6 +33,7 @@ dependencies {
     embedded(kotlin("stdlib-jdk8"))
     embedded(kotlin("compiler-embeddable"))
     embedded(kotlin("reflect"))
+
     embedded("io.art.java:core:main")
     embedded("io.art.java:launcher:main")
     embedded("io.art.java:configurator:main")
@@ -48,6 +49,7 @@ dependencies {
     testImplementation(kotlin("stdlib-jdk8"))
     testImplementation(kotlin("compiler-embeddable"))
     testImplementation(kotlin("reflect"))
+
     testImplementation("io.art.java:core:main")
     testImplementation("io.art.java:launcher:main")
     testImplementation("io.art.java:configurator:main")
@@ -57,10 +59,10 @@ dependencies {
     testImplementation("io.art.java:logging:main")
     testImplementation("io.art.java:meta:main")
 
-    annotationProcessor("org.projectlombok", "lombok", lombokVersion)
-
     testCompileOnly("org.projectlombok", "lombok", lombokVersion)
+    annotationProcessor("org.projectlombok", "lombok", lombokVersion)
     testAnnotationProcessor("org.projectlombok", "lombok", lombokVersion)
+
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 }
