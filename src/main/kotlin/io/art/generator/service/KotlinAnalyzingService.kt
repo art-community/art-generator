@@ -52,12 +52,10 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
 import org.jetbrains.kotlin.resolve.source.KotlinSourceElement
-import org.jetbrains.kotlin.resolve.source.PsiSourceFile
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.nio.file.Paths.get
 import java.util.Objects.isNull
 import java.util.Objects.nonNull
@@ -76,7 +74,7 @@ private class KotlinAnalyzingService {
     fun analyzeKotlinSources(request: KotlinAnalyzingRequest): List<KotlinMetaClass> {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
 
-        val roots = request.roots.flatMap { root -> root.toFile().listFiles()!!.filter { packageName -> packageName.name != META_NAME } }.toSet()
+        val roots = request.roots.flatMap { root -> root.toFile().listFiles()!!.filter { packageName -> packageName.name != META_NAME }.map { source -> source.toPath() } }.toSet()
         val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(roots, request.configuration.classpath), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
                 ?: return emptyList()

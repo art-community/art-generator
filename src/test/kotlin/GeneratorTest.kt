@@ -32,7 +32,6 @@ import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import io.art.generator.service.SourceWatchingService.watchSources
-import io.art.generator.service.collectJavaSources
 import io.art.generator.service.initialize
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.launcher.TestingActivator.testing
@@ -82,9 +81,11 @@ class GeneratorTest {
             }
 
             if (source.languages.contains(JAVA)) {
-                val javaSources = collectJavaSources(source.root, emptySet()).asSequence()
-
-                useJavaCompiler(JavaCompilerConfiguration(setOf(source.root), javaSources, source.classpath, tempDirectory)) { task -> assertTrue(task.call()) }
+                val roots = configuration.sources
+                        .filter { configuration -> configuration.languages.contains(JAVA) }
+                        .map { configuration -> configuration.root }
+                        .toSet()
+                useJavaCompiler(JavaCompilerConfiguration(roots, source.classpath, tempDirectory)) { task -> assertTrue(task.call()) }
                 logger.info("[${source.root.name}]: Java sources compiled")
 
                 var name = source.module + source.root.toFile().name.normalizeToClassSuffix()
@@ -103,7 +104,11 @@ class GeneratorTest {
             }
 
             if (source.languages.contains(KOTLIN)) {
-                useKotlinCompiler(KotlinCompilerConfiguration(setOf(source.root.toFile()), source.classpath, tempDirectory)) {
+                val roots = configuration.sources
+                        .filter { configuration -> configuration.languages.contains(KOTLIN) }
+                        .map { configuration -> configuration.root }
+                        .toSet()
+                useKotlinCompiler(KotlinCompilerConfiguration(roots, source.classpath, tempDirectory)) {
                     analyzeAndGenerate(this)
                 }
                 logger.info("[${source.root.name}]: Kotlin sources compiled")

@@ -43,7 +43,6 @@ import javax.tools.JavaFileObject.Kind.SOURCE
 data class JavaAnalyzingRequest(
         val roots: Set<Path>,
         val configuration: SourceConfiguration,
-        val sources: Sequence<Path>,
         val metaClassName: String,
 )
 
@@ -55,7 +54,7 @@ private class JavaAnalyzingService {
     fun analyzeJavaSources(request: JavaAnalyzingRequest): List<JavaMetaClass> {
         if (!request.configuration.root.toFile().exists()) return emptyList()
         JAVA_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
-        return useJavaCompiler(JavaCompilerConfiguration(request.roots, request.sources, request.configuration.classpath)) { task ->
+        return useJavaCompiler(JavaCompilerConfiguration(request.roots, request.configuration.classpath)) { task ->
             task.analyze()
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }

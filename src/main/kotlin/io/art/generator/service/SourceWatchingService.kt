@@ -106,7 +106,6 @@ object SourceWatchingService {
         val request = JavaAnalyzingRequest(
                 roots,
                 sourceConfiguration,
-                existed.asSequence(),
                 metaClassName.fullName
         )
         val sources = analyzeJavaSources(request)

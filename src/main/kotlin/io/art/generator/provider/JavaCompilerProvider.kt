@@ -26,6 +26,7 @@ import com.sun.tools.javac.comp.CompileStates.CompileState.GENERATE
 import com.sun.tools.javac.main.JavaCompiler
 import com.sun.tools.javac.util.Log.WriterKind.ERROR
 import com.sun.tools.javac.util.Options
+import io.art.generator.constants.JAVA
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.constants.PARAMETERS_OPTION
 import io.art.generator.logging.EmptyDiagnosticListener
@@ -39,7 +40,6 @@ import javax.tools.StandardLocation.*
 
 class JavaCompilerConfiguration(
         val roots: Set<Path>,
-        val sources: Sequence<Path>,
         val classpath: Set<Path>,
         val destination: Path? = null,
 )
@@ -56,7 +56,11 @@ object JavaCompilerProvider {
             compilerConfiguration.destination?.let { destination -> setLocation(CLASS_OUTPUT, listOf(destination.toFile())) }
         }
         val options = listOf(PARAMETERS_OPTION)
-        val files = fileManager.getJavaFileObjects(*compilerConfiguration.sources.map(Path::toFile).toList().toTypedArray())
+        val sources = compilerConfiguration
+                .roots
+                .flatMap { root -> root.toFile().walkTopDown().filter { file -> file.extension == JAVA } }
+                .toTypedArray()
+        val files = fileManager.getJavaFileObjects(*sources)
         val compilerInstance = JavaCompiler.instance(context).apply {
             log.setWriter(ERROR, EmptyWriter)
             shouldStopPolicyIfError = GENERATE
