@@ -55,6 +55,7 @@ class GeneratorControllerTest {
     }
 
     @Test
+    @Order(0)
     fun testGeneratorControllerLocked() {
         assertTrue(runGenerator().isAlive)
         waitTime(ofSeconds(10))
@@ -62,22 +63,12 @@ class GeneratorControllerTest {
     }
 
     @Test
-    fun testGeneratorControllerStopped() {
-        assertTrue(runGenerator().isAlive)
-        waitTime(ofSeconds(30))
-        configuration.controller.writeText("STOPPING")
-        waitTime(ofSeconds(30))
-        assertTrue(configuration.controller.readText().split(SHARP)[0] == "AVAILABLE")
-    }
-
-    @Test
+    @Order(1)
     fun testGeneratorControllerSingleton() {
-        assertTrue(runGenerator().isAlive)
-        waitTime(ofSeconds(10))
-        assertTrue(configuration.controller.readText().split(SHARP)[0] == "LOCKED")
         val second = runGenerator()
         waitTime(ofSeconds(10))
         assertFalse(second.isAlive)
+        configuration.controller.writeText("STOPPING")
     }
 
     private fun runGenerator(): Process {
