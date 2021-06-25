@@ -20,6 +20,7 @@ package io.art.generator.service
 
 import io.art.core.constants.DateTimeConstants.DEFAULT_FORMATTER
 import io.art.core.constants.StringConstants.SHARP
+import io.art.core.extensions.FileExtensions.touchDirectory
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.GeneratorState
 import io.art.generator.constants.GeneratorState.*
@@ -54,7 +55,10 @@ object ControllerService {
         return loadTimeStamp()!!.isBefore(now().minus(LOCK_VALIDATION_DURATION))
     }
 
-    fun updateLock() = configuration.controller.writeText("$LOCKED$SHARP${now().format(DEFAULT_FORMATTER)}")
+    fun updateLock() {
+        if (!controllerFileExists()) touchDirectory(configuration.controller.parent)
+        configuration.controller.writeText("$LOCKED$SHARP${now().format(DEFAULT_FORMATTER)}")
+    }
 
     fun markAvailable() = configuration.controller.writeText("$AVAILABLE")
 }
