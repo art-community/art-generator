@@ -51,8 +51,6 @@ fun kotlinSuppressAnnotation() = AnnotationSpec.builder(Suppress::class)
 
 fun kotlinSuperStatement(label: String): CodeBlock = "%L".asCode(label)
 
-fun kotlinNewStatement(type: TypeName): CodeBlock = "%T()".asCode(type)
-
 fun kotlinReturnStatement(label: CodeBlock): CodeBlock = "return ".join(label)
 
 fun kotlinReturnStatement(label: String): CodeBlock = "return %L".asCode(label)

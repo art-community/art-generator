@@ -49,8 +49,6 @@ fun javaSuppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWa
         .addMember("value", "{\$S,\$S,\$S}", ALL, UNCHECKED, UNUSED)
         .build()
 
-fun javaNewStatement(type: TypeName): CodeBlock = "new \$T()".asCode(type)
-
 fun javaReturnStatement(label: String): CodeBlock = "return \$L;".asCode(label)
 
 fun javaReturnStatement(block: CodeBlock): CodeBlock = "return".asCode().joinBySpace(block)
