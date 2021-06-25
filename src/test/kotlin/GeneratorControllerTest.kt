@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import io.art.core.constants.StringConstants.*
 import io.art.core.context.Context.context
 import io.art.core.waiter.Waiter.waitTime
 import io.art.generator.configuration.configuration
@@ -56,7 +57,7 @@ class GeneratorControllerTest {
     fun testGeneratorControllerLocked() {
         assertTrue { runGenerator().isAlive }
         waitTime(ofSeconds(10))
-        assertTrue { configuration.controller.readText().split(" ")[0] == "LOCKED" }
+        assertTrue { configuration.controller.readText().split(SHARP)[0] == "LOCKED" }
     }
 
     private fun runGenerator(): Process {

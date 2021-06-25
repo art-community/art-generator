@@ -19,7 +19,7 @@
 package io.art.generator.service
 
 import io.art.core.constants.DateTimeConstants.DEFAULT_FORMATTER
-import io.art.core.constants.StringConstants.SPACE
+import io.art.core.constants.StringConstants.SHARP
 import io.art.generator.configuration.configuration
 import io.art.generator.constants.GeneratorState
 import io.art.generator.constants.GeneratorState.*
@@ -36,12 +36,12 @@ object ControllerService {
 
     fun loadState(): GeneratorState {
         if (!controllerFileExists()) return AVAILABLE
-        return GeneratorState.valueOf(configuration.controller.readText().split(SPACE)[0])
+        return GeneratorState.valueOf(configuration.controller.readText().split(SHARP)[0])
     }
 
     fun loadTimeStamp(): LocalDateTime? = loadState()
             .takeIf { state -> state != AVAILABLE }
-            ?.let { parse(configuration.controller.readText().split(SPACE)[1], DEFAULT_FORMATTER) }
+            ?.let { parse(configuration.controller.readText().split(SHARP)[1], DEFAULT_FORMATTER) }
 
     fun isAvailable() = loadState() == AVAILABLE
 
@@ -51,10 +51,10 @@ object ControllerService {
 
     fun lockIsValid(): Boolean {
         if (isAvailable()) return true
-        return loadTimeStamp()!!.isAfter(now().minus(LOCK_VALIDATION_DURATION))
+        return loadTimeStamp()!!.isBefore(now().minus(LOCK_VALIDATION_DURATION))
     }
 
-    fun updateLock() = configuration.controller.writeText("$LOCKED ${now().format(DEFAULT_FORMATTER)}")
+    fun updateLock() = configuration.controller.writeText("$LOCKED$SHARP${now().format(DEFAULT_FORMATTER)}")
 
     fun markAvailable() = configuration.controller.writeText("$AVAILABLE")
 }

@@ -51,7 +51,7 @@ object Generator {
         reconfigure()
 
         if (isStopping()) {
-            if (!waitCondition(STOPPING_TIMEOUT) { !isStopping() }) return
+            if (!waitCondition(STOPPING_TIMEOUT) { !lockIsValid() }) return
         }
 
         if (!lockIsValid()) return

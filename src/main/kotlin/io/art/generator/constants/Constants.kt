@@ -20,8 +20,7 @@ package io.art.generator.constants
 
 import org.jetbrains.kotlin.com.intellij.openapi.Disposable
 import java.time.Duration
-import java.time.Duration.ofMinutes
-import java.time.Duration.ofSeconds
+import java.time.Duration.*
 
 const val KOTLIN_EXTENSION = "kt"
 const val KOTLIN_SCRIPT_EXTENSION = "kts"
@@ -59,6 +58,6 @@ const val KOTLIN_ANALYZER_MODULE_NAME = "kotlin-analyzer"
 
 val LOCK_VALIDATION_DURATION: Duration = ofMinutes(1)
 
-val LOCK_VALIDATION_PERIOD: Duration = ofSeconds(30)
+val LOCK_VALIDATION_PERIOD: Duration = ofMillis(500)
 
 val STOPPING_TIMEOUT: Duration = ofSeconds(30)

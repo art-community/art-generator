@@ -81,7 +81,6 @@ generator {
     sourcesPattern { exclude("**/main/*", "**/kotlin/*") }
     consoleLogging()
     useLocalJar(file("build/executable/art-generator.jar").toPath())
-    disableAutoActivation()
 }
 
 executable {
