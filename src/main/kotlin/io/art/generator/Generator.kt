@@ -38,10 +38,12 @@ import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
 import io.art.scheduler.Scheduling.scheduleDelayed
 import io.art.scheduler.module.SchedulerActivator.scheduler
+import java.lang.System.setProperty
 
 object Generator {
     @JvmStatic
     fun main(arguments: Array<String>) {
+        setProperty("configuration", "G:\\Development\\Projects\\art\\art-environment\\local\\projects\\sandbox\\build\\generator\\module.yml")
         activator(arguments)
                 .mainModuleId(Generator::class.simpleName)
                 .module(scheduler().with(logging()))
