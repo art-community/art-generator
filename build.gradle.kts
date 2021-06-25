@@ -105,3 +105,7 @@ tasks.test {
     jvmArgs("-Dconfiguration=${generator.workingDirectory.resolve("module.yml").toFile().absolutePath}")
     jvmArgs("-DjarPath=${buildDir.resolve("executable").resolve("art-generator.jar").absolutePath}")
 }
+
+tasks.clean {
+
+}
