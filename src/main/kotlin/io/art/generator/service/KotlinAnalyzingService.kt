@@ -74,7 +74,13 @@ private class KotlinAnalyzingService {
     fun analyzeKotlinSources(request: KotlinAnalyzingRequest): List<KotlinMetaClass> {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
 
-        val roots = request.roots.flatMap { root -> root.toFile().listFiles()!!.filter { packageName -> packageName.name != META_NAME }.map { source -> source.toPath() } }.toSet()
+        val roots = request.roots.flatMap { root ->
+            root.toFile()
+                    .listFiles()!!
+                    .filter { packageName -> packageName.name != META_NAME }
+                    .map { source -> source.toPath() }
+        }
+                .toSet()
         val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(roots, request.configuration.classpath), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
                 ?: return emptyList()

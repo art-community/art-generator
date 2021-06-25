@@ -94,7 +94,7 @@ class GeneratorTest {
                 }
                 val generatedClassName = metaModuleClassFullName(name)
                 assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
-                    logger.info("[${source.root.name}]: Loaded Java class: $name")
+                    logger.info("[${source.root.name}]: Loaded Java class: $generatedClassName")
                 })
             }
 
@@ -119,7 +119,7 @@ class GeneratorTest {
                 }
                 val generatedClassName = metaModuleClassFullName(name)
                 assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
-                    logger.info("[${source.root.name}]: Loaded Kotlin class: $name")
+                    logger.info("[${source.root.name}]: Loaded Kotlin class: $generatedClassName")
                 })
             }
         }
