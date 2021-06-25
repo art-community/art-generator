@@ -79,14 +79,16 @@ fun JavaMetaClass.parentFields() = parent
         ?: emptyMap()
 
 private fun JavaMetaType.extractClassName(): ClassName {
-    val nestedClasses = classFullName!!.substringAfter("$classPackageName.$className")
+    val nestedClasses = classFullName!!.substringAfter(classPackageName!!)
             .split(DOT)
             .filter { part -> part.isNotBlank() }
             .toTypedArray()
-    if (nestedClasses.isEmpty()) {
-        return ClassName.get(classPackageName!!, className!!)
+    if (nestedClasses.size < 2) {
+        return ClassName.get(classPackageName, className!!)
     }
-    return ClassName.get(classPackageName!!, className!!, *nestedClasses)
+    val owner = nestedClasses[0]
+    val nested = nestedClasses.drop(1).toTypedArray()
+    return ClassName.get(classPackageName, owner, *nested)
 }
 
 private fun JavaMetaType.asPrimitive() = when (typeName) {

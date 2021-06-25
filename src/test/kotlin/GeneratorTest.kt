@@ -18,11 +18,13 @@
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
 import io.art.core.extensions.FileExtensions.recursiveDelete
+import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.GeneratorLanguage.JAVA
 import io.art.generator.constants.GeneratorLanguage.KOTLIN
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import io.art.generator.constants.META_NAME
 import io.art.generator.extension.normalizeToClassSuffix
 import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.JavaCompilerConfiguration
@@ -45,7 +47,7 @@ import java.nio.file.Path
 import kotlin.io.path.name
 
 @TestInstance(PER_CLASS)
-class GenerationTest {
+class GeneratorTest {
     @BeforeAll
     fun setup() = testing { activator ->
         initialize()
@@ -85,7 +87,11 @@ class GenerationTest {
                 useJavaCompiler(JavaCompilerConfiguration(source.root, javaSources, source.classpath, tempDirectory)) { task -> assertTrue(task.call()) }
                 logger.info("[${source.root.name}]: Java sources compiled")
 
-                val generatedClassName = metaModuleClassFullName(source.module + source.root.toFile().name.normalizeToClassSuffix())
+                var name = source.module + source.root.toFile().name.normalizeToClassSuffix()
+                if (source.languages.size > 1) {
+                    name += JAVA.suffix
+                }
+                val generatedClassName = metaModuleClassFullName(name)
                 assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
                     logger.info("[${source.root.name}]: Loaded Java class: $name")
                 })
@@ -97,12 +103,16 @@ class GenerationTest {
             }
 
             if (source.languages.contains(KOTLIN)) {
-                useKotlinCompiler(KotlinCompilerConfiguration(setOf(source.root.toFile()), source.classpath, destination = tempDirectory)) {
+                useKotlinCompiler(KotlinCompilerConfiguration(setOf(source.root.toFile()), source.classpath, tempDirectory)) {
                     analyzeAndGenerate(this)
                 }
                 logger.info("[${source.root.name}]: Kotlin sources compiled")
 
-                val generatedClassName = metaModuleClassFullName(source.module + source.root.toFile().name.normalizeToClassSuffix())
+                var name = source.module + source.root.toFile().name.normalizeToClassSuffix()
+                if (source.languages.size > 1) {
+                    name += KOTLIN.suffix
+                }
+                val generatedClassName = metaModuleClassFullName(name)
                 assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
                     logger.info("[${source.root.name}]: Loaded Kotlin class: $name")
                 })
@@ -113,10 +123,10 @@ class GenerationTest {
     private fun generatedFiles() = configuration.sources
             .flatMap { source ->
                 source.root
-                        .resolve("meta")
+                        .resolve(META_NAME)
                         .toFile()
                         .listFiles()
-                        ?.filter { file -> file.name.startsWith("MetaExample") }
+                        ?.filter { file -> file.name.startsWith(capitalize(META_NAME + source.module)) }
                         ?: emptyList()
             }
             .toSet()

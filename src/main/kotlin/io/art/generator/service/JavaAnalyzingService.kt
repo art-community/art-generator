@@ -24,8 +24,6 @@ import com.sun.tools.javac.code.Flags.Flag.SYNTHETIC
 import com.sun.tools.javac.code.Flags.asFlagSet
 import com.sun.tools.javac.code.Symbol.*
 import com.sun.tools.javac.code.Type
-import io.art.core.constants.StringConstants.DOT
-import io.art.core.constants.StringConstants.EMPTY_STRING
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZE_COMPLETED
@@ -100,10 +98,7 @@ private class JavaAnalyzingService {
                     },
                     typeName = tsym.qualifiedName.toString(),
                     className = tsym.simpleName.toString(),
-                    classPackageName = tsym.qualifiedName
-                            .toString()
-                            .takeIf { name -> name.contains(DOT) }?.substringBefore(".${tsym.simpleName}")
-                            ?: EMPTY_STRING
+                    classPackageName = tsym.packge().qualifiedName.toString()
             )
         }
         if (type.typeParameters.isNotEmpty()) return type

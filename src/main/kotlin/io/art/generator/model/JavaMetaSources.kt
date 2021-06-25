@@ -33,22 +33,6 @@ enum class JavaMetaTypeKind {
     UNKNOWN_KIND
 }
 
-val JAVA_OBJECT_META_TYPE: JavaMetaType = JavaMetaType(
-        typeName = Object::class.java.name,
-        kind = JavaMetaTypeKind.CLASS_KIND,
-        classFullName = Object::class.java.name,
-        className = Object::class.java.simpleName,
-        classPackageName = Object::class.java.packageName
-)
-
-val JAVA_VOID_META_TYPE: JavaMetaType = JavaMetaType(
-        typeName = Void.TYPE.typeName,
-        kind = JavaMetaTypeKind.PRIMITIVE_KIND,
-        classFullName = Void.TYPE.name,
-        className = Void.TYPE.simpleName,
-        classPackageName = Void.TYPE.packageName
-)
-
 data class JavaMetaType(
         val javaOriginalType: TypeMirror? = null,
 

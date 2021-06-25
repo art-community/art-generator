@@ -43,6 +43,12 @@ object SourceWatchingService {
             val metaModuleClassFullName = metaModuleClassFullName(source.module)
             val metaModuleClassNames = source.languages.associate { language ->
                 if (sourcesByModule[source.module]!!.size > 1) {
+                    if (source.languages.size > 1) {
+                        return@associate language to MetaModuleClassNames(
+                                name = metaModuleClassName + source.root.toFile().name.normalizeToClassSuffix() + language.suffix,
+                                fullName = metaModuleClassFullName + source.root.toFile().name.normalizeToClassSuffix() + language.suffix
+                        )
+                    }
                     return@associate language to MetaModuleClassNames(
                             name = metaModuleClassName + source.root.toFile().name.normalizeToClassSuffix(),
                             fullName = metaModuleClassFullName + source.root.toFile().name.normalizeToClassSuffix()
