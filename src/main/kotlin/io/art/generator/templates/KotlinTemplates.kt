@@ -216,4 +216,4 @@ private fun casted(parameters: Map<String, KotlinMetaParameter>): CodeBlock = pa
         }
         .joinToCode(COMMA)
 
-private fun inheritedStatement(inherited: Boolean) = "\$L".asCode(inherited)
+private fun inheritedStatement(inherited: Boolean) = "%L".asCode(inherited)
