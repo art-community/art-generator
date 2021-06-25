@@ -25,10 +25,7 @@ import com.squareup.kotlinpoet.WildcardTypeName.Companion.producerOf
 import io.art.core.constants.StringConstants.DOT
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.exception.MetaGeneratorException
-import io.art.generator.model.KotlinMetaClass
-import io.art.generator.model.KotlinMetaFunction
-import io.art.generator.model.KotlinMetaPropertyFunction
-import io.art.generator.model.KotlinMetaType
+import io.art.generator.model.*
 import io.art.generator.model.KotlinMetaTypeKind.*
 import io.art.generator.model.KotlinTypeVariance.*
 import org.jetbrains.kotlin.descriptors.Visibilities.Public
@@ -88,13 +85,15 @@ fun KotlinMetaFunction.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(nam
 
 fun KotlinMetaPropertyFunction.couldBeGenerated() = visibility.delegate == Public
 
-fun KotlinMetaClass.parentFunctions() = parent
-        ?.functions
-        ?: emptyList()
+fun KotlinMetaClass.superFunctions(): List<KotlinMetaFunction> {
+    val parentFunctions = (parent?.functions ?: emptyList()) + (parent?.superFunctions() ?: emptyList())
+    val interfaceFunctions = interfaces.flatMap { parent -> parent.superFunctions() }
+    return parentFunctions + interfaceFunctions
+}
 
-fun KotlinMetaClass.parentProperties() = parent
-        ?.properties
-        ?: emptyMap()
+fun KotlinMetaClass.superProperties(): Map<String, KotlinMetaProperty> {
+    return (parent?.properties ?: emptyMap()) + (parent?.superProperties() ?: emptyMap())
+}
 
 private fun KotlinMetaType.asClassName(): ClassName {
     val classes = classFullName!!.substringAfter(classPackageName!!)

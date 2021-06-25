@@ -30,8 +30,8 @@ import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.constants.*
 import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
-import io.art.generator.extension.parentFunctions
-import io.art.generator.extension.parentProperties
+import io.art.generator.extension.superFunctions
+import io.art.generator.extension.superProperties
 import io.art.generator.factory.NameFactory
 import io.art.generator.model.*
 import io.art.generator.templates.*
@@ -74,7 +74,7 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: Name
 }
 
 private fun TypeSpec.Builder.generateProperties(metaClass: KotlinMetaClass) {
-    val parentProperties = metaClass.parentProperties()
+    val parentProperties = metaClass.superProperties()
     parentProperties.forEach { property -> generateProperty(property.value, true, metaClass) }
     metaClass.properties.entries.filter { property -> !parentProperties.containsKey(property.key) }.forEach { property -> generateProperty(property.value, false, metaClass) }
 }
@@ -164,7 +164,7 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: KotlinMetaType
 }
 
 private fun TypeSpec.Builder.generateFunctions(metaClass: KotlinMetaClass) {
-    val parentFunctions = metaClass.parentFunctions()
+    val parentFunctions = metaClass.superFunctions()
     val functions = metaClass
             .functions
             .filter { function -> parentFunctions.none { parent -> parent.withoutModifiers() == function.withoutModifiers() } }

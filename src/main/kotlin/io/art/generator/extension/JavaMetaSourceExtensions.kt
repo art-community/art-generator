@@ -26,6 +26,7 @@ import io.art.generator.constants.JAVA_OBJECT_CLASS_NAME
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.model.JavaMetaClass
+import io.art.generator.model.JavaMetaField
 import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.*
@@ -70,13 +71,15 @@ fun JavaMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && modifiers.conta
 
 fun JavaMetaMethod.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) && modifiers.contains(PUBLIC)
 
-fun JavaMetaClass.parentMethods() = parent
-        ?.methods
-        ?: emptyList()
+fun JavaMetaClass.superMethods(): List<JavaMetaMethod> {
+    val parentMethods = (parent?.methods ?: emptyList()) + (parent?.superMethods() ?: emptyList())
+    val interfacesMethods = interfaces.flatMap { parent -> parent.superMethods() }
+    return parentMethods + interfacesMethods
+}
 
-fun JavaMetaClass.parentFields() = parent
-        ?.fields
-        ?: emptyMap()
+fun JavaMetaClass.superFields(): Map<String, JavaMetaField> {
+    return (parent?.fields ?: emptyMap()) + (parent?.superFields() ?: emptyMap())
+}
 
 fun JavaMetaType.extractOwnerClassName(): String = classFullName!!.substringAfter(classPackageName!!)
         .split(DOT)
