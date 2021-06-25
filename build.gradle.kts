@@ -29,6 +29,7 @@ dependencies {
     val lombokVersion: String by project
     val junitVersion: String by project
     val javaPoetVersion: String by project
+    val kotlinPoetVersion: String by project
 
     embedded(kotlin("stdlib-jdk8"))
     embedded(kotlin("compiler-embeddable"))
@@ -44,7 +45,7 @@ dependencies {
     embedded("io.art.java:meta:main")
     embedded("org.projectlombok", "lombok", lombokVersion)
     embedded("com.squareup", "javapoet", javaPoetVersion)
-    embedded(files("libraries/kotlinpoet-1.9.0-SNAPSHOT.jar"))
+    embedded("com.squareup", "kotlinpoet", kotlinPoetVersion)
 
     testImplementation(kotlin("stdlib-jdk8"))
     testImplementation(kotlin("compiler-embeddable"))
