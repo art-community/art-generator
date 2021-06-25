@@ -41,6 +41,7 @@ import org.jetbrains.kotlin.descriptors.ClassKind.ANNOTATION_CLASS
 import org.jetbrains.kotlin.descriptors.ClassKind.ENUM_ENTRY
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
+import org.jetbrains.kotlin.descriptors.SourceFile.NO_SOURCE_FILE
 import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
@@ -50,10 +51,14 @@ import org.jetbrains.kotlin.resolve.calls.tower.isSynthesized
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
+import org.jetbrains.kotlin.resolve.source.KotlinSourceElement
+import org.jetbrains.kotlin.resolve.source.PsiSourceFile
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.Paths.get
 import java.util.Objects.isNull
 import java.util.Objects.nonNull
 
@@ -80,6 +85,10 @@ private class KotlinAnalyzingService {
                 .map { file -> file.name }
                 .flatMap { packageName -> collectClasses(analysisResult, packageName) }
                 .asSequence()
+                .filter { descriptor -> descriptor.source.containingFile != NO_SOURCE_FILE }
+                .filter { descriptor -> !descriptor.source.containingFile.name.isNullOrBlank() }
+                .filter { descriptor -> descriptor.source is KotlinSourceElement }
+                .filter { descriptor -> get((descriptor.source as KotlinSourceElement).psi.containingKtFile.virtualFilePath).startsWith(request.configuration.root) }
                 .filter { descriptor -> descriptor.defaultType.resolved() }
                 .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != request.metaClassName }
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }

@@ -28,5 +28,12 @@ import io.art.scheduler.Scheduling.scheduleFixedRate
 import io.art.scheduler.module.SchedulerActivator.scheduler
 
 fun main() {
-    Generator.main(emptyArray())
+    activator()
+            .mainModuleId(Generator::class.simpleName)
+            .module(scheduler().with(logging()))
+            .launch()
+    initialize()
+    reconfigure()
+    scheduleFixedRate(configuration.watcherPeriod, ::watchSources)
+    block()
 }
