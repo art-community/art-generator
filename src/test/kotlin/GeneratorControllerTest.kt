@@ -48,14 +48,10 @@ class GeneratorControllerTest {
     }
 
     @Test
-    fun testGeneratorController() {
+    fun testGeneratorControllerLocked() {
         assertTrue { runGenerator().isAlive }
-        waitTime(ofSeconds(20))
+        waitTime(ofSeconds(30))
         assertTrue { configuration.controller.readText().split(" ")[0] == "LOCKED" }
-        waitTime(ofSeconds(20))
-        configuration.controller.writeText("STOPPING")
-        waitTime(ofSeconds(20))
-        assertTrue { configuration.controller.readText().split(" ")[0] == "AVAILABLE" }
     }
 
     private fun runGenerator(): Process {
