@@ -91,7 +91,7 @@ class GeneratorControllerTest {
                 .resolve(buildString {
                     append("java")
                     if (isWindows()) {
-                        append("java.exe")
+                        append(".exe")
                     }
                 })
 
