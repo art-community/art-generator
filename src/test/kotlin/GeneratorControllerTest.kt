@@ -67,7 +67,7 @@ class GeneratorControllerTest {
     @Order(0)
     fun testGeneratorControllerLocked() {
         val process = runGenerator()
-        assertTrue(process.isAlive)
+        assertTrue(process.alive())
         waitTime(ofSeconds(3))
         val controllerContent = configuration.controller.readText()
         assertTrue(controllerContent.split(SHARP)[0] == "LOCKED")
@@ -81,7 +81,7 @@ class GeneratorControllerTest {
     fun testGeneratorControllerSingleton() {
         val second = runGenerator()
         waitTime(ofSeconds(10))
-        assertFalse(second.isAlive)
+        assertFalse(second.alive())
     }
 
     private fun runGenerator(): Process {
@@ -102,5 +102,12 @@ class GeneratorControllerTest {
                         "-jar", getProperty("jar")
                 )
         )
+    }
+
+    fun Process.alive() = try {
+        exitValue()
+        false
+    } catch (ignore: IllegalThreadStateException) {
+        true
     }
 }
