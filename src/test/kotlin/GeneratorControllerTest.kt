@@ -20,6 +20,7 @@ import io.art.core.constants.DateTimeConstants.DEFAULT_FORMATTER
 import io.art.core.constants.StringConstants.SHARP
 import io.art.core.context.Context.context
 import io.art.core.determiner.SystemDeterminer.isWindows
+import io.art.core.waiter.Waiter.waitCondition
 import io.art.core.waiter.Waiter.waitTime
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
@@ -27,7 +28,6 @@ import io.art.generator.constants.META_NAME
 import io.art.launcher.Activator
 import io.art.launcher.TestingActivator.testing
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
@@ -66,9 +66,8 @@ class GeneratorControllerTest {
     @Test
     @Order(0)
     fun testGeneratorControllerLocked() {
-        val process = runGenerator()
-        assertTrue(process.alive())
-        waitTime(ofSeconds(3))
+        runGenerator()
+        waitTime(ofSeconds(5))
         val controllerContent = configuration.controller.readText()
         assertTrue(controllerContent.split(SHARP)[0] == "LOCKED")
         val timestamp = parse(controllerContent.split(SHARP)[1], DEFAULT_FORMATTER)
@@ -80,8 +79,10 @@ class GeneratorControllerTest {
     @Order(1)
     fun testGeneratorControllerSingleton() {
         val second = runGenerator()
-        waitTime(ofSeconds(10))
-        assertFalse(second.alive())
+        var exited = false
+        second.onExit().thenRun { exited = true }
+        waitCondition { exited }
+        assertTrue(exited)
     }
 
     private fun runGenerator(): Process {
@@ -102,12 +103,5 @@ class GeneratorControllerTest {
                         "-jar", getProperty("jar")
                 )
         )
-    }
-
-    private fun Process.alive() = try {
-        exitValue()
-        false
-    } catch (ignore: IllegalThreadStateException) {
-        true
     }
 }
