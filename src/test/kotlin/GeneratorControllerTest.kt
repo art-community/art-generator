@@ -19,6 +19,7 @@
 import io.art.core.constants.DateTimeConstants.DEFAULT_FORMATTER
 import io.art.core.constants.StringConstants.SHARP
 import io.art.core.context.Context.context
+import io.art.core.determiner.SystemDeterminer.isWindows
 import io.art.core.waiter.Waiter.waitTime
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
@@ -84,7 +85,7 @@ class GeneratorControllerTest {
     }
 
     private fun runGenerator(): Process {
-        val executable = context().configuration().javaHomeDirectory.resolve("bin").resolve("java")
+        val executable = context().configuration().javaHomeDirectory.resolve("bin").resolve(buildString { "java".apply { if (isWindows()) append(".exe") } })
         return getRuntime().exec(
                 arrayOf(
                         executable.toFile().absolutePath,
