@@ -16,12 +16,14 @@
  * limitations under the License.
  */
 
+import io.art.core.constants.DateTimeConstants.DEFAULT_FORMATTER
 import io.art.core.constants.StringConstants.SHARP
 import io.art.core.context.Context.context
 import io.art.core.waiter.Waiter.waitTime
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.META_NAME
+import io.art.launcher.Activator
 import io.art.launcher.TestingActivator.testing
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.lang.Runtime.getRuntime
 import java.lang.System.getProperty
 import java.time.Duration.ofSeconds
+import java.time.LocalDateTime.parse
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
@@ -39,7 +42,7 @@ import kotlin.io.path.writeText
 class GeneratorControllerTest {
     @BeforeAll
     fun setup() {
-        testing { activator -> activator.kit() }
+        testing(Activator::kit)
         reconfigure()
         configuration.sources
                 .map { source -> source.root.resolve(META_NAME).toFile() }
@@ -54,21 +57,29 @@ class GeneratorControllerTest {
                 .forEach { path -> if (path.exists()) path.deleteRecursively() }
     }
 
+    @AfterAll
+    fun finalize() {
+        configuration.controller.writeText("STOPPING")
+    }
+
     @Test
     @Order(0)
     fun testGeneratorControllerLocked() {
         assertTrue(runGenerator().isAlive)
         waitTime(ofSeconds(3))
-        assertTrue(configuration.controller.readText().split(SHARP)[0] == "LOCKED")
+        val controllerContent = configuration.controller.readText()
+        assertTrue(controllerContent.split(SHARP)[0] == "LOCKED")
+        val timestamp = parse(controllerContent.split(SHARP)[1], DEFAULT_FORMATTER)
+        waitTime(ofSeconds(3))
+        assertTrue(parse(configuration.controller.readText().split(SHARP)[1], DEFAULT_FORMATTER).isAfter(timestamp))
     }
 
-    @Test
+    @RepeatedTest(5)
     @Order(1)
     fun testGeneratorControllerSingleton() {
         val second = runGenerator()
         waitTime(ofSeconds(3))
         assertFalse(second.isAlive)
-        configuration.controller.writeText("STOPPING")
     }
 
     private fun runGenerator(): Process {
