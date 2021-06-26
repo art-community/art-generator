@@ -65,7 +65,8 @@ class GeneratorControllerTest {
     @Test
     @Order(0)
     fun testGeneratorControllerLocked() {
-        assertTrue(runGenerator().isAlive)
+        val process = runGenerator()
+        assertTrue(process.isAlive)
         waitTime(ofSeconds(3))
         val controllerContent = configuration.controller.readText()
         assertTrue(controllerContent.split(SHARP)[0] == "LOCKED")
