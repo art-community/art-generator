@@ -34,6 +34,7 @@ import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
 import io.art.generator.templates.metaModuleClassFullName
+import io.art.launcher.Activator
 import io.art.launcher.TestingActivator.testing
 import io.art.logging.module.LoggingModule.logger
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
@@ -48,10 +49,7 @@ import kotlin.io.path.name
 @TestInstance(PER_CLASS)
 class GeneratorTest {
     @BeforeAll
-    fun setup() = testing { activator ->
-        initialize()
-        activator.kit()
-    }
+    fun setup() = testing(Activator::kit)
 
     @BeforeEach
     fun prepare() {
@@ -66,6 +64,8 @@ class GeneratorTest {
 
     @Test
     fun testMetaGeneration(@TempDir tempDirectory: Path) {
+        initialize()
+
         val logger = logger("test")
 
         watchSources(asynchronous = false)
