@@ -42,7 +42,5 @@ const val META_FIELD_NAME = "MetaField"
 
 const val ARRAY_OF_NULLS_METHOD = "arrayOfNulls"
 
-const val CAST_METHOD_NAME = "cast"
-
 const val GET_NAME = "get"
 const val SET_NAME = "set"
