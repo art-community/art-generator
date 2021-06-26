@@ -28,9 +28,11 @@ import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.constants.LOCK_VALIDATION_PERIOD
 import io.art.generator.constants.STOPPING_TIMEOUT
+import io.art.generator.service.ControllerService.incrementStopWaiters
 import io.art.generator.service.ControllerService.isStopping
 import io.art.generator.service.ControllerService.lockIsValid
 import io.art.generator.service.ControllerService.markAvailable
+import io.art.generator.service.ControllerService.stoppingWaiters
 import io.art.generator.service.ControllerService.updateLock
 import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
@@ -51,6 +53,8 @@ object Generator {
         reconfigure()
 
         if (isStopping()) {
+            if (stoppingWaiters() != 0) return
+            incrementStopWaiters()
             if (!waitCondition(STOPPING_TIMEOUT) { lockIsValid() }) return
         }
 

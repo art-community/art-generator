@@ -50,6 +50,13 @@ object ControllerService {
 
     fun isLocked() = loadState() == LOCKED
 
+    fun stoppingWaiters(): Int {
+        if (!isStopping()) return 0
+        val state = configuration.controller.readText().split(SHARP)
+        if (state.size == 2) return 0
+        return state[2].toInt()
+    }
+
     fun lockIsValid(): Boolean {
         if (isAvailable()) return true
         return loadTimeStamp()!!.isBefore(now().minus(LOCK_VALIDATION_DURATION))
@@ -58,6 +65,10 @@ object ControllerService {
     fun updateLock() {
         if (!controllerFileExists()) touchDirectory(configuration.controller.parent)
         configuration.controller.writeText("$LOCKED$SHARP${now().format(DEFAULT_FORMATTER)}")
+    }
+
+    fun incrementStopWaiters() {
+        configuration.controller.writeText("$STOPPING$SHARP${now().format(DEFAULT_FORMATTER)}${SHARP}1")
     }
 
     fun markAvailable() = configuration.controller.writeText("$AVAILABLE")

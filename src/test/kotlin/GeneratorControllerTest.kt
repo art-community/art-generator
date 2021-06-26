@@ -104,7 +104,7 @@ class GeneratorControllerTest {
         )
     }
 
-    fun Process.alive() = try {
+    private fun Process.alive() = try {
         exitValue()
         false
     } catch (ignore: IllegalThreadStateException) {
