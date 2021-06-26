@@ -85,7 +85,10 @@ class GeneratorControllerTest {
     }
 
     private fun runGenerator(): Process {
-        val executable = context().configuration().javaHomeDirectory.resolve("bin").resolve(buildString { "java".apply { if (isWindows()) append(".exe") } })
+        val executable = context().configuration()
+                .javaHomeDirectory
+                .resolve("bin")
+                .resolve(buildString { "java".apply { if (isWindows()) append(".exe") } })
         return getRuntime().exec(
                 arrayOf(
                         executable.toFile().absolutePath,
