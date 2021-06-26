@@ -79,7 +79,7 @@ class GeneratorControllerTest {
     @Order(1)
     fun testGeneratorControllerSingleton() {
         val second = runGenerator()
-        waitTime(ofSeconds(3))
+        waitTime(ofSeconds(10))
         assertFalse(second.isAlive)
     }
 

@@ -107,7 +107,6 @@ tasks.test {
     dependsOn(BUILD_EXECUTABLE_JAR_TASK)
     dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
-    addTestOutputListener { _, outputEvent -> info(outputEvent.message) }
     jvmArgs("-Xms2g", "-Xmx2g")
     jvmArgs("-Dconfiguration=${generator.workingDirectory.resolve("module.yml").toFile().absolutePath}")
     jvmArgs("-Djar=${buildDir.resolve("executable").resolve("art-generator.jar").absolutePath}")
