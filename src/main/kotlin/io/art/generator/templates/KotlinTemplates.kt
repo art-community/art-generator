@@ -206,7 +206,11 @@ private fun casted(parameter: KotlinMetaParameter): CodeBlock {
 
 private fun casted(parameters: Map<String, KotlinMetaParameter>): CodeBlock = parameters.values
         .mapIndexed { index, parameter ->
-            val block = "$ARGUMENTS_NAME[$index] as %T".asCode(parameter.type.asPoetType())
+            var asInstruction = "as"
+            if (parameter.type.nullable) {
+                asInstruction += "?"
+            }
+            val block = "$ARGUMENTS_NAME[$index] $asInstruction %T".asCode(parameter.type.asPoetType())
             if (parameter.varargs) {
                 return@mapIndexed "*(".join(block).join(")")
             }

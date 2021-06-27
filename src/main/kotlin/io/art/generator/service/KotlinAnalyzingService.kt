@@ -135,7 +135,8 @@ private class KotlinAnalyzingService {
                     classFullName = classId.asSingleFqName().asString(),
                     className = classId.relativeClassName.pathSegments().last().asString(),
                     classPackageName = classId.packageFqName.asString(),
-                    typeName = classId.asSingleFqName().asString()
+                    typeName = classId.asSingleFqName().asString(),
+                    nullable = isNullableType(this),
             )
         }
 
@@ -143,7 +144,8 @@ private class KotlinAnalyzingService {
                 originalType = this,
                 kind = ARRAY_KIND,
                 arrayComponentType = constructor.builtIns.getArrayElementType(this).asMetaType(),
-                typeName = toString()
+                typeName = toString(),
+                nullable = isNullableType(this)
         )
 
         constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(cache, this) {
@@ -178,6 +180,7 @@ private class KotlinAnalyzingService {
                         classPackageName = classId.packageFqName.asString(),
                         typeName = classId.asSingleFqName().asString(),
                         typeVariance = variance,
+                        nullable = isNullableType(this),
                 )
             }.apply {
                 if (typeParameters.isNotEmpty()) return@apply
