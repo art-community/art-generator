@@ -37,7 +37,9 @@ object ControllerService {
 
     fun loadState(): GeneratorState {
         if (!controllerFileExists()) return AVAILABLE
-        return GeneratorState.valueOf(configuration.controller.readText().split(SHARP)[0])
+        val value = configuration.controller.readText().split(SHARP)[0]
+        if (value.isBlank()) return AVAILABLE
+        return GeneratorState.valueOf(value)
     }
 
     fun loadTimeStamp(): LocalDateTime? = loadState()
