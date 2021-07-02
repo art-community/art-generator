@@ -32,6 +32,12 @@ import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
+data class ControllerState(
+        val state: GeneratorState,
+        val timestamp: LocalDateTime,
+        val count: Int,
+)
+
 object ControllerService {
     fun controllerFileExists() = configuration.controller.exists()
 
@@ -74,4 +80,6 @@ object ControllerService {
     }
 
     fun markAvailable() = configuration.controller.writeText("$AVAILABLE")
+
+    fun writeState(state:)
 }
