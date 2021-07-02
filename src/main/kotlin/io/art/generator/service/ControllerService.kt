@@ -39,47 +39,7 @@ data class ControllerState(
 )
 
 object ControllerService {
-    fun controllerFileExists() = configuration.controller.exists()
+    fun writeState(state: ControllerState) = configuration.controller.writeText("${state.state}$SHARP${state.timestamp.format(DEFAULT_FORMATTER)}${SHARP}${state.count}")
 
-    fun loadState(): GeneratorState {
-        if (!controllerFileExists()) return AVAILABLE
-        val value = configuration.controller.readText().split(SHARP)[0]
-        if (value.isBlank()) return AVAILABLE
-        return GeneratorState.valueOf(value)
-    }
-
-    fun loadTimeStamp(): LocalDateTime? = loadState()
-            .takeIf { state -> state != AVAILABLE }
-            ?.let { parse(configuration.controller.readText().split(SHARP)[1], DEFAULT_FORMATTER) }
-
-    fun isAvailable() = loadState() == AVAILABLE
-
-    fun isStopping() = loadState() == STOPPING
-
-    fun isLocked() = loadState() == LOCKED
-
-    fun stoppingWaiters(): Int {
-        if (!isStopping()) return 0
-        val state = configuration.controller.readText().split(SHARP)
-        if (state.size == 2) return 0
-        return state[2].toInt()
-    }
-
-    fun lockIsValid(): Boolean {
-        if (isAvailable()) return true
-        return loadTimeStamp()!!.isBefore(now().minus(LOCK_VALIDATION_DURATION))
-    }
-
-    fun updateLock() {
-        if (!controllerFileExists()) touchDirectory(configuration.controller.parent)
-        configuration.controller.writeText("$LOCKED$SHARP${now().format(DEFAULT_FORMATTER)}")
-    }
-
-    fun incrementStopWaiters() {
-        configuration.controller.writeText("$STOPPING$SHARP${now().format(DEFAULT_FORMATTER)}${SHARP}1")
-    }
-
-    fun markAvailable() = configuration.controller.writeText("$AVAILABLE")
-
-    fun writeState(state:)
+    fun readState() = configuration.controller.readText()
 }
