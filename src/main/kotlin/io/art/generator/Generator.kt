@@ -20,6 +20,7 @@
 
 package io.art.generator
 
+import io.art.core.context.Context.active
 import io.art.core.context.Context.scheduleTermination
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.core.waiter.Waiter.waitCondition
@@ -61,12 +62,15 @@ object Generator {
         if (!lockIsValid()) return
 
         scheduleDelayed(LOCK_VALIDATION_PERIOD) {
-            if (!isStopping()) {
+            if (!isStopping() && active()) {
                 updateLock()
             }
         }
 
         scheduleDelayed(configuration.watcherPeriod) {
+            if (!active()) {
+                return@scheduleDelayed
+            }
             if (isStopping()) {
                 scheduleTermination()
                 return@scheduleDelayed
