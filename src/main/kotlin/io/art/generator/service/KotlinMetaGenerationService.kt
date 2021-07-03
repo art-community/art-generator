@@ -44,9 +44,9 @@ private class KotlinMetaGenerationService(private val nameFactory: NameFactory =
         val metaModuleClassName = ClassName(META_NAME, metaClassName)
         classBuilder(metaModuleClassName)
                 .addAnnotation(kotlinSuppressAnnotation())
-                .superclass(KOTLIN_META_MODULE_CLASS_NAME)
+                .superclass(KOTLIN_META_LIBRARY_CLASS_NAME)
                 .addFunction(constructorBuilder()
-                        .addParameter(ParameterSpec.builder(DEPENDENCIES_NAME, KOTLIN_META_MODULE_CLASS_NAME, VARARG).build())
+                        .addParameter(ParameterSpec.builder(DEPENDENCIES_NAME, KOTLIN_META_LIBRARY_CLASS_NAME, VARARG).build())
                         .callSuperConstructor(kotlinSuperStatement(DEPENDENCIES_NAME))
                         .build())
                 .apply { generateTree(classes) }
