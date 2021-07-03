@@ -82,7 +82,6 @@ generator {
     module("Example")
     jvm()
     sourcesPattern { exclude("**/main/*", "**/kotlin/*") }
-    consoleLogging()
     disableRunning()
 }
 
