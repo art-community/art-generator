@@ -52,10 +52,10 @@ object ControllerService {
         return readState().count
     }
 
-    fun lockIsValid(): Boolean {
-        if (isAvailable()) return true
-        return readState().timestamp!!.isBefore(now().minus(LOCK_VALIDATION_DURATION))
-    }
+    fun lockIsValid(): Boolean = readState()
+            .timestamp
+            ?.isBefore(now().minus(LOCK_VALIDATION_DURATION))
+            ?: true
 
     fun updateLock() = writeState(ControllerState(LOCKED, now()))
 
@@ -80,6 +80,7 @@ object ControllerService {
         if (value.isEmpty()) return ControllerState(state = AVAILABLE)
         val state = GeneratorState.valueOf(value[0])
         if (state == AVAILABLE) return ControllerState(state = AVAILABLE)
+        if (value.size == 1) return ControllerState(state = state)
         val timestamp = parse(value[1], DEFAULT_FORMATTER)
         if (value.size == 2) return ControllerState(state = state, timestamp = timestamp)
         return ControllerState(state = state, timestamp = timestamp, count = value[2].toInt())
