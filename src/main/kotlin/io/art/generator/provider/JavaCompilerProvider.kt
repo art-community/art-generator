@@ -29,8 +29,8 @@ import com.sun.tools.javac.util.Options
 import io.art.generator.constants.JAVA
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.constants.PARAMETERS_OPTION
-import io.art.generator.logging.EmptyDiagnosticListener
-import io.art.generator.logging.EmptyWriter
+import io.art.generator.logging.LoggingDiagnosticListener
+import io.art.generator.logging.LoggingWriter
 import io.art.generator.model.JavaCompilerContext
 import org.jetbrains.kotlin.javac.JavacOptionsMapper.setUTF8Encoding
 import java.nio.charset.Charset.defaultCharset
@@ -50,7 +50,7 @@ object JavaCompilerProvider {
         val context = JavaCompilerContext().apply {
             Options.instance(this).apply { setUTF8Encoding(this) }
         }
-        val fileManager = tool.getStandardFileManager(EmptyDiagnosticListener, Locale.getDefault(), defaultCharset()).apply {
+        val fileManager = tool.getStandardFileManager(LoggingDiagnosticListener, Locale.getDefault(), defaultCharset()).apply {
             setLocation(SOURCE_PATH, compilerConfiguration.roots.map { root -> root.toFile() })
             setLocation(CLASS_PATH, compilerConfiguration.classpath.map { path -> path.toFile() })
             compilerConfiguration.destination?.let { destination -> setLocation(CLASS_OUTPUT, listOf(destination.toFile())) }
@@ -62,14 +62,14 @@ object JavaCompilerProvider {
                 .toTypedArray()
         val files = fileManager.getJavaFileObjects(*sources)
         val compilerInstance = JavaCompiler.instance(context).apply {
-            log.setWriter(ERROR, EmptyWriter)
+            log.setWriter(ERROR, LoggingWriter)
             shouldStopPolicyIfError = GENERATE
         }
         try {
             val javacTask = tool.getTask(
-                    EmptyWriter,
+                    LoggingWriter,
                     fileManager,
-                    EmptyDiagnosticListener,
+                    LoggingDiagnosticListener,
                     options,
                     emptyList(),
                     files,

@@ -20,14 +20,12 @@ package io.art.generator.provider
 
 import io.art.generator.constants.EMPTY_DISPOSABLE
 import io.art.generator.constants.KOTLIN_ANALYZER_MODULE_NAME
-import io.art.generator.logging.emptyMessageCollector
+import io.art.generator.logging.loggingMessageCollector
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoots
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_FILES
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment.Companion.createForProduction
-import org.jetbrains.kotlin.cli.jvm.config.addJavaSourceRoot
-import org.jetbrains.kotlin.cli.jvm.config.addJavaSourceRoots
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.DISABLE_INLINE
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.MODULE_NAME
@@ -37,7 +35,6 @@ import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR_EXTENDED_CHEC
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
 import org.jetbrains.kotlin.config.JvmTarget.JVM_11
-import java.io.File
 import java.nio.file.Path
 
 
@@ -50,7 +47,7 @@ class KotlinCompilerConfiguration(
 object KotlinCompilerProvider {
     fun <T> useKotlinCompiler(kotlinCompilerConfiguration: KotlinCompilerConfiguration, action: KotlinCoreEnvironment.() -> T): T? {
         val compilerConfiguration = CompilerConfiguration()
-        compilerConfiguration.put(MESSAGE_COLLECTOR_KEY, emptyMessageCollector)
+        compilerConfiguration.put(MESSAGE_COLLECTOR_KEY, loggingMessageCollector)
         compilerConfiguration.put(MODULE_NAME, KOTLIN_ANALYZER_MODULE_NAME)
         compilerConfiguration.put(REPORT_OUTPUT_FILES, false)
         compilerConfiguration.put(JVM_TARGET, JVM_11)

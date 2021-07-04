@@ -18,23 +18,15 @@
 
 package io.art.generator.logging
 
+import io.art.generator.constants.JAVA_LOGGER
+import io.art.logging.logger.Logger
+import io.art.logging.stream.LoggerOutputStream
 import java.io.PrintWriter
-import java.io.Writer
 import javax.tools.Diagnostic
 import javax.tools.DiagnosticListener
 
-object EmptyWriter : PrintWriter(object : Writer() {
-    override fun close() {
-    }
+object LoggingWriter : PrintWriter(LoggerOutputStream(JAVA_LOGGER, Logger::info))
 
-    override fun flush() {
-    }
-
-    override fun write(cbuf: CharArray, off: Int, len: Int) {
-    }
-})
-
-object EmptyDiagnosticListener : DiagnosticListener<Any> {
-    override fun report(diagnostic: Diagnostic<out Any>) {
-    }
+object LoggingDiagnosticListener : DiagnosticListener<Any> {
+    override fun report(diagnostic: Diagnostic<out Any>) = JAVA_LOGGER.info(diagnostic.toString())
 }
