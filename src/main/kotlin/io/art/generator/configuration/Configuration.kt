@@ -31,6 +31,7 @@ import java.time.Duration.ofMillis
 data class SourceConfiguration(
         val languages: Set<GeneratorLanguage>,
         val root: Path,
+        val sources: Set<Path>,
         val module: String,
         val `package`: String,
         val classpath: Set<Path>,
@@ -58,6 +59,10 @@ private fun load() = with(configuration().apply { refresh() }) {
                                 .map { language -> GeneratorLanguage.valueOf(language.uppercase()) }
                                 .toSet(),
                         classpath = source.getString("classpath")
+                                .split(if (isWindows()) SEMICOLON else COLON)
+                                .map { path -> get(path) }
+                                .toSet(),
+                        sources = source.getString("sources")
                                 .split(if (isWindows()) SEMICOLON else COLON)
                                 .map { path -> get(path) }
                                 .toSet(),

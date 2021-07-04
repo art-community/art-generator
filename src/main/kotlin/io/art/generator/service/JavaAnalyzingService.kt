@@ -34,14 +34,12 @@ import io.art.generator.model.*
 import io.art.generator.model.JavaMetaTypeKind.*
 import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
-import java.nio.file.Path
 import java.nio.file.Paths.get
 import javax.lang.model.element.ElementKind.ENUM
 import javax.lang.model.type.TypeMirror
 import javax.tools.JavaFileObject.Kind.SOURCE
 
 data class JavaAnalyzingRequest(
-        val roots: Set<Path>,
         val configuration: SourceConfiguration,
         val metaClassName: String,
 )
@@ -54,7 +52,7 @@ private class JavaAnalyzingService {
     fun analyzeJavaSources(request: JavaAnalyzingRequest): List<JavaMetaClass> {
         if (!request.configuration.root.toFile().exists()) return emptyList()
         JAVA_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
-        return useJavaCompiler(JavaCompilerConfiguration(request.roots, request.configuration.classpath)) { task ->
+        return useJavaCompiler(JavaCompilerConfiguration(request.configuration.sources, request.configuration.classpath)) { task ->
             task.analyze()
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }

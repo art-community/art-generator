@@ -55,13 +55,11 @@ import org.jetbrains.kotlin.resolve.source.KotlinSourceElement
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
 import org.jetbrains.kotlin.types.typeUtil.isEnum
-import java.nio.file.Path
 import java.nio.file.Paths.get
 import java.util.Objects.isNull
 import java.util.Objects.nonNull
 
 data class KotlinAnalyzingRequest(
-        val roots: Set<Path>,
         val configuration: SourceConfiguration,
         val metaClassName: String,
 )
@@ -74,7 +72,7 @@ private class KotlinAnalyzingService {
     fun analyzeKotlinSources(request: KotlinAnalyzingRequest): List<KotlinMetaClass> {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
 
-        val roots = request.roots.flatMap { root ->
+        val roots = request.configuration.sources.flatMap { root ->
             root.toFile()
                     .listFiles()!!
                     .filter { packageName -> packageName.name != request.configuration.metaPackage }

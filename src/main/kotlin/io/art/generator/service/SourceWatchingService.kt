@@ -34,7 +34,6 @@ import io.art.generator.extension.normalizeToClassSuffix
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.generator.templates.metaModuleClassName
 import io.art.scheduler.Scheduling.schedule
-import java.nio.file.Path
 
 object SourceWatchingService {
     private data class MetaModuleClassNames(val name: String, val fullName: String)
@@ -67,49 +66,29 @@ object SourceWatchingService {
             if (source.languages.contains(JAVA)) {
                 detectChanges(JAVA, source.root, collectJavaSources(source.root, source.metaPath, excludedClassNames)).changed {
                     JAVA_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
-                    val roots = sourcesByModule
-                            .values
-                            .flatMap { sources ->
-                                sources
-                                        .filter { source -> source.languages.contains(JAVA) }
-                                        .map { source -> source.root }
-                            }
-                            .toSet()
                     if (asynchronous) {
-                        schedule { handleJavaSources(roots, source, metaModuleClassNames[JAVA]!!) }
+                        schedule { handleJavaSources(source, metaModuleClassNames[JAVA]!!) }
                         return@changed
                     }
-                    handleJavaSources(roots, source, metaModuleClassNames[JAVA]!!)
+                    handleJavaSources(source, metaModuleClassNames[JAVA]!!)
                 }
             }
 
             if (source.languages.contains(KOTLIN)) {
                 detectChanges(KOTLIN, source.root, collectKotlinSources(source.root, source.metaPath, excludedClassNames)).changed {
                     KOTLIN_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
-                    val roots = sourcesByModule
-                            .values
-                            .flatMap { sources ->
-                                sources
-                                        .filter { source -> source.languages.contains(KOTLIN) }
-                                        .map { source -> source.root }
-                            }
-                            .toSet()
                     if (asynchronous) {
-                        schedule { handleKotlinSources(roots, source, metaModuleClassNames[KOTLIN]!!) }
+                        schedule { handleKotlinSources(source, metaModuleClassNames[KOTLIN]!!) }
                         return@changed
                     }
-                    handleKotlinSources(roots, source, metaModuleClassNames[KOTLIN]!!)
+                    handleKotlinSources(source, metaModuleClassNames[KOTLIN]!!)
                 }
             }
         }
     }
 
-    private fun SourcesChanges.handleJavaSources(roots: Set<Path>, sourceConfiguration: SourceConfiguration, metaClassName: MetaModuleClassNames) {
-        val request = JavaAnalyzingRequest(
-                roots,
-                sourceConfiguration,
-                metaClassName.fullName
-        )
+    private fun SourcesChanges.handleJavaSources(sourceConfiguration: SourceConfiguration, metaClassName: MetaModuleClassNames) {
+        val request = JavaAnalyzingRequest(sourceConfiguration, metaClassName.fullName)
         val sources = analyzeJavaSources(request)
         if (sources.isEmpty()) {
             JAVA_LOGGER.info(SOURCES_NOT_FOUND(root))
@@ -118,12 +97,8 @@ object SourceWatchingService {
         generateJavaMetaClasses(sourceConfiguration, sources.asSequence(), metaClassName.name)
     }
 
-    private fun SourcesChanges.handleKotlinSources(roots: Set<Path>, sourceConfiguration: SourceConfiguration, metaClassName: MetaModuleClassNames) {
-        val request = KotlinAnalyzingRequest(
-                roots,
-                sourceConfiguration,
-                metaClassName.fullName
-        )
+    private fun SourcesChanges.handleKotlinSources(sourceConfiguration: SourceConfiguration, metaClassName: MetaModuleClassNames) {
+        val request = KotlinAnalyzingRequest(sourceConfiguration, metaClassName.fullName)
         val sources = analyzeKotlinSources(request)
         if (sources.isEmpty()) {
             KOTLIN_LOGGER.info(SOURCES_NOT_FOUND(root))
