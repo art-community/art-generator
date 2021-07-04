@@ -20,26 +20,25 @@ package io.art.generator.service
 
 import io.art.generator.constants.JAVA
 import io.art.generator.constants.KOTLIN_EXTENSION
-import io.art.generator.constants.META_NAME
 import io.art.generator.extension.isJava
 import io.art.generator.extension.isKotlin
 import java.io.File
 import java.nio.file.Path
 
-fun collectJavaSources(root: Path, excludedClassNames: Set<String>) = root.toFile()
+fun collectJavaSources(root: Path, metaPath: Path, excludedClassNames: Set<String>) = root.toFile()
         .walkTopDown()
         .asSequence()
-        .filter { file -> excludedClassNames.none { name -> metaModuleJavaFile(root, name).exists() && file == metaModuleJavaFile(root, name) } }
+        .filter { file -> excludedClassNames.none { name -> metaModuleJavaFile(root, metaPath, name).exists() && file == metaModuleJavaFile(root, metaPath, name) } }
         .filter { file -> file.isJava }
         .map { file -> file.toPath() }
 
-fun collectKotlinSources(root: Path, excludedClassNames: Set<String>) = root.toFile()
+fun collectKotlinSources(root: Path, metaPath: Path, excludedClassNames: Set<String>) = root.toFile()
         .walkTopDown()
         .asSequence()
-        .filter { file -> excludedClassNames.none { name -> metaModuleKotlinFile(root, name).exists() && file == metaModuleKotlinFile(root, name) } }
+        .filter { file -> excludedClassNames.none { name -> metaModuleKotlinFile(root, metaPath, name).exists() && file == metaModuleKotlinFile(root, metaPath, name) } }
         .filter { file -> file.isKotlin }
         .map { file -> file.toPath() }
 
-fun metaModuleJavaFile(root: Path, name: String): File = root.resolve(META_NAME).resolve("$name.$JAVA").toFile()
+fun metaModuleJavaFile(root: Path, metaPath: Path, name: String): File = root.resolve(metaPath).resolve("$name.$JAVA").toFile()
 
-fun metaModuleKotlinFile(root: Path, name: String): File = root.resolve(META_NAME).resolve("$name.$KOTLIN_EXTENSION").toFile()
+fun metaModuleKotlinFile(root: Path, metaPath: Path, name: String): File = root.resolve(metaPath).resolve("$name.$KOTLIN_EXTENSION").toFile()

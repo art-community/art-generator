@@ -18,11 +18,14 @@
 
 package io.art.generator.extension
 
+import io.art.core.combiner.SectionCombiner.combine
 import io.art.core.constants.StringConstants.*
 import io.art.core.extensions.FileExtensions.parseExtension
 import io.art.core.extensions.StringExtensions.capitalize
+import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.*
 import java.io.File
+import java.io.File.pathSeparator
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -60,3 +63,9 @@ val String.packages: List<String>
     get() = split(DOT)
 
 fun String.normalizeToClassSuffix() = replace(UNDERSCORE, DASH).replace(DOT, DASH).split(DASH).joinToString(EMPTY_STRING, transform = ::capitalize)
+
+val SourceConfiguration.metaPackage: String
+    get() = combine(`package`, META_NAME)
+
+val SourceConfiguration.metaPath: Path
+    get() = root.resolve(metaPackage.replace(DOT, pathSeparator))

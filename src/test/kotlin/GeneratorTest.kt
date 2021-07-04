@@ -25,6 +25,8 @@ import io.art.generator.constants.GeneratorLanguage.JAVA
 import io.art.generator.constants.GeneratorLanguage.KOTLIN
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.constants.META_NAME
+import io.art.generator.extension.metaPackage
+import io.art.generator.extension.metaPath
 import io.art.generator.extension.normalizeToClassSuffix
 import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.JavaCompilerConfiguration
@@ -92,7 +94,7 @@ class GeneratorTest {
                 if (source.languages.size > 1) {
                     name += JAVA.suffix
                 }
-                val generatedClassName = metaModuleClassFullName(name)
+                val generatedClassName = metaModuleClassFullName(source.metaPackage, name)
                 assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
                     logger.info("[${source.root.name}]: Loaded Java class: $generatedClassName")
                 })
@@ -117,7 +119,7 @@ class GeneratorTest {
                 if (source.languages.size > 1) {
                     name += KOTLIN.suffix
                 }
-                val generatedClassName = metaModuleClassFullName(name)
+                val generatedClassName = metaModuleClassFullName(source.metaPackage, name)
                 assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
                     logger.info("[${source.root.name}]: Loaded Kotlin class: $generatedClassName")
                 })
@@ -127,8 +129,7 @@ class GeneratorTest {
 
     private fun generatedFiles() = configuration.sources
             .flatMap { source ->
-                source.root
-                        .resolve(META_NAME)
+                source.metaPath
                         .toFile()
                         .listFiles()
                         ?.filter { file -> file.name.startsWith(capitalize(META_NAME + source.module)) }

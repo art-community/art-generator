@@ -32,6 +32,7 @@ data class SourceConfiguration(
         val languages: Set<GeneratorLanguage>,
         val root: Path,
         val module: String,
+        val `package`: String,
         val classpath: Set<Path>,
 )
 
@@ -61,7 +62,8 @@ private fun load() = with(configuration().apply { refresh() }) {
                                 .map { path -> get(path) }
                                 .toSet(),
                         root = get(source.getString("root")),
-                        module = source.getString("module")
+                        module = source.getString("module"),
+                        `package` = source.getString("package")
                 )
             }.toSet(),
             controller = get(getString("controller")),

@@ -24,25 +24,28 @@ import com.squareup.javapoet.*
 import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
 import com.squareup.javapoet.TypeSpec.classBuilder
+import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.*
 import io.art.generator.extension.couldBeGenerated
+import io.art.generator.extension.metaPackage
+import io.art.generator.extension.metaPath
 import io.art.generator.factory.NameFactory
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaNode
 import io.art.generator.model.asTree
 import io.art.generator.producer.generateClass
 import io.art.generator.templates.*
-import java.nio.file.Path
 import javax.lang.model.element.Modifier.*
 
-fun generateJavaMetaClasses(root: Path, classes: Sequence<JavaMetaClass>, metaClassName: String) = JavaMetaGenerationService()
-        .generateJavaMetaClasses(root, classes, metaClassName)
+fun generateJavaMetaClasses(configuration: SourceConfiguration, classes: Sequence<JavaMetaClass>, metaClassName: String) = JavaMetaGenerationService()
+        .generateJavaMetaClasses(configuration, classes, metaClassName)
 
 private class JavaMetaGenerationService(private val nameFactory: NameFactory = NameFactory()) {
-    fun generateJavaMetaClasses(root: Path, classes: Sequence<JavaMetaClass>, metaClassName: String) {
+    fun generateJavaMetaClasses(configuration: SourceConfiguration, classes: Sequence<JavaMetaClass>, metaClassName: String) {
+        val root = configuration.root
         JAVA_LOGGER.info(GENERATING_METAS_MESSAGE(classes.javaClassNames()))
         root.toFile().parentFile.mkdirs()
-        val metaModuleClassName = ClassName.get(META_NAME, metaClassName)
+        val metaModuleClassName = ClassName.get(configuration.metaPackage, metaClassName)
         classBuilder(metaModuleClassName)
                 .addModifiers(PUBLIC)
                 .addAnnotation(javaSuppressAnnotation())
@@ -56,12 +59,12 @@ private class JavaMetaGenerationService(private val nameFactory: NameFactory = N
                 .apply { generateTree(classes) }
                 .build()
                 .let { metaClass ->
-                    JavaFile.builder(META_NAME, metaClass)
+                    JavaFile.builder(configuration.metaPackage, metaClass)
                             .addStaticImport(JAVA_META_TYPE_CLASS_NAME, *META_METHODS.toTypedArray())
                             .skipJavaLangImports(true)
                             .build()
                             .writeTo(root)
-                    JAVA_LOGGER.info(GENERATED_MESSAGE(metaModuleJavaFile(root, metaClassName).absolutePath))
+                    JAVA_LOGGER.info(GENERATED_MESSAGE(metaModuleJavaFile(root, configuration.metaPath, metaClassName).absolutePath))
                 }
     }
 

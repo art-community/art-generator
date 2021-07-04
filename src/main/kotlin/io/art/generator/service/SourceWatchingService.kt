@@ -28,6 +28,8 @@ import io.art.generator.constants.SOURCES_CHANGED
 import io.art.generator.constants.SOURCES_NOT_FOUND
 import io.art.generator.detector.SourcesChanges
 import io.art.generator.detector.detectChanges
+import io.art.generator.extension.metaPackage
+import io.art.generator.extension.metaPath
 import io.art.generator.extension.normalizeToClassSuffix
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.generator.templates.metaModuleClassName
@@ -41,7 +43,7 @@ object SourceWatchingService {
         val sourcesByModule = configuration.sources.groupBy { source -> source.module }
         configuration.sources.forEach { source ->
             val metaModuleClassName = metaModuleClassName(source.module)
-            val metaModuleClassFullName = metaModuleClassFullName(source.module)
+            val metaModuleClassFullName = metaModuleClassFullName(source.metaPackage, source.module)
             val metaModuleClassNames = source.languages.associate { language ->
                 if (sourcesByModule[source.module]!!.size > 1) {
                     if (source.languages.size > 1) {
@@ -63,7 +65,7 @@ object SourceWatchingService {
                     .toSet()
 
             if (source.languages.contains(JAVA)) {
-                detectChanges(JAVA, source.root, collectJavaSources(source.root, excludedClassNames)).changed {
+                detectChanges(JAVA, source.root, collectJavaSources(source.root, source.metaPath, excludedClassNames)).changed {
                     JAVA_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
                     val roots = sourcesByModule
                             .values
@@ -82,7 +84,7 @@ object SourceWatchingService {
             }
 
             if (source.languages.contains(KOTLIN)) {
-                detectChanges(KOTLIN, source.root, collectKotlinSources(source.root, excludedClassNames)).changed {
+                detectChanges(KOTLIN, source.root, collectKotlinSources(source.root, source.metaPath, excludedClassNames)).changed {
                     KOTLIN_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
                     val roots = sourcesByModule
                             .values
@@ -113,7 +115,7 @@ object SourceWatchingService {
             JAVA_LOGGER.info(SOURCES_NOT_FOUND(root))
             return
         }
-        generateJavaMetaClasses(sourceConfiguration.root, sources.asSequence(), metaClassName.name)
+        generateJavaMetaClasses(sourceConfiguration, sources.asSequence(), metaClassName.name)
     }
 
     private fun SourcesChanges.handleKotlinSources(roots: Set<Path>, sourceConfiguration: SourceConfiguration, metaClassName: MetaModuleClassNames) {
@@ -127,6 +129,6 @@ object SourceWatchingService {
             KOTLIN_LOGGER.info(SOURCES_NOT_FOUND(root))
             return
         }
-        generateKotlinMetaClasses(sourceConfiguration.root, sources.asSequence(), metaClassName.name)
+        generateKotlinMetaClasses(sourceConfiguration, sources.asSequence(), metaClassName.name)
     }
 }

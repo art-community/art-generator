@@ -24,24 +24,27 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
 import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
+import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.*
 import io.art.generator.extension.couldBeGenerated
+import io.art.generator.extension.metaPackage
+import io.art.generator.extension.metaPath
 import io.art.generator.factory.NameFactory
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaNode
 import io.art.generator.model.asTree
 import io.art.generator.producer.generateClass
 import io.art.generator.templates.*
-import java.nio.file.Path
 
-fun generateKotlinMetaClasses(root: Path, classes: Sequence<KotlinMetaClass>, metaClassName: String) = KotlinMetaGenerationService()
-        .generateKotlinMetaClasses(root, classes, metaClassName)
+fun generateKotlinMetaClasses(configuration: SourceConfiguration, classes: Sequence<KotlinMetaClass>, metaClassName: String) = KotlinMetaGenerationService()
+        .generateKotlinMetaClasses(configuration, classes, metaClassName)
 
 private class KotlinMetaGenerationService(private val nameFactory: NameFactory = NameFactory()) {
-    fun generateKotlinMetaClasses(root: Path, classes: Sequence<KotlinMetaClass>, metaClassName: String) {
+    fun generateKotlinMetaClasses(configuration: SourceConfiguration, classes: Sequence<KotlinMetaClass>, metaClassName: String) {
+        val root = configuration.root
         KOTLIN_LOGGER.info(GENERATING_METAS_MESSAGE(classes.kotlinClassNames()))
         root.toFile().parentFile.mkdirs()
-        val metaModuleClassName = ClassName(META_NAME, metaClassName)
+        val metaModuleClassName = ClassName(configuration.metaPackage, metaClassName)
         classBuilder(metaModuleClassName)
                 .addAnnotation(kotlinSuppressAnnotation())
                 .superclass(KOTLIN_META_LIBRARY_CLASS_NAME)
@@ -52,12 +55,12 @@ private class KotlinMetaGenerationService(private val nameFactory: NameFactory =
                 .apply { generateTree(classes) }
                 .build()
                 .let { metaClass ->
-                    FileSpec.builder(META_NAME, metaClass.name!!)
+                    FileSpec.builder(configuration.metaPackage, metaClass.name!!)
                             .addType(metaClass)
                             .addImport(KOTLIN_META_TYPE_CLASS_NAME, *META_METHODS.toTypedArray())
                             .build()
                             .writeTo(root)
-                    KOTLIN_LOGGER.info(GENERATED_MESSAGE(metaModuleKotlinFile(root, metaClassName).absolutePath))
+                    KOTLIN_LOGGER.info(GENERATED_MESSAGE(metaModuleKotlinFile(root, configuration.metaPath, metaClassName).absolutePath))
                 }
     }
 

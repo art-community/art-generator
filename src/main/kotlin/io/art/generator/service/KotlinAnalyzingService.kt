@@ -22,7 +22,7 @@ import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.KOTLIN_LOGGER
-import io.art.generator.constants.META_NAME
+import io.art.generator.extension.metaPackage
 import io.art.generator.model.*
 import io.art.generator.model.KotlinMetaPropertyFunctionKind.GETTER
 import io.art.generator.model.KotlinMetaPropertyFunctionKind.SETTER
@@ -77,7 +77,7 @@ private class KotlinAnalyzingService {
         val roots = request.roots.flatMap { root ->
             root.toFile()
                     .listFiles()!!
-                    .filter { packageName -> packageName.name != META_NAME }
+                    .filter { packageName -> packageName.name != request.configuration.metaPackage }
                     .map { source -> source.toPath() }
         }
                 .toSet()

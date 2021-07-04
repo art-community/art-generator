@@ -20,9 +20,8 @@ package io.art.generator.templates
 
 import io.art.core.extensions.StringExtensions.capitalize
 import io.art.core.extensions.StringExtensions.decapitalize
-import io.art.generator.constants.META_NAME
 
-fun metaModuleClassFullName(name: String): String = "$META_NAME.Meta$name"
+fun metaModuleClassFullName(metaPackage: String, name: String): String = "$metaPackage.Meta$name"
 
 fun metaModuleClassName(name: String): String = "Meta$name"
 
