@@ -51,7 +51,6 @@ object JavaCompilerProvider {
             Options.instance(this).apply { setUTF8Encoding(this) }
         }
         val fileManager = tool.getStandardFileManager(LoggingDiagnosticListener, Locale.getDefault(), defaultCharset()).apply {
-            setLocation(SOURCE_PATH, compilerConfiguration.roots.map { root -> root.toFile() })
             setLocation(CLASS_PATH, compilerConfiguration.classpath.map { path -> path.toFile() })
             compilerConfiguration.destination?.let { destination -> setLocation(CLASS_OUTPUT, listOf(destination.toFile())) }
         }
