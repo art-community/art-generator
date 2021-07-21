@@ -36,6 +36,7 @@ import org.jetbrains.kotlin.javac.JavacOptionsMapper.setUTF8Encoding
 import java.nio.charset.Charset.defaultCharset
 import java.nio.file.Path
 import java.util.*
+import javax.tools.JavaFileManager
 import javax.tools.StandardLocation.*
 
 class JavaCompilerConfiguration(
@@ -47,13 +48,17 @@ class JavaCompilerConfiguration(
 object JavaCompilerProvider {
     fun <T> useJavaCompiler(compilerConfiguration: JavaCompilerConfiguration, action: JavaCompiler.(task: JavacTask) -> T): T {
         val tool = JavacTool.create()
+
         val context = JavaCompilerContext().apply {
             Options.instance(this).apply { setUTF8Encoding(this) }
         }
+
         val fileManager = tool.getStandardFileManager(LoggingDiagnosticListener, Locale.getDefault(), defaultCharset()).apply {
             setLocation(CLASS_PATH, compilerConfiguration.classpath.map { path -> path.toFile() })
             compilerConfiguration.destination?.let { destination -> setLocation(CLASS_OUTPUT, listOf(destination.toFile())) }
+            context.put(JavaFileManager::class.java, this)
         }
+
         val options = listOf(PARAMETERS_OPTION)
         val sources = compilerConfiguration
                 .roots
