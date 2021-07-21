@@ -47,19 +47,12 @@ object ControllerService {
 
     fun isLocked() = readState().state == LOCKED
 
-    fun stoppingWaiters(): Int {
-        if (!isStopping()) return 0
-        return readState().count
-    }
-
     fun lockIsValid(): Boolean = readState()
             .timestamp
             ?.isBefore(now().minus(LOCK_VALIDATION_DURATION))
             ?: true
 
     fun updateLock() = writeState(ControllerState(LOCKED, now()))
-
-    fun incrementStopWaiters() = writeState(ControllerState(STOPPING, now(), 1))
 
     fun markAvailable() = writeState(ControllerState(AVAILABLE))
 
