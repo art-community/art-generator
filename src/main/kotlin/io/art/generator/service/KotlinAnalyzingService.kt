@@ -74,11 +74,12 @@ private class KotlinAnalyzingService {
 
         val roots = request.configuration.sources.flatMap { root ->
             root.toFile()
-                    .listFiles()!!
-                    .filter { packageName -> packageName.name != request.configuration.metaPackage }
-                    .map { source -> source.toPath() }
-        }
-                .toSet()
+                    .listFiles()
+                    ?.filter { packageName -> packageName.name != request.configuration.metaPackage }
+                    ?.map { source -> source.toPath() }
+                    ?: emptySet()
+        }.toSet()
+
         val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(roots, request.configuration.classpath), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
                 ?: return emptyList()

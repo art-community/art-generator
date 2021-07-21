@@ -1,6 +1,5 @@
 import io.art.gradle.common.constants.BUILD_EXECUTABLE_JAR_TASK
 import io.art.gradle.common.constants.WRITE_CONFIGURATION_TASK
-import io.art.gradle.common.logger.info
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {

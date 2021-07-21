@@ -26,6 +26,7 @@ import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.*
 import java.io.File
 import java.io.File.pathSeparator
+import java.io.File.separator
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -68,4 +69,4 @@ val SourceConfiguration.metaPackage: String
     get() = combine(`package`, META_NAME)
 
 val SourceConfiguration.metaPath: Path
-    get() = root.resolve(metaPackage.replace(DOT, pathSeparator))
+    get() = root.resolve(metaPackage.replace(DOT, separator))

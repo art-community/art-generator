@@ -77,7 +77,7 @@ object ControllerService {
     private fun readState(): ControllerState {
         if (!controllerFileExists()) return ControllerState(state = AVAILABLE)
         val value = configuration.controller.readText().split(SHARP)
-        if (value.isEmpty()) return ControllerState(state = AVAILABLE)
+        if (value.isEmpty() || value[0].isEmpty()) return ControllerState(state = AVAILABLE)
         val state = GeneratorState.valueOf(value[0])
         if (state == AVAILABLE) return ControllerState(state = AVAILABLE)
         if (value.size == 1) return ControllerState(state = state)
