@@ -37,7 +37,7 @@ import io.art.generator.service.SourceWatchingService.watchSources
 import io.art.generator.service.initialize
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.launcher.Activator
-import io.art.launcher.TestingActivator.testing
+import io.art.launcher.TestingLauncher.testing
 import io.art.logging.module.LoggingModule.logger
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
 import org.junit.jupiter.api.*

@@ -26,7 +26,7 @@ import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.META_NAME
 import io.art.launcher.Activator
-import io.art.launcher.TestingActivator.testing
+import io.art.launcher.TestingLauncher.testing
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
