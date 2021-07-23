@@ -29,7 +29,8 @@ import io.art.scheduler.module.SchedulerActivator.scheduler
 
 fun main() {
     activator()
-            .mainModuleId(Generator::class.simpleName)
+            .configurable()
+            .main(Generator::class.simpleName)
             .module(scheduler().with(logging()))
             .launch()
     initialize()

@@ -44,7 +44,7 @@ object Generator {
     @JvmStatic
     fun main(arguments: Array<String>) {
         activator(arguments)
-                .mainModuleId(Generator::class.simpleName)
+                .main(Generator::class.simpleName)
                 .module(scheduler().with(logging()))
                 .onUnload(::markAvailable)
                 .launch()
