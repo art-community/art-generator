@@ -20,6 +20,7 @@
 
 package io.art.generator
 
+import io.art.configurator.module.ConfiguratorActivator.configurator
 import io.art.core.context.Context.active
 import io.art.core.context.Context.scheduleTermination
 import io.art.core.extensions.ThreadExtensions.block
@@ -44,9 +45,10 @@ object Generator {
     @JvmStatic
     fun main(arguments: Array<String>) {
         activator(arguments)
-                .configurable()
                 .main(Generator::class.simpleName)
-                .module(scheduler().with(logging()))
+                .module(configurator())
+                .module(logging())
+                .module(scheduler())
                 .onUnload(::markAvailable)
                 .launch()
         initialize()

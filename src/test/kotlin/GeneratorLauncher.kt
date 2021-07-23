@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import io.art.configurator.module.ConfiguratorActivator.configurator
 import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.Generator
 import io.art.generator.configuration.configuration
@@ -29,9 +30,10 @@ import io.art.scheduler.module.SchedulerActivator.scheduler
 
 fun main() {
     activator()
-            .configurable()
             .main(Generator::class.simpleName)
-            .module(scheduler().with(logging()))
+            .module(configurator())
+            .module(logging())
+            .module(scheduler())
             .launch()
     initialize()
     reconfigure()
