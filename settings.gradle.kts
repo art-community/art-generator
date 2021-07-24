@@ -16,8 +16,6 @@
  * limitations under the License.
  */
 
-import org.gradle.api.JavaVersion.*
-
 rootProject.name = "art-generator"
 
 pluginManagement {
