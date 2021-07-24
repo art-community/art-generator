@@ -25,6 +25,7 @@ import com.sun.tools.javac.code.Flags.asFlagSet
 import com.sun.tools.javac.code.Symbol.*
 import com.sun.tools.javac.code.Type
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import io.art.core.matcher.PathMatcher.matches
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZE_COMPLETED
 import io.art.generator.constants.ANALYZING_MESSAGE
@@ -57,7 +58,13 @@ private class JavaAnalyzingService {
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
                     .map { element -> (element as ClassSymbol) }
-                    .filter { symbol -> symbol.sourcefile.kind == SOURCE && get(symbol.sourcefile.name).startsWith(request.configuration.root) }
+                    .filter { symbol ->
+                        symbol.sourcefile.kind == SOURCE && get(symbol.sourcefile.name).let { path ->
+                            path.startsWith(request.configuration.root)
+                                    && request.configuration.exclusions.none { exclusion -> matches(exclusion, path) }
+                                    && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion, path) })
+                        }
+                    }
                     .filter { symbol -> symbol.className() != request.metaClassName }
                     .filter { symbol -> symbol.typeParameters.isEmpty() }
                     .map { symbol -> symbol.asMetaClass() }

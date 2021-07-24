@@ -32,6 +32,8 @@ data class SourceConfiguration(
         val languages: Set<GeneratorLanguage>,
         val root: Path,
         val sources: Set<Path>,
+        val inclusions: Set<String>,
+        val exclusions: Set<String>,
         val module: String,
         val `package`: String,
         val classpath: Set<Path>,
@@ -58,6 +60,8 @@ private fun load() = with(configuration().apply { refresh() }) {
                                 .getStringArray("languages")
                                 .map { language -> GeneratorLanguage.valueOf(language.uppercase()) }
                                 .toSet(),
+                        inclusions = source.getStringArray("inclusions").toSet(),
+                        exclusions = source.getStringArray("exclusions").toSet(),
                         classpath = source.getString("classpath")
                                 .split(if (isWindows()) SEMICOLON else COLON)
                                 .map { path -> get(path) }

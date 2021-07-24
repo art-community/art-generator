@@ -19,6 +19,7 @@
 package io.art.generator.service
 
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import io.art.core.matcher.PathMatcher.matches
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.KOTLIN_LOGGER
@@ -91,7 +92,14 @@ private class KotlinAnalyzingService {
                 .filter { descriptor -> descriptor.source.containingFile != NO_SOURCE_FILE }
                 .filter { descriptor -> !descriptor.source.containingFile.name.isNullOrBlank() }
                 .filter { descriptor -> descriptor.source is KotlinSourceElement }
-                .filter { descriptor -> get((descriptor.source as KotlinSourceElement).psi.containingKtFile.virtualFilePath).startsWith(request.configuration.root) }
+                .filter { descriptor ->
+                    get((descriptor.source as KotlinSourceElement).psi.containingKtFile.virtualFilePath)
+                            .let { path ->
+                                path.startsWith(request.configuration.root)
+                                        && request.configuration.exclusions.none { exclusion -> matches(exclusion, path) }
+                                        && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion, path) })
+                            }
+                }
                 .filter { descriptor -> descriptor.defaultType.resolved() }
                 .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != request.metaClassName }
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
