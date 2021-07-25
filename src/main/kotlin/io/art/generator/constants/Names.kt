@@ -21,12 +21,13 @@ package io.art.generator.constants
 
 const val META_NAME = "meta"
 const val DEPENDENCIES_NAME = "dependencies"
-const val GENERATOR_NAME = "generator"
 const val INVOKE_NAME = "invoke"
 const val CONSTRUCTOR_NAME = "constructor"
 const val INSTANCE_NAME = "instance"
 const val ARGUMENT_NAME = "argument"
 const val ARGUMENTS_NAME = "arguments"
+const val INVOCATIONS_NAME = "invocations"
+const val PROXY_NAME = "proxy"
 
 const val META_TYPE_METHOD_NAME = "metaType"
 const val META_ARRAY_METHOD_NAME = "metaArray"

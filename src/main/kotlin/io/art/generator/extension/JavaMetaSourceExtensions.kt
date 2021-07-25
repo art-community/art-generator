@@ -86,6 +86,13 @@ fun JavaMetaType.extractOwnerClassName(): String = classFullName!!.substringAfte
         .filter { part -> part.isNotBlank() }
         .toTypedArray()[0]
 
+fun JavaMetaType.asUnboxedPoetType(): TypeName {
+    if (kind == PRIMITIVE_KIND) {
+        return asPrimitive().unbox()
+    }
+    return asPoetType()
+}
+
 private fun JavaMetaType.asClassName(): ClassName {
     val nestedClasses = classFullName!!.substringAfter(classPackageName!!)
             .split(DOT)

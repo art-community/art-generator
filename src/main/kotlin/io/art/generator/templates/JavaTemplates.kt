@@ -21,6 +21,7 @@ package io.art.generator.templates
 import com.squareup.javapoet.*
 import com.squareup.javapoet.CodeBlock.join
 import com.squareup.javapoet.CodeBlock.of
+import com.squareup.javapoet.TypeName.VOID
 import io.art.core.constants.CompilerSuppressingWarnings.*
 import io.art.core.constants.StringConstants.*
 import io.art.core.extensions.StringExtensions.capitalize
@@ -30,10 +31,7 @@ import io.art.generator.extension.asPoetType
 import io.art.generator.extension.extractClass
 import io.art.generator.factory.NameFactory
 import io.art.generator.factory.name
-import io.art.generator.model.JavaMetaClass
-import io.art.generator.model.JavaMetaField
-import io.art.generator.model.JavaMetaParameter
-import io.art.generator.model.JavaMetaType
+import io.art.generator.model.*
 import io.art.generator.model.JavaMetaTypeKind.*
 
 fun javaMetaPackageClassName(name: String, nameFactory: NameFactory): ClassName =
@@ -127,6 +125,41 @@ fun javaMetaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
 fun javaNamedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
 
 
+fun javaReturnNewProxyStatement(proxyClass: TypeName) = "return new \$T($INVOCATIONS_NAME)".asCode(proxyClass)
+
+fun javaProxySuperStatement() = "super($INVOCATIONS_NAME)"
+
+fun javaGetInvocationStatement(methodName: String) = "\$L = $INVOCATIONS_NAME.get(\$L)".asCode(metaProxyInvocationName(methodName), metaMethodName(methodName))
+
+fun javaCallInvocationStatement(method: JavaMetaMethod, invocationName: String): CodeBlock {
+    if (method.parameters.isEmpty()) {
+        val returnType = method.returnType.asPoetType()
+        if (method.returnType.kind == PRIMITIVE_KIND && returnType == VOID.box()) {
+            return "\$L.apply(null);".asCode(invocationName)
+        }
+        return "return (\$T)(\$L.apply(null));".asCode(returnType, invocationName)
+    }
+    if (method.parameters.size == 1) {
+        val returnType = method.returnType.asPoetType()
+        if (method.returnType.kind == PRIMITIVE_KIND && returnType == VOID.box()) {
+            return "\$L.apply(\$L);".asCode(invocationName, method.parameters.values.first().name)
+        }
+        return "return (\$T)(\$L.apply(\$L));".asCode(returnType, invocationName, method.parameters.values.first().name)
+    }
+    val returnType = method.returnType.asPoetType()
+    if (method.returnType.kind == PRIMITIVE_KIND && returnType == VOID.box()) {
+        return "\$L.apply(new Object[]{"
+                .asCode(invocationName)
+                .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
+                .join("});")
+    }
+    return "return (\$T)(\$L.apply(new Object[]{"
+            .asCode(returnType, invocationName)
+            .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
+            .join("}));")
+}
+
+
 fun MethodSpec.Builder.addLines(vararg code: CodeBlock): MethodSpec.Builder = addCode(join(listOf(*code), NEW_LINE))
 
 
@@ -172,6 +205,8 @@ private fun CodeBlock.join(block: String): CodeBlock = join(listOf(this, block.a
 private fun CodeBlock.joinBySpace(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), SPACE)
 
 private fun CodeBlock.joinByComma(vararg blocks: CodeBlock): CodeBlock = join(listOf(this, *blocks), COMMA)
+
+private fun joinByComma(vararg blocks: CodeBlock): CodeBlock = join(listOf(*blocks), COMMA)
 
 
 private fun casted(parameter: JavaMetaParameter): CodeBlock {

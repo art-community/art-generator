@@ -71,6 +71,7 @@ data class JavaMetaClass(
         val modifiers: Set<Modifier>,
         val parent: JavaMetaClass? = null,
         val interfaces: List<JavaMetaClass> = emptyList(),
+        val isInterface: Boolean = false
 )
 
 data class JavaMetaField(

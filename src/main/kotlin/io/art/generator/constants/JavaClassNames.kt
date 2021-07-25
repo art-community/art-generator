@@ -18,7 +18,10 @@
 package io.art.generator.constants
 
 import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.WildcardTypeName.subtypeOf
 import io.art.meta.model.*
+import java.util.function.Function
 
 
 val JAVA_OBJECT_CLASS_NAME = ClassName.get(Object::class.java)!!
@@ -33,3 +36,10 @@ val JAVA_META_PARAMETER_CLASS_NAME = ClassName.get(MetaParameter::class.java)!!
 val JAVA_META_CONSTRUCTOR_CLASS_NAME = ClassName.get(MetaConstructor::class.java)!!
 val JAVA_THROWABLE_CLASS_NAME = ClassName.get(Throwable::class.java)!!
 val JAVA_OVERRIDE_CLASS_NAME = ClassName.get(Override::class.java)!!
+val JAVA_FUNCTION_TYPE_NAME = ParameterizedTypeName.get(ClassName.get(Function::class.java), JAVA_OBJECT_CLASS_NAME, JAVA_OBJECT_CLASS_NAME)!!
+val JAVA_META_PROXY_CLASS_NAME = ClassName.get(MetaProxy::class.java)!!
+val JAVA_MAP_META_METHOD_FUNCTION_TYPE_NAME = ParameterizedTypeName.get(
+        ClassName.get(Map::class.java),
+        ParameterizedTypeName.get(ClassName.get(MetaMethod::class.java), subtypeOf(JAVA_OBJECT_CLASS_NAME)),
+        JAVA_FUNCTION_TYPE_NAME,
+)!!

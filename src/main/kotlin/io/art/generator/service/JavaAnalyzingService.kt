@@ -146,6 +146,8 @@ private class JavaAnalyzingService {
 
             modifiers = modifiers,
 
+            isInterface = isInterface,
+
             fields = members()
                     .symbols
                     .reversed()
@@ -202,7 +204,6 @@ private class JavaAnalyzingService {
                     .filter { symbol -> symbol.typeParameters.isEmpty() }
                     .map { interfaceField -> interfaceField.asMetaClass() }
                     .toList()
-
     )
 
     private fun MethodSymbol.asMetaMethod() = JavaMetaMethod(

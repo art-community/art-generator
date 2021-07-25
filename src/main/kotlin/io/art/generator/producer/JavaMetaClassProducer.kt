@@ -50,6 +50,11 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
             .apply { generateFields(metaClass) }
             .apply { generateMethods(metaClass) }
             .apply {
+                if (metaClass.isInterface) {
+                    generateProxy(metaClass)
+                }
+            }
+            .apply {
                 metaClass.innerClasses
                         .values
                         .filter(JavaMetaClass::couldBeGenerated)
@@ -133,7 +138,7 @@ private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, type
             .filter(JavaMetaMethod::couldBeGenerated)
             .mapIndexed { index, constructor ->
                 var name = CONSTRUCTOR_NAME
-                if (index > 0) name += index
+                if (index > 0) name += "_$index"
                 val constructorClassName = metaConstructorClassName(name)
                 classBuilder(constructorClassName)
                         .addModifiers(PUBLIC, FINAL, STATIC)
@@ -205,7 +210,7 @@ private fun TypeSpec.Builder.generateMethods(metaClass: JavaMetaClass) {
 
 private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, ownerType: JavaMetaType) {
     var name = method.name
-    if (index > 0) name += index
+    if (index > 0) name += "_$index"
     val methodName = metaMethodName(name)
     val methodClassName = javaMetaMethodClassName(name)
     val returnType = method.returnType
@@ -305,4 +310,58 @@ private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
                 .build()
                 .let(::addMethod)
     }
+}
+
+private fun TypeSpec.Builder.generateProxy(metaClass: JavaMetaClass) {
+    val proxyClassName = metaProxyClassName(metaClass.type.className!!)
+    val proxyClass = classBuilder(proxyClassName)
+            .addModifiers(PUBLIC)
+            .superclass(JAVA_META_PROXY_CLASS_NAME)
+            .addSuperinterface(metaClass.type.asPoetType())
+            .apply { qualifyImports(metaClass) }
+            .apply {
+                addMethod(constructorBuilder()
+                        .addModifiers(PUBLIC)
+                        .addParameter(ParameterSpec.builder(JAVA_MAP_META_METHOD_FUNCTION_TYPE_NAME, INVOCATIONS_NAME).build())
+                        .addStatement(javaProxySuperStatement())
+                        .apply {
+                            metaClass
+                                    .methods
+                                    .filter { method -> method.couldBeGenerated() && !method.modifiers.contains(STATIC) }
+                                    .groupBy { method -> method.name }
+                                    .forEach { grouped ->
+                                        grouped.value.forEachIndexed { methodIndex, method ->
+                                            var name = method.name
+                                            if (methodIndex > 0) name += "_$methodIndex"
+                                            val invocationName = metaProxyInvocationName(name)
+                                            addField(FieldSpec.builder(JAVA_FUNCTION_TYPE_NAME, invocationName)
+                                                    .addModifiers(PRIVATE, FINAL)
+                                                    .build())
+                                            addMethod(methodBuilder(method.name)
+                                                    .addModifiers(PUBLIC)
+                                                    .addAnnotation(JAVA_OVERRIDE_CLASS_NAME)
+                                                    .returns(method.returnType.asUnboxedPoetType())
+                                                    .addParameters(method.parameters.map { parameter ->
+                                                        ParameterSpec.builder(parameter.value.type.asPoetType(), parameter.key).build()
+                                                    })
+                                                    .addCode(javaCallInvocationStatement(method, invocationName))
+                                                    .build())
+                                            addStatement(javaGetInvocationStatement(name))
+                                        }
+                                    }
+
+                        }
+                        .build()
+                ).build()
+            }
+            .build()
+    addType(proxyClass)
+    addMethod(methodBuilder(PROXY_NAME)
+            .addAnnotation(JAVA_OVERRIDE_CLASS_NAME)
+            .addModifiers(PUBLIC)
+            .returns(JAVA_META_PROXY_CLASS_NAME)
+            .addParameter(ParameterSpec.builder(JAVA_MAP_META_METHOD_FUNCTION_TYPE_NAME, INVOCATIONS_NAME).build())
+            .addStatement(javaReturnNewProxyStatement(ClassName.get(EMPTY_STRING, proxyClassName)))
+            .build())
+
 }

@@ -36,3 +36,7 @@ fun metaParameterName(name: String): String = "${name}Parameter"
 fun metaMethodName(name: String): String = "${name}Method"
 
 fun metaConstructorClassName(name: String) = "Meta${capitalize(name)}Constructor"
+
+fun metaProxyClassName(name: String) = "Meta${capitalize(name)}Proxy"
+
+fun metaProxyInvocationName(name: String) = "${name}Invocation"
