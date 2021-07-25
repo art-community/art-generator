@@ -356,7 +356,7 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: JavaMetaClass, 
                             .build())
                     addMethod(methodBuilder(method.name)
                             .addModifiers(PUBLIC)
-                            .addException(JAVA_THROWABLE_CLASS_NAME)
+                            .addExceptions(method.throws.map { type -> type.asPoetType() })
                             .addAnnotation(JAVA_OVERRIDE_CLASS_NAME)
                             .returns(method.returnType.asUnboxedPoetType())
                             .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.value.type.asPoetType(), parameter.key).build() })

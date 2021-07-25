@@ -48,9 +48,11 @@ import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils.*
 import org.jetbrains.kotlin.resolve.calls.tower.isSynthesized
+import org.jetbrains.kotlin.resolve.constants.KClassValue
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
+import org.jetbrains.kotlin.resolve.descriptorUtil.module
 import org.jetbrains.kotlin.resolve.source.KotlinSourceElement
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.TypeUtils.isNullableType
@@ -312,7 +314,22 @@ private class KotlinAnalyzingService {
             parameters = valueParameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
             visibility = visibility,
             modality = modality,
+            throws = extractThrows()
     )
+
+    private fun FunctionDescriptor.extractThrows(): Set<KotlinMetaType> {
+        val annotation = annotations.findAnnotation(FqName(Throws::class.qualifiedName!!)) ?: return emptySet()
+        val values = annotation.allValueArguments.values
+        if (values.isEmpty()) return emptySet()
+        if (values.first() !is List<*>) return emptySet()
+        val classes = values.first() as List<*>
+        return classes
+                .asSequence()
+                .map { value -> value as? KClassValue }
+                .filterNotNull()
+                .map { classValue -> classValue.getArgumentType(this.module).asMetaType() }
+                .toSet()
+    }
 
     private fun PropertyDescriptor.asMetaProperty() = KotlinMetaProperty(
             name = name.toString(),

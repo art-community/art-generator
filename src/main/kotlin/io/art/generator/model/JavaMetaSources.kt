@@ -89,12 +89,14 @@ data class JavaMetaParameter(
 data class JavaMetaMethod(
         val name: String,
         val returnType: JavaMetaType,
+        val throws: Set<JavaMetaType>,
         val parameters: Map<String, JavaMetaParameter>,
         val modifiers: Set<Modifier>,
 ) {
     fun withoutModifiers() = JavaMetaMethodWithoutModifiers(
             name,
             returnType,
+            throws,
             parameters
     )
 }
@@ -103,5 +105,6 @@ data class JavaMetaMethod(
 data class JavaMetaMethodWithoutModifiers(
         val name: String,
         val returnType: JavaMetaType,
+        val throws: Set<JavaMetaType>,
         val parameters: Map<String, JavaMetaParameter>,
 )

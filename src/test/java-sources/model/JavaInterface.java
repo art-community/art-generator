@@ -18,8 +18,10 @@
 
 package model;
 
+import java.io.*;
+
 public interface JavaInterface {
-    String implementableMethod(String argument);
+    String implementableMethod(String argument) throws IOException;
 
     default String defaultMethod(String argument) {
         return "test";

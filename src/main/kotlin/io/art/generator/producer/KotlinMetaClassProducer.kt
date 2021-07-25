@@ -425,7 +425,7 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass
                             .build())
                     addFunction(FunSpec.builder(method.name)
                             .addModifiers(PUBLIC, OVERRIDE)
-                            .throws(THROWABLE)
+                            .throws(method.throws.map { exception -> exception.asPoetType() })
                             .returns(method.returnType?.asPoetType() ?: UNIT)
                             .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.key, parameter.value.type.asPoetType()).build() })
                             .addCode(kotlinCallInvocationStatement(method, invocationName))

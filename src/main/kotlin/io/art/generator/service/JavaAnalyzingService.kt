@@ -210,6 +210,7 @@ private class JavaAnalyzingService {
             name = name.toString(),
             modifiers = modifiers,
             returnType = returnType.asMetaType(),
+            throws = thrownTypes.map { type -> type.asMetaType() }.toSet(),
             parameters = parameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
     )
 

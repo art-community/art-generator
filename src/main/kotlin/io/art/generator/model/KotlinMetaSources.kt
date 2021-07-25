@@ -113,6 +113,7 @@ data class KotlinMetaParameter(
 data class KotlinMetaFunction(
         val name: String,
         val returnType: KotlinMetaType?,
+        val throws: Set<KotlinMetaType>,
         val parameters: Map<String, KotlinMetaParameter>,
         val visibility: DescriptorVisibility,
         val modality: Modality,
@@ -120,6 +121,7 @@ data class KotlinMetaFunction(
     fun withoutModifiers(): KotlinMetaFunctionWithoutModifiers = KotlinMetaFunctionWithoutModifiers(
             name,
             returnType,
+            throws,
             parameters
     )
 }
@@ -127,5 +129,6 @@ data class KotlinMetaFunction(
 data class KotlinMetaFunctionWithoutModifiers(
         val name: String,
         val returnType: KotlinMetaType?,
+        val throws: Set<KotlinMetaType>,
         val parameters: Map<String, KotlinMetaParameter>,
 )
