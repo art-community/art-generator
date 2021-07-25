@@ -56,5 +56,25 @@ public abstract class JavaClass {
     public boolean publicMethod() {
         return true;
     }
+
     public abstract boolean publicAbstractMethod();
+
+    public interface Enclosing {
+        class Nested extends JavaClass implements Enclosing {
+            @Override
+            protected boolean protectedAbstractMethod() {
+                return false;
+            }
+
+            @Override
+            boolean internalAbstractMethod() {
+                return false;
+            }
+
+            @Override
+            public boolean publicAbstractMethod() {
+                return false;
+            }
+        }
+    }
 }

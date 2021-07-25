@@ -61,7 +61,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
                         .forEach { inner -> generateClass(inner, nameFactory) }
             }
             .build()
-            .apply { qualifyImports(metaClass) }
+            .apply { qualifyImports(mutableSetOf(), metaClass) }
             .apply(::addType)
     FieldSpec.builder(metaClassName, className)
             .addModifiers(PRIVATE, FINAL)
@@ -76,7 +76,8 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
             .let(::addMethod)
 }
 
-private fun TypeSpec.Builder.qualifyImports(metaClass: JavaMetaClass) {
+private fun TypeSpec.Builder.qualifyImports(qualified: MutableSet<JavaMetaClass>, metaClass: JavaMetaClass) {
+    qualified.add(metaClass)
     qualifyImports(metaClass.type)
     metaClass.constructors.forEach { constructor ->
         constructor.parameters.values.forEach { parameter ->
@@ -92,9 +93,9 @@ private fun TypeSpec.Builder.qualifyImports(metaClass: JavaMetaClass) {
     metaClass.fields.forEach { field ->
         qualifyImports(field.value.type)
     }
-    metaClass.innerClasses.values.forEach(::qualifyImports)
-    metaClass.parent?.let(::qualifyImports)
-    metaClass.interfaces.forEach(::qualifyImports)
+    metaClass.innerClasses.values.filter { value -> !qualified.contains(value) }.forEach { value -> qualifyImports(qualified, value) }
+    metaClass.parent?.let { parent -> qualifyImports(qualified, parent) }
+    metaClass.interfaces.filter { value -> !qualified.contains(value) }.forEach { value -> qualifyImports(qualified, value) }
 }
 
 private fun TypeSpec.Builder.qualifyImports(metaType: JavaMetaType) {
@@ -319,7 +320,7 @@ private fun TypeSpec.Builder.generateProxy(metaClass: JavaMetaClass) {
             .superclass(JAVA_META_PROXY_CLASS_NAME)
             .addSuperinterface(metaClass.type.asPoetType())
             .apply {
-                qualifyImports(metaClass)
+                qualifyImports(mutableSetOf(), metaClass)
                 constructorBuilder()
                         .addModifiers(PUBLIC)
                         .addParameter(ParameterSpec.builder(JAVA_MAP_META_METHOD_FUNCTION_TYPE_NAME, INVOCATIONS_NAME).build())

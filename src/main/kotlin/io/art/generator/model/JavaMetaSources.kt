@@ -66,13 +66,22 @@ data class JavaMetaClass(
         val type: JavaMetaType,
         val fields: Map<String, JavaMetaField>,
         val constructors: List<JavaMetaMethod>,
-        val innerClasses: Map<String, JavaMetaClass>,
         val methods: List<JavaMetaMethod>,
         val modifiers: Set<Modifier>,
         val parent: JavaMetaClass? = null,
-        val interfaces: List<JavaMetaClass> = emptyList(),
-        val isInterface: Boolean = false
-)
+        val innerClasses: MutableMap<String, JavaMetaClass> = mutableMapOf(),
+        val interfaces: MutableList<JavaMetaClass> = mutableListOf(),
+        val isInterface: Boolean = false,
+) {
+    override fun hashCode(): Int = type.hashCode()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as JavaMetaClass
+        return type == other.type
+    }
+}
 
 data class JavaMetaField(
         val name: String,

@@ -429,3 +429,9 @@ open class KotlinClass(override var abstractProperty: String) : KotlinModelParen
 
 // Must be ignored as class
 class KotlinGeneric<T>
+
+interface Enclosing {
+    class Nested : Enclosing {
+
+    }
+}
