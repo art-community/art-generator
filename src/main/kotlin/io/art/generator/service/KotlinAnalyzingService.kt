@@ -163,19 +163,19 @@ private class KotlinAnalyzingService {
                     kind = FUNCTION_KIND,
                     nullable = isNullableType(this),
                     typeName = toString(),
-                    functionResultType = arguments
+                    lambdaResultType = arguments
                             .takeLast(1)
                             .firstOrNull()
                             ?.asMetaType(),
                     typeVariance = variance
             )
         }.apply {
-            if (functionArgumentTypes.isNotEmpty()) return@apply
+            if (lambdaArgumentTypes.isNotEmpty()) return@apply
             arguments
                     .dropLast(1)
                     .asSequence()
-                    .map { type -> type.asMetaType() }
-                    .forEach(functionArgumentTypes::add)
+                    .map { projection -> typeCache.getOrElse(projection.type) { projection.asMetaType() } }
+                    .forEach(lambdaArgumentTypes::add)
         }
 
         constructor.declarationDescriptor is ClassDescriptor -> {
@@ -195,7 +195,7 @@ private class KotlinAnalyzingService {
                 if (typeParameters.isNotEmpty()) return@apply
                 arguments
                         .asSequence()
-                        .map { projection -> projection.asMetaType() }
+                        .map { projection -> typeCache.getOrElse(projection.type) { projection.asMetaType() } }
                         .forEach(typeParameters::add)
             }
         }

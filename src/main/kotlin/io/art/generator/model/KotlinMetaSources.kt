@@ -60,8 +60,8 @@ data class KotlinMetaType(
 
         val typeParameters: MutableList<KotlinMetaType> = mutableListOf(),
 
-        val functionArgumentTypes: MutableList<KotlinMetaType> = mutableListOf(),
-        val functionResultType: KotlinMetaType? = null,
+        val lambdaArgumentTypes: MutableList<KotlinMetaType> = mutableListOf(),
+        val lambdaResultType: KotlinMetaType? = null,
 
         val typeVariance: KotlinTypeVariance? = null,
 ) {

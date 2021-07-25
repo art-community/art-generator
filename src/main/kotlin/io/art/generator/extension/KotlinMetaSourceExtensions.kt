@@ -50,8 +50,8 @@ fun KotlinMetaType.asPoetType(): TypeName {
         WILDCARD_KIND -> STAR
 
         FUNCTION_KIND -> LambdaTypeName.get(
-                parameters = functionArgumentTypes.map { argument -> argument.asPoetType() }.toTypedArray(),
-                returnType = functionResultType?.asPoetType() ?: UNIT
+                parameters = lambdaArgumentTypes.map { argument -> argument.asPoetType() }.toTypedArray(),
+                returnType = lambdaResultType?.asPoetType() ?: UNIT
         ).copy(nullable = nullable)
 
         UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
@@ -72,8 +72,8 @@ fun KotlinMetaType.extractClass(): TypeName = when (kind) {
     WILDCARD_KIND -> ANY
 
     FUNCTION_KIND -> LambdaTypeName.get(
-            parameters = functionArgumentTypes.map { argument -> argument.extractClass() }.toTypedArray(),
-            returnType = functionResultType?.extractClass() ?: UNIT
+            parameters = lambdaArgumentTypes.map { argument -> argument.extractClass() }.toTypedArray(),
+            returnType = lambdaResultType?.extractClass() ?: UNIT
     )
 
     UNKNOWN_KIND -> STAR
