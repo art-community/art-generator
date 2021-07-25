@@ -63,7 +63,7 @@ class GeneratorTest {
 
     @AfterEach
     fun cleanup() {
-        //generatedFiles().forEach { file -> file.delete() }
+        generatedFiles().forEach { file -> file.delete() }
     }
 
     @Test

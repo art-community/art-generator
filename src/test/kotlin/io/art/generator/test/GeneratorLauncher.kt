@@ -1,4 +1,4 @@
-package io.art.generator.test/*
+/*
  * ART
  *
  * Copyright 2019-2021 ART
@@ -15,6 +15,8 @@ package io.art.generator.test/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package io.art.generator.test
 
 import io.art.configurator.module.ConfiguratorActivator.configurator
 import io.art.core.extensions.ThreadExtensions.block
