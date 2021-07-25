@@ -28,10 +28,7 @@ import io.art.generator.extension.asPoetType
 import io.art.generator.extension.extractClass
 import io.art.generator.factory.NameFactory
 import io.art.generator.factory.name
-import io.art.generator.model.KotlinMetaClass
-import io.art.generator.model.KotlinMetaParameter
-import io.art.generator.model.KotlinMetaProperty
-import io.art.generator.model.KotlinMetaType
+import io.art.generator.model.*
 import io.art.generator.model.KotlinMetaTypeKind.*
 
 
@@ -137,6 +134,39 @@ fun kotlinSetStatementByArray(owner: String, property: KotlinMetaProperty, prope
 fun kotlinReturnGetStatement(owner: String, property: MemberName) = "return %L.%N".asCode(owner, property)
 
 
+fun kotlinReturnNewProxyStatement(proxyClass: TypeName) = "return %T($INVOCATIONS_NAME)".asCode(proxyClass)
+
+fun kotlinGetInvocationStatement(methodName: String) = "%L = $INVOCATIONS_NAME[%L]".asCode(metaProxyInvocationName(methodName), metaMethodName(methodName))
+
+fun kotlinCallInvocationStatement(method: KotlinMetaFunction, invocationName: String): CodeBlock {
+    if (method.parameters.isEmpty()) {
+        val returnType = method.returnType?.asPoetType() ?: UNIT
+        if (returnType == UNIT) {
+            return "%L.apply(null)".asCode(invocationName)
+        }
+        return "return %L.apply(null) as %T".asCode(invocationName, returnType)
+    }
+    if (method.parameters.size == 1) {
+        val returnType = method.returnType?.asPoetType() ?: UNIT
+        if (returnType == UNIT) {
+            return "%L.apply(%L)".asCode(invocationName, method.parameters.values.first().name)
+        }
+        return "return %L.apply(%L) as %T".asCode(invocationName, method.parameters.values.first().name, returnType)
+    }
+    val returnType = method.returnType?.asPoetType() ?: UNIT
+    if (returnType == UNIT) {
+        return "%L.apply(arrayOf("
+                .asCode(invocationName)
+                .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
+                .join("));")
+    }
+    return "return (%L.apply(arrayOf("
+            .asCode(invocationName)
+            .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
+            .join("))) as %T".asCode(returnType))
+}
+
+
 fun FunSpec.Builder.addLines(vararg code: CodeBlock) = addCode(listOf(*code).joinToCode(NEW_LINE))
 
 
@@ -194,6 +224,7 @@ private fun CodeBlock.joinLine(vararg blocks: CodeBlock): CodeBlock = listOf(thi
 
 private fun CodeBlock.joinByComma(vararg blocks: CodeBlock): CodeBlock = listOf(this, *blocks).joinToCode(COMMA)
 
+private fun joinByComma(vararg blocks: CodeBlock): CodeBlock = listOf(*blocks).joinToCode(COMMA)
 
 private fun casted(parameter: KotlinMetaParameter): CodeBlock {
     val parameterClass = parameter.type.asPoetType()

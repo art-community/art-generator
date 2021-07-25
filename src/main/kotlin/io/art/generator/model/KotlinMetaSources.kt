@@ -87,6 +87,7 @@ data class KotlinMetaClass(
         val parent: KotlinMetaClass? = null,
         val interfaces: List<KotlinMetaClass> = emptyList(),
         val isObject: Boolean = false,
+        val isInterface: Boolean = false,
 )
 
 data class KotlinMetaProperty(

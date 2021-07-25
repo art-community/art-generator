@@ -19,6 +19,7 @@
 package io.art.generator.producer
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ClassName.Companion.bestGuess
 import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
 import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.MemberName.Companion.member
@@ -53,6 +54,11 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: Name
             .apply { if (metaClass.modality != ABSTRACT) generateConstructors(metaClass, typeName) }
             .apply { generateProperties(metaClass) }
             .apply { generateFunctions(metaClass) }
+            .apply {
+                if (metaClass.isInterface) {
+                    generateProxy(metaClass)
+                }
+            }
             .apply {
                 metaClass.innerClasses
                         .values
@@ -111,7 +117,7 @@ private fun TypeSpec.Builder.generateConstructors(metaClass: KotlinMetaClass, ty
             .filter(KotlinMetaFunction::couldBeGenerated)
             .mapIndexed { index, constructor ->
                 var name = CONSTRUCTOR_NAME
-                if (index > 0) name += index
+                if (index > 0) name += "_$index"
                 val constructorClassName = metaConstructorClassName(name)
                 classBuilder(constructorClassName)
                         .superclass(KOTLIN_META_CONSTRUCTOR_CLASS_NAME.parameterizedBy(typeName))
@@ -180,7 +186,7 @@ private fun TypeSpec.Builder.generateFunctions(metaClass: KotlinMetaClass) {
 
 private fun TypeSpec.Builder.generateFunction(function: KotlinMetaFunction, index: Int, ownerClass: KotlinMetaClass) {
     var name = function.name
-    if (index > 0) name += index
+    if (index > 0) name += "_$index"
     val methodName = metaMethodName(name)
     val methodClassName = kotlinMetaMethodClassName(name)
     val returnType = function.returnType
@@ -375,4 +381,55 @@ private fun TypeSpec.Builder.generateParameters(function: KotlinMetaFunction) {
                 .build()
                 .let(::addFunction)
     }
+}
+
+private fun TypeSpec.Builder.generateProxy(metaClass: KotlinMetaClass) {
+    val proxyClassName = metaProxyClassName(metaClass.type.className!!)
+    val proxyClass = classBuilder(proxyClassName)
+            .addModifiers(PUBLIC)
+            .superclass(KOTLIN_META_PROXY_CLASS_NAME)
+            .addSuperinterface(metaClass.type.asPoetType())
+            .apply {
+                constructorBuilder()
+                        .callSuperConstructor(INVOCATIONS_NAME)
+                        .addModifiers(PUBLIC)
+                        .addParameter(ParameterSpec.builder(INVOCATIONS_NAME, KOTLIN_MAP_META_METHOD_FUNCTION_TYPE_NAME).build())
+                        .apply { generateProxyInvocations(metaClass, this) }
+                        .build()
+                        .apply(::addFunction)
+            }
+            .build()
+    addType(proxyClass)
+    addFunction(FunSpec.builder(PROXY_NAME)
+            .addModifiers(PUBLIC, OVERRIDE)
+            .returns(KOTLIN_META_PROXY_CLASS_NAME)
+            .addParameter(ParameterSpec.builder(INVOCATIONS_NAME, KOTLIN_MAP_META_METHOD_FUNCTION_TYPE_NAME).build())
+            .addCode(kotlinReturnNewProxyStatement(bestGuess(proxyClassName)))
+            .build())
+
+}
+
+private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass, constructor: FunSpec.Builder) {
+    metaClass
+            .functions
+            .asSequence()
+            .filter { method -> method.couldBeGenerated() }
+            .groupBy { method -> method.name }
+            .forEach { grouped ->
+                grouped.value.forEachIndexed { methodIndex, method ->
+                    var name = method.name
+                    if (methodIndex > 0) name += "_$methodIndex"
+                    val invocationName = metaProxyInvocationName(name)
+                    addProperty(PropertySpec.builder(invocationName, KOTLIN_FUNCTION_TYPE_NAME)
+                            .addModifiers(PRIVATE, FINAL)
+                            .build())
+                    addFunction(FunSpec.builder(method.name)
+                            .addModifiers(PUBLIC, OVERRIDE)
+                            .returns(method.returnType?.asPoetType() ?: UNIT)
+                            .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.key, parameter.value.type.asPoetType()).build() })
+                            .addCode(kotlinCallInvocationStatement(method, invocationName))
+                            .build())
+                    constructor.addCode(kotlinGetInvocationStatement(name))
+                }
+            }
 }

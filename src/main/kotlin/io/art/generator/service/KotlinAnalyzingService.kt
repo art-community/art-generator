@@ -46,8 +46,7 @@ import org.jetbrains.kotlin.descriptors.SourceFile.NO_SOURCE_FILE
 import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
-import org.jetbrains.kotlin.resolve.DescriptorUtils.isObject
+import org.jetbrains.kotlin.resolve.DescriptorUtils.*
 import org.jetbrains.kotlin.resolve.calls.tower.isSynthesized
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
@@ -234,6 +233,8 @@ private class KotlinAnalyzingService {
             modality = modality,
 
             isObject = isObject(this),
+
+            isInterface = isInterface(this),
 
             properties = getAllDescriptors(defaultType.memberScope)
                     .asSequence()
