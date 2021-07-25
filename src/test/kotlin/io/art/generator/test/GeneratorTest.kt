@@ -17,6 +17,8 @@
  */
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
+package io.art.generator.test
+
 import io.art.core.extensions.FileExtensions.recursiveDelete
 import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.configuration.configuration
