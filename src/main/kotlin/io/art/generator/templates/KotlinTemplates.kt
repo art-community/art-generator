@@ -138,7 +138,6 @@ fun kotlinReturnNewProxyStatement(proxyClass: TypeName) = "return %T($INVOCATION
 
 fun kotlinGetInvocationStatement(methodName: String) = "%L = $INVOCATIONS_NAME[%L]"
         .asCode(metaProxyInvocationName(methodName), metaMethodName(methodName))
-        .joinLine()
 
 fun kotlinCallInvocationStatement(method: KotlinMetaFunction, invocationName: String): CodeBlock {
     if (method.parameters.isEmpty()) {

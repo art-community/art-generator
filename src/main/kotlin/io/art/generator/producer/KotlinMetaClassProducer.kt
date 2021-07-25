@@ -435,7 +435,7 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass
                             .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.key, parameter.value.type.asPoetType()).build() })
                             .addCode(kotlinCallInvocationStatement(method, invocationName))
                             .build())
-                    constructor.addCode(kotlinGetInvocationStatement(name))
+                    constructor.addLines(kotlinGetInvocationStatement(name))
                 }
             }
 
