@@ -437,13 +437,13 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass
                 }
             }
 
-    metaClass.properties.values.asSequence().filter { property -> property.visibility.delegate == Public }.forEach { property ->
-        addProperty(PropertySpec.builder(property.name, property.type.asPoetType())
-                .addModifiers(FINAL, OVERRIDE)
-                .getter(getterBuilder()
-                        .returns(property.type.asPoetType())
-                        .addCode(kotlinNotImplementedStatement())
+    metaClass.properties.values
+            .asSequence()
+            .filter { property -> property.visibility.delegate == Public }
+            .forEach { property ->
+                addProperty(PropertySpec.builder(property.name, property.type.asPoetType())
+                        .addModifiers(FINAL, OVERRIDE)
+                        .getter(getterBuilder().addCode(kotlinNotImplementedStatement()).build())
                         .build())
-                .build())
-    }
+            }
 }
