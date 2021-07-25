@@ -130,6 +130,26 @@ public class JavaModel extends MixedJavaClass implements JavaInterface {
         return null;
     }
 
+    @Override
+    public void implementableMethod1() {
+
+    }
+
+    @Override
+    public void implementableMethod1(String argument) {
+
+    }
+
+    @Override
+    public String implementableMethod2(String argument1) {
+        return null;
+    }
+
+    @Override
+    public String implementableMethod2(String argument1, String argument2) {
+        return null;
+    }
+
     @Getter
     @ToString
     @AllArgsConstructor

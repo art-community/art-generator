@@ -21,6 +21,14 @@ package model.model;
 public interface JavaInterface {
     String implementableMethod(String argument);
 
+    void implementableMethod1();
+
+    void implementableMethod1(String argument);
+
+    String implementableMethod2(String argument1);
+
+    String implementableMethod2(String argument1, String argument2);
+
     default String defaultMethod(String argument) {
         return "test";
     }

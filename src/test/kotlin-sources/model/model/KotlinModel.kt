@@ -324,6 +324,14 @@ interface KotlinInterface {
     }
 
     fun implementableMethod()
+
+    fun implementableMethod1()
+
+    fun implementableMethod1(argument: String)
+
+    fun implementableMethod2(argument1: String): String
+
+    fun implementableMethod2(argument1: String, argument2: String): String
 }
 
 object KotlinObject : KotlinModelParent(false, true), KotlinInterface {
@@ -355,6 +363,22 @@ object KotlinObject : KotlinModelParent(false, true), KotlinInterface {
 
     @Throws(NullPointerException::class)
     override fun implementableMethod() {
+        TODO("Not yet implemented")
+    }
+
+    override fun implementableMethod1() {
+        TODO("Not yet implemented")
+    }
+
+    override fun implementableMethod1(argument: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun implementableMethod2(argument1: String): String {
+        TODO("Not yet implemented")
+    }
+
+    override fun implementableMethod2(argument1: String, argument2: String): String {
         TODO("Not yet implemented")
     }
 
@@ -401,6 +425,22 @@ open class KotlinClass(override var abstractProperty: String) : KotlinModelParen
 
     @Throws(NullPointerException::class)
     override fun implementableMethod() {
+        TODO("Not yet implemented")
+    }
+
+    override fun implementableMethod1() {
+        TODO("Not yet implemented")
+    }
+
+    override fun implementableMethod1(argument: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun implementableMethod2(argument1: String): String {
+        TODO("Not yet implemented")
+    }
+
+    override fun implementableMethod2(argument1: String, argument2: String): String {
         TODO("Not yet implemented")
     }
 
