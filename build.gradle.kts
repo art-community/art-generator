@@ -41,6 +41,7 @@ dependencies {
     embedded("io.art.java:scheduler:main")
     embedded("io.art.java:logging:main")
     embedded("io.art.java:meta:main")
+
     embedded("org.projectlombok", "lombok", lombokVersion)
     embedded("com.squareup", "javapoet", javaPoetVersion)
     embedded("com.squareup", "kotlinpoet", kotlinPoetVersion)
