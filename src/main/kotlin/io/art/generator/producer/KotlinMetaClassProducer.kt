@@ -21,6 +21,7 @@ package io.art.generator.producer
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ClassName.Companion.bestGuess
 import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
+import com.squareup.kotlinpoet.FunSpec.Companion.getterBuilder
 import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -386,7 +387,7 @@ private fun TypeSpec.Builder.generateParameters(function: KotlinMetaFunction) {
 private fun TypeSpec.Builder.generateProxy(metaClass: KotlinMetaClass) {
     val proxyClassName = metaProxyClassName(metaClass.type.className!!)
     val proxyClass = classBuilder(proxyClassName)
-            .addModifiers(PUBLIC)
+            .addModifiers(PUBLIC, INNER)
             .superclass(KOTLIN_META_PROXY_CLASS_NAME)
             .addSuperinterface(metaClass.type.asPoetType())
             .apply {
@@ -406,7 +407,6 @@ private fun TypeSpec.Builder.generateProxy(metaClass: KotlinMetaClass) {
             .addParameter(ParameterSpec.builder(INVOCATIONS_NAME, KOTLIN_MAP_META_METHOD_FUNCTION_TYPE_NAME).build())
             .addCode(kotlinReturnNewProxyStatement(bestGuess(proxyClassName)))
             .build())
-
 }
 
 private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass, constructor: FunSpec.Builder) {
@@ -427,16 +427,23 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass
                             .addModifiers(PUBLIC, OVERRIDE)
                             .apply {
                                 val throws = method.throws.map { exception -> exception.asPoetType() }
-                                if (throws.isNotEmpty()) {
-                                    throws(throws)
-                                }
+                                if (throws.isNotEmpty()) throws(throws)
                             }
                             .returns(method.returnType?.asPoetType() ?: UNIT)
                             .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.key, parameter.value.type.asPoetType()).build() })
                             .addCode(kotlinCallInvocationStatement(method, invocationName))
                             .build())
-                    constructor.addLines(kotlinGetInvocationStatement(name))
+                    constructor.addCode(kotlinGetInvocationStatement(name))
                 }
             }
 
+    metaClass.properties.values.asSequence().filter { property -> property.visibility.delegate == Public }.forEach { property ->
+        addProperty(PropertySpec.builder(property.name, property.type.asPoetType())
+                .addModifiers(FINAL, OVERRIDE)
+                .getter(getterBuilder()
+                        .returns(property.type.asPoetType())
+                        .addCode(kotlinNotImplementedStatement())
+                        .build())
+                .build())
+    }
 }

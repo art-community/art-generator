@@ -136,7 +136,7 @@ fun kotlinReturnGetStatement(owner: String, property: MemberName) = "return %L.%
 
 fun kotlinReturnNewProxyStatement(proxyClass: TypeName) = "return %T($INVOCATIONS_NAME)".asCode(proxyClass)
 
-fun kotlinGetInvocationStatement(methodName: String) = "%L = $INVOCATIONS_NAME[%L]"
+fun kotlinGetInvocationStatement(methodName: String) = "%L = $INVOCATIONS_NAME[%L]!!\n"
         .asCode(metaProxyInvocationName(methodName), metaMethodName(methodName))
 
 fun kotlinCallInvocationStatement(method: KotlinMetaFunction, invocationName: String): CodeBlock {
@@ -166,6 +166,8 @@ fun kotlinCallInvocationStatement(method: KotlinMetaFunction, invocationName: St
             .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
             .join("))) as %T".asCode(returnType))
 }
+
+fun kotlinNotImplementedStatement() = "TODO(\"Not yet implemented\")"
 
 
 fun FunSpec.Builder.addLines(vararg code: CodeBlock) = addCode(listOf(*code).joinToCode(NEW_LINE))
