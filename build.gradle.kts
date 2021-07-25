@@ -97,7 +97,8 @@ tasks.build {
     dependsOn("build-executable-jar")
 }
 
-tasks.findByName("publish")?.dependsOn("build-executable-jar")
+tasks["publish"].dependsOn("build-executable-jar")
+tasks["publish"].inputs.files(task("build-executable-jar").outputs.files)
 
 tasks.test {
     dependsOn(BUILD_EXECUTABLE_JAR_TASK)
