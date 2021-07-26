@@ -82,7 +82,9 @@ generator {
         jvm()
         sourcesPattern { exclude("**/main/*", "**/kotlin/*") }
     }
-    disableRunning()
+    main {
+        disableRunning()
+    }
 }
 
 executable {
