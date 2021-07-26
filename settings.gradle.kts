@@ -32,6 +32,8 @@ pluginManagement {
     }
     plugins {
         val kotlinVersion: String by settings
+        val internalPluginVersion: String by settings
         kotlin("jvm") version kotlinVersion
+        id("art-internal-jvm") version internalPluginVersion
     }
 }

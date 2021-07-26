@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
-    id("art-internal-jvm") version "main"
+    id("art-internal-jvm")
     kotlin("jvm")
 }
 
