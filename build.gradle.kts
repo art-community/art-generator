@@ -91,7 +91,7 @@ executable {
     jar {
         configureRun {
             dependsOn(WRITE_CONFIGURATION_TASK)
-            jvmArgs("-Dconfiguration=${generator.workingDirectory.resolve("module.yml").toFile().absolutePath}")
+            jvmArgs("-Dconfiguration=${generator.mainConfiguration.workingDirectory.resolve("module.yml").toFile().absolutePath}")
         }
     }
     main("io.art.generator.Generator")
