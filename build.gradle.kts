@@ -77,9 +77,11 @@ sourceSets {
 }
 
 generator {
-    module("Example")
-    jvm()
-    sourcesPattern { exclude("**/main/*", "**/kotlin/*") }
+    source {
+        module("Example")
+        jvm()
+        sourcesPattern { exclude("**/main/*", "**/kotlin/*") }
+    }
     disableRunning()
 }
 
