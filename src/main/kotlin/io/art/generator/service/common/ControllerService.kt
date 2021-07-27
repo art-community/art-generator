@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.service
+package io.art.generator.service.common
 
 import io.art.core.constants.DateTimeConstants.DEFAULT_FORMATTER
 import io.art.core.constants.StringConstants.SHARP

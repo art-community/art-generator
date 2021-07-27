@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.service
+package io.art.generator.service.common
 
 import io.art.generator.constants.JAVA
 import io.art.generator.constants.KOTLIN_EXTENSION

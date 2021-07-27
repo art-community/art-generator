@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.service
+package io.art.generator.service.common
 
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.configuration.configuration
@@ -31,6 +31,12 @@ import io.art.generator.detector.detectChanges
 import io.art.generator.extension.metaPackage
 import io.art.generator.extension.metaPath
 import io.art.generator.extension.normalizeToClassSuffix
+import io.art.generator.service.JavaAnalyzingRequest
+import io.art.generator.service.KotlinAnalyzingRequest
+import io.art.generator.service.analyzeJavaSources
+import io.art.generator.service.analyzeKotlinSources
+import io.art.generator.service.generation.generateJavaMetaClasses
+import io.art.generator.service.generation.generateKotlinMetaClasses
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.generator.templates.metaModuleClassName
 import io.art.scheduler.Scheduling.schedule

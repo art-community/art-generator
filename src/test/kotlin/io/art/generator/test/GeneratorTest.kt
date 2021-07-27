@@ -35,8 +35,8 @@ import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
-import io.art.generator.service.SourceWatchingService.watchSources
-import io.art.generator.service.initialize
+import io.art.generator.service.common.SourceWatchingService.watchSources
+import io.art.generator.service.common.initialize
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.launcher.Activator
 import io.art.launcher.TestingLauncher.testing

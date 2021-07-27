@@ -18,7 +18,7 @@
 
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
-package io.art.generator.service
+package io.art.generator.service.generation
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
@@ -34,6 +34,7 @@ import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaNode
 import io.art.generator.model.asTree
 import io.art.generator.producer.generateClass
+import io.art.generator.service.common.metaModuleKotlinFile
 import io.art.generator.templates.*
 
 fun generateKotlinMetaClasses(configuration: SourceConfiguration, classes: Sequence<KotlinMetaClass>, metaClassName: String) = KotlinMetaGenerationService()
