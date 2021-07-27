@@ -1,7 +1,7 @@
 package io.art.generator.parser
 
 import com.sun.tools.javac.code.Type
-import io.art.core.extensions.CollectionExtensions
+import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind
 import javax.lang.model.type.TypeMirror
@@ -9,7 +9,7 @@ import javax.lang.model.type.TypeMirror
 open class JavaTypeParser {
     private val typeCache = mutableMapOf<TypeMirror, JavaMetaType>()
 
-    internal fun TypeMirror.asMetaType(): JavaMetaType = CollectionExtensions.putIfAbsent(typeCache, this) {
+    internal fun TypeMirror.asMetaType(): JavaMetaType = putIfAbsent(typeCache, this) {
         when (this) {
             is Type.ArrayType -> asMetaType()
 
@@ -35,7 +35,7 @@ open class JavaTypeParser {
     }
 
     private fun Type.ClassType.asMetaType(): JavaMetaType {
-        val type = CollectionExtensions.putIfAbsent(typeCache, this) {
+        val type = putIfAbsent(typeCache, this) {
             JavaMetaType(
                     javaOriginalType = this,
                     classFullName = tsym.qualifiedName.toString(),
@@ -58,7 +58,7 @@ open class JavaTypeParser {
         return type
     }
 
-    private fun Type.ArrayType.asMetaType(): JavaMetaType = CollectionExtensions.putIfAbsent(typeCache, this) {
+    private fun Type.ArrayType.asMetaType(): JavaMetaType = putIfAbsent(typeCache, this) {
         JavaMetaType(
                 javaOriginalType = this,
                 kind = JavaMetaTypeKind.ARRAY_KIND,
@@ -67,7 +67,7 @@ open class JavaTypeParser {
         )
     }
 
-    private fun Type.WildcardType.asMetaType(): JavaMetaType = CollectionExtensions.putIfAbsent(typeCache, this) {
+    private fun Type.WildcardType.asMetaType(): JavaMetaType = putIfAbsent(typeCache, this) {
         JavaMetaType(
                 javaOriginalType = this,
                 kind = JavaMetaTypeKind.WILDCARD_KIND,

@@ -1,8 +1,9 @@
 package io.art.generator.parser
 
-import io.art.core.extensions.CollectionExtensions
+import io.art.core.extensions.CollectionExtensions.*
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.model.KotlinMetaTypeKind
+import io.art.generator.model.KotlinMetaTypeKind.UNKNOWN_KIND
 import io.art.generator.model.KotlinTypeVariance
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.builtins.functions.FunctionClassDescriptor
@@ -16,12 +17,12 @@ open class KotlinTypeParser {
 
     protected fun KotlinType.resolved(): Boolean = this !is UnresolvedType && arguments.all { argument -> argument.type.resolved() }
 
-    protected fun KotlinType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = CollectionExtensions.putIfAbsent(typeCache, this) {
+    protected fun KotlinType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = putIfAbsent(typeCache, this) {
         when (this) {
             is SimpleType -> asMetaType(variance)
             is FlexibleType -> asMetaType(variance)
             is DeferredType -> asMetaType(variance)
-            else -> KotlinMetaType(originalType = this, kind = KotlinMetaTypeKind.UNKNOWN_KIND, typeName = toString())
+            else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
         }
     }
 
@@ -47,7 +48,7 @@ open class KotlinTypeParser {
                 nullable = TypeUtils.isNullableType(this)
         )
 
-        constructor.declarationDescriptor is FunctionClassDescriptor -> CollectionExtensions.putIfAbsent(typeCache, this) {
+        constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(typeCache, this) {
             KotlinMetaType(
                     originalType = this,
                     kind = KotlinMetaTypeKind.FUNCTION_KIND,
@@ -70,7 +71,7 @@ open class KotlinTypeParser {
 
         constructor.declarationDescriptor is ClassDescriptor -> {
             val classId = constructor.declarationDescriptor?.classId!!
-            CollectionExtensions.putIfAbsent(typeCache, this) {
+            putIfAbsent(typeCache, this) {
                 KotlinMetaType(
                         originalType = this,
                         kind = KotlinMetaTypeKind.CLASS_KIND,
@@ -90,7 +91,7 @@ open class KotlinTypeParser {
             }
         }
 
-        else -> KotlinMetaType(originalType = this, kind = KotlinMetaTypeKind.UNKNOWN_KIND, typeName = toString())
+        else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
     }
 
     private fun FlexibleType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType {
