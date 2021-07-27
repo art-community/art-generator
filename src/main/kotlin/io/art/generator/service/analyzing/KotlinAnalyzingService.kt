@@ -24,7 +24,6 @@ import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.KOTLIN_LOGGER
 import io.art.generator.extension.isKotlin
-import io.art.generator.extension.metaPackage
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.parser.KotlinDescriptorParser
 import io.art.generator.provider.KotlinCompilerConfiguration
@@ -54,17 +53,14 @@ private class KotlinAnalyzingService : KotlinDescriptorParser() {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
 
         val roots = request.configuration.sources
-                .filter { source -> source.toFile().walkTopDown().all { file -> file.isDirectory || file.isKotlin } }
-                .flatMap { root ->
-                    root.toFile()
-                            .listFiles()
-                            ?.filter { packageName -> packageName.name != request.configuration.metaPackage }
-                            ?.map { source -> source.toPath() }
-                            ?: emptySet()
-                }.toSet()
+                .filter { source ->
+                    source.toFile().exists() && source.toFile()
+                            .walkTopDown()
+                            .all { file -> file.isDirectory || file.isKotlin }
+                }
+                .toSet()
 
         val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(roots, request.configuration.classpath), KotlinToJVMBytecodeCompiler::analyze)
-                ?.takeIf { result -> !result.isError() }
                 ?.apply { ignoreException(this::throwIfError, KOTLIN_LOGGER::error) }
                 ?: return emptyList()
 
