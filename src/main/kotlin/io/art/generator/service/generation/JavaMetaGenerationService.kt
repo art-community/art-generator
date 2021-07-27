@@ -34,6 +34,7 @@ import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaNode
 import io.art.generator.model.asTree
 import io.art.generator.producer.generateClass
+import io.art.generator.service.common.metaModuleJavaFile
 import io.art.generator.templates.*
 import javax.lang.model.element.Modifier.*
 

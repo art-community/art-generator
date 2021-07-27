@@ -31,10 +31,10 @@ import io.art.generator.detector.detectChanges
 import io.art.generator.extension.metaPackage
 import io.art.generator.extension.metaPath
 import io.art.generator.extension.normalizeToClassSuffix
-import io.art.generator.service.JavaAnalyzingRequest
-import io.art.generator.service.KotlinAnalyzingRequest
-import io.art.generator.service.analyzeJavaSources
-import io.art.generator.service.analyzeKotlinSources
+import io.art.generator.service.analyzing.JavaAnalyzingRequest
+import io.art.generator.service.analyzing.KotlinAnalyzingRequest
+import io.art.generator.service.analyzing.analyzeJavaSources
+import io.art.generator.service.analyzing.analyzeKotlinSources
 import io.art.generator.service.generation.generateJavaMetaClasses
 import io.art.generator.service.generation.generateKotlinMetaClasses
 import io.art.generator.templates.metaModuleClassFullName

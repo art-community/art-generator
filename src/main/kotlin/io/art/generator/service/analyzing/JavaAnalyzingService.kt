@@ -18,7 +18,7 @@
 
 @file:Suppress(JAVA_MODULE_SUPPRESSION)
 
-package io.art.generator.service
+package io.art.generator.service.analyzing
 
 import com.sun.tools.javac.code.Symbol.ClassSymbol
 import io.art.core.matcher.PathMatcher.matches

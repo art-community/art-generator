@@ -1,8 +1,11 @@
+@file:Suppress(JAVA_MODULE_SUPPRESSION)
+
 package io.art.generator.parser
 
 import com.sun.tools.javac.code.Flags
 import com.sun.tools.javac.code.Symbol
 import io.art.core.extensions.CollectionExtensions
+import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaField
 import io.art.generator.model.JavaMetaMethod

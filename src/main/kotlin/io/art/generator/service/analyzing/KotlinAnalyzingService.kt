@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package io.art.generator.service
+package io.art.generator.service.analyzing
 
 import io.art.core.matcher.PathMatcher.matches
 import io.art.generator.configuration.SourceConfiguration

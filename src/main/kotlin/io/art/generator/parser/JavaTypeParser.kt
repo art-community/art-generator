@@ -1,7 +1,10 @@
+@file:Suppress(JAVA_MODULE_SUPPRESSION)
+
 package io.art.generator.parser
 
 import com.sun.tools.javac.code.Type
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind
 import javax.lang.model.type.TypeMirror
