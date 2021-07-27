@@ -52,13 +52,7 @@ private class KotlinAnalyzingService : KotlinDescriptorParser() {
     fun analyzeKotlinSources(request: KotlinAnalyzingRequest): List<KotlinMetaClass> {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
 
-        val roots = request.configuration.sources
-                .filter { source ->
-                    source.toFile().exists() && source.toFile()
-                            .walkTopDown()
-                            .all { file -> file.isDirectory || file.isKotlin }
-                }
-                .toSet()
+        val roots = request.configuration.sources.toSet()
 
         val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(roots, request.configuration.classpath), KotlinToJVMBytecodeCompiler::analyze)
                 ?.apply { ignoreException(this::throwIfError, KOTLIN_LOGGER::error) }
