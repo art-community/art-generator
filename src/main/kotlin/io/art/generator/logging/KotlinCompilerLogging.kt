@@ -21,16 +21,26 @@ package io.art.generator.logging
 import io.art.generator.constants.KOTLIN_LOGGER
 import io.art.logging.logger.Logger
 import io.art.logging.stream.LoggerPrintStream
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer.WITHOUT_PATHS
-import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import java.io.PrintStream
 
 
 class LoggingMessageCollector(
         private val logger: Logger = KOTLIN_LOGGER,
         private val stream: PrintStream = LoggerPrintStream(logger, Logger::info),
-        private val printer: MessageCollector = PrintingMessageCollector(stream, WITHOUT_PATHS, true),
+        private val printer: MessageCollector = object : MessageCollector {
+            override fun clear() {}
+
+            // Important! This function used by Kotlin Compiler for checking analyzing status.
+            // In case of hasErrors() == true analyze result will be null and we will not be able to continue generation
+            override fun hasErrors(): Boolean = false
+
+            override fun report(severity: CompilerMessageSeverity, message: String, location: CompilerMessageSourceLocation?) =
+                    stream.println(WITHOUT_PATHS.render(severity, message, location))
+        },
 ) : MessageCollector by printer
 
 val loggingMessageCollector = LoggingMessageCollector()
