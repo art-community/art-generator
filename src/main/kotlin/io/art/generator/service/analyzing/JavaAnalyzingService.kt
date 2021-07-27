@@ -40,7 +40,7 @@ data class JavaAnalyzingRequest(
         val metaClassName: String,
 )
 
-fun analyzeJavaSources(request: JavaAnalyzingRequest) = JavaAnalyzingService().analyzeJavaSources(request)
+fun analyzeJavaSources(request: JavaAnalyzingRequest) = io.art.generator.service.analyzing.JavaAnalyzingService().analyzeJavaSources(request)
 
 private class JavaAnalyzingService : JavaSymbolParser() {
     fun analyzeJavaSources(request: JavaAnalyzingRequest): List<JavaMetaClass> {
@@ -51,13 +51,7 @@ private class JavaAnalyzingService : JavaSymbolParser() {
                     .asSequence()
                     .filter { input -> input.kind.isClass || input.kind.isInterface || input.kind == ENUM }
                     .map { element -> (element as ClassSymbol) }
-                    .filter { symbol ->
-                        symbol.sourcefile.kind == SOURCE && get(symbol.sourcefile.name).let { path ->
-                            path.startsWith(request.configuration.root)
-                                    && request.configuration.exclusions.none { exclusion -> matches(exclusion, path) }
-                                    && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion, path) })
-                        }
-                    }
+                    .filter { symbol -> symbol.included(request) }
                     .filter { symbol -> symbol.className() != request.metaClassName }
                     .filter { symbol -> symbol.typeParameters.isEmpty() }
                     .map { symbol -> symbol.asMetaClass() }
@@ -66,4 +60,11 @@ private class JavaAnalyzingService : JavaSymbolParser() {
                     .apply { JAVA_LOGGER.info(ANALYZE_COMPLETED(map { metaClass -> metaClass.type.typeName })) }
         }
     }
+
+    private fun ClassSymbol.included(request: JavaAnalyzingRequest) =
+            sourcefile.kind == SOURCE && get(sourcefile.name).let { path ->
+                path.startsWith(request.configuration.root)
+                        && request.configuration.exclusions.none { exclusion -> matches(exclusion, path) }
+                        && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion, path) })
+            }
 }
