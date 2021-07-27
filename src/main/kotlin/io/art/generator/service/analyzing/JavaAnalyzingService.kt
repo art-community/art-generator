@@ -40,7 +40,7 @@ data class JavaAnalyzingRequest(
         val metaClassName: String,
 )
 
-fun analyzeJavaSources(request: JavaAnalyzingRequest) = io.art.generator.service.analyzing.JavaAnalyzingService().analyzeJavaSources(request)
+fun analyzeJavaSources(request: JavaAnalyzingRequest) = JavaAnalyzingService().analyzeJavaSources(request)
 
 private class JavaAnalyzingService : JavaSymbolParser() {
     fun analyzeJavaSources(request: JavaAnalyzingRequest): List<JavaMetaClass> {
