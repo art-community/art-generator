@@ -18,48 +18,27 @@
 
 package io.art.generator.service
 
-import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.core.matcher.PathMatcher.matches
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.KOTLIN_LOGGER
 import io.art.generator.extension.metaPackage
-import io.art.generator.model.*
-import io.art.generator.model.KotlinMetaPropertyFunctionKind.GETTER
-import io.art.generator.model.KotlinMetaPropertyFunctionKind.SETTER
-import io.art.generator.model.KotlinMetaTypeKind.*
+import io.art.generator.model.KotlinMetaClass
+import io.art.generator.parser.KotlinDescriptorParser
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import org.jetbrains.kotlin.analyzer.AnalysisResult
-import org.jetbrains.kotlin.backend.common.descriptors.isSuspend
-import org.jetbrains.kotlin.builtins.KotlinBuiltIns.isArray
-import org.jetbrains.kotlin.builtins.functions.FunctionClassDescriptor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
-import org.jetbrains.kotlin.codegen.coroutines.isSuspendLambdaOrLocalFunction
-import org.jetbrains.kotlin.coroutines.isSuspendLambda
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.ClassKind.ANNOTATION_CLASS
 import org.jetbrains.kotlin.descriptors.ClassKind.ENUM_ENTRY
-import org.jetbrains.kotlin.descriptors.FunctionDescriptor
-import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.SourceFile.NO_SOURCE_FILE
-import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.resolve.DescriptorUtils.*
-import org.jetbrains.kotlin.resolve.calls.tower.isSynthesized
-import org.jetbrains.kotlin.resolve.constants.KClassValue
+import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
-import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
-import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
-import org.jetbrains.kotlin.resolve.descriptorUtil.module
 import org.jetbrains.kotlin.resolve.source.KotlinSourceElement
-import org.jetbrains.kotlin.types.*
-import org.jetbrains.kotlin.types.TypeUtils.isNullableType
-import org.jetbrains.kotlin.types.typeUtil.isEnum
 import java.nio.file.Paths.get
-import java.util.Objects.isNull
-import java.util.Objects.nonNull
 
 data class KotlinAnalyzingRequest(
         val configuration: SourceConfiguration,
@@ -68,10 +47,7 @@ data class KotlinAnalyzingRequest(
 
 fun analyzeKotlinSources(request: KotlinAnalyzingRequest) = KotlinAnalyzingService().analyzeKotlinSources(request)
 
-private class KotlinAnalyzingService {
-    private val typeCache = mutableMapOf<KotlinType, KotlinMetaType>()
-    private val descriptorCache = mutableMapOf<ClassDescriptor, KotlinMetaClass>()
-
+private class KotlinAnalyzingService : KotlinDescriptorParser() {
     fun analyzeKotlinSources(request: KotlinAnalyzingRequest): List<KotlinMetaClass> {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
 
@@ -94,14 +70,7 @@ private class KotlinAnalyzingService {
                 .filter { descriptor -> descriptor.source.containingFile != NO_SOURCE_FILE }
                 .filter { descriptor -> !descriptor.source.containingFile.name.isNullOrBlank() }
                 .filter { descriptor -> descriptor.source is KotlinSourceElement }
-                .filter { descriptor ->
-                    get((descriptor.source as KotlinSourceElement).psi.containingKtFile.virtualFilePath)
-                            .let { path ->
-                                path.startsWith(request.configuration.root)
-                                        && request.configuration.exclusions.none { exclusion -> matches(exclusion, path) }
-                                        && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion, path) })
-                            }
-                }
+                .filter { descriptor -> descriptor.included(request) }
                 .filter { descriptor -> descriptor.defaultType.resolved() }
                 .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != request.metaClassName }
                 .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
@@ -115,6 +84,13 @@ private class KotlinAnalyzingService {
                 .toList()
     }
 
+    private fun ClassDescriptor.included(request: KotlinAnalyzingRequest) = get((source as KotlinSourceElement).psi.containingKtFile.virtualFilePath)
+            .let { path ->
+                path.startsWith(request.configuration.root)
+                        && request.configuration.exclusions.none { exclusion -> matches(exclusion, path) }
+                        && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion, path) })
+            }
+
     private fun collectClasses(analysisResult: AnalysisResult, packageName: String): List<ClassDescriptor> {
         val name = FqName(packageName)
         val packageView = analysisResult.moduleDescriptor.getPackage(name).memberScope
@@ -125,236 +101,4 @@ private class KotlinAnalyzingService {
                 .getSubPackagesOf(name) { true }
                 .flatMap { nested -> collectClasses(analysisResult, nested.asString()) }
     }
-
-    private fun KotlinType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = putIfAbsent(typeCache, this) {
-        when (this) {
-            is SimpleType -> asMetaType(variance)
-            is FlexibleType -> asMetaType(variance)
-            is DeferredType -> asMetaType(variance)
-            else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
-        }
-    }
-
-    private fun SimpleType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = when {
-        isEnum() -> {
-            val classId = constructor.declarationDescriptor?.classId!!
-            KotlinMetaType(
-                    originalType = this,
-                    kind = ENUM_KIND,
-                    classFullName = classId.asSingleFqName().asString(),
-                    className = classId.relativeClassName.pathSegments().last().asString(),
-                    classPackageName = classId.packageFqName.asString(),
-                    typeName = classId.asSingleFqName().asString(),
-                    nullable = isNullableType(this),
-            )
-        }
-
-        isArray(this) -> KotlinMetaType(
-                originalType = this,
-                kind = ARRAY_KIND,
-                arrayComponentType = constructor.builtIns.getArrayElementType(this).asMetaType(),
-                typeName = toString(),
-                nullable = isNullableType(this)
-        )
-
-        constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(typeCache, this) {
-            KotlinMetaType(
-                    originalType = this,
-                    kind = FUNCTION_KIND,
-                    nullable = isNullableType(this),
-                    typeName = toString(),
-                    lambdaResultType = arguments
-                            .takeLast(1)
-                            .firstOrNull()
-                            ?.asMetaType(),
-                    typeVariance = variance
-            )
-        }.apply {
-            if (lambdaArgumentTypes.isNotEmpty()) return@apply
-            arguments
-                    .dropLast(1)
-                    .asSequence()
-                    .map { projection -> typeCache.getOrElse(projection.type) { projection.asMetaType() } }
-                    .forEach(lambdaArgumentTypes::add)
-        }
-
-        constructor.declarationDescriptor is ClassDescriptor -> {
-            val classId = constructor.declarationDescriptor?.classId!!
-            putIfAbsent(typeCache, this) {
-                KotlinMetaType(
-                        originalType = this,
-                        kind = CLASS_KIND,
-                        classFullName = classId.asSingleFqName().asString(),
-                        className = classId.relativeClassName.pathSegments().last().asString(),
-                        classPackageName = classId.packageFqName.asString(),
-                        typeName = classId.asSingleFqName().asString(),
-                        typeVariance = variance,
-                        nullable = isNullableType(this),
-                )
-            }.apply {
-                if (typeParameters.isNotEmpty()) return@apply
-                arguments
-                        .asSequence()
-                        .map { projection -> typeCache.getOrElse(projection.type) { projection.asMetaType() } }
-                        .forEach(typeParameters::add)
-            }
-        }
-
-        else -> KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
-    }
-
-    private fun FlexibleType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType {
-        return delegate.asMetaType(variance)
-    }
-
-    private fun DeferredType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType {
-        return delegate.asMetaType(variance)
-    }
-
-    private fun TypeProjection.asMetaType(): KotlinMetaType {
-        if (isStarProjection) {
-            return KotlinMetaType(
-                    originalType = type,
-                    kind = WILDCARD_KIND,
-                    typeName = toString()
-            )
-        }
-        return type.asMetaType(when (projectionKind) {
-            Variance.INVARIANT -> KotlinTypeVariance.INVARIANT
-            Variance.IN_VARIANCE -> KotlinTypeVariance.IN
-            Variance.OUT_VARIANCE -> KotlinTypeVariance.OUT
-        })
-    }
-
-    private fun KotlinType.resolved(): Boolean = this !is UnresolvedType && arguments.all { argument -> argument.type.resolved() }
-
-    private fun ClassDescriptor.asMetaClass(): KotlinMetaClass {
-        val metaClass = putIfAbsent(descriptorCache, this) {
-            KotlinMetaClass(
-                    type = defaultType.asMetaType(),
-
-                    visibility = visibility,
-
-                    modality = modality,
-
-                    isObject = isObject(this),
-
-                    isInterface = isInterface(this),
-
-                    properties = getAllDescriptors(defaultType.memberScope)
-                            .asSequence()
-                            .filterIsInstance<PropertyDescriptor>()
-                            .filter { descriptor -> descriptor.type.resolved() }
-                            .filter { descriptor -> !descriptor.isSynthesized }
-                            .filter { descriptor -> !descriptor.isSuspend }
-                            .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
-                            .filter { descriptor -> descriptor.typeParameters.isEmpty() }
-                            .filter { descriptor -> isNull(descriptor.extensionReceiverParameter) }
-                            .associate { descriptor -> descriptor.name.toString() to descriptor.asMetaProperty() },
-
-                    constructors = constructors
-                            .asSequence()
-                            .filter { descriptor -> descriptor.returnType.resolved() && descriptor.valueParameters.all { parameter -> parameter.type.resolved() } }
-                            .filter { descriptor -> !descriptor.isSuspendLambdaOrLocalFunction() }
-                            .filter { descriptor -> !descriptor.isSynthesized }
-                            .filter { descriptor -> descriptor.typeParameters.isEmpty() }
-                            .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
-                            .filter { descriptor -> descriptor.typeParameters.isEmpty() }
-                            .map { descriptor -> descriptor.asMetaFunction() }
-                            .toList(),
-
-                    functions = getAllDescriptors(defaultType.memberScope)
-                            .asSequence()
-                            .filterIsInstance<FunctionDescriptor>()
-                            .filter { descriptor -> descriptor.returnType?.resolved() ?: true }
-                            .filter { descriptor -> descriptor.valueParameters.all { parameter -> parameter.type.resolved() } }
-                            .filter { descriptor -> !descriptor.isSuspendLambdaOrLocalFunction() }
-                            .filter { descriptor -> !descriptor.isSynthesized }
-                            .filter { descriptor -> !descriptor.isSuspend }
-                            .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
-                            .filter { descriptor -> descriptor.typeParameters.isEmpty() }
-                            .filter { descriptor -> isNull(descriptor.extensionReceiverParameter) }
-                            .map { descriptor -> descriptor.asMetaFunction() }
-                            .toList(),
-
-
-                    parent = getSuperClassNotAny()
-                            ?.takeIf { descriptor -> descriptor.defaultType.resolved() }
-                            ?.takeIf { descriptor -> descriptor.kind != ENUM_ENTRY }
-                            ?.takeIf { descriptor -> descriptor.kind != ANNOTATION_CLASS }
-                            ?.takeIf { descriptor -> !descriptor.isInner }
-                            ?.takeIf { descriptor -> !descriptor.classId!!.isLocal }
-                            ?.takeIf { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
-                            ?.asMetaClass()
-            )
-        }
-
-        if (metaClass.innerClasses.isEmpty()) {
-            val innerClasses = getAllDescriptors(defaultType.memberScope)
-                    .asSequence()
-                    .filterIsInstance<ClassDescriptor>()
-                    .filter { descriptor -> descriptor.defaultType.resolved() }
-                    .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
-                    .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
-                    .filter { descriptor -> !descriptor.isInner }
-                    .filter { descriptor -> !descriptor.classId!!.isLocal }
-                    .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
-                    .associate { descriptor -> descriptor.name.toString() to descriptorCache.getOrElse(descriptor) { descriptor.asMetaClass() } }
-            metaClass.innerClasses.putAll(innerClasses)
-        }
-
-        if (metaClass.interfaces.isEmpty()) {
-            val interfaces = getSuperInterfaces()
-                    .asSequence()
-                    .filter { descriptor -> descriptor.defaultType.resolved() }
-                    .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
-                    .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
-                    .filter { descriptor -> !descriptor.isInner }
-                    .filter { descriptor -> !descriptor.classId!!.isLocal }
-                    .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
-                    .map { descriptor -> descriptorCache.getOrElse(descriptor) { descriptor.asMetaClass() } }
-                    .toList()
-            metaClass.interfaces.addAll(interfaces)
-        }
-
-        return metaClass
-    }
-
-    private fun FunctionDescriptor.asMetaFunction() = KotlinMetaFunction(
-            name = name.toString(),
-            returnType = returnType?.asMetaType(),
-            parameters = valueParameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
-            visibility = visibility,
-            modality = modality,
-            throws = extractThrows()
-    )
-
-    private fun FunctionDescriptor.extractThrows(): Set<KotlinMetaType> {
-        val annotation = annotations.findAnnotation(FqName(Throws::class.qualifiedName!!)) ?: return emptySet()
-        val values = annotation.allValueArguments.values
-        if (values.isEmpty()) return emptySet()
-        if (values.first() !is List<*>) return emptySet()
-        val classes = values.first() as List<*>
-        return classes
-                .asSequence()
-                .map { value -> value as? KClassValue }
-                .filterNotNull()
-                .map { classValue -> classValue.getArgumentType(this.module).asMetaType() }
-                .toSet()
-    }
-
-    private fun PropertyDescriptor.asMetaProperty() = KotlinMetaProperty(
-            name = name.toString(),
-            type = type.asMetaType(),
-            visibility = visibility,
-            getter = getter?.let { function -> KotlinMetaPropertyFunction(kind = GETTER, visibility = function.visibility) },
-            setter = setter?.let { function -> KotlinMetaPropertyFunction(kind = SETTER, visibility = function.visibility) },
-    )
-
-    private fun ValueParameterDescriptor.asMetaParameter() = KotlinMetaParameter(
-            name = name.toString(),
-            type = type.asMetaType(),
-            visibility = visibility,
-            varargs = nonNull(varargElementType)
-    )
 }

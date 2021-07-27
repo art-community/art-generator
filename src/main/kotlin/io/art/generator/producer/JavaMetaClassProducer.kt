@@ -18,17 +18,18 @@
 
 package io.art.generator.producer
 
-import com.squareup.javapoet.*
+import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.TypeSpec.classBuilder
-import io.art.core.constants.StringConstants.EMPTY_STRING
-import io.art.generator.constants.*
-import io.art.generator.extension.*
+import io.art.generator.constants.JAVA_META_CLASS_CLASS_NAME
+import io.art.generator.extension.asPoetType
+import io.art.generator.extension.couldBeGenerated
+import io.art.generator.extension.extractOwnerClassName
 import io.art.generator.factory.NameFactory
 import io.art.generator.model.JavaMetaClass
-import io.art.generator.model.JavaMetaField
-import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.PRIMITIVE_KIND
 import io.art.generator.templates.*
@@ -76,7 +77,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
             .let(::addMethod)
 }
 
-private fun TypeSpec.Builder.qualifyImports(qualified: MutableSet<JavaMetaClass>, metaClass: JavaMetaClass) {
+internal fun TypeSpec.Builder.qualifyImports(qualified: MutableSet<JavaMetaClass>, metaClass: JavaMetaClass) {
     qualified.add(metaClass)
     qualifyImports(metaClass.type)
     metaClass.constructors.forEach { constructor ->
@@ -98,7 +99,7 @@ private fun TypeSpec.Builder.qualifyImports(qualified: MutableSet<JavaMetaClass>
     metaClass.interfaces.filter { value -> !qualified.contains(value) }.forEach { value -> qualifyImports(qualified, value) }
 }
 
-private fun TypeSpec.Builder.qualifyImports(metaType: JavaMetaType) {
+internal fun TypeSpec.Builder.qualifyImports(metaType: JavaMetaType) {
     if (metaType.kind == PRIMITIVE_KIND) return
     metaType.className?.let { name ->
         alwaysQualify(metaType.extractOwnerClassName())
@@ -108,262 +109,4 @@ private fun TypeSpec.Builder.qualifyImports(metaType: JavaMetaType) {
     metaType.arrayComponentType?.let(::qualifyImports)
     metaType.wildcardExtendsBound?.let(::qualifyImports)
     metaType.wildcardSuperBound?.let(::qualifyImports)
-}
-
-private fun TypeSpec.Builder.generateFields(metaClass: JavaMetaClass) {
-    val parentFields = metaClass.superFields()
-    parentFields.entries.forEach { field -> generateField(field.value, true) }
-    metaClass.fields.entries.filter { field -> !parentFields.containsKey(field.key) }.forEach { field -> generateField(field.value, false) }
-}
-
-private fun TypeSpec.Builder.generateField(field: JavaMetaField, inherited: Boolean) {
-    val fieldTypeName = field.type.asPoetType()
-    val fieldMetaType = ParameterizedTypeName.get(JAVA_META_FIELD_CLASS_NAME, fieldTypeName.box())
-    val fieldName = metaFieldName(field.name)
-    FieldSpec.builder(fieldMetaType, fieldName)
-            .addModifiers(PRIVATE, FINAL)
-            .initializer(javaRegisterMetaFieldStatement(field, inherited))
-            .build()
-            .apply(::addField)
-    methodBuilder(fieldName)
-            .addModifiers(PUBLIC)
-            .returns(fieldMetaType)
-            .addCode(javaReturnStatement(fieldName))
-            .build()
-            .let(::addMethod)
-}
-
-private fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, typeName: TypeName) {
-    val type = metaClass.type
-    metaClass.constructors
-            .filter(JavaMetaMethod::couldBeGenerated)
-            .mapIndexed { index, constructor ->
-                var name = CONSTRUCTOR_NAME
-                if (index > 0) name += "_$index"
-                val constructorClassName = metaConstructorClassName(name)
-                classBuilder(constructorClassName)
-                        .addModifiers(PUBLIC, FINAL, STATIC)
-                        .superclass(ParameterizedTypeName.get(JAVA_META_CONSTRUCTOR_CLASS_NAME, typeName.box()))
-                        .addMethod(constructorBuilder()
-                                .addModifiers(PRIVATE)
-                                .addCode(javaMetaConstructorSuperStatement(type))
-                                .build())
-                        .apply { generateConstructorInvocations(type, constructor) }
-                        .apply { generateParameters(constructor) }
-                        .build()
-                        .apply(::addType)
-                val reference = ClassName.get(EMPTY_STRING, constructorClassName)
-                FieldSpec.builder(reference, name)
-                        .addModifiers(PRIVATE, FINAL)
-                        .initializer(javaRegisterNewStatement(reference))
-                        .build()
-                        .apply(::addField)
-                methodBuilder(name)
-                        .addModifiers(PUBLIC)
-                        .returns(reference)
-                        .addCode(javaReturnStatement(name))
-                        .build()
-                        .let(::addMethod)
-            }
-}
-
-private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, constructor: JavaMetaMethod) {
-    val parameters = constructor.parameters
-    val template = methodBuilder(INVOKE_NAME)
-            .addModifiers(PUBLIC)
-            .addException(JAVA_THROWABLE_CLASS_NAME)
-            .addAnnotation(JAVA_OVERRIDE_CLASS_NAME)
-            .returns(type.asPoetType())
-            .build()
-    template.toBuilder()
-            .addParameter(ArrayTypeName.of(JAVA_OBJECT_CLASS_NAME), ARGUMENTS_NAME)
-            .addCode(javaInvokeConstructorStatement(type, parameters))
-            .build()
-            .apply(::addMethod)
-    when (parameters.size) {
-        0 -> {
-            template.toBuilder()
-                    .addCode(javaInvokeConstructorStatement(type))
-                    .build()
-                    .apply(::addMethod)
-        }
-        1 -> {
-            template.toBuilder()
-                    .addParameter(JAVA_OBJECT_CLASS_NAME, ARGUMENT_NAME)
-                    .addCode(javaInvokeConstructorStatement(type, parameters.values.first()))
-                    .build()
-                    .apply(::addMethod)
-        }
-    }
-}
-
-private fun TypeSpec.Builder.generateMethods(metaClass: JavaMetaClass) {
-    val parentMethods = metaClass.superMethods()
-    val methods = metaClass
-            .methods
-            .asSequence()
-            .filter { method -> parentMethods.none { parent -> parent.withoutModifiers() == method.withoutModifiers() } }
-    (methods + parentMethods)
-            .filter(JavaMetaMethod::couldBeGenerated)
-            .groupBy { method -> method.name }
-            .map { grouped -> grouped.value.forEachIndexed { methodIndex, method -> generateMethod(method, methodIndex, metaClass.type) } }
-}
-
-private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, ownerType: JavaMetaType) {
-    var name = method.name
-    if (index > 0) name += "_$index"
-    val methodName = metaMethodName(name)
-    val methodClassName = javaMetaMethodClassName(name)
-    val returnType = method.returnType
-    val returnTypeName = returnType.asPoetType().box()
-    val static = method.modifiers.contains(STATIC)
-    val parent = when {
-        static -> ParameterizedTypeName.get(JAVA_STATIC_META_METHOD_CLASS_NAME, returnTypeName)
-        else -> ParameterizedTypeName.get(JAVA_INSTANCE_META_METHOD_CLASS_NAME, ownerType.asPoetType(), returnTypeName)
-    }
-    classBuilder(methodClassName)
-            .addModifiers(PUBLIC, FINAL, STATIC)
-            .superclass(parent)
-            .addMethod(constructorBuilder()
-                    .addModifiers(PRIVATE)
-                    .addCode(javaMetaMethodSuperStatement(method.name, returnType))
-                    .build())
-            .apply { generateMethodInvocations(ownerType, method.name, method) }
-            .apply { generateParameters(method) }
-            .build()
-            .apply(::addType)
-    FieldSpec.builder(methodClassName, methodName)
-            .addModifiers(PRIVATE, FINAL)
-            .initializer(javaRegisterNewStatement(methodClassName))
-            .build()
-            .apply(::addField)
-    methodBuilder(methodName)
-            .addModifiers(PUBLIC)
-            .returns(methodClassName)
-            .addCode(javaReturnStatement(methodName))
-            .build()
-            .let(::addMethod)
-}
-
-private fun TypeSpec.Builder.generateMethodInvocations(type: JavaMetaType, name: String, method: JavaMetaMethod) {
-    val static = method.modifiers.contains(STATIC)
-    val parameters = method.parameters
-    val template = methodBuilder(INVOKE_NAME)
-            .addModifiers(PUBLIC)
-            .addAnnotation(JAVA_OVERRIDE_CLASS_NAME)
-            .addException(JAVA_THROWABLE_CLASS_NAME)
-            .returns(JAVA_OBJECT_CLASS_NAME)
-            .apply { if (!static) addParameter(type.asPoetType(), INSTANCE_NAME) }
-            .build()
-    template.toBuilder().apply {
-        val invoke = when {
-            static -> javaInvokeStaticStatement(name, type, parameters)
-            else -> javaInvokeInstanceStatement(name, parameters)
-        }
-        when (method.returnType.typeName == Void.TYPE.typeName) {
-            true -> addLines(invoke, javaReturnNullStatement())
-            false -> addCode(javaReturnStatement(invoke))
-        }
-        addParameter(ArrayTypeName.of(JAVA_OBJECT_CLASS_NAME), ARGUMENTS_NAME)
-        addMethod(build())
-    }
-    when (parameters.size) {
-        0 -> template.toBuilder().apply {
-            val invoke = when {
-                static -> javaInvokeStaticStatement(name, type)
-                else -> javaInvokeInstanceStatement(name)
-            }
-            when (method.returnType.typeName == Void.TYPE.typeName) {
-                true -> addLines(invoke, javaReturnNullStatement())
-                false -> addCode(javaReturnStatement(invoke))
-            }
-            addMethod(build())
-        }
-        1 -> template.toBuilder().apply {
-            addParameter(JAVA_OBJECT_CLASS_NAME, ARGUMENT_NAME)
-            val invoke = when {
-                static -> javaInvokeStaticStatement(name, type, parameters.values.first())
-                else -> javaInvokeInstanceStatement(name, parameters.values.first())
-            }
-            when (method.returnType.typeName == Void.TYPE.typeName) {
-                true -> addLines(invoke, javaReturnNullStatement())
-                false -> addCode(javaReturnStatement(invoke))
-            }
-            addMethod(build())
-        }
-    }
-}
-
-private fun TypeSpec.Builder.generateParameters(method: JavaMetaMethod) {
-    method.parameters.entries.forEachIndexed { parameterIndex, parameter ->
-        val parameterTypeName = parameter.value.type.asPoetType()
-        val metaParameterType = ParameterizedTypeName.get(JAVA_META_PARAMETER_CLASS_NAME, parameterTypeName.box())
-        val parameterName = metaParameterName(parameter.key)
-        FieldSpec.builder(metaParameterType, parameterName)
-                .addModifiers(PRIVATE, FINAL)
-                .initializer(javaRegisterMetaParameterStatement(parameterIndex, parameter.value))
-                .build()
-                .apply(::addField)
-        methodBuilder(parameterName)
-                .addModifiers(PUBLIC)
-                .returns(metaParameterType)
-                .addCode(javaReturnStatement(parameterName))
-                .build()
-                .let(::addMethod)
-    }
-}
-
-private fun TypeSpec.Builder.generateProxy(metaClass: JavaMetaClass) {
-    val proxyClassName = metaProxyClassName(metaClass.type.className!!)
-    val proxyClass = classBuilder(proxyClassName)
-            .addModifiers(PUBLIC)
-            .superclass(JAVA_META_PROXY_CLASS_NAME)
-            .addSuperinterface(metaClass.type.asPoetType())
-            .apply {
-                qualifyImports(mutableSetOf(), metaClass)
-                constructorBuilder()
-                        .addModifiers(PUBLIC)
-                        .addParameter(ParameterSpec.builder(JAVA_MAP_META_METHOD_FUNCTION_TYPE_NAME, INVOCATIONS_NAME).build())
-                        .addStatement(javaProxySuperStatement())
-                        .apply { generateProxyInvocations(metaClass, this) }
-                        .build()
-                        .apply(::addMethod)
-            }
-            .build()
-    addType(proxyClass)
-    addMethod(methodBuilder(PROXY_NAME)
-            .addAnnotation(JAVA_OVERRIDE_CLASS_NAME)
-            .addModifiers(PUBLIC)
-            .returns(JAVA_META_PROXY_CLASS_NAME)
-            .addParameter(ParameterSpec.builder(JAVA_MAP_META_METHOD_FUNCTION_TYPE_NAME, INVOCATIONS_NAME).build())
-            .addStatement(javaReturnNewProxyStatement(ClassName.get(EMPTY_STRING, proxyClassName)))
-            .build())
-
-}
-
-private fun TypeSpec.Builder.generateProxyInvocations(metaClass: JavaMetaClass, constructor: MethodSpec.Builder) {
-    metaClass
-            .methods
-            .asSequence()
-            .filter { method -> method.couldBeGenerated() && !method.modifiers.contains(STATIC) }
-            .groupBy { method -> method.name }
-            .forEach { grouped ->
-                grouped.value.forEachIndexed { methodIndex, method ->
-                    var name = method.name
-                    if (methodIndex > 0) name += "_$methodIndex"
-                    val invocationName = metaProxyInvocationName(name)
-                    addField(FieldSpec.builder(JAVA_FUNCTION_TYPE_NAME, invocationName)
-                            .addModifiers(PRIVATE, FINAL)
-                            .build())
-                    addMethod(methodBuilder(method.name)
-                            .addModifiers(PUBLIC)
-                            .addExceptions(method.throws.map { type -> type.asPoetType() })
-                            .addAnnotation(JAVA_OVERRIDE_CLASS_NAME)
-                            .returns(method.returnType.asUnboxedPoetType())
-                            .addParameters(method.parameters.map { parameter -> ParameterSpec.builder(parameter.value.type.asPoetType(), parameter.key).build() })
-                            .addCode(javaCallInvocationStatement(method, invocationName))
-                            .build())
-                    constructor.addStatement(javaGetInvocationStatement(name))
-                }
-            }
 }

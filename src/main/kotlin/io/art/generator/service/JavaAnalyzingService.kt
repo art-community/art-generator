@@ -20,24 +20,19 @@
 
 package io.art.generator.service
 
-import com.sun.tools.javac.code.Flags.Flag.SYNTHETIC
-import com.sun.tools.javac.code.Flags.asFlagSet
-import com.sun.tools.javac.code.Symbol.*
-import com.sun.tools.javac.code.Type
-import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import com.sun.tools.javac.code.Symbol.ClassSymbol
 import io.art.core.matcher.PathMatcher.matches
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZE_COMPLETED
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.JAVA_LOGGER
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
-import io.art.generator.model.*
-import io.art.generator.model.JavaMetaTypeKind.*
+import io.art.generator.model.JavaMetaClass
+import io.art.generator.parser.JavaSymbolParser
 import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
 import java.nio.file.Paths.get
 import javax.lang.model.element.ElementKind.ENUM
-import javax.lang.model.type.TypeMirror
 import javax.tools.JavaFileObject.Kind.SOURCE
 
 data class JavaAnalyzingRequest(
@@ -47,10 +42,7 @@ data class JavaAnalyzingRequest(
 
 fun analyzeJavaSources(request: JavaAnalyzingRequest) = JavaAnalyzingService().analyzeJavaSources(request)
 
-private class JavaAnalyzingService {
-    private val typeCache = mutableMapOf<TypeMirror, JavaMetaType>()
-    private val symbolCache = mutableMapOf<ClassSymbol, JavaMetaClass>()
-
+private class JavaAnalyzingService : JavaSymbolParser() {
     fun analyzeJavaSources(request: JavaAnalyzingRequest): List<JavaMetaClass> {
         if (!request.configuration.root.toFile().exists()) return emptyList()
         JAVA_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
@@ -74,170 +66,4 @@ private class JavaAnalyzingService {
                     .apply { JAVA_LOGGER.info(ANALYZE_COMPLETED(map { metaClass -> metaClass.type.typeName })) }
         }
     }
-
-    private fun TypeMirror.asMetaType(): JavaMetaType = putIfAbsent(typeCache, this) {
-        when (this) {
-            is Type.ArrayType -> asMetaType()
-
-            is Type.WildcardType -> asMetaType()
-
-            is Type.ClassType -> asMetaType()
-
-            is Type -> when {
-                isPrimitiveOrVoid -> JavaMetaType(
-                        javaOriginalType = this,
-                        kind = PRIMITIVE_KIND,
-                        typeName = tsym.qualifiedName.toString()
-                )
-                else -> JavaMetaType(
-                        javaOriginalType = this,
-                        kind = UNKNOWN_KIND,
-                        typeName = tsym?.qualifiedName?.toString() ?: toString()
-                )
-            }
-
-            else -> JavaMetaType(javaOriginalType = this, kind = UNKNOWN_KIND, typeName = toString())
-        }
-    }
-
-    private fun Type.ClassType.asMetaType(): JavaMetaType {
-        val type = putIfAbsent(typeCache, this) {
-            JavaMetaType(
-                    javaOriginalType = this,
-                    classFullName = tsym.qualifiedName.toString(),
-                    kind = when {
-                        !asElement().isEnum -> CLASS_KIND
-                        asElement().isEnum -> ENUM_KIND
-                        else -> UNKNOWN_KIND
-                    },
-                    typeName = tsym.qualifiedName.toString(),
-                    className = tsym.simpleName.toString(),
-                    classPackageName = tsym.packge().qualifiedName.toString()
-            )
-        }
-        if (type.typeParameters.isEmpty()) {
-            val newArguments = typeArguments
-                    .asSequence()
-                    .map { argument -> typeCache.getOrElse(argument) { argument.asMetaType() } }
-            type.typeParameters.addAll(newArguments)
-        }
-        return type
-    }
-
-    private fun Type.ArrayType.asMetaType(): JavaMetaType = putIfAbsent(typeCache, this) {
-        JavaMetaType(
-                javaOriginalType = this,
-                kind = ARRAY_KIND,
-                typeName = tsym.qualifiedName.toString(),
-                arrayComponentType = componentType.asMetaType()
-        )
-    }
-
-    private fun Type.WildcardType.asMetaType(): JavaMetaType = putIfAbsent(typeCache, this) {
-        JavaMetaType(
-                javaOriginalType = this,
-                kind = WILDCARD_KIND,
-                typeName = type.toString(),
-                wildcardSuperBound = superBound?.asMetaType(),
-                wildcardExtendsBound = extendsBound?.asMetaType()
-        )
-    }
-
-    private fun ClassSymbol.asMetaClass(): JavaMetaClass {
-        val metaClass = putIfAbsent(symbolCache, this) {
-            JavaMetaClass(
-                    type = type.asMetaType(),
-
-                    modifiers = modifiers,
-
-                    isInterface = isInterface,
-
-                    fields = members()
-                            .symbols
-                            .reversed()
-                            .asSequence()
-                            .filterIsInstance<VarSymbol>()
-                            .filter { field -> !asFlagSet(field.flags()).contains(SYNTHETIC) }
-                            .associate { symbol -> symbol.name.toString() to symbol.asMetaField() },
-
-                    constructors = members()
-                            .symbols
-                            .reversed()
-                            .asSequence()
-                            .filterIsInstance<MethodSymbol>()
-                            .filter { method -> method.isConstructor }
-                            .filter { method -> !method.isLambdaMethod }
-                            .filter { method -> !method.isDynamic }
-                            .filter { method -> !asFlagSet(method.flags()).contains(SYNTHETIC) }
-                            .filter { method -> method.typeParameters.isEmpty() }
-                            .map { method -> method.asMetaMethod() }
-                            .toList(),
-
-                    methods = members()
-                            .symbols
-                            .reversed()
-                            .asSequence()
-                            .filterIsInstance<MethodSymbol>()
-                            .filter { method -> !method.isConstructor }
-                            .filter { method -> !method.isLambdaMethod }
-                            .filter { method -> !method.isDynamic }
-                            .filter { method -> !asFlagSet(method.flags()).contains(SYNTHETIC) }
-                            .filter { method -> method.typeParameters.isEmpty() }
-                            .map { method -> method.asMetaMethod() }
-                            .toList(),
-
-                    parent = superclass
-                            ?.let { superclass.tsym as? ClassSymbol }
-                            ?.takeIf { superclass.tsym?.qualifiedName.toString() != Object::class.java.name }
-                            ?.takeIf { symbol -> symbol.typeParameters.isEmpty() }
-                            ?.asMetaClass()
-            )
-        }
-
-        if (metaClass.innerClasses.isEmpty()) {
-            val innerClasses = members()
-                    .symbols
-                    .asSequence()
-                    .filterIsInstance<ClassSymbol>()
-                    .filter { inner -> !asFlagSet(inner.flags()).contains(SYNTHETIC) }
-                    .filter { symbol -> symbol.typeParameters.isEmpty() }
-                    .associate { symbol -> symbol.name.toString() to symbolCache.getOrElse(symbol) { symbol.asMetaClass() } }
-
-            metaClass.innerClasses.putAll(innerClasses)
-        }
-
-        if (metaClass.interfaces.isEmpty()) {
-            val interfaces = interfaces
-                    .asSequence()
-                    .map { interfaceType -> interfaceType.tsym }
-                    .filterIsInstance<ClassSymbol>()
-                    .filter { symbol -> !asFlagSet(symbol.flags()).contains(SYNTHETIC) }
-                    .filter { symbol -> symbol.typeParameters.isEmpty() }
-                    .map { symbol -> symbolCache.getOrElse(symbol) { symbol.asMetaClass() } }
-                    .toList()
-            metaClass.interfaces.addAll(interfaces)
-        }
-
-        return metaClass
-    }
-
-    private fun MethodSymbol.asMetaMethod() = JavaMetaMethod(
-            name = name.toString(),
-            modifiers = modifiers,
-            returnType = returnType.asMetaType(),
-            throws = thrownTypes.map { type -> type.asMetaType() }.toSet(),
-            parameters = parameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
-    )
-
-    private fun VarSymbol.asMetaField() = JavaMetaField(
-            name = name.toString(),
-            modifiers = modifiers,
-            type = type.asMetaType()
-    )
-
-    private fun VarSymbol.asMetaParameter() = JavaMetaParameter(
-            name = name.toString(),
-            modifiers = modifiers,
-            type = type.asMetaType()
-    )
 }
