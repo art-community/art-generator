@@ -19,6 +19,7 @@
 package io.art.generator.service.analyzing
 
 import io.art.core.matcher.PathMatcher.matches
+import io.art.core.wrapper.ExceptionWrapper.ignoreException
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.KOTLIN_LOGGER
@@ -61,6 +62,7 @@ private class KotlinAnalyzingService : KotlinDescriptorParser() {
 
         val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(roots, request.configuration.classpath), KotlinToJVMBytecodeCompiler::analyze)
                 ?.takeIf { result -> !result.isError() }
+                ?.apply { ignoreException(this::throwIfError, KOTLIN_LOGGER::error) }
                 ?: return emptyList()
 
         return request.configuration.root.toFile().listFiles()!!
