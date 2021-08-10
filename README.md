@@ -1,5 +1,18 @@
 # ART Code Generator
 
+## Бейджики
+[![ART Generator Main](https://github.com/art-community/art-generator/actions/workflows/push-main.yml/badge.svg)](https://github.com/art-community/art-generator/actions/workflows/push-main.yml)
+![GitHub repo size](https://img.shields.io/github/repo-size/art-community/art-generator)
+
+## Требования
+- Java 11+
+- Gradle 7+
+
+## Фидбек
+Баги и пожелания можете оставить на GitHub [Github Issues](https://github.com/art-community/art-generator/issues).
+
+Наша Телега: https://t.me/art_github
+
 ## Зачем ?
 
 Основная серверная платформа для ART решений - JVM.
