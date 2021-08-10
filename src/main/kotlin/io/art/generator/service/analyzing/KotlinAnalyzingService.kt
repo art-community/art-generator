@@ -23,7 +23,7 @@ import io.art.core.wrapper.ExceptionWrapper.ignoreException
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.KOTLIN_LOGGER
-import io.art.generator.extension.isKotlin
+import io.art.generator.extension.kotlinPath
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.parser.KotlinDescriptorParser
 import io.art.generator.provider.KotlinCompilerConfiguration
@@ -82,8 +82,8 @@ private class KotlinAnalyzingService : KotlinDescriptorParser() {
     private fun ClassDescriptor.included(request: KotlinAnalyzingRequest) = get((source as KotlinSourceElement).psi.containingKtFile.virtualFilePath)
             .let { path ->
                 path.startsWith(request.configuration.root)
-                        && request.configuration.exclusions.none { exclusion -> matches(exclusion, path) }
-                        && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion, path) })
+                        && request.configuration.exclusions.none { exclusion -> matches(exclusion.kotlinPath, path) }
+                        && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion.kotlinPath, path) })
             }
 
     private fun collectClasses(analysisResult: AnalysisResult, packageName: String): List<ClassDescriptor> {

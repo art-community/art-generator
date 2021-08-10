@@ -25,7 +25,6 @@ import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.*
 import java.io.File
-import java.io.File.pathSeparator
 import java.io.File.separator
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -70,3 +69,9 @@ val SourceConfiguration.metaPackage: String
 
 val SourceConfiguration.metaPath: Path
     get() = root.resolve(metaPackage.replace(DOT, separator))
+
+val String.javaPath
+    get() = replace(ESCAPED_DOT, separator) + DOT + JAVA
+
+val String.kotlinPath
+    get() = replace(ESCAPED_DOT, separator) + DOT + KOTLIN_EXTENSION
