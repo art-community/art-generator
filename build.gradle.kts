@@ -89,8 +89,12 @@ generator {
 executable {
     jar {
         configureRun {
+            val configurationPath = generator.mainConfiguration.workingDirectory
+                    .resolve("module.yml")
+                    .toFile()
+                    .absolutePath
             dependsOn(WRITE_CONFIGURATION_TASK)
-            jvmArgs("-Dconfiguration=${generator.mainConfiguration.workingDirectory.resolve("module.yml").toFile().absolutePath}")
+            jvmArgs("-Dconfiguration=$configurationPath")
         }
     }
     main("io.art.generator.Generator")
@@ -105,10 +109,14 @@ afterEvaluate {
 }
 
 tasks.test {
+    val configurationPath = generator.mainConfiguration.workingDirectory
+            .resolve("module.yml")
+            .toFile()
+            .absolutePath
     dependsOn(BUILD_EXECUTABLE_JAR_TASK)
     dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
     jvmArgs("-Xms2g", "-Xmx2g")
-    jvmArgs("-Dconfiguration=${generator.mainConfiguration.workingDirectory.resolve("module.yml").toFile().absolutePath}")
+    jvmArgs("-Dconfiguration=$configurationPath")
     jvmArgs("-Djar=${buildDir.resolve("executable").resolve("art-generator.jar").absolutePath}")
 }
