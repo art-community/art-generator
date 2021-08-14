@@ -67,11 +67,9 @@ fun KotlinMetaType.asPoetType(): TypeName {
 fun KotlinMetaType.extractClass(): TypeName = when (kind) {
     ARRAY_KIND -> ARRAY
 
-    CLASS_KIND, ENUM_KIND -> asClassName()
+    FUNCTION_KIND, CLASS_KIND, ENUM_KIND -> asClassName()
 
     WILDCARD_KIND -> ANY
-
-    FUNCTION_KIND -> ClassName.bestGuess(typeName)
 
     UNKNOWN_KIND -> STAR
 }
