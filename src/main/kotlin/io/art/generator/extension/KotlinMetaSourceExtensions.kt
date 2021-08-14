@@ -23,6 +23,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.WildcardTypeName.Companion.consumerOf
 import com.squareup.kotlinpoet.WildcardTypeName.Companion.producerOf
 import io.art.core.constants.StringConstants.DOT
+import io.art.generator.constants.KOTLIN
 import io.art.generator.constants.META_METHOD_EXCLUSIONS
 import io.art.generator.exception.MetaGeneratorException
 import io.art.generator.model.*
@@ -67,9 +68,11 @@ fun KotlinMetaType.asPoetType(): TypeName {
 fun KotlinMetaType.extractClass(): TypeName = when (kind) {
     ARRAY_KIND -> ARRAY
 
-    FUNCTION_KIND, CLASS_KIND, ENUM_KIND -> asClassName()
+    CLASS_KIND, ENUM_KIND -> asClassName()
 
     WILDCARD_KIND -> ANY
+
+    FUNCTION_KIND -> ClassName(KOTLIN, typeName)
 
     UNKNOWN_KIND -> STAR
 }
