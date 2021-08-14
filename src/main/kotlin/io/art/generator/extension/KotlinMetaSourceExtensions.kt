@@ -71,10 +71,7 @@ fun KotlinMetaType.extractClass(): TypeName = when (kind) {
 
     WILDCARD_KIND -> ANY
 
-    FUNCTION_KIND -> LambdaTypeName.get(
-            parameters = lambdaArgumentTypes.map { argument -> argument.extractClass() }.toTypedArray(),
-            returnType = lambdaResultType?.extractClass() ?: UNIT
-    )
+    FUNCTION_KIND -> ClassName.bestGuess(typeName)
 
     UNKNOWN_KIND -> STAR
 }

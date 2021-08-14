@@ -1,9 +1,9 @@
 package io.art.generator.parser
 
-import io.art.core.extensions.CollectionExtensions.*
+import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.model.KotlinMetaTypeKind
-import io.art.generator.model.KotlinMetaTypeKind.UNKNOWN_KIND
+import io.art.generator.model.KotlinMetaTypeKind.*
 import io.art.generator.model.KotlinTypeVariance
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.builtins.functions.FunctionClassDescriptor
@@ -31,7 +31,7 @@ open class KotlinTypeParser {
             val classId = constructor.declarationDescriptor?.classId!!
             KotlinMetaType(
                     originalType = this,
-                    kind = KotlinMetaTypeKind.ENUM_KIND,
+                    kind = ENUM_KIND,
                     classFullName = classId.asSingleFqName().asString(),
                     className = classId.relativeClassName.pathSegments().last().asString(),
                     classPackageName = classId.packageFqName.asString(),
@@ -42,7 +42,7 @@ open class KotlinTypeParser {
 
         KotlinBuiltIns.isArray(this) -> KotlinMetaType(
                 originalType = this,
-                kind = KotlinMetaTypeKind.ARRAY_KIND,
+                kind = ARRAY_KIND,
                 arrayComponentType = constructor.builtIns.getArrayElementType(this).asMetaType(),
                 typeName = toString(),
                 nullable = TypeUtils.isNullableType(this)
@@ -51,9 +51,9 @@ open class KotlinTypeParser {
         constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(typeCache, this) {
             KotlinMetaType(
                     originalType = this,
-                    kind = KotlinMetaTypeKind.FUNCTION_KIND,
+                    kind = FUNCTION_KIND,
                     nullable = TypeUtils.isNullableType(this),
-                    typeName = toString(),
+                    typeName = constructor.declarationDescriptor!!.name.asString(),
                     lambdaResultType = arguments
                             .takeLast(1)
                             .firstOrNull()
@@ -74,7 +74,7 @@ open class KotlinTypeParser {
             putIfAbsent(typeCache, this) {
                 KotlinMetaType(
                         originalType = this,
-                        kind = KotlinMetaTypeKind.CLASS_KIND,
+                        kind = CLASS_KIND,
                         classFullName = classId.asSingleFqName().asString(),
                         className = classId.relativeClassName.pathSegments().last().asString(),
                         classPackageName = classId.packageFqName.asString(),
@@ -106,7 +106,7 @@ open class KotlinTypeParser {
         if (isStarProjection) {
             return KotlinMetaType(
                     originalType = type,
-                    kind = KotlinMetaTypeKind.WILDCARD_KIND,
+                    kind = WILDCARD_KIND,
                     typeName = toString()
             )
         }
