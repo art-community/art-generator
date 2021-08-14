@@ -21,8 +21,8 @@ package io.art.generator.constants
 import io.art.core.constants.StringConstants.NEW_LINE
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.KotlinMetaClass
+import io.art.logging.Logging.logger
 import io.art.logging.logger.Logger
-import io.art.logging.module.LoggingModule.logger
 import java.nio.file.Path
 
 fun Sequence<JavaMetaClass>.javaClassNames() = map { source -> source.type.classFullName!! }.toList()

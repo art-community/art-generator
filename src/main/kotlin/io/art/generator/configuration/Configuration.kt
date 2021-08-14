@@ -18,7 +18,7 @@
 
 package io.art.generator.configuration
 
-import io.art.configurator.module.ConfiguratorModule.configuration
+import io.art.configurator.Configuring.configuration
 import io.art.core.constants.StringConstants.COLON
 import io.art.core.constants.StringConstants.SEMICOLON
 import io.art.core.determiner.SystemDeterminer.isWindows

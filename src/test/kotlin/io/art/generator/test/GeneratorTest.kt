@@ -40,7 +40,7 @@ import io.art.generator.service.common.initialize
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.launcher.Activator
 import io.art.launcher.TestingLauncher.testing
-import io.art.logging.module.LoggingModule.logger
+import io.art.logging.Logging.logger
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
