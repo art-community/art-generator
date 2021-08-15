@@ -29,17 +29,18 @@ dependencies {
     val junitVersion: String by project
     val javaPoetVersion: String by project
     val kotlinPoetVersion: String by project
+    val artKotlinVersion: String by project
 
     embedded(kotlin("stdlib-jdk8"))
     embedded(kotlin("compiler-embeddable"))
     embedded(kotlin("reflect"))
 
-    embedded("io.art.kotlin:core:main")
-    embedded("io.art.kotlin:launcher:main")
-    embedded("io.art.kotlin:configurator:main")
-    embedded("io.art.kotlin:scheduler:main")
-    embedded("io.art.kotlin:logging:main")
-    embedded("io.art.kotlin:meta:main")
+    embedded("io.art.kotlin:core:$artKotlinVersion")
+    embedded("io.art.kotlin:launcher:$artKotlinVersion")
+    embedded("io.art.kotlin:configurator:$artKotlinVersion")
+    embedded("io.art.kotlin:scheduler:$artKotlinVersion")
+    embedded("io.art.kotlin:logging:$artKotlinVersion")
+    embedded("io.art.kotlin:meta:$artKotlinVersion")
 
     embedded("org.projectlombok", "lombok", lombokVersion)
     embedded("com.squareup", "javapoet", javaPoetVersion)
@@ -49,12 +50,12 @@ dependencies {
     testImplementation(kotlin("compiler-embeddable"))
     testImplementation(kotlin("reflect"))
 
-    testImplementation("io.art.kotlin:core:main")
-    testImplementation("io.art.kotlin:launcher:main")
-    testImplementation("io.art.kotlin:configurator:main")
-    testImplementation("io.art.kotlin:scheduler:main")
-    testImplementation("io.art.kotlin:logging:main")
-    testImplementation("io.art.kotlin:meta:main")
+    testImplementation("io.art.kotlin:core:$artKotlinVersion")
+    testImplementation("io.art.kotlin:launcher:$artKotlinVersion")
+    testImplementation("io.art.kotlin:configurator:$artKotlinVersion")
+    testImplementation("io.art.kotlin:scheduler:$artKotlinVersion")
+    testImplementation("io.art.kotlin:logging:$artKotlinVersion")
+    testImplementation("io.art.kotlin:meta:$artKotlinVersion")
 
     testCompileOnly("org.projectlombok", "lombok", lombokVersion)
     annotationProcessor("org.projectlombok", "lombok", lombokVersion)
