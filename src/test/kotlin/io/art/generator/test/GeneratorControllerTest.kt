@@ -25,8 +25,10 @@ import io.art.core.waiter.Waiter.waitTime
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.META_NAME
-import io.art.launcher.Activator
-import io.art.launcher.TestingLauncher.testing
+import io.art.launcher.kotlin.configurator
+import io.art.launcher.kotlin.logging
+import io.art.launcher.kotlin.scheduler
+import io.art.launcher.kotlin.testing
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
@@ -43,7 +45,11 @@ import kotlin.io.path.writeText
 class GeneratorControllerTest {
     @BeforeAll
     fun setup() {
-        testing(Activator::kit)
+        testing {
+            configurator()
+            logging()
+            scheduler()
+        }
         reconfigure()
         configuration.sources
                 .map { source -> source.root.resolve(META_NAME).toFile() }
