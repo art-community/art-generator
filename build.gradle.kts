@@ -1,4 +1,4 @@
-import io.art.gradle.common.constants.BUILD_EXECUTABLE_JAR_TASK
+import io.art.gradle.common.constants.BUILD_JAR_EXECUTABLE_TASK
 import io.art.gradle.common.constants.WRITE_CONFIGURATION_TASK
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -112,7 +112,7 @@ tasks.test {
             .resolve("module.yml")
             .toFile()
             .absolutePath
-    dependsOn(BUILD_EXECUTABLE_JAR_TASK)
+    dependsOn(BUILD_JAR_EXECUTABLE_TASK)
     dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
     jvmArgs("-Xms2g", "-Xmx2g")
