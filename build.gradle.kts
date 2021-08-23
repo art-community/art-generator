@@ -100,11 +100,11 @@ executable {
 }
 
 tasks.build {
-    dependsOn("build-executable-jar")
+    dependsOn("build-jar-executable")
 }
 
 afterEvaluate {
-    tasks.findByName("publish")?.dependsOn("build-executable-jar")
+    tasks.findByName("publish")?.dependsOn("build-jar-executable")
 }
 
 tasks.test {
