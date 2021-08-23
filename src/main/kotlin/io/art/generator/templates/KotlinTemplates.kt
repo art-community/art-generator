@@ -184,6 +184,14 @@ private fun metaTypeBlock(type: KotlinMetaType, vararg parameters: KotlinMetaTyp
         }
         .join(")")
 
+private fun metaFunctionTypeBlock(type: KotlinMetaType): CodeBlock = "$META_TYPE_METHOD_NAME<%T>(%T::class.java"
+        .asCode(type.asPoetType(), type.extractClass())
+        .let { block ->
+            val arguments = type.lambdaArgumentTypes.map(::metaTypeStatement) + (type.lambdaResultType?.let(::metaTypeStatement) ?: "%T".asCode(UNIT))
+            block.joinByComma(*arguments.toTypedArray())
+        }
+        .join(")")
+
 private fun metaAnyTypeBlock(): CodeBlock = "$META_TYPE_METHOD_NAME<%T>(%T::class.java)".asCode(ANY, ANY)
 
 private fun metaArrayBlock(type: KotlinMetaType): CodeBlock = "$META_ARRAY_METHOD_NAME<%T>(%T::class.java, { size: Int -> $ARRAY_OF_NULLS_METHOD<%T>(size) }, "
@@ -210,7 +218,8 @@ private fun metaTypeStatement(type: KotlinMetaType): CodeBlock = when (type.kind
         else -> metaTypeBlock(type, *type.typeParameters.toTypedArray())
     }
     ENUM_KIND -> metaEnumBlock(type)
-    WILDCARD_KIND, FUNCTION_KIND -> metaAnyTypeBlock()
+    WILDCARD_KIND -> metaAnyTypeBlock()
+    FUNCTION_KIND -> metaFunctionTypeBlock(type)
     UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $type")
 }
 

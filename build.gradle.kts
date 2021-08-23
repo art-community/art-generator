@@ -29,18 +29,18 @@ dependencies {
     val junitVersion: String by project
     val javaPoetVersion: String by project
     val kotlinPoetVersion: String by project
+    val artKotlinVersion: String by project
 
     embedded(kotlin("stdlib-jdk8"))
     embedded(kotlin("compiler-embeddable"))
     embedded(kotlin("reflect"))
 
-    embedded("io.art.java:core:main")
-    embedded("io.art.java:launcher:main")
-    embedded("io.art.java:configurator:main")
-    embedded("io.art.java:yaml-configuration:main")
-    embedded("io.art.java:scheduler:main")
-    embedded("io.art.java:logging:main")
-    embedded("io.art.java:meta:main")
+    embedded("io.art.kotlin:core:$artKotlinVersion")
+    embedded("io.art.kotlin:launcher:$artKotlinVersion")
+    embedded("io.art.kotlin:configurator:$artKotlinVersion")
+    embedded("io.art.kotlin:scheduler:$artKotlinVersion")
+    embedded("io.art.kotlin:logging:$artKotlinVersion")
+    embedded("io.art.kotlin:meta:$artKotlinVersion")
 
     embedded("org.projectlombok", "lombok", lombokVersion)
     embedded("com.squareup", "javapoet", javaPoetVersion)
@@ -50,13 +50,12 @@ dependencies {
     testImplementation(kotlin("compiler-embeddable"))
     testImplementation(kotlin("reflect"))
 
-    testImplementation("io.art.java:core:main")
-    testImplementation("io.art.java:launcher:main")
-    testImplementation("io.art.java:configurator:main")
-    testImplementation("io.art.java:yaml-configuration:main")
-    testImplementation("io.art.java:scheduler:main")
-    testImplementation("io.art.java:logging:main")
-    testImplementation("io.art.java:meta:main")
+    testImplementation("io.art.kotlin:core:$artKotlinVersion")
+    testImplementation("io.art.kotlin:launcher:$artKotlinVersion")
+    testImplementation("io.art.kotlin:configurator:$artKotlinVersion")
+    testImplementation("io.art.kotlin:scheduler:$artKotlinVersion")
+    testImplementation("io.art.kotlin:logging:$artKotlinVersion")
+    testImplementation("io.art.kotlin:meta:$artKotlinVersion")
 
     testCompileOnly("org.projectlombok", "lombok", lombokVersion)
     annotationProcessor("org.projectlombok", "lombok", lombokVersion)
@@ -89,26 +88,34 @@ generator {
 executable {
     jar {
         configureRun {
+            val configurationPath = generator.mainConfiguration.workingDirectory
+                    .resolve("module.yml")
+                    .toFile()
+                    .absolutePath
             dependsOn(WRITE_CONFIGURATION_TASK)
-            jvmArgs("-Dconfiguration=${generator.mainConfiguration.workingDirectory.resolve("module.yml").toFile().absolutePath}")
+            jvmArgs("-Dconfiguration=$configurationPath")
         }
     }
     main("io.art.generator.Generator")
 }
 
 tasks.build {
-    dependsOn("build-executable-jar")
+    dependsOn("build-jar-executable")
 }
 
 afterEvaluate {
-    tasks.findByName("publish")?.dependsOn("build-executable-jar")
+    tasks.findByName("publish")?.dependsOn("build-jar-executable")
 }
 
 tasks.test {
+    val configurationPath = generator.mainConfiguration.workingDirectory
+            .resolve("module.yml")
+            .toFile()
+            .absolutePath
     dependsOn(BUILD_JAR_EXECUTABLE_TASK)
     dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
     jvmArgs("-Xms2g", "-Xmx2g")
-    jvmArgs("-Dconfiguration=${generator.mainConfiguration.workingDirectory.resolve("module.yml").toFile().absolutePath}")
+    jvmArgs("-Dconfiguration=$configurationPath")
     jvmArgs("-Djar=${buildDir.resolve("executable").resolve("art-generator.jar").absolutePath}")
 }

@@ -1,6 +1,7 @@
 package io.art.generator.producer;
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.jvm.throws
@@ -30,7 +31,7 @@ internal fun TypeSpec.Builder.generateProperty(property: KotlinMetaProperty, inh
     val propertyMetaType = KOTLIN_META_FIELD_CLASS_NAME.parameterizedBy(propertyTypeName)
     val propertyName = metaFieldName(property.name)
     PropertySpec.builder(propertyName, propertyMetaType)
-            .addModifiers(KModifier.PRIVATE)
+            .addModifiers(PRIVATE)
             .initializer(kotlinRegisterMetaFieldStatement(property, inherited))
             .build()
             .apply(::addProperty)
@@ -59,12 +60,12 @@ private fun TypeSpec.Builder.generateGetter(property: KotlinMetaProperty, ownerC
     TypeSpec.classBuilder(methodClassName)
             .superclass(parent)
             .addFunction(FunSpec.constructorBuilder()
-                    .addModifiers(KModifier.INTERNAL)
+                    .addModifiers(INTERNAL)
                     .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType))
                     .build())
             .apply {
                 FunSpec.builder(INVOKE_NAME)
-                        .addModifiers(KModifier.OVERRIDE)
+                        .addModifiers(OVERRIDE)
                         .throws(THROWABLE)
                         .returns(ANY.copy(nullable = true))
                         .addParameter(INSTANCE_NAME, ownerType)
@@ -72,7 +73,7 @@ private fun TypeSpec.Builder.generateGetter(property: KotlinMetaProperty, ownerC
                         .build()
                         .apply(::addFunction)
                 FunSpec.builder(INVOKE_NAME)
-                        .addModifiers(KModifier.OVERRIDE)
+                        .addModifiers(OVERRIDE)
                         .throws(THROWABLE)
                         .returns(ANY.copy(nullable = true))
                         .addParameter(INSTANCE_NAME, ownerType)
@@ -84,7 +85,7 @@ private fun TypeSpec.Builder.generateGetter(property: KotlinMetaProperty, ownerC
             .build()
             .apply(::addType)
     PropertySpec.builder(methodName, methodClassName)
-            .addModifiers(KModifier.PRIVATE, KModifier.FINAL)
+            .addModifiers(PRIVATE, FINAL)
             .initializer(kotlinRegisterNewStatement(methodClassName))
             .build()
             .apply(::addProperty)
@@ -106,12 +107,12 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
     TypeSpec.classBuilder(methodClassName)
             .superclass(parent)
             .addFunction(FunSpec.constructorBuilder()
-                    .addModifiers(KModifier.INTERNAL)
+                    .addModifiers(INTERNAL)
                     .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType))
                     .build())
             .apply {
                 FunSpec.builder(INVOKE_NAME)
-                        .addModifiers(KModifier.OVERRIDE)
+                        .addModifiers(OVERRIDE)
                         .throws(THROWABLE)
                         .returns(ANY.copy(nullable = true))
                         .addParameter(INSTANCE_NAME, ownerType)
@@ -120,7 +121,7 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
                         .build()
                         .apply(::addFunction)
                 FunSpec.builder(INVOKE_NAME)
-                        .addModifiers(KModifier.OVERRIDE)
+                        .addModifiers(OVERRIDE)
                         .throws(THROWABLE)
                         .returns(ANY.copy(nullable = true))
                         .addParameter(INSTANCE_NAME, ownerType)
@@ -132,7 +133,7 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
             .build()
             .apply(::addType)
     PropertySpec.builder(methodName, methodClassName)
-            .addModifiers(KModifier.PRIVATE, KModifier.FINAL)
+            .addModifiers(PRIVATE, FINAL)
             .initializer(kotlinRegisterNewStatement(methodClassName))
             .build()
             .apply(::addProperty)

@@ -38,9 +38,11 @@ import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import io.art.generator.service.common.SourceWatchingService.watchSources
 import io.art.generator.service.common.initialize
 import io.art.generator.templates.metaModuleClassFullName
-import io.art.launcher.Activator
-import io.art.launcher.TestingLauncher.testing
-import io.art.logging.module.LoggingModule.logger
+import io.art.launcher.kotlin.configurator
+import io.art.launcher.kotlin.logging
+import io.art.launcher.kotlin.scheduler
+import io.art.launcher.kotlin.testing
+import io.art.logging.Logging.logger
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -53,7 +55,11 @@ import kotlin.io.path.name
 @TestInstance(PER_CLASS)
 class GeneratorTest {
     @BeforeAll
-    fun setup() = testing(Activator::kit)
+    fun setup() = testing {
+        configurator()
+        logging()
+        scheduler()
+    }
 
     @BeforeEach
     fun prepare() {

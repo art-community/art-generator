@@ -27,6 +27,7 @@ import io.art.generator.constants.ANALYZE_COMPLETED
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.JAVA_LOGGER
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import io.art.generator.extension.javaPath
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.parser.JavaSymbolParser
 import io.art.generator.provider.JavaCompilerConfiguration
@@ -64,7 +65,7 @@ private class JavaAnalyzingService : JavaSymbolParser() {
     private fun ClassSymbol.included(request: JavaAnalyzingRequest) =
             sourcefile.kind == SOURCE && get(sourcefile.name).let { path ->
                 path.startsWith(request.configuration.root)
-                        && request.configuration.exclusions.none { exclusion -> matches(exclusion, path) }
-                        && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion, path) })
+                        && request.configuration.exclusions.none { exclusion -> matches(exclusion.javaPath, path) }
+                        && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion.javaPath, path) })
             }
 }

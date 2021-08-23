@@ -1,6 +1,7 @@
 package io.art.generator.producer
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.jvm.throws
 import io.art.generator.constants.*
 import io.art.generator.extension.asPoetType
@@ -13,13 +14,13 @@ import org.jetbrains.kotlin.descriptors.Visibilities
 internal fun TypeSpec.Builder.generateProxy(metaClass: KotlinMetaClass) {
     val proxyClassName = metaProxyClassName(metaClass.type.className!!)
     val proxyClass = TypeSpec.classBuilder(proxyClassName)
-            .addModifiers(KModifier.PUBLIC, KModifier.INNER)
+            .addModifiers(PUBLIC, INNER)
             .superclass(KOTLIN_META_PROXY_CLASS_NAME)
             .addSuperinterface(metaClass.type.asPoetType())
             .apply {
                 FunSpec.constructorBuilder()
                         .callSuperConstructor(INVOCATIONS_NAME)
-                        .addModifiers(KModifier.PUBLIC)
+                        .addModifiers(PUBLIC)
                         .addParameter(ParameterSpec.builder(INVOCATIONS_NAME, KOTLIN_MAP_META_METHOD_FUNCTION_TYPE_NAME).build())
                         .apply { generateProxyInvocations(metaClass, this) }
                         .build()
@@ -28,7 +29,7 @@ internal fun TypeSpec.Builder.generateProxy(metaClass: KotlinMetaClass) {
             .build()
     addType(proxyClass)
     addFunction(FunSpec.builder(PROXY_NAME)
-            .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+            .addModifiers(PUBLIC, OVERRIDE)
             .returns(KOTLIN_META_PROXY_CLASS_NAME)
             .addParameter(ParameterSpec.builder(INVOCATIONS_NAME, KOTLIN_MAP_META_METHOD_FUNCTION_TYPE_NAME).build())
             .addCode(kotlinReturnNewProxyStatement(ClassName.bestGuess(proxyClassName)))
@@ -47,10 +48,10 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass
                     if (methodIndex > 0) name += "_$methodIndex"
                     val invocationName = metaProxyInvocationName(name)
                     addProperty(PropertySpec.builder(invocationName, KOTLIN_FUNCTION_TYPE_NAME)
-                            .addModifiers(KModifier.PRIVATE, KModifier.FINAL)
+                            .addModifiers(PRIVATE, FINAL)
                             .build())
                     addFunction(FunSpec.builder(method.name)
-                            .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+                            .addModifiers(PUBLIC, OVERRIDE)
                             .apply {
                                 val throws = method.throws.map { exception -> exception.asPoetType() }
                                 if (throws.isNotEmpty()) throws(throws)
@@ -68,7 +69,7 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass
             .filter { property -> property.visibility.delegate == Visibilities.Public }
             .forEach { property ->
                 addProperty(PropertySpec.builder(property.name, property.type.asPoetType())
-                        .addModifiers(KModifier.FINAL, KModifier.OVERRIDE)
+                        .addModifiers(FINAL, OVERRIDE)
                         .getter(FunSpec.getterBuilder().addCode(kotlinNotImplementedStatement()).build())
                         .build())
             }
