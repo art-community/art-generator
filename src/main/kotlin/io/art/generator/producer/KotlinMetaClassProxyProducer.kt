@@ -8,6 +8,7 @@ import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.templates.*
+import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.descriptors.Visibilities
 
 
@@ -40,7 +41,7 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass
     metaClass
             .functions
             .asSequence()
-            .filter { method -> method.couldBeGenerated() }
+            .filter { method -> method.couldBeGenerated() && method.modality == Modality.ABSTRACT }
             .groupBy { method -> method.name }
             .forEach { grouped ->
                 grouped.value.forEachIndexed { methodIndex, method ->

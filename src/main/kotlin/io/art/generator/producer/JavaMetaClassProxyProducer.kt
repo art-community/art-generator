@@ -12,7 +12,7 @@ import io.art.generator.extension.couldBeGenerated
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.templates.*
 import javax.lang.model.element.Modifier
-import javax.lang.model.element.Modifier.PUBLIC
+import javax.lang.model.element.Modifier.*
 
 
 internal fun TypeSpec.Builder.generateProxy(metaClass: JavaMetaClass) {
@@ -47,7 +47,7 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: JavaMetaClass, 
     metaClass
             .methods
             .asSequence()
-            .filter { method -> method.couldBeGenerated() && !method.modifiers.contains(Modifier.STATIC) }
+            .filter { method -> method.couldBeGenerated() && !method.modifiers.contains(STATIC) && !method.modifiers.contains(DEFAULT) }
             .groupBy { method -> method.name }
             .forEach { grouped ->
                 grouped.value.forEachIndexed { methodIndex, method ->
