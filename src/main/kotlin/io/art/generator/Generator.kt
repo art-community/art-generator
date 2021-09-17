@@ -32,6 +32,7 @@ import io.art.generator.constants.LOCK_VALIDATION_PERIOD
 import io.art.generator.constants.STOPPING_TIMEOUT
 import io.art.generator.service.common.ControllerService.isStopping
 import io.art.generator.service.common.ControllerService.lockIsValid
+import io.art.generator.service.common.ControllerService.locked
 import io.art.generator.service.common.ControllerService.markAvailable
 import io.art.generator.service.common.ControllerService.updateLock
 import io.art.generator.service.common.SourceWatchingService.watchSources
@@ -60,7 +61,7 @@ object Generator {
             }
         }
 
-        if (!lockIsValid()) return
+        if (!lockIsValid() || !locked()) return
 
         scheduleDelayed(LOCK_VALIDATION_PERIOD) {
             if (!isStopping() && active()) {

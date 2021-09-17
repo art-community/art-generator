@@ -25,6 +25,9 @@ import io.art.generator.configuration.configuration
 import io.art.generator.constants.GeneratorState
 import io.art.generator.constants.GeneratorState.*
 import io.art.generator.constants.LOCK_VALIDATION_DURATION
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel.open
+import java.nio.file.StandardOpenOption.*
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.time.LocalDateTime.parse
@@ -55,6 +58,17 @@ object ControllerService {
     fun updateLock() = writeState(ControllerState(LOCKED, now()))
 
     fun markAvailable() = writeState(ControllerState(AVAILABLE))
+
+    fun locked(): Boolean {
+        if (!controllerFileExists()) touchDirectory(configuration.controller.parent)
+        open(configuration.controller, CREATE_NEW, READ, WRITE, SYNC, DSYNC).use { channel ->
+            channel.tryLock().use { lock ->
+                if (!lock.isValid) return false
+                channel.write(ByteBuffer.wrap("${LOCKED}$SHARP${now().format(DEFAULT_FORMATTER)}${SHARP}1".toByteArray()))
+            }
+        }
+        return true
+    }
 
     private fun writeState(state: ControllerState) {
         if (!controllerFileExists()) touchDirectory(configuration.controller.parent)
