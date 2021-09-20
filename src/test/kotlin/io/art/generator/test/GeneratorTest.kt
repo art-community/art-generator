@@ -19,6 +19,7 @@
 
 package io.art.generator.test
 
+import io.art.configurator.module.ConfiguratorActivator.configurator
 import io.art.core.extensions.FileExtensions.recursiveDelete
 import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.configuration.configuration
@@ -38,11 +39,10 @@ import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import io.art.generator.service.common.SourceWatchingService.watchSources
 import io.art.generator.service.common.initialize
 import io.art.generator.templates.metaModuleClassFullName
-import io.art.launcher.kotlin.configurator
-import io.art.launcher.kotlin.logging
-import io.art.launcher.kotlin.scheduler
-import io.art.launcher.kotlin.testing
+import io.art.launcher.kotlin.activator
 import io.art.logging.Logging.logger
+import io.art.logging.module.LoggingActivator.logging
+import io.art.scheduler.module.SchedulerActivator.scheduler
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -55,10 +55,11 @@ import kotlin.io.path.name
 @TestInstance(PER_CLASS)
 class GeneratorTest {
     @BeforeAll
-    fun setup() = testing {
+    fun setup() = activator {
         configurator()
         logging()
         scheduler()
+        launch()
     }
 
     @BeforeEach

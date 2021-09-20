@@ -16,6 +16,7 @@ package io.art.generator.test/*
  * limitations under the License.
  */
 
+import io.art.configurator.module.ConfiguratorActivator.configurator
 import io.art.core.constants.DateTimeConstants.DEFAULT_FORMATTER
 import io.art.core.constants.StringConstants.SHARP
 import io.art.core.context.Context.context
@@ -25,10 +26,9 @@ import io.art.core.waiter.Waiter.waitTime
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.META_NAME
-import io.art.launcher.kotlin.configurator
-import io.art.launcher.kotlin.logging
-import io.art.launcher.kotlin.scheduler
-import io.art.launcher.kotlin.testing
+import io.art.launcher.kotlin.activator
+import io.art.logging.module.LoggingActivator.logging
+import io.art.scheduler.module.SchedulerActivator.scheduler
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
@@ -45,10 +45,11 @@ import kotlin.io.path.writeText
 class GeneratorControllerTest {
     @BeforeAll
     fun setup() {
-        testing {
+        activator {
             configurator()
             logging()
             scheduler()
+            launch()
         }
         reconfigure()
         configuration.sources
