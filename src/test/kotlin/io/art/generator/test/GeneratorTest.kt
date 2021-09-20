@@ -19,7 +19,7 @@
 
 package io.art.generator.test
 
-import io.art.configurator.module.ConfiguratorActivator.configurator
+import io.art.configurator.kotlin.configurator
 import io.art.core.extensions.FileExtensions.recursiveDelete
 import io.art.core.extensions.StringExtensions.capitalize
 import io.art.generator.configuration.configuration
@@ -41,8 +41,8 @@ import io.art.generator.service.common.initialize
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.launcher.kotlin.activator
 import io.art.logging.Logging.logger
-import io.art.logging.module.LoggingActivator.logging
-import io.art.scheduler.module.SchedulerActivator.scheduler
+import io.art.logging.kotlin.logging
+import io.art.scheduler.kotlin.scheduler
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull

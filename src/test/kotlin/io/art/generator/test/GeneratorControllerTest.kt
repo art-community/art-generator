@@ -1,4 +1,4 @@
-package io.art.generator.test/*
+/*
  * ART
  *
  * Copyright 2019-2021 ART
@@ -15,8 +15,9 @@ package io.art.generator.test/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.art.generator.test
 
-import io.art.configurator.module.ConfiguratorActivator.configurator
+import io.art.configurator.kotlin.configurator
 import io.art.core.constants.DateTimeConstants.DEFAULT_FORMATTER
 import io.art.core.constants.StringConstants.SHARP
 import io.art.core.context.Context.context
@@ -27,8 +28,8 @@ import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.META_NAME
 import io.art.launcher.kotlin.activator
-import io.art.logging.module.LoggingActivator.logging
-import io.art.scheduler.module.SchedulerActivator.scheduler
+import io.art.logging.kotlin.logging
+import io.art.scheduler.kotlin.scheduler
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
