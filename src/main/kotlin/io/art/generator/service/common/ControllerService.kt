@@ -61,7 +61,7 @@ object ControllerService {
 
     fun locked(): Boolean {
         if (!controllerFileExists()) touchDirectory(configuration.controller.parent)
-        open(configuration.controller, CREATE_NEW, READ, WRITE, SYNC, DSYNC).use { channel ->
+        open(configuration.controller, CREATE, READ, WRITE, SYNC, DSYNC).use { channel ->
             channel.tryLock().use { lock ->
                 if (!lock.isValid) return false
                 channel.write(ByteBuffer.wrap("${LOCKED}$SHARP${now().format(DEFAULT_FORMATTER)}${SHARP}1".toByteArray()))
