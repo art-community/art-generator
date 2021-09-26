@@ -74,6 +74,7 @@ object KotlinCompilerProvider {
         compilerConfiguration.addKotlinSourceRoots(kotlinCompilerConfiguration.roots.map { root -> root.toFile().absolutePath })
         compilerConfiguration.addJvmClasspathRoots(classpath)
 
-        return action(createForProduction(EMPTY_DISPOSABLE, compilerConfiguration, JVM_CONFIG_FILES))
+        val environment = createForProduction(EMPTY_DISPOSABLE, compilerConfiguration, JVM_CONFIG_FILES)
+        return action(environment).also { environment.project.dispose() }
     }
 }
