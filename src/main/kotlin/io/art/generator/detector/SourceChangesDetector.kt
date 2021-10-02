@@ -29,7 +29,9 @@ import java.nio.file.Path
 data class DetectorKey(val language: GeneratorLanguage, val path: Path)
 
 private val detectors = concurrentMap<DetectorKey, SourceChangesDetector>()
-fun detectChanges(language: GeneratorLanguage, root: Path, sources: Sequence<Path>) = putIfAbsent(detectors, DetectorKey(language, root)) { SourceChangesDetector(root) }.detectChanges(sources)
+fun detectChanges(language: GeneratorLanguage, root: Path, sources: Sequence<Path>) = putIfAbsent(detectors, DetectorKey(language, root)) {
+    SourceChangesDetector(root)
+}.detectChanges(sources)
 
 private class SourceChangesDetector(private val root: Path) {
     private data class Cache(@Volatile var hashes: Map<Path, Long>)
