@@ -65,9 +65,9 @@ class GeneratorControllerTest {
 
     @RepeatedTest(5)
     fun testGeneratorControllerSingleton() {
-        val second = runGenerator()
+        val process = runGenerator()
         var exited = false
-        second.onExit().thenRun { exited = true }
+        process.onExit().thenRun { exited = true }
         waitCondition { exited }
         assertTrue(exited)
     }
