@@ -33,6 +33,7 @@ import io.art.generator.service.common.ControllerService.updateLock
 import io.art.generator.service.common.SourceScanningService.scanSources
 import io.art.generator.service.common.initialize
 import io.art.launcher.Activator.activator
+import io.art.logging.Logging.logger
 import io.art.logging.module.LoggingActivator.logging
 
 object Generator {
@@ -56,6 +57,10 @@ object Generator {
         if (!lockIsValid() || !locked()) return
 
         updateLock()
-        scanSources()
+        try {
+            scanSources()
+        } catch (throwable: Throwable) {
+            logger(Generator::class.java.name).error(throwable)
+        }
     }
 }
