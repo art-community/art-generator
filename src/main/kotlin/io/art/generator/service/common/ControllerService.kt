@@ -38,7 +38,6 @@ import kotlin.io.path.writeText
 private data class ControllerState(
         val state: GeneratorState,
         val timestamp: LocalDateTime? = null,
-        val count: Int = 0,
 )
 
 object ControllerService {
@@ -64,7 +63,7 @@ object ControllerService {
         open(configuration.controller, CREATE, READ, WRITE, SYNC, DSYNC).use { channel ->
             channel.tryLock().use { lock ->
                 if (!lock.isValid) return false
-                channel.write(ByteBuffer.wrap("${LOCKED}$SHARP${now().format(DEFAULT_FORMATTER)}${SHARP}1".toByteArray()))
+                channel.write(ByteBuffer.wrap("${LOCKED}$SHARP${now().format(DEFAULT_FORMATTER)}".toByteArray()))
             }
         }
         return true
@@ -77,7 +76,7 @@ object ControllerService {
             return
         }
         state.timestamp?.let { stamp ->
-            configuration.controller.writeText("${state.state}$SHARP${stamp.format(DEFAULT_FORMATTER)}${SHARP}${state.count}")
+            configuration.controller.writeText("${state.state}$SHARP${stamp.format(DEFAULT_FORMATTER)}")
         }
     }
 
@@ -89,7 +88,6 @@ object ControllerService {
         if (state == AVAILABLE) return ControllerState(state = AVAILABLE)
         if (value.size == 1) return ControllerState(state = state)
         val timestamp = parse(value[1], DEFAULT_FORMATTER)
-        if (value.size == 2) return ControllerState(state = state, timestamp = timestamp)
-        return ControllerState(state = state, timestamp = timestamp, count = value[2].toInt())
+        return ControllerState(state = state, timestamp = timestamp)
     }
 }
