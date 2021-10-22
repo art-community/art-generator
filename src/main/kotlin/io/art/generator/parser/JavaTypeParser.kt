@@ -4,14 +4,13 @@ package io.art.generator.parser
 
 import com.sun.tools.javac.code.Type
 import io.art.core.extensions.CollectionExtensions.checkOrPut
-import io.art.core.factory.MapFactory.concurrentMap
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind
 import javax.lang.model.type.TypeMirror
 
 open class JavaTypeParser {
-    private val typeCache = concurrentMap<TypeMirror, JavaMetaType>()
+    private val typeCache = mutableMapOf<TypeMirror, JavaMetaType>()
 
     internal fun TypeMirror.asMetaType(): JavaMetaType = checkOrPut(typeCache, this) {
         when (this) {
