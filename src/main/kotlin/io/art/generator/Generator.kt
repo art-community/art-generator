@@ -34,7 +34,6 @@ import io.art.generator.service.common.SourceScanningService.scanSources
 import io.art.generator.service.common.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
-import io.art.scheduler.module.SchedulerActivator.scheduler
 
 object Generator {
     @JvmStatic
@@ -43,7 +42,6 @@ object Generator {
                 .main(Generator::class.simpleName)
                 .module(configurator())
                 .module(logging())
-                .module(scheduler())
                 .onUnload(::markAvailable)
                 .launch()
         initialize()

@@ -26,7 +26,6 @@ import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.META_NAME
 import io.art.launcher.kotlin.activator
 import io.art.logging.kotlin.logging
-import io.art.scheduler.kotlin.scheduler
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
@@ -43,7 +42,6 @@ class GeneratorControllerTest {
         activator {
             configurator()
             logging()
-            scheduler()
             launch()
         }
         reconfigure()

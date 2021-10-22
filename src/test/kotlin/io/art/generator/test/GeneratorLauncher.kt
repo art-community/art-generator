@@ -19,26 +19,20 @@
 package io.art.generator.test
 
 import io.art.configurator.module.ConfiguratorActivator.configurator
-import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.Generator
-import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.service.common.SourceScanningService.scanSources
 import io.art.generator.service.common.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
-import io.art.scheduler.Scheduling.scheduleFixedRate
-import io.art.scheduler.module.SchedulerActivator.scheduler
 
 fun main() {
     activator()
             .main(Generator::class.simpleName)
             .module(configurator())
             .module(logging())
-            .module(scheduler())
             .launch()
     initialize()
     reconfigure()
-    scheduleFixedRate(configuration.watcherPeriod, ::scanSources)
-    block()
+    scanSources()
 }

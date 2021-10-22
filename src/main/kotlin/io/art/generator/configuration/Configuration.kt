@@ -25,8 +25,6 @@ import io.art.core.determiner.SystemDeterminer.isWindows
 import io.art.generator.constants.GeneratorLanguage
 import java.nio.file.Path
 import java.nio.file.Paths.get
-import java.time.Duration
-import java.time.Duration.ofMillis
 
 data class SourceConfiguration(
         val languages: Set<GeneratorLanguage>,
@@ -41,7 +39,6 @@ data class SourceConfiguration(
 
 data class Configuration(
         val sources: Set<SourceConfiguration>,
-        val watcherPeriod: Duration,
         val controller: Path,
 )
 
@@ -75,7 +72,6 @@ private fun load() = with(configuration().apply { refresh() }) {
                         `package` = source.getString("package")
                 )
             }.toSet(),
-            controller = get(getString("controller")),
-            watcherPeriod = ofMillis(getLong("watcher.period"))
+            controller = get(getString("controller"))
     )
 }

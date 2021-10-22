@@ -38,7 +38,6 @@ dependencies {
     embedded("io.art.kotlin:core:$artKotlinVersion")
     embedded("io.art.kotlin:launcher:$artKotlinVersion")
     embedded("io.art.kotlin:configurator:$artKotlinVersion")
-    embedded("io.art.kotlin:scheduler:$artKotlinVersion")
     embedded("io.art.kotlin:logging:$artKotlinVersion")
     embedded("io.art.kotlin:meta:$artKotlinVersion")
 

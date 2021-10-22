@@ -42,7 +42,6 @@ import io.art.generator.templates.metaModuleClassFullName
 import io.art.launcher.kotlin.activator
 import io.art.logging.Logging.logger
 import io.art.logging.kotlin.logging
-import io.art.scheduler.kotlin.scheduler
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -58,7 +57,6 @@ class GeneratorTest {
     fun setup() = activator {
         configurator()
         logging()
-        scheduler()
         launch()
     }
 
