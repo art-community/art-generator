@@ -1,6 +1,6 @@
 package io.art.generator.parser
 
-import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import io.art.core.extensions.CollectionExtensions.checkOrPut
 import io.art.core.factory.MapFactory.concurrentMap
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.model.KotlinMetaTypeKind.*
@@ -17,7 +17,7 @@ open class KotlinTypeParser {
 
     protected fun KotlinType.resolved(): Boolean = this !is UnresolvedType && arguments.all { argument -> argument.type.resolved() }
 
-    protected fun KotlinType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = putIfAbsent(typeCache, this) {
+    protected fun KotlinType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = checkOrPut(typeCache, this) {
         when (this) {
             is SimpleType -> asMetaType(variance)
             is FlexibleType -> asMetaType(variance)
@@ -48,7 +48,7 @@ open class KotlinTypeParser {
                 nullable = TypeUtils.isNullableType(this)
         )
 
-        constructor.declarationDescriptor is FunctionClassDescriptor -> putIfAbsent(typeCache, this) {
+        constructor.declarationDescriptor is FunctionClassDescriptor -> checkOrPut(typeCache, this) {
             KotlinMetaType(
                     originalType = this,
                     kind = FUNCTION_KIND,
@@ -71,7 +71,7 @@ open class KotlinTypeParser {
 
         constructor.declarationDescriptor is ClassDescriptor -> {
             val classId = constructor.declarationDescriptor?.classId!!
-            putIfAbsent(typeCache, this) {
+            checkOrPut(typeCache, this) {
                 KotlinMetaType(
                         originalType = this,
                         kind = CLASS_KIND,

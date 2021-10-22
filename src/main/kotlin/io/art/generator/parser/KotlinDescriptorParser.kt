@@ -1,6 +1,6 @@
 package io.art.generator.parser
 
-import io.art.core.extensions.CollectionExtensions
+import io.art.core.extensions.CollectionExtensions.checkOrPut
 import io.art.core.factory.MapFactory.concurrentMap
 import io.art.generator.model.*
 import org.jetbrains.kotlin.backend.common.descriptors.isSuspend
@@ -21,7 +21,7 @@ open class KotlinDescriptorParser : KotlinTypeParser() {
     private val descriptorCache = concurrentMap<ClassDescriptor, KotlinMetaClass>()
 
     protected fun ClassDescriptor.asMetaClass(): KotlinMetaClass {
-        val metaClass = CollectionExtensions.putIfAbsent(descriptorCache, this) {
+        val metaClass = checkOrPut(descriptorCache, this) {
             KotlinMetaClass(
                     type = defaultType.asMetaType(),
 

@@ -16,7 +16,7 @@ open class JavaSymbolParser : JavaTypeParser() {
     private val symbolCache = concurrentMap<Symbol.ClassSymbol, JavaMetaClass>()
 
     internal fun Symbol.ClassSymbol.asMetaClass(): JavaMetaClass {
-        val metaClass = CollectionExtensions.putIfAbsent(symbolCache, this) {
+        val metaClass = CollectionExtensions.checkOrPut(symbolCache, this) {
             JavaMetaClass(
                     type = type.asMetaType(),
 
