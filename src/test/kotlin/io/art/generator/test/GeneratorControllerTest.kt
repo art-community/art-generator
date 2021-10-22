@@ -32,6 +32,7 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.lang.Runtime.getRuntime
 import java.lang.System.getProperty
+import java.time.Duration.ofSeconds
 import kotlin.io.path.writeText
 
 @TestInstance(PER_CLASS)
@@ -68,7 +69,7 @@ class GeneratorControllerTest {
         val process = runGenerator()
         var exited = false
         process.onExit().thenRun { exited = true }
-        waitCondition { exited }
+        waitCondition(ofSeconds(30)) { exited }
         assertTrue(exited)
     }
 
