@@ -23,7 +23,7 @@ import io.art.core.extensions.ThreadExtensions.block
 import io.art.generator.Generator
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
-import io.art.generator.service.common.SourceWatchingService.watchSources
+import io.art.generator.service.common.SourceScanningService.scanSources
 import io.art.generator.service.common.initialize
 import io.art.launcher.Activator.activator
 import io.art.logging.module.LoggingActivator.logging
@@ -39,6 +39,6 @@ fun main() {
             .launch()
     initialize()
     reconfigure()
-    scheduleFixedRate(configuration.watcherPeriod, ::watchSources)
+    scheduleFixedRate(configuration.watcherPeriod, ::scanSources)
     block()
 }

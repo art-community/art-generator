@@ -36,7 +36,7 @@ import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
 import io.art.generator.provider.KotlinCompilerConfiguration
 import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
-import io.art.generator.service.common.SourceWatchingService.watchSources
+import io.art.generator.service.common.SourceScanningService.scanSources
 import io.art.generator.service.common.initialize
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.launcher.kotlin.activator
@@ -79,7 +79,7 @@ class GeneratorTest {
 
         val logger = logger("test")
 
-        watchSources(asynchronous = false)
+        scanSources()
 
         logger.info("Meta sources generated")
 

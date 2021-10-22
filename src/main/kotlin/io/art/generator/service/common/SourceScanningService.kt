@@ -39,12 +39,11 @@ import io.art.generator.service.generation.generateJavaMetaClasses
 import io.art.generator.service.generation.generateKotlinMetaClasses
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.generator.templates.metaModuleClassName
-import io.art.scheduler.Scheduling.schedule
 
-object SourceWatchingService {
+object SourceScanningService {
     private data class MetaModuleClassNames(val name: String, val fullName: String)
 
-    fun watchSources(asynchronous: Boolean = true) {
+    fun scanSources() {
         val sourcesByModule = configuration.sources.groupBy { source -> source.module }
         configuration.sources.forEach { source ->
             val metaModuleClassName = metaModuleClassName(source.module)
@@ -72,10 +71,6 @@ object SourceWatchingService {
             if (source.languages.contains(JAVA)) {
                 detectChanges(JAVA, source.root, collectJavaSources(source.root, source.metaPath, excludedClassNames)).changed {
                     JAVA_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
-                    if (asynchronous) {
-                        schedule { handleJavaSources(source, metaModuleClassNames[JAVA]!!) }
-                        return@changed
-                    }
                     handleJavaSources(source, metaModuleClassNames[JAVA]!!)
                 }
             }
@@ -83,10 +78,6 @@ object SourceWatchingService {
             if (source.languages.contains(KOTLIN)) {
                 detectChanges(KOTLIN, source.root, collectKotlinSources(source.root, source.metaPath, excludedClassNames)).changed {
                     KOTLIN_LOGGER.info(SOURCES_CHANGED(source.root, modified, deleted))
-                    if (asynchronous) {
-                        schedule { handleKotlinSources(source, metaModuleClassNames[KOTLIN]!!) }
-                        return@changed
-                    }
                     handleKotlinSources(source, metaModuleClassNames[KOTLIN]!!)
                 }
             }
