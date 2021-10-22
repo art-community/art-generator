@@ -1,8 +1,8 @@
 package io.art.generator.parser
 
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import io.art.core.factory.MapFactory.concurrentMap
 import io.art.generator.model.KotlinMetaType
-import io.art.generator.model.KotlinMetaTypeKind
 import io.art.generator.model.KotlinMetaTypeKind.*
 import io.art.generator.model.KotlinTypeVariance
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.typeUtil.isEnum
 
 open class KotlinTypeParser {
-    private val typeCache = mutableMapOf<KotlinType, KotlinMetaType>()
+    private val typeCache = concurrentMap<KotlinType, KotlinMetaType>()
 
     protected fun KotlinType.resolved(): Boolean = this !is UnresolvedType && arguments.all { argument -> argument.type.resolved() }
 

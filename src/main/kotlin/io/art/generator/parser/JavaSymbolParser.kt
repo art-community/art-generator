@@ -5,6 +5,7 @@ package io.art.generator.parser
 import com.sun.tools.javac.code.Flags
 import com.sun.tools.javac.code.Symbol
 import io.art.core.extensions.CollectionExtensions
+import io.art.core.factory.MapFactory.concurrentMap
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.model.JavaMetaClass
 import io.art.generator.model.JavaMetaField
@@ -12,7 +13,7 @@ import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaParameter
 
 open class JavaSymbolParser : JavaTypeParser() {
-    private val symbolCache = mutableMapOf<Symbol.ClassSymbol, JavaMetaClass>()
+    private val symbolCache = concurrentMap<Symbol.ClassSymbol, JavaMetaClass>()
 
     internal fun Symbol.ClassSymbol.asMetaClass(): JavaMetaClass {
         val metaClass = CollectionExtensions.putIfAbsent(symbolCache, this) {
