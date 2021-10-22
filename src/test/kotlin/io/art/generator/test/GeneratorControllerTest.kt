@@ -18,12 +18,9 @@
 package io.art.generator.test
 
 import io.art.configurator.kotlin.configurator
-import io.art.core.constants.DateTimeConstants.DEFAULT_FORMATTER
-import io.art.core.constants.StringConstants.SHARP
 import io.art.core.context.Context.context
 import io.art.core.determiner.SystemDeterminer.isWindows
 import io.art.core.waiter.Waiter.waitCondition
-import io.art.core.waiter.Waiter.waitTime
 import io.art.generator.configuration.configuration
 import io.art.generator.configuration.reconfigure
 import io.art.generator.constants.META_NAME
@@ -36,9 +33,6 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.lang.Runtime.getRuntime
 import java.lang.System.getProperty
-import java.time.Duration.ofSeconds
-import java.time.LocalDateTime.parse
-import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
 @TestInstance(PER_CLASS)
@@ -71,20 +65,7 @@ class GeneratorControllerTest {
         configuration.controller.writeText("STOPPING")
     }
 
-    @Test
-    @Order(0)
-    fun testGeneratorControllerLocked() {
-        runGenerator()
-        waitTime(ofSeconds(5))
-        val controllerContent = configuration.controller.readText()
-        assertTrue(controllerContent.split(SHARP)[0] == "LOCKED")
-        val timestamp = parse(controllerContent.split(SHARP)[1], DEFAULT_FORMATTER)
-        waitTime(ofSeconds(3))
-        assertTrue(parse(configuration.controller.readText().split(SHARP)[1], DEFAULT_FORMATTER).isAfter(timestamp))
-    }
-
     @RepeatedTest(5)
-    @Order(1)
     fun testGeneratorControllerSingleton() {
         val second = runGenerator()
         var exited = false
