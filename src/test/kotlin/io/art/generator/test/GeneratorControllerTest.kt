@@ -27,12 +27,14 @@ import io.art.generator.constants.META_NAME
 import io.art.launcher.kotlin.activator
 import io.art.logging.kotlin.logging
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.lang.Runtime.getRuntime
 import java.lang.System.getProperty
-import java.time.Duration.ofSeconds
+import java.time.Duration.ofMinutes
+import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
 @TestInstance(PER_CLASS)
@@ -64,13 +66,14 @@ class GeneratorControllerTest {
         configuration.controller.writeText("STOPPING")
     }
 
-    @RepeatedTest(5)
+    @Test
     fun testGeneratorControllerSingleton() {
         val process = runGenerator()
         var exited = false
         process.onExit().thenRun { exited = true }
-        waitCondition(ofSeconds(30)) { exited }
+        waitCondition(ofMinutes(10)) { exited }
         assertTrue(exited)
+        assertEquals("AVAILABLE", configuration.controller.readText())
     }
 
     private fun runGenerator(): Process {
