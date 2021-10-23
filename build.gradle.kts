@@ -9,7 +9,7 @@ plugins {
 }
 
 tasks.withType(type = Wrapper::class) {
-    gradleVersion = "7.0"
+    gradleVersion = "7.2"
 }
 
 val compileKotlin by tasks.getting(KotlinCompile::class) {
