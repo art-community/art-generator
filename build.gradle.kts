@@ -14,7 +14,7 @@ tasks.withType(type = Wrapper::class) {
 
 val compileKotlin by tasks.getting(KotlinCompile::class) {
     kotlinOptions {
-        jvmTarget = JavaVersion.current().toString()
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
         apiVersion = "1.5"
     }
 }
