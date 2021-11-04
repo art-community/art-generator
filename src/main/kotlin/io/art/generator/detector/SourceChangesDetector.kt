@@ -18,7 +18,7 @@
 
 package io.art.generator.detector
 
-import io.art.core.extensions.CollectionExtensions.putIfAbsent
+import io.art.core.extensions.CollectionExtensions.computeIfAbsent
 import io.art.core.extensions.FileExtensions.readFileBytes
 import io.art.core.extensions.HashExtensions.xx64
 import io.art.core.factory.MapFactory.concurrentMap
@@ -29,7 +29,7 @@ import java.nio.file.Path
 data class DetectorKey(val language: GeneratorLanguage, val path: Path)
 
 private val detectors = concurrentMap<DetectorKey, SourceChangesDetector>()
-fun detectChanges(language: GeneratorLanguage, root: Path, sources: Sequence<Path>) = putIfAbsent(detectors, DetectorKey(language, root)) {
+fun detectChanges(language: GeneratorLanguage, root: Path, sources: Sequence<Path>) = computeIfAbsent(detectors, DetectorKey(language, root)) {
     SourceChangesDetector(root)
 }.detectChanges(sources)
 
