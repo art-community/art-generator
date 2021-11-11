@@ -62,3 +62,13 @@ val LOCK_VALIDATION_DURATION: Duration = ofSeconds(5)
 val LOCK_VALIDATION_PERIOD: Duration = ofMillis(500)
 
 val STOPPING_TIMEOUT: Duration = ofSeconds(5)
+
+const val LANGUAGES_KEY = "languages"
+const val INCLUSIONS_KEY = "inclusions"
+const val EXCLUSIONS_KEY = "exclusions"
+const val CLASSPATH_KEY = "classpath"
+const val SOURCES_KEY = "sources"
+const val ROOT_KEY = "root"
+const val MODULE_KEY = "module"
+const val PACKAGE_KEY = "package"
+const val CONTROLLER_KEY = "controller"

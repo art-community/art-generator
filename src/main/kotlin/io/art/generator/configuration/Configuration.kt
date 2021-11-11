@@ -22,7 +22,7 @@ import io.art.configurator.Configuring.configuration
 import io.art.core.constants.StringConstants.COLON
 import io.art.core.constants.StringConstants.SEMICOLON
 import io.art.core.determiner.SystemDeterminer.isWindows
-import io.art.generator.constants.GeneratorLanguage
+import io.art.generator.constants.*
 import java.nio.file.Path
 import java.nio.file.Paths.get
 
@@ -50,28 +50,38 @@ fun reconfigure() {
 }
 
 private fun load() = with(configuration().apply { refresh() }) {
+    validate(SOURCES_KEY)
     Configuration(
-            sources = getNestedArray("sources") { source ->
+            sources = getNestedArray(SOURCES_KEY) { source ->
                 SourceConfiguration(
                         languages = source
-                                .getStringArray("languages")
+                                .validate(LANGUAGES_KEY)
+                                .getStringArray(LANGUAGES_KEY)
                                 .map { language -> GeneratorLanguage.valueOf(language.uppercase()) }
                                 .toSet(),
-                        inclusions = source.getStringArray("inclusions").toSet(),
-                        exclusions = source.getStringArray("exclusions").toSet(),
-                        classpath = source.getString("classpath")
+                        inclusions = source
+                                .validate(LANGUAGES_KEY)
+                                .getStringArray(INCLUSIONS_KEY).toSet(),
+                        exclusions = source
+                                .validate(EXCLUSIONS_KEY)
+                                .getStringArray(EXCLUSIONS_KEY).toSet(),
+                        classpath = source
+                                .validate(CLASSPATH_KEY)
+                                .getString(CLASSPATH_KEY)
                                 .split(if (isWindows()) SEMICOLON else COLON)
                                 .map { path -> get(path) }
                                 .toSet(),
-                        sources = source.getString("sources")
+                        sources = source
+                                .validate(SOURCES_KEY)
+                                .getString(SOURCES_KEY)
                                 .split(if (isWindows()) SEMICOLON else COLON)
                                 .map { path -> get(path) }
                                 .toSet(),
-                        root = get(source.getString("root")),
-                        module = source.getString("module"),
-                        `package` = source.getString("package")
+                        root = get(source.validate(ROOT_KEY).getString(ROOT_KEY)),
+                        module = source.validate(MODULE_KEY).getString(MODULE_KEY),
+                        `package` = source.validate(PACKAGE_KEY).getString(PACKAGE_KEY)
                 )
             }.toSet(),
-            controller = get(getString("controller"))
+            controller = get(validate(CONTROLLER_KEY).getString(CONTROLLER_KEY))
     )
 }
