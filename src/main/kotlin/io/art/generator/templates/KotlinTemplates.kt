@@ -56,7 +56,7 @@ fun kotlinReturnLazyGetStatement(label: String): CodeBlock = "return %L.get()".a
 
 fun kotlinRegisterNewStatement(type: TypeName): CodeBlock = "register(%T())".asCode(type)
 
-fun kotlinRegisterOwnedNewStatement(type: TypeName): CodeBlock = "register(%T($OWNER_NAME))".asCode(type)
+fun kotlinRegisterOwnedNewStatement(type: TypeName): CodeBlock = "register(%T($THIS_NAME))".asCode(type)
 
 fun kotlinNamedSuperStatement(name: String): CodeBlock = "%S".asCode(name)
 

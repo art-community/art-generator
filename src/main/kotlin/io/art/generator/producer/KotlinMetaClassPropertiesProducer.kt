@@ -61,7 +61,7 @@ private fun TypeSpec.Builder.generateGetter(property: KotlinMetaProperty, ownerC
             .superclass(parent)
             .addFunction(FunSpec.constructorBuilder()
                     .addModifiers(INTERNAL)
-                    .addParameter(OWNER_NAME, KOTLIN_META_CLASS_CLASS_NAME)
+                    .addParameter(OWNER_NAME, KOTLIN_META_CLASS_PARAMETRIZED_ANY_CLASS_NAME)
                     .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType))
                     .build())
             .apply {
@@ -109,7 +109,7 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
             .superclass(parent)
             .addFunction(FunSpec.constructorBuilder()
                     .addModifiers(INTERNAL)
-                    .addParameter(OWNER_NAME, KOTLIN_META_CLASS_CLASS_NAME)
+                    .addParameter(OWNER_NAME, KOTLIN_META_CLASS_PARAMETRIZED_ANY_CLASS_NAME)
                     .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType))
                     .build())
             .apply {

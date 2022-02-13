@@ -21,6 +21,7 @@ package io.art.generator.constants
 import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.ClassName.Companion.bestGuess
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.WildcardTypeName
 import com.squareup.kotlinpoet.WildcardTypeName.Companion.producerOf
 import io.art.core.property.LazyProperty
 import io.art.meta.model.*
@@ -42,3 +43,4 @@ val KOTLIN_MAP_META_METHOD_FUNCTION_TYPE_NAME = bestGuess(MutableMap::class.qual
         KOTLIN_FUNCTION_TYPE_NAME
 )
 val KOTLIN_LAZY_CLASS_NAME = bestGuess(LazyProperty::class.java.name)
+val KOTLIN_META_CLASS_PARAMETRIZED_ANY_CLASS_NAME = bestGuess(MetaClass::class.java.name).parameterizedBy(ANY)

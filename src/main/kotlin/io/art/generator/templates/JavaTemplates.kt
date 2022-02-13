@@ -57,7 +57,7 @@ fun javaReturnNullStatement(): CodeBlock = "return null;".asCode()
 
 fun javaRegisterNewStatement(type: TypeName): CodeBlock = "register(new \$T())".asCode(type)
 
-fun javaRegisterNewOwnedStatement(type: TypeName): CodeBlock = "register(new \$T($OWNER_NAME))".asCode(type)
+fun javaRegisterNewOwnedStatement(type: TypeName): CodeBlock = "register(new \$T($THIS_NAME))".asCode(type)
 
 fun javaSuperStatement(label: String): CodeBlock = "super(\$L);".asCode(label)
 
