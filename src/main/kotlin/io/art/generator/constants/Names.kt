@@ -47,3 +47,5 @@ const val GET_NAME = "get"
 const val SET_NAME = "set"
 
 const val SELF_NAME = "self"
+const val THIS_NAME = "this"
+const val OWNER_NAME = "owner"

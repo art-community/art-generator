@@ -61,6 +61,7 @@ private fun TypeSpec.Builder.generateGetter(property: KotlinMetaProperty, ownerC
             .superclass(parent)
             .addFunction(FunSpec.constructorBuilder()
                     .addModifiers(INTERNAL)
+                    .addParameter(OWNER_NAME, KOTLIN_META_CLASS_CLASS_NAME)
                     .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType))
                     .build())
             .apply {
@@ -86,7 +87,7 @@ private fun TypeSpec.Builder.generateGetter(property: KotlinMetaProperty, ownerC
             .apply(::addType)
     PropertySpec.builder(methodName, methodClassName)
             .addModifiers(PRIVATE, FINAL)
-            .initializer(kotlinRegisterNewStatement(methodClassName))
+            .initializer(kotlinRegisterOwnedNewStatement(methodClassName))
             .build()
             .apply(::addProperty)
     FunSpec.builder(methodName)
@@ -108,6 +109,7 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
             .superclass(parent)
             .addFunction(FunSpec.constructorBuilder()
                     .addModifiers(INTERNAL)
+                    .addParameter(OWNER_NAME, KOTLIN_META_CLASS_CLASS_NAME)
                     .callSuperConstructor(kotlinMetaMethodSuperStatement(name, returnType))
                     .build())
             .apply {
@@ -134,7 +136,7 @@ private fun TypeSpec.Builder.generateSetter(property: KotlinMetaProperty, ownerC
             .apply(::addType)
     PropertySpec.builder(methodName, methodClassName)
             .addModifiers(PRIVATE, FINAL)
-            .initializer(kotlinRegisterNewStatement(methodClassName))
+            .initializer(kotlinRegisterOwnedNewStatement(methodClassName))
             .build()
             .apply(::addProperty)
     FunSpec.builder(methodName)

@@ -22,10 +22,11 @@ internal fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, typ
                 if (index > 0) name += "_$index"
                 val constructorClassName = metaConstructorClassName(name)
                 TypeSpec.classBuilder(constructorClassName)
-                        .addModifiers(PUBLIC, FINAL, STATIC)
+                        .addModifiers(PUBLIC, FINAL)
                         .superclass(ParameterizedTypeName.get(JAVA_META_CONSTRUCTOR_CLASS_NAME, typeName.box()))
                         .addMethod(MethodSpec.constructorBuilder()
                                 .addModifiers(PRIVATE)
+                                .addParameter(JAVA_META_CLASS_CLASS_NAME, OWNER_NAME)
                                 .addCode(javaMetaConstructorSuperStatement(type))
                                 .build())
                         .apply { generateConstructorInvocations(type, constructor) }
@@ -35,7 +36,7 @@ internal fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, typ
                 val reference = ClassName.get(StringConstants.EMPTY_STRING, constructorClassName)
                 FieldSpec.builder(reference, name)
                         .addModifiers(PRIVATE, FINAL)
-                        .initializer(javaRegisterNewStatement(reference))
+                        .initializer(javaRegisterNewOwnedStatement(reference))
                         .build()
                         .apply(::addField)
                 methodBuilder(name)
@@ -102,10 +103,11 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
         else -> ParameterizedTypeName.get(JAVA_INSTANCE_META_METHOD_CLASS_NAME, ownerType.asPoetType(), returnTypeName)
     }
     TypeSpec.classBuilder(methodClassName)
-            .addModifiers(PUBLIC, FINAL, STATIC)
+            .addModifiers(PUBLIC, FINAL)
             .superclass(parent)
             .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(PRIVATE)
+                    .addParameter(JAVA_META_CLASS_CLASS_NAME, OWNER_NAME)
                     .addCode(javaMetaMethodSuperStatement(method.name, returnType))
                     .build())
             .apply { generateMethodInvocations(ownerType, method.name, method) }
@@ -114,7 +116,7 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
             .apply(::addType)
     FieldSpec.builder(methodClassName, methodName)
             .addModifiers(PRIVATE, FINAL)
-            .initializer(javaRegisterNewStatement(methodClassName))
+            .initializer(javaRegisterNewOwnedStatement(methodClassName))
             .build()
             .apply(::addField)
     methodBuilder(methodName)

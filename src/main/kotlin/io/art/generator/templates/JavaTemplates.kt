@@ -57,6 +57,8 @@ fun javaReturnNullStatement(): CodeBlock = "return null;".asCode()
 
 fun javaRegisterNewStatement(type: TypeName): CodeBlock = "register(new \$T())".asCode(type)
 
+fun javaRegisterNewOwnedStatement(type: TypeName): CodeBlock = "register(new \$T($OWNER_NAME))".asCode(type)
+
 fun javaSuperStatement(label: String): CodeBlock = "super(\$L);".asCode(label)
 
 fun javaReturnNewStatement(type: JavaMetaType): CodeBlock {
@@ -103,6 +105,7 @@ fun javaRegisterMetaFieldStatement(field: JavaMetaField, inherited: Boolean): Co
         .asCode(field.name)
         .join(metaTypeStatement(field.type))
         .joinByComma(inheritedStatement(inherited))
+        .joinByComma(THIS_NAME.asCode())
         .join("))")
 
 fun javaRegisterMetaParameterStatement(index: Int, parameter: JavaMetaParameter): CodeBlock = "register(new $META_PARAMETER_NAME<>($index, \$S,"
@@ -114,10 +117,12 @@ fun javaRegisterMetaParameterStatement(index: Int, parameter: JavaMetaParameter)
 fun javaMetaMethodSuperStatement(name: String, type: JavaMetaType): CodeBlock = "super(\$S,"
         .asCode(name)
         .join(metaTypeStatement(type))
+        .joinByComma(OWNER_NAME.asCode())
         .join(");")
 
 fun javaMetaConstructorSuperStatement(type: JavaMetaType): CodeBlock = "super("
         .join(metaTypeStatement(type))
+        .joinByComma(OWNER_NAME.asCode())
         .join(");")
 
 fun javaMetaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("

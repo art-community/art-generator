@@ -56,6 +56,8 @@ fun kotlinReturnLazyGetStatement(label: String): CodeBlock = "return %L.get()".a
 
 fun kotlinRegisterNewStatement(type: TypeName): CodeBlock = "register(%T())".asCode(type)
 
+fun kotlinRegisterOwnedNewStatement(type: TypeName): CodeBlock = "register(%T($OWNER_NAME))".asCode(type)
+
 fun kotlinNamedSuperStatement(name: String): CodeBlock = "%S".asCode(name)
 
 fun kotlinReturnNullStatement() = "return null".asCode()
@@ -105,6 +107,7 @@ fun kotlinRegisterMetaFieldStatement(property: KotlinMetaProperty, inherited: Bo
                 .asCode(property.name)
                 .join(metaTypeStatement(property.type))
                 .joinByComma(inheritedStatement(inherited))
+                .joinByComma(THIS_NAME.asCode())
                 .join("))")
 
 fun kotlinRegisterMetaParameterStatement(index: Int, parameter: KotlinMetaParameter): CodeBlock =
@@ -117,8 +120,9 @@ fun kotlinRegisterMetaParameterStatement(index: Int, parameter: KotlinMetaParame
 fun kotlinMetaMethodSuperStatement(name: String, returnType: KotlinMetaType?): CodeBlock = "%S,"
         .asCode(name)
         .join(returnType?.let(::metaTypeStatement) ?: "%T".asCode(UNIT))
+        .joinByComma(OWNER_NAME.asCode())
 
-fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType): CodeBlock = metaTypeStatement(type)
+fun kotlinMetaConstructorSuperStatement(type: KotlinMetaType): CodeBlock = metaTypeStatement(type).joinByComma(OWNER_NAME.asCode())
 
 fun kotlinMetaClassSuperStatement(metaClass: KotlinMetaClass): CodeBlock = metaTypeStatement(metaClass.type)
 
@@ -190,7 +194,8 @@ private fun metaTypeBlock(type: KotlinMetaType, vararg parameters: KotlinMetaTyp
 private fun metaFunctionTypeBlock(type: KotlinMetaType): CodeBlock = "$META_TYPE_METHOD_NAME<%T>(%T::class.java"
         .asCode(type.asPoetType(), type.extractClass())
         .let { block ->
-            val arguments = type.lambdaArgumentTypes.map(::metaTypeStatement) + (type.lambdaResultType?.let(::metaTypeStatement) ?: "%T".asCode(UNIT))
+            val arguments = type.lambdaArgumentTypes.map(::metaTypeStatement) + (type.lambdaResultType?.let(::metaTypeStatement)
+                    ?: "%T".asCode(UNIT))
             block.joinByComma(*arguments.toTypedArray())
         }
         .join(")")
