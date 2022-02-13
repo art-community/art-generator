@@ -52,6 +52,8 @@ fun kotlinReturnStatement(label: CodeBlock): CodeBlock = "return ".join(label)
 
 fun kotlinReturnStatement(label: String): CodeBlock = "return %L".asCode(label)
 
+fun kotlinReturnLazyGetStatement(label: String): CodeBlock = "return %L.get()".asCode(label)
+
 fun kotlinRegisterNewStatement(type: TypeName): CodeBlock = "register(%T())".asCode(type)
 
 fun kotlinNamedSuperStatement(name: String): CodeBlock = "%S".asCode(name)
@@ -169,6 +171,7 @@ fun kotlinCallInvocationStatement(method: KotlinMetaFunction, invocationName: St
 
 fun kotlinNotImplementedStatement() = "TODO(\"Not yet implemented\")"
 
+fun kotlinMetaClassSelfMethodCall(target: TypeName): CodeBlock = "%T.self(%T::class.java)".asCode(KOTLIN_META_CLASS_CLASS_NAME, target)
 
 fun FunSpec.Builder.addLines(vararg code: CodeBlock) = addCode(listOf(*code).joinToCode(NEW_LINE))
 

@@ -20,6 +20,7 @@ package io.art.generator.constants
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.WildcardTypeName.subtypeOf
+import io.art.core.property.LazyProperty
 import io.art.meta.model.*
 import java.util.function.Function
 
@@ -43,3 +44,4 @@ val JAVA_MAP_META_METHOD_FUNCTION_TYPE_NAME = ParameterizedTypeName.get(
         ParameterizedTypeName.get(ClassName.get(MetaMethod::class.java), subtypeOf(JAVA_OBJECT_CLASS_NAME)),
         JAVA_FUNCTION_TYPE_NAME,
 )!!
+val JAVA_LAZY_CLASS_NAME = ClassName.get(LazyProperty::class.java)!!

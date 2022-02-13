@@ -18,15 +18,15 @@
 
 package io.art.generator.producer
 
-import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
-import com.squareup.kotlinpoet.KModifier.INTERNAL
-import com.squareup.kotlinpoet.KModifier.PRIVATE
+import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
+import io.art.core.extensions.StringExtensions.decapitalize
+import io.art.generator.constants.KOTLIN_LAZY_CLASS_NAME
 import io.art.generator.constants.KOTLIN_META_CLASS_CLASS_NAME
+import io.art.generator.constants.SELF_NAME
 import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.factory.NameFactory
@@ -44,6 +44,7 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: Name
                     .addModifiers(INTERNAL)
                     .callSuperConstructor(kotlinMetaClassSuperStatement(metaClass))
                     .build())
+            .apply { generateSelf(metaClassName, typeName, metaClass) }
             .apply { if (metaClass.modality != ABSTRACT) generateConstructors(metaClass, typeName) }
             .apply { generateProperties(metaClass) }
             .apply { generateFunctions(metaClass) }
@@ -70,4 +71,20 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: Name
             .addCode(kotlinReturnStatement(className))
             .build()
             .let(::addFunction)
+}
+
+private fun TypeSpec.Builder.generateSelf(metaClassName: ClassName, typeName: TypeName, metaClass: KotlinMetaClass) {
+    val type = KOTLIN_LAZY_CLASS_NAME.parameterizedBy(metaClassName)
+    TypeSpec.companionObjectBuilder().apply {
+        PropertySpec.builder(SELF_NAME, type, PRIVATE, FINAL)
+                .initializer(kotlinMetaClassSelfMethodCall(typeName))
+                .build()
+                .apply(::addProperty)
+        FunSpec.builder(decapitalize(metaClass.type.className))
+                .addModifiers(PUBLIC)
+                .returns(metaClassName)
+                .addCode(kotlinReturnLazyGetStatement(SELF_NAME))
+                .build()
+                .let(::addFunction)
+    }.build().apply(::addType)
 }

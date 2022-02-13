@@ -45,3 +45,5 @@ const val ARRAY_OF_NULLS_METHOD = "arrayOfNulls"
 
 const val GET_NAME = "get"
 const val SET_NAME = "set"
+
+const val SELF_NAME = "self"

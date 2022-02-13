@@ -18,13 +18,14 @@
 
 package io.art.generator.producer
 
-import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.*
 import com.squareup.javapoet.MethodSpec.constructorBuilder
 import com.squareup.javapoet.MethodSpec.methodBuilder
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.TypeSpec.classBuilder
+import io.art.core.extensions.StringExtensions.decapitalize
+import io.art.generator.constants.JAVA_LAZY_CLASS_NAME
 import io.art.generator.constants.JAVA_META_CLASS_CLASS_NAME
+import io.art.generator.constants.SELF_NAME
 import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.extension.extractOwnerClassName
@@ -47,6 +48,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
                     .addModifiers(PRIVATE)
                     .addCode(constructorStatement)
                     .build())
+            .apply { generateSelf(metaClassName, typeName, metaClass) }
             .apply { if (!metaClass.modifiers.contains(ABSTRACT)) generateConstructors(metaClass, typeName) }
             .apply { generateFields(metaClass) }
             .apply { generateMethods(metaClass) }
@@ -73,6 +75,20 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
             .addModifiers(PUBLIC)
             .returns(metaClassName)
             .addCode(javaReturnStatement(className))
+            .build()
+            .let(::addMethod)
+}
+
+private fun TypeSpec.Builder.generateSelf(metaClassName: ClassName, typeName: TypeName, metaClass: JavaMetaClass) {
+    val type = ParameterizedTypeName.get(JAVA_LAZY_CLASS_NAME, metaClassName)
+    FieldSpec.builder(type, SELF_NAME, PRIVATE, STATIC, FINAL)
+            .initializer(javaMetaClassSelfMethodCall(typeName))
+            .build()
+            .apply(::addField)
+    methodBuilder(decapitalize(metaClass.type.className))
+            .addModifiers(PUBLIC, STATIC)
+            .returns(metaClassName)
+            .addCode(javaReturnLazyGetStatement(SELF_NAME))
             .build()
             .let(::addMethod)
 }

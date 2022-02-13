@@ -49,6 +49,8 @@ fun javaSuppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWa
 
 fun javaReturnStatement(label: String): CodeBlock = "return \$L;".asCode(label)
 
+fun javaReturnLazyGetStatement(label: String): CodeBlock = "return \$L.get();".asCode(label)
+
 fun javaReturnStatement(block: CodeBlock): CodeBlock = "return".asCode().joinBySpace(block)
 
 fun javaReturnNullStatement(): CodeBlock = "return null;".asCode()
@@ -162,6 +164,7 @@ fun javaCallInvocationStatement(method: JavaMetaMethod, invocationName: String):
 
 fun MethodSpec.Builder.addLines(vararg code: CodeBlock): MethodSpec.Builder = addCode(join(listOf(*code), NEW_LINE))
 
+fun javaMetaClassSelfMethodCall(target: TypeName): CodeBlock = "\$T.self(\$T.class)".asCode(JAVA_META_CLASS_CLASS_NAME, target)
 
 private fun metaEnumBlock(className: TypeName) = "$META_ENUM_METHOD_NAME(\$T.class, \$T::valueOf)"
         .asCode(className, className)

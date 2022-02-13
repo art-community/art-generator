@@ -76,6 +76,7 @@ sourceSets {
 
 generator {
     source("Example") {
+        modulePackage("")
         jvm()
         sourcesPattern { exclude("**/main/*", "**/kotlin/*") }
     }
