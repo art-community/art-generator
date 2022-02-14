@@ -27,7 +27,7 @@ internal fun TypeSpec.Builder.generateConstructors(metaClass: KotlinMetaClass, t
                 TypeSpec.classBuilder(constructorClassName)
                         .superclass(KOTLIN_META_CONSTRUCTOR_CLASS_NAME.parameterizedBy(typeName))
                         .addFunction(FunSpec.constructorBuilder()
-                                .addParameter(OWNER_NAME, KOTLIN_META_CLASS_PARAMETRIZED_CLASS_NAME)
+                                .addParameter(OWNER_NAME, KOTLIN_META_CLASS_CLASS_NAME.parameterizedBy(typeName))
                                 .addModifiers(KModifier.INTERNAL)
                                 .callSuperConstructor(kotlinMetaConstructorSuperStatement(type))
                                 .build())
