@@ -27,7 +27,7 @@ internal fun TypeSpec.Builder.generateConstructors(metaClass: KotlinMetaClass, t
                 TypeSpec.classBuilder(constructorClassName)
                         .superclass(KOTLIN_META_CONSTRUCTOR_CLASS_NAME.parameterizedBy(typeName))
                         .addFunction(FunSpec.constructorBuilder()
-                                .addParameter(OWNER_NAME, KOTLIN_META_CLASS_PARAMETRIZED_ANY_CLASS_NAME)
+                                .addParameter(OWNER_NAME, KOTLIN_META_CLASS_PARAMETRIZED_CLASS_NAME)
                                 .addModifiers(KModifier.INTERNAL)
                                 .callSuperConstructor(kotlinMetaConstructorSuperStatement(type))
                                 .build())
@@ -106,7 +106,7 @@ private fun TypeSpec.Builder.generateFunction(function: KotlinMetaFunction, inde
             .superclass(parent)
             .addFunction(FunSpec.constructorBuilder()
                     .addModifiers(KModifier.INTERNAL)
-                    .addParameter(OWNER_NAME, KOTLIN_META_CLASS_PARAMETRIZED_ANY_CLASS_NAME)
+                    .addParameter(OWNER_NAME, KOTLIN_META_CLASS_PARAMETRIZED_CLASS_NAME)
                     .callSuperConstructor(kotlinMetaMethodSuperStatement(function.name, returnType))
                     .build())
             .apply { generateFunctionInvocations(ownerClass, function.name, function) }
