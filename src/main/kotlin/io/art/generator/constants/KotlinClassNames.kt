@@ -43,4 +43,4 @@ val KOTLIN_MAP_META_METHOD_FUNCTION_TYPE_NAME = bestGuess(MutableMap::class.qual
         KOTLIN_FUNCTION_TYPE_NAME
 )
 val KOTLIN_LAZY_CLASS_NAME = bestGuess(LazyProperty::class.java.name)
-val KOTLIN_META_CLASS_PARAMETRIZED_CLASS_NAME = bestGuess(MetaClass::class.java.name).parameterizedBy(ANY)
+val KOTLIN_META_CLASS_PARAMETRIZED_CLASS_NAME = bestGuess(MetaClass::class.java.name).parameterizedBy(producerOf(ANY))
