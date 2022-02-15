@@ -31,23 +31,27 @@ import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.factory.NameFactory
 import io.art.generator.model.KotlinMetaClass
+import io.art.generator.model.KotlinMetaClassName
 import io.art.generator.templates.*
 import org.jetbrains.kotlin.descriptors.Modality.ABSTRACT
 
 fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: NameFactory) {
     val className = metaClassName(metaClass.type.className!!)
-    val metaClassName = kotlinMetaClassClassName(metaClass.type.className, nameFactory)
-    val typeName = metaClass.type.asPoetType()
-    classBuilder(metaClassName)
-            .superclass(KOTLIN_META_CLASS_CLASS_NAME.parameterizedBy(typeName))
+    val metaClassName = KotlinMetaClassName(
+            metaName = kotlinMetaClassClassName(metaClass.type.className, nameFactory),
+            type = metaClass,
+            typeName = metaClass.type.asPoetType()
+    )
+    classBuilder(metaClassName.metaName)
+            .superclass(KOTLIN_META_CLASS_CLASS_NAME.parameterizedBy(metaClassName.typeName))
             .addFunction(constructorBuilder()
                     .addModifiers(INTERNAL)
                     .callSuperConstructor(kotlinMetaClassSuperStatement(metaClass))
                     .build())
-            .apply { generateSelf(metaClassName, typeName, metaClass) }
-            .apply { if (metaClass.modality != ABSTRACT) generateConstructors(metaClass, typeName) }
-            .apply { generateProperties(metaClass) }
-            .apply { generateFunctions(metaClass) }
+            .apply { generateSelf(metaClassName) }
+            .apply { if (metaClass.modality != ABSTRACT) generateConstructors(metaClassName) }
+            .apply { generateProperties(metaClassName) }
+            .apply { generateFunctions(metaClassName) }
             .apply {
                 if (metaClass.isInterface) {
                     generateProxy(metaClass)
@@ -61,28 +65,28 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: Name
             }
             .build()
             .apply(::addType)
-    PropertySpec.builder(className, metaClassName)
+    PropertySpec.builder(className, metaClassName.metaName)
             .addModifiers(PRIVATE)
-            .initializer(kotlinRegisterNewStatement(metaClassName))
+            .initializer(kotlinRegisterNewStatement(metaClassName.metaName))
             .build()
             .apply(::addProperty)
     FunSpec.builder(className)
-            .returns(metaClassName)
+            .returns(metaClassName.metaName)
             .addCode(kotlinReturnStatement(className))
             .build()
             .let(::addFunction)
 }
 
-private fun TypeSpec.Builder.generateSelf(metaClassName: ClassName, typeName: TypeName, metaClass: KotlinMetaClass) {
-    val type = KOTLIN_LAZY_CLASS_NAME.parameterizedBy(metaClassName)
+private fun TypeSpec.Builder.generateSelf(metaClassName: KotlinMetaClassName) {
+    val type = KOTLIN_LAZY_CLASS_NAME.parameterizedBy(metaClassName.metaName)
     TypeSpec.companionObjectBuilder().apply {
         PropertySpec.builder(SELF_NAME, type, PRIVATE, FINAL)
-                .initializer(kotlinMetaClassSelfMethodCall(typeName))
+                .initializer(kotlinMetaClassSelfMethodCall(metaClassName.typeName))
                 .build()
                 .apply(::addProperty)
-        FunSpec.builder(decapitalize(metaClass.type.className))
+        FunSpec.builder(decapitalize(metaClassName.type.type.className))
                 .addModifiers(PUBLIC)
-                .returns(metaClassName)
+                .returns(metaClassName.metaName)
                 .addCode(kotlinReturnLazyGetStatement(SELF_NAME))
                 .build()
                 .let(::addFunction)

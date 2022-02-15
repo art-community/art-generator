@@ -20,6 +20,8 @@
 
 package io.art.generator.model
 
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.TypeName
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.descriptors.Modality
@@ -140,4 +142,10 @@ data class KotlinMetaFunctionWithoutModifiers(
         val returnType: KotlinMetaType?,
         val throws: Set<KotlinMetaType>,
         val parameters: Map<String, KotlinMetaParameter>,
+)
+
+data class KotlinMetaClassName(
+        val metaName: ClassName,
+        val type: KotlinMetaClass,
+        val typeName: TypeName
 )

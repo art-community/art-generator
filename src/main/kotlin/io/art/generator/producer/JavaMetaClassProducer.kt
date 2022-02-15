@@ -31,6 +31,7 @@ import io.art.generator.extension.couldBeGenerated
 import io.art.generator.extension.extractOwnerClassName
 import io.art.generator.factory.NameFactory
 import io.art.generator.model.JavaMetaClass
+import io.art.generator.model.JavaMetaClassName
 import io.art.generator.model.JavaMetaType
 import io.art.generator.model.JavaMetaTypeKind.PRIMITIVE_KIND
 import io.art.generator.templates.*
@@ -38,20 +39,23 @@ import javax.lang.model.element.Modifier.*
 
 fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFactory) {
     val className = metaClassName(metaClass.type.className!!)
-    val metaClassName = javaMetaClassClassName(metaClass.type.className, nameFactory)
-    val typeName = metaClass.type.asPoetType()
+    val metaClassName = JavaMetaClassName(
+            metaName = javaMetaClassClassName(metaClass.type.className, nameFactory),
+            type = metaClass,
+            typeName = metaClass.type.asPoetType()
+    )
     val constructorStatement = javaMetaClassSuperStatement(metaClass)
-    classBuilder(metaClassName)
+    classBuilder(metaClassName.metaName)
             .addModifiers(PUBLIC, FINAL, STATIC)
-            .superclass(ParameterizedTypeName.get(JAVA_META_CLASS_CLASS_NAME, typeName.box()))
+            .superclass(ParameterizedTypeName.get(JAVA_META_CLASS_CLASS_NAME, metaClassName.typeName.box()))
             .addMethod(constructorBuilder()
                     .addModifiers(PRIVATE)
                     .addCode(constructorStatement)
                     .build())
-            .apply { generateSelf(metaClassName, typeName, metaClass) }
-            .apply { if (!metaClass.modifiers.contains(ABSTRACT)) generateConstructors(metaClass, typeName) }
-            .apply { generateFields(metaClass) }
-            .apply { generateMethods(metaClass) }
+            .apply { generateSelf(metaClassName) }
+            .apply { if (!metaClass.modifiers.contains(ABSTRACT)) generateConstructors(metaClassName) }
+            .apply { generateFields(metaClassName) }
+            .apply { generateMethods(metaClassName) }
             .apply {
                 if (metaClass.isInterface) {
                     generateProxy(metaClass)
@@ -66,28 +70,28 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
             .build()
             .apply { qualifyImports(mutableSetOf(), metaClass) }
             .apply(::addType)
-    FieldSpec.builder(metaClassName, className)
+    FieldSpec.builder(metaClassName.metaName, className)
             .addModifiers(PRIVATE, FINAL)
-            .initializer(javaRegisterNewStatement(metaClassName))
+            .initializer(javaRegisterNewStatement(metaClassName.metaName))
             .build()
             .apply(::addField)
     methodBuilder(className)
             .addModifiers(PUBLIC)
-            .returns(metaClassName)
+            .returns(metaClassName.metaName)
             .addCode(javaReturnStatement(className))
             .build()
             .let(::addMethod)
 }
 
-private fun TypeSpec.Builder.generateSelf(metaClassName: ClassName, typeName: TypeName, metaClass: JavaMetaClass) {
-    val type = ParameterizedTypeName.get(JAVA_LAZY_CLASS_NAME, metaClassName)
+private fun TypeSpec.Builder.generateSelf(metaClassName: JavaMetaClassName) {
+    val type = ParameterizedTypeName.get(JAVA_LAZY_CLASS_NAME, metaClassName.metaName)
     FieldSpec.builder(type, SELF_NAME, PRIVATE, STATIC, FINAL)
-            .initializer(javaMetaClassSelfMethodCall(typeName))
+            .initializer(javaMetaClassSelfMethodCall(metaClassName.typeName))
             .build()
             .apply(::addField)
-    methodBuilder(decapitalize(metaClass.type.className))
+    methodBuilder(decapitalize(metaClassName.type.type.className))
             .addModifiers(PUBLIC, STATIC)
-            .returns(metaClassName)
+            .returns(metaClassName.metaName)
             .addCode(javaReturnLazyGetStatement(SELF_NAME))
             .build()
             .let(::addMethod)

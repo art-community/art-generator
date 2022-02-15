@@ -20,6 +20,8 @@
 
 package io.art.generator.model
 
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.TypeName
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeMirror
@@ -117,3 +119,11 @@ data class JavaMetaMethodWithoutModifiers(
         val throws: Set<JavaMetaType>,
         val parameters: Map<String, JavaMetaParameter>,
 )
+
+
+data class JavaMetaClassName(
+        val metaName: ClassName,
+        val type: JavaMetaClass,
+        val typeName: TypeName
+)
+

@@ -7,15 +7,15 @@ import io.art.generator.constants.*
 import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.extension.superMethods
-import io.art.generator.model.JavaMetaClass
+import io.art.generator.model.JavaMetaClassName
 import io.art.generator.model.JavaMetaMethod
 import io.art.generator.model.JavaMetaType
 import io.art.generator.templates.*
 import javax.lang.model.element.Modifier.*
 
-internal fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, typeName: TypeName) {
-    val type = metaClass.type
-    metaClass.constructors
+internal fun TypeSpec.Builder.generateConstructors(metaClassName: JavaMetaClassName) {
+    val type = metaClassName.type.type
+    metaClassName.type.constructors
             .filter(JavaMetaMethod::couldBeGenerated)
             .mapIndexed { index, constructor ->
                 var name = CONSTRUCTOR_NAME
@@ -23,10 +23,10 @@ internal fun TypeSpec.Builder.generateConstructors(metaClass: JavaMetaClass, typ
                 val constructorClassName = metaConstructorClassName(name)
                 TypeSpec.classBuilder(constructorClassName)
                         .addModifiers(PUBLIC, FINAL)
-                        .superclass(ParameterizedTypeName.get(JAVA_META_CONSTRUCTOR_CLASS_NAME, typeName.box()))
+                        .superclass(ParameterizedTypeName.get(JAVA_META_CONSTRUCTOR_CLASS_NAME, metaClassName.metaName, metaClassName.typeName.box()))
                         .addMethod(MethodSpec.constructorBuilder()
                                 .addModifiers(PRIVATE)
-                                .addParameter(JAVA_META_CLASS_CLASS_NAME, OWNER_NAME)
+                                .addParameter(metaClassName.metaName, OWNER_NAME)
                                 .addCode(javaMetaConstructorSuperStatement(type))
                                 .build())
                         .apply { generateConstructorInvocations(type, constructor) }
@@ -78,19 +78,19 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: JavaMetaType, 
     }
 }
 
-internal fun TypeSpec.Builder.generateMethods(metaClass: JavaMetaClass) {
-    val parentMethods = metaClass.superMethods()
-    val methods = metaClass
+internal fun TypeSpec.Builder.generateMethods(metaClassName: JavaMetaClassName) {
+    val parentMethods = metaClassName.type.superMethods()
+    val methods = metaClassName.type
             .methods
             .asSequence()
             .filter { method -> parentMethods.none { parent -> parent.withoutModifiers() == method.withoutModifiers() } }
     (methods + parentMethods)
             .filter(JavaMetaMethod::couldBeGenerated)
             .groupBy { method -> method.name }
-            .map { grouped -> grouped.value.forEachIndexed { methodIndex, method -> generateMethod(method, methodIndex, metaClass.type) } }
+            .map { grouped -> grouped.value.forEachIndexed { methodIndex, method -> generateMethod(method, methodIndex, metaClassName) } }
 }
 
-private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, ownerType: JavaMetaType) {
+private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, metaClassName: JavaMetaClassName) {
     var name = method.name
     if (index > 0) name += "_$index"
     val methodName = metaMethodName(name)
@@ -99,18 +99,18 @@ private fun TypeSpec.Builder.generateMethod(method: JavaMetaMethod, index: Int, 
     val returnTypeName = returnType.asPoetType().box()
     val static = method.modifiers.contains(STATIC)
     val parent = when {
-        static -> ParameterizedTypeName.get(JAVA_STATIC_META_METHOD_CLASS_NAME, returnTypeName)
-        else -> ParameterizedTypeName.get(JAVA_INSTANCE_META_METHOD_CLASS_NAME, ownerType.asPoetType(), returnTypeName)
+        static -> ParameterizedTypeName.get(JAVA_STATIC_META_METHOD_CLASS_NAME, metaClassName.metaName, returnTypeName)
+        else -> ParameterizedTypeName.get(JAVA_INSTANCE_META_METHOD_CLASS_NAME, metaClassName.metaName, metaClassName.type.type.asPoetType(), returnTypeName)
     }
     TypeSpec.classBuilder(methodClassName)
             .addModifiers(PUBLIC, FINAL)
             .superclass(parent)
             .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(PRIVATE)
-                    .addParameter(JAVA_META_CLASS_CLASS_NAME, OWNER_NAME)
+                    .addParameter(metaClassName.metaName, OWNER_NAME)
                     .addCode(javaMetaMethodSuperStatement(method.name, returnType))
                     .build())
-            .apply { generateMethodInvocations(ownerType, method.name, method) }
+            .apply { generateMethodInvocations(metaClassName.type.type, method.name, method) }
             .apply { generateParameters(method) }
             .build()
             .apply(::addType)

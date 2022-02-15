@@ -10,28 +10,28 @@ import io.art.generator.extension.asPoetType
 import io.art.generator.extension.couldBeGenerated
 import io.art.generator.extension.superFunctions
 import io.art.generator.model.KotlinMetaClass
+import io.art.generator.model.KotlinMetaClassName
 import io.art.generator.model.KotlinMetaFunction
 import io.art.generator.model.KotlinMetaType
 import io.art.generator.templates.*
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import java.util.*
 
-internal fun TypeSpec.Builder.generateConstructors(metaClass: KotlinMetaClass, typeName: TypeName) {
-    val type = metaClass.type
-    metaClass.constructors
+internal fun TypeSpec.Builder.generateConstructors(metaClassName: KotlinMetaClassName) {
+    metaClassName.type.constructors
             .filter(KotlinMetaFunction::couldBeGenerated)
             .mapIndexed { index, constructor ->
                 var name = CONSTRUCTOR_NAME
                 if (index > 0) name += "_$index"
                 val constructorClassName = metaConstructorClassName(name)
                 TypeSpec.classBuilder(constructorClassName)
-                        .superclass(KOTLIN_META_CONSTRUCTOR_CLASS_NAME.parameterizedBy(typeName))
+                        .superclass(KOTLIN_META_CONSTRUCTOR_CLASS_NAME.parameterizedBy(metaClassName.metaName, metaClassName.typeName))
                         .addFunction(FunSpec.constructorBuilder()
-                                .addParameter(OWNER_NAME, KOTLIN_META_CLASS_CLASS_NAME.parameterizedBy(typeName))
+                                .addParameter(OWNER_NAME, metaClassName.metaName)
                                 .addModifiers(KModifier.INTERNAL)
-                                .callSuperConstructor(kotlinMetaConstructorSuperStatement(type))
+                                .callSuperConstructor(kotlinMetaConstructorSuperStatement(metaClassName.type.type))
                                 .build())
-                        .apply { generateConstructorInvocations(type, constructor) }
+                        .apply { generateConstructorInvocations(metaClassName.type.type, constructor) }
                         .apply { generateParameters(constructor) }
                         .build()
                         .apply(::addType)
@@ -78,38 +78,38 @@ private fun TypeSpec.Builder.generateConstructorInvocations(type: KotlinMetaType
     }
 }
 
-internal fun TypeSpec.Builder.generateFunctions(metaClass: KotlinMetaClass) {
-    val parentFunctions = metaClass.superFunctions()
-    val functions = metaClass
+internal fun TypeSpec.Builder.generateFunctions(metaClassName: KotlinMetaClassName) {
+    val parentFunctions = metaClassName.type.superFunctions()
+    val functions = metaClassName.type
             .functions
             .filter { function -> parentFunctions.none { parent -> parent.withoutModifiers() == function.withoutModifiers() } }
     (functions + parentFunctions)
             .asSequence()
             .filter(KotlinMetaFunction::couldBeGenerated)
             .groupBy { function -> function.name }
-            .map { grouped -> grouped.value.forEachIndexed { index, function -> generateFunction(function, index, metaClass) } }
+            .map { grouped -> grouped.value.forEachIndexed { index, function -> generateFunction(metaClassName, function, index) } }
 }
 
-private fun TypeSpec.Builder.generateFunction(function: KotlinMetaFunction, index: Int, ownerClass: KotlinMetaClass) {
+private fun TypeSpec.Builder.generateFunction(metaClassName: KotlinMetaClassName, function: KotlinMetaFunction, index: Int) {
     var name = function.name
     if (index > 0) name += "_$index"
     val methodName = metaMethodName(name)
     val methodClassName = kotlinMetaMethodClassName(name)
     val returnType = function.returnType
     val returnTypeName = returnType?.asPoetType() ?: UNIT
-    val static = ownerClass.isObject
+    val static = metaClassName.type.isObject
     val parent = when {
-        static -> KOTLIN_STATIC_META_METHOD_CLASS_NAME.parameterizedBy(returnTypeName)
-        else -> KOTLIN_INSTANCE_META_METHOD_CLASS_NAME.parameterizedBy(ownerClass.type.asPoetType(), returnTypeName)
+        static -> KOTLIN_STATIC_META_METHOD_CLASS_NAME.parameterizedBy(metaClassName.metaName, returnTypeName)
+        else -> KOTLIN_INSTANCE_META_METHOD_CLASS_NAME.parameterizedBy(metaClassName.metaName, metaClassName.type.type.asPoetType(), returnTypeName)
     }
     TypeSpec.classBuilder(methodClassName)
             .superclass(parent)
             .addFunction(FunSpec.constructorBuilder()
                     .addModifiers(KModifier.INTERNAL)
-                    .addParameter(OWNER_NAME, KOTLIN_META_CLASS_PARAMETRIZED_CLASS_NAME)
+                    .addParameter(OWNER_NAME, metaClassName.metaName)
                     .callSuperConstructor(kotlinMetaMethodSuperStatement(function.name, returnType))
                     .build())
-            .apply { generateFunctionInvocations(ownerClass, function.name, function) }
+            .apply { generateFunctionInvocations(metaClassName.type, function.name, function) }
             .apply { generateParameters(function) }
             .build()
             .apply(::addType)
