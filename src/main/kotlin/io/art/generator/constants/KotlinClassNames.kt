@@ -38,7 +38,7 @@ val KOTLIN_META_CONSTRUCTOR_CLASS_NAME = bestGuess(MetaConstructor::class.java.n
 val KOTLIN_FUNCTION_TYPE_NAME = bestGuess(Function::class.java.name).parameterizedBy(ANY.copy(nullable = true), ANY.copy(nullable = true))
 val KOTLIN_META_PROXY_CLASS_NAME = bestGuess(MetaProxy::class.java.name)
 val KOTLIN_MAP_META_METHOD_FUNCTION_TYPE_NAME = bestGuess(MutableMap::class.qualifiedName!!).parameterizedBy(
-        bestGuess(MetaMethod::class.java.name).parameterizedBy(producerOf(KOTLIN_META_CLASS_CLASS_NAME.copy(nullable = true)), producerOf(ANY.copy(nullable = true))),
+        bestGuess(MetaMethod::class.java.name).parameterizedBy(KOTLIN_META_CLASS_CLASS_NAME, producerOf(ANY.copy(nullable = true))),
         KOTLIN_FUNCTION_TYPE_NAME
 )
 val KOTLIN_LAZY_CLASS_NAME = bestGuess(LazyProperty::class.java.name)

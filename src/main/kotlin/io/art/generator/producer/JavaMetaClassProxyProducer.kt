@@ -55,7 +55,7 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: JavaMetaClass, 
                     if (methodIndex > 0) name += "_$methodIndex"
                     val invocationName = metaProxyInvocationName(name)
                     addField(FieldSpec.builder(JAVA_FUNCTION_TYPE_NAME, invocationName)
-                            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                            .addModifiers(PRIVATE, FINAL)
                             .build())
                     addMethod(methodBuilder(method.name)
                             .addModifiers(PUBLIC)
