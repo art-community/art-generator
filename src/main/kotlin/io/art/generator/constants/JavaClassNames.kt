@@ -41,7 +41,7 @@ val JAVA_FUNCTION_TYPE_NAME = ParameterizedTypeName.get(ClassName.get(Function::
 val JAVA_META_PROXY_CLASS_NAME = ClassName.get(MetaProxy::class.java)!!
 val JAVA_MAP_META_METHOD_FUNCTION_TYPE_NAME = ParameterizedTypeName.get(
         ClassName.get(Map::class.java),
-        ParameterizedTypeName.get(ClassName.get(MetaMethod::class.java), subtypeOf(JAVA_OBJECT_CLASS_NAME)),
+        ParameterizedTypeName.get(ClassName.get(MetaMethod::class.java), subtypeOf(JAVA_META_CLASS_CLASS_NAME), subtypeOf(JAVA_OBJECT_CLASS_NAME)),
         JAVA_FUNCTION_TYPE_NAME,
 )!!
 val JAVA_LAZY_CLASS_NAME = ClassName.get(LazyProperty::class.java)!!
