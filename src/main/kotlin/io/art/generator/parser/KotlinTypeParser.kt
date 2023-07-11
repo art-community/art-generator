@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.types.typeUtil.isEnum
 open class KotlinTypeParser {
     private val typeCache = mutableMapOf<KotlinType, KotlinMetaType>()
 
-    protected fun KotlinType.resolved(): Boolean = this !is UnresolvedType && arguments.all { argument -> argument.type.resolved() }
+    protected fun KotlinType.resolved(): Boolean = !isError && arguments.all { argument -> argument.type.resolved() }
 
     protected fun KotlinType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = putIfAbsent(typeCache, this) {
         when (this) {
