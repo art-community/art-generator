@@ -62,7 +62,7 @@ object KotlinCompilerProvider {
         compilerConfiguration.put(EMIT_JVM_TYPE_ANNOTATIONS, true)
         compilerConfiguration.put(USE_FIR, false)
         compilerConfiguration.put(USE_FIR_EXTENDED_CHECKERS, false)
-        compilerConfiguration.put(IR, true)
+        compilerConfiguration.put(IR, false)
 
         kotlinCompilerConfiguration.destination?.let { destination ->
             compilerConfiguration.put(RETAIN_OUTPUT_IN_MEMORY, false)
