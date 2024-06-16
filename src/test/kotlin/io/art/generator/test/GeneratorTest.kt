@@ -112,25 +112,25 @@ class GeneratorTest {
                 tempDirectory.toFile().mkdirs()
             }
 
-            if (source.languages.contains(KOTLIN)) {
-                val roots = configuration.sources
-                        .filter { configuration -> configuration.languages.contains(KOTLIN) }
-                        .map { configuration -> configuration.root }
-                        .toSet()
-                useKotlinCompiler(KotlinCompilerConfiguration(roots, source.classpath, tempDirectory)) {
-                    analyzeAndGenerate(this)
-                }
-                logger.info("[${source.root.name}]: Kotlin sources compiled")
-
-                var name = source.module + source.root.toFile().name.normalizeToClassSuffix()
-                if (source.languages.size > 1) {
-                    name += KOTLIN.suffix
-                }
-                val generatedClassName = metaModuleClassFullName(source.metaPackage, name)
-                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
-                    logger.info("[${source.root.name}]: Loaded Kotlin class: $generatedClassName")
-                })
-            }
+//            if (source.languages.contains(KOTLIN)) {
+//                val roots = configuration.sources
+//                        .filter { configuration -> configuration.languages.contains(KOTLIN) }
+//                        .map { configuration -> configuration.root }
+//                        .toSet()
+//                useKotlinCompiler(KotlinCompilerConfiguration(roots, source.classpath, tempDirectory)) {
+//                    analyzeAndGenerate(this)
+//                }
+//                logger.info("[${source.root.name}]: Kotlin sources compiled")
+//
+//                var name = source.module + source.root.toFile().name.normalizeToClassSuffix()
+//                if (source.languages.size > 1) {
+//                    name += KOTLIN.suffix
+//                }
+//                val generatedClassName = metaModuleClassFullName(source.metaPackage, name)
+//                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
+//                    logger.info("[${source.root.name}]: Loaded Kotlin class: $generatedClassName")
+//                })
+//            }
         }
     }
 

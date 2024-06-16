@@ -84,7 +84,7 @@ private class JavaMetaGenerationService(private val nameFactory: NameFactory = N
         val packageClassName = javaMetaPackageClassName(packageName, nameFactory)
         FieldSpec.builder(packageClassName, metaPackageName)
                 .addModifiers(PRIVATE, FINAL)
-                .initializer(javaRegisterNewStatement(packageClassName))
+                .initializer(javaRegisterPackage(packageClassName))
                 .build()
                 .apply(::addField)
         methodBuilder(metaPackageName)

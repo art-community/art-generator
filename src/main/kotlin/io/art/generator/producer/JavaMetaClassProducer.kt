@@ -72,7 +72,7 @@ fun TypeSpec.Builder.generateClass(metaClass: JavaMetaClass, nameFactory: NameFa
             .apply(::addType)
     FieldSpec.builder(metaClassName.metaName, className)
             .addModifiers(PRIVATE, FINAL)
-            .initializer(javaRegisterNewStatement(metaClassName.metaName))
+            .initializer(javaRegisterClass(metaClassName.metaName))
             .build()
             .apply(::addField)
     methodBuilder(className)

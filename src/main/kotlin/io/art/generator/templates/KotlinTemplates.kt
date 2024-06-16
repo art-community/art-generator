@@ -54,9 +54,13 @@ fun kotlinReturnStatement(label: String): CodeBlock = "return %L".asCode(label)
 
 fun kotlinReturnLazyGetStatement(label: String): CodeBlock = "return %L.get()".asCode(label)
 
-fun kotlinRegisterNewStatement(type: TypeName): CodeBlock = "register(%T())".asCode(type)
+fun kotlinRegisterPackage(type: TypeName): CodeBlock = "registerPackage(%T())".asCode(type)
 
-fun kotlinRegisterOwnedNewStatement(type: TypeName): CodeBlock = "register(%T($THIS_NAME))".asCode(type)
+fun kotlinRegisterClass(type: TypeName): CodeBlock = "registerClass(%T())".asCode(type)
+
+fun kotlinRegisterConstructor(type: TypeName): CodeBlock = "registerConstructor(%T($THIS_NAME))".asCode(type)
+
+fun kotlinRegisterMethod(type: TypeName): CodeBlock = "registerMethod(%T($THIS_NAME))".asCode(type)
 
 fun kotlinNamedSuperStatement(name: String): CodeBlock = "%S".asCode(name)
 
@@ -103,7 +107,7 @@ fun kotlinInvokeConstructorStatement(type: KotlinMetaType, parameters: Map<Strin
 
 
 fun kotlinRegisterMetaFieldStatement(property: KotlinMetaProperty, inherited: Boolean): CodeBlock =
-        "register($META_FIELD_NAME(%S,"
+        "registerField($META_FIELD_NAME(%S,"
                 .asCode(property.name)
                 .join(metaTypeStatement(property.type))
                 .joinByComma(inheritedStatement(inherited))

@@ -80,7 +80,7 @@ private class KotlinMetaGenerationService(private val nameFactory: NameFactory =
         val packageClassName = kotlinMetaPackageClassName(packageName, nameFactory)
         PropertySpec.builder(metaPackageName, packageClassName)
                 .addModifiers(PRIVATE)
-                .initializer(kotlinRegisterNewStatement(packageClassName))
+                .initializer(kotlinRegisterPackage(packageClassName))
                 .build()
                 .apply(::addProperty)
         FunSpec.builder(metaPackageName)

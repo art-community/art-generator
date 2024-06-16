@@ -67,7 +67,7 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: Name
             .apply(::addType)
     PropertySpec.builder(className, metaClassName.metaName)
             .addModifiers(PRIVATE)
-            .initializer(kotlinRegisterNewStatement(metaClassName.metaName))
+            .initializer(kotlinRegisterClass(metaClassName.metaName))
             .build()
             .apply(::addProperty)
     FunSpec.builder(className)

@@ -35,17 +35,17 @@ import io.art.generator.model.*
 import io.art.generator.model.JavaMetaTypeKind.*
 
 fun javaMetaPackageClassName(name: String, nameFactory: NameFactory): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Package".name(nameFactory))
+    ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Package".name(nameFactory))
 
 fun javaMetaClassClassName(name: String, nameFactory: NameFactory): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Class".name(nameFactory))
+    ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Class".name(nameFactory))
 
 fun javaMetaMethodClassName(name: String): ClassName =
-        ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Method")
+    ClassName.get(EMPTY_STRING, "Meta${capitalize(name)}Method")
 
 fun javaSuppressAnnotation(): AnnotationSpec = AnnotationSpec.builder(SuppressWarnings::class.java)
-        .addMember("value", "{\$S,\$S,\$S}", ALL, UNCHECKED, UNUSED)
-        .build()
+    .addMember("value", "{\$S,\$S,\$S}", ALL, UNCHECKED, UNUSED)
+    .build()
 
 fun javaReturnStatement(label: String): CodeBlock = "return \$L;".asCode(label)
 
@@ -55,9 +55,13 @@ fun javaReturnStatement(block: CodeBlock): CodeBlock = "return".asCode().joinByS
 
 fun javaReturnNullStatement(): CodeBlock = "return null;".asCode()
 
-fun javaRegisterNewStatement(type: TypeName): CodeBlock = "register(new \$T())".asCode(type)
+fun javaRegisterPackage(type: TypeName): CodeBlock = "registerPackage(new \$T())".asCode(type)
 
-fun javaRegisterNewOwnedStatement(type: TypeName): CodeBlock = "register(new \$T($THIS_NAME))".asCode(type)
+fun javaRegisterClass(type: TypeName): CodeBlock = "registerClass(new \$T())".asCode(type)
+
+fun javaRegisterConstructor(type: TypeName): CodeBlock = "registerConstructor(new \$T($THIS_NAME))".asCode(type)
+
+fun javaRegisterMethod(type: TypeName): CodeBlock = "registerMethod(new \$T($THIS_NAME))".asCode(type)
 
 fun javaSuperStatement(label: String): CodeBlock = "super(\$L);".asCode(label)
 
@@ -72,20 +76,20 @@ fun javaReturnNewStatement(type: JavaMetaType): CodeBlock {
 fun javaInvokeInstanceStatement(method: String): CodeBlock = "$INSTANCE_NAME.$method();".asCode()
 
 fun javaInvokeInstanceStatement(method: String, parameter: JavaMetaParameter): CodeBlock =
-        "$INSTANCE_NAME.$method(".join(casted(parameter)).join(");")
+    "$INSTANCE_NAME.$method(".join(casted(parameter)).join(");")
 
 fun javaInvokeInstanceStatement(method: String, parameters: Map<String, JavaMetaParameter>): CodeBlock =
-        "$INSTANCE_NAME.$method(".join(casted(parameters)).join(");")
+    "$INSTANCE_NAME.$method(".join(casted(parameters)).join(");")
 
 
 fun javaInvokeStaticStatement(method: String, type: JavaMetaType): CodeBlock =
-        "\$T.$method();".asCode(type.extractClass())
+    "\$T.$method();".asCode(type.extractClass())
 
 fun javaInvokeStaticStatement(method: String, type: JavaMetaType, parameter: JavaMetaParameter): CodeBlock =
-        "\$T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(");")
+    "\$T.$method(".asCode(type.extractClass()).join(casted(parameter)).join(");")
 
 fun javaInvokeStaticStatement(method: String, type: JavaMetaType, parameters: Map<String, JavaMetaParameter>): CodeBlock =
-        "\$T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(");")
+    "\$T.$method(".asCode(type.extractClass()).join(casted(parameters)).join(");")
 
 
 fun javaInvokeConstructorStatement(type: JavaMetaType): CodeBlock {
@@ -101,33 +105,33 @@ fun javaInvokeConstructorStatement(type: JavaMetaType, parameters: Map<String, J
 }
 
 
-fun javaRegisterMetaFieldStatement(field: JavaMetaField, inherited: Boolean): CodeBlock = "register(new $META_FIELD_NAME<>(\$S,"
-        .asCode(field.name)
-        .join(metaTypeStatement(field.type))
-        .joinByComma(inheritedStatement(inherited))
-        .joinByComma(THIS_NAME.asCode())
-        .join("))")
+fun javaRegisterMetaFieldStatement(field: JavaMetaField, inherited: Boolean): CodeBlock = "registerField(new $META_FIELD_NAME<>(\$S,"
+    .asCode(field.name)
+    .join(metaTypeStatement(field.type))
+    .joinByComma(inheritedStatement(inherited))
+    .joinByComma(THIS_NAME.asCode())
+    .join("))")
 
 fun javaRegisterMetaParameterStatement(index: Int, parameter: JavaMetaParameter): CodeBlock = "register(new $META_PARAMETER_NAME<>($index, \$S,"
-        .asCode(parameter.name)
-        .join(metaTypeStatement(parameter.type))
-        .join("))")
+    .asCode(parameter.name)
+    .join(metaTypeStatement(parameter.type))
+    .join("))")
 
 
 fun javaMetaMethodSuperStatement(name: String, type: JavaMetaType): CodeBlock = "super(\$S,"
-        .asCode(name)
-        .join(metaTypeStatement(type))
-        .joinByComma(OWNER_NAME.asCode())
-        .join(");")
+    .asCode(name)
+    .join(metaTypeStatement(type))
+    .joinByComma(OWNER_NAME.asCode())
+    .join(");")
 
 fun javaMetaConstructorSuperStatement(type: JavaMetaType): CodeBlock = "super("
-        .join(metaTypeStatement(type))
-        .joinByComma(OWNER_NAME.asCode())
-        .join(");")
+    .join(metaTypeStatement(type))
+    .joinByComma(OWNER_NAME.asCode())
+    .join(");")
 
 fun javaMetaClassSuperStatement(metaClass: JavaMetaClass): CodeBlock = "super("
-        .join(metaTypeStatement(metaClass.type))
-        .join(");")
+    .join(metaTypeStatement(metaClass.type))
+    .join(");")
 
 fun javaNamedSuperStatement(name: String): CodeBlock = "super(\$S);".asCode(name)
 
@@ -156,14 +160,14 @@ fun javaCallInvocationStatement(method: JavaMetaMethod, invocationName: String):
     val returnType = method.returnType.asPoetType()
     if (method.returnType.kind == PRIMITIVE_KIND && returnType == VOID.box()) {
         return "\$L.apply(new Object[]{"
-                .asCode(invocationName)
-                .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
-                .join("});")
+            .asCode(invocationName)
+            .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
+            .join("});")
     }
     return "return (\$T)(\$L.apply(new Object[]{"
-            .asCode(returnType, invocationName)
-            .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
-            .join("}));")
+        .asCode(returnType, invocationName)
+        .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
+        .join("}));")
 }
 
 
@@ -172,20 +176,20 @@ fun MethodSpec.Builder.addLines(vararg code: CodeBlock): MethodSpec.Builder = ad
 fun javaMetaClassSelfMethodCall(target: TypeName): CodeBlock = "\$T.self(\$T.class)".asCode(JAVA_META_CLASS_CLASS_NAME, target)
 
 private fun metaEnumBlock(className: TypeName) = "$META_ENUM_METHOD_NAME(\$T.class, \$T::valueOf)"
-        .asCode(className, className)
+    .asCode(className, className)
 
 private fun metaTypeBlock(className: TypeName, vararg parameters: JavaMetaType): CodeBlock = "$META_TYPE_METHOD_NAME(\$T.class"
-        .asCode(className)
-        .let { block ->
-            if (parameters.isEmpty()) return@let block
-            block.joinByComma(*parameters.map(::metaTypeStatement).toTypedArray())
-        }
-        .join(")")
+    .asCode(className)
+    .let { block ->
+        if (parameters.isEmpty()) return@let block
+        block.joinByComma(*parameters.map(::metaTypeStatement).toTypedArray())
+    }
+    .join(")")
 
 private fun metaArrayBlock(type: JavaMetaType, className: TypeName): CodeBlock = "$META_ARRAY_METHOD_NAME(\$T.class, \$T::new, "
-        .asCode(className, className)
-        .join(metaTypeStatement(type.arrayComponentType!!))
-        .join(")")
+    .asCode(className, className)
+    .join(metaTypeStatement(type.arrayComponentType!!))
+    .join(")")
 
 private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
     val poetClass = type.extractClass()
@@ -195,8 +199,9 @@ private fun metaTypeStatement(type: JavaMetaType): CodeBlock {
         CLASS_KIND -> metaTypeBlock(poetClass, *type.typeParameters.toTypedArray())
         ENUM_KIND -> metaEnumBlock(poetClass)
         WILDCARD_KIND -> type.wildcardExtendsBound?.let(::metaTypeStatement)
-                ?: type.wildcardSuperBound?.let(::metaTypeStatement)
-                ?: metaTypeBlock(JAVA_OBJECT_CLASS_NAME)
+            ?: type.wildcardSuperBound?.let(::metaTypeStatement)
+            ?: metaTypeBlock(JAVA_OBJECT_CLASS_NAME)
+
         UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $type")
     }
 }
@@ -223,7 +228,7 @@ private fun casted(parameter: JavaMetaParameter): CodeBlock {
 }
 
 private fun casted(parameters: Map<String, JavaMetaParameter>): CodeBlock = parameters.values
-        .mapIndexed { index, parameter -> "(\$T)($ARGUMENTS_NAME[$index])".asCode(parameter.type.asPoetType()) }
-        .let { blocks -> join(blocks, COMMA) }
+    .mapIndexed { index, parameter -> "(\$T)($ARGUMENTS_NAME[$index])".asCode(parameter.type.asPoetType()) }
+    .let { blocks -> join(blocks, COMMA) }
 
 private fun inheritedStatement(inherited: Boolean) = "\$L".asCode(inherited)
