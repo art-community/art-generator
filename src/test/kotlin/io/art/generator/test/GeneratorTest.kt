@@ -63,12 +63,12 @@ class GeneratorTest {
     @BeforeEach
     fun prepare() {
         reconfigure()
-        //generatedFiles().forEach { file -> file.delete() }
+        generatedFiles().forEach { file -> file.delete() }
     }
 
     @AfterEach
     fun cleanup() {
-        //generatedFiles().forEach { file -> file.delete() }
+        generatedFiles().forEach { file -> file.delete() }
     }
 
     @Test
