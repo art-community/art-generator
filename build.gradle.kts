@@ -97,7 +97,7 @@ tasks.build {
 }
 
 afterEvaluate {
-    tasks.findByName("publish")?.dependsOn("build-jar-executable")
+    tasks.forEach { task -> if (task.name.contains("publish")) task.dependsOn("build-jar-executable") }
 }
 
 tasks.test {
