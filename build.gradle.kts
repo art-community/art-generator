@@ -82,9 +82,9 @@ executable {
     jar {
         configureRun {
             val configurationPath = generator.mainConfiguration.workingDirectory
-                    .resolve("module.yml")
-                    .toFile()
-                    .absolutePath
+                .resolve("module.yml")
+                .toFile()
+                .absolutePath
             dependsOn(WRITE_CONFIGURATION_TASK)
             jvmArgs("-Dconfiguration=$configurationPath")
         }
@@ -102,13 +102,21 @@ afterEvaluate {
 
 tasks.test {
     val configurationPath = generator.mainConfiguration.workingDirectory
-            .resolve("module.yml")
-            .toFile()
-            .absolutePath
+        .resolve("module.yml")
+        .toFile()
+        .absolutePath
     dependsOn(BUILD_JAR_EXECUTABLE_TASK)
     dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
     jvmArgs("-Xms2g", "-Xmx2g")
+    jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
+    jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
+    jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED")
+    jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
+    jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+    jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
+    jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED")
+    jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
     jvmArgs("-Dconfiguration=$configurationPath")
     jvmArgs("-Djar=${layout.buildDirectory.file("executable").get().asFile.resolve("art-generator.jar").absolutePath}")
 }
