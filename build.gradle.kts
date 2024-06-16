@@ -9,14 +9,7 @@ plugins {
 }
 
 tasks.withType(type = Wrapper::class) {
-    gradleVersion = "7.2"
-}
-
-val compileKotlin by tasks.getting(KotlinCompile::class) {
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
-        apiVersion = "1.5"
-    }
+    gradleVersion = "8.5"
 }
 
 allprojects {
@@ -117,5 +110,5 @@ tasks.test {
     useJUnitPlatform()
     jvmArgs("-Xms2g", "-Xmx2g")
     jvmArgs("-Dconfiguration=$configurationPath")
-    jvmArgs("-Djar=${buildDir.resolve("executable").resolve("art-generator.jar").absolutePath}")
+    jvmArgs("-Djar=${layout.buildDirectory.file("executable").get().asFile.resolve("art-generator.jar").absolutePath}")
 }
