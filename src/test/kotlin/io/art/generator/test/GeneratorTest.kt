@@ -41,8 +41,11 @@ import io.art.generator.service.common.initialize
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.launcher.kotlin.activator
 import io.art.logging.Logging.logger
+import io.art.logging.kotlin.error
 import io.art.logging.kotlin.logging
+import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
+import org.jetbrains.kotlin.cli.jvm.compiler.messageCollector
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -91,9 +94,9 @@ class GeneratorTest {
 
             if (source.languages.contains(JAVA)) {
                 val roots = configuration.sources
-                        .filter { configuration -> configuration.languages.contains(JAVA) }
-                        .map { configuration -> configuration.root }
-                        .toSet()
+                    .filter { configuration -> configuration.languages.contains(JAVA) }
+                    .map { configuration -> configuration.root }
+                    .toSet()
                 useJavaCompiler(JavaCompilerConfiguration(roots, source.classpath, tempDirectory)) { task -> assertTrue(task.call()) }
                 logger.info("[${source.root.name}]: Java sources compiled")
 
@@ -112,35 +115,40 @@ class GeneratorTest {
                 tempDirectory.toFile().mkdirs()
             }
 
-//            if (source.languages.contains(KOTLIN)) {
-//                val roots = configuration.sources
-//                        .filter { configuration -> configuration.languages.contains(KOTLIN) }
-//                        .map { configuration -> configuration.root }
-//                        .toSet()
-//                useKotlinCompiler(KotlinCompilerConfiguration(roots, source.classpath, tempDirectory)) {
-//                    analyzeAndGenerate(this)
-//                }
-//                logger.info("[${source.root.name}]: Kotlin sources compiled")
-//
-//                var name = source.module + source.root.toFile().name.normalizeToClassSuffix()
-//                if (source.languages.size > 1) {
-//                    name += KOTLIN.suffix
-//                }
-//                val generatedClassName = metaModuleClassFullName(source.metaPackage, name)
-//                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
-//                    logger.info("[${source.root.name}]: Loaded Kotlin class: $generatedClassName")
-//                })
-//            }
+            if (source.languages.contains(KOTLIN)) {
+                val roots = configuration.sources
+                    .filter { configuration -> configuration.languages.contains(KOTLIN) }
+                    .map { configuration -> configuration.root }
+                    .toSet()
+                useKotlinCompiler(KotlinCompilerConfiguration(roots, source.classpath, tempDirectory)) {
+                    runCatching { analyzeAndGenerate(this) }.onFailure { error ->
+                        if (messageCollector.hasErrors()) {
+                            throw AssertionError(messageCollector.error())
+                        }
+                        throw error
+                    }
+                }
+                logger.info("[${source.root.name}]: Kotlin sources compiled")
+
+                var name = source.module + source.root.toFile().name.normalizeToClassSuffix()
+                if (source.languages.size > 1) {
+                    name += KOTLIN.suffix
+                }
+                val generatedClassName = metaModuleClassFullName(source.metaPackage, name)
+                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
+                    logger.info("[${source.root.name}]: Loaded Kotlin class: $generatedClassName")
+                })
+            }
         }
     }
 
     private fun generatedFiles() = configuration.sources
-            .flatMap { source ->
-                source.metaPath
-                        .toFile()
-                        .listFiles()
-                        ?.filter { file -> file.name.startsWith(capitalize(META_NAME + source.module)) }
-                        ?: emptyList()
-            }
-            .toSet()
+        .flatMap { source ->
+            source.metaPath
+                .toFile()
+                .listFiles()
+                ?.filter { file -> file.name.startsWith(capitalize(META_NAME + source.module)) }
+                ?: emptyList()
+        }
+        .toSet()
 }
