@@ -23,6 +23,8 @@ dependencies {
     val javaPoetVersion: String by project
     val kotlinPoetVersion: String by project
     val artKotlinVersion: String by project
+    val kspVersion: String by project
+    val kotlinCompileTestingVersion: String by project
 
     embedded(kotlin("stdlib-jdk8"))
     embedded(kotlin("compiler-embeddable"))
@@ -33,6 +35,8 @@ dependencies {
     embedded("io.art.kotlin:configurator:$artKotlinVersion")
     embedded("io.art.kotlin:logging:$artKotlinVersion")
     embedded("io.art.kotlin:meta:$artKotlinVersion")
+    embedded("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+    embedded("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
 
     embedded("org.projectlombok", "lombok", lombokVersion)
     embedded("com.squareup", "javapoet", javaPoetVersion)
