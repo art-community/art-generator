@@ -18,6 +18,7 @@
 
 package io.art.generator.producer
 
+import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
 import com.squareup.kotlinpoet.KModifier.*
@@ -38,57 +39,59 @@ import org.jetbrains.kotlin.descriptors.Modality.ABSTRACT
 fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: NameFactory) {
     val className = metaClassName(metaClass.type.className!!)
     val metaClassName = KotlinMetaClassName(
-            metaName = kotlinMetaClassClassName(metaClass.type.className, nameFactory),
-            type = metaClass,
-            typeName = metaClass.type.asPoetType()
+        metaName = kotlinMetaClassClassName(metaClass.type.className, nameFactory),
+        type = metaClass,
+        typeName = metaClass.type.asPoetType()
     )
     classBuilder(metaClassName.metaName)
-            .superclass(KOTLIN_META_CLASS_CLASS_NAME.parameterizedBy(metaClassName.typeName))
-            .addFunction(constructorBuilder()
-                    .addModifiers(INTERNAL)
-                    .callSuperConstructor(kotlinMetaClassSuperStatement(metaClass))
-                    .build())
-            .apply { generateSelf(metaClassName) }
-            .apply { if (metaClass.modality != ABSTRACT) generateConstructors(metaClassName) }
-            .apply { generateProperties(metaClassName) }
-            .apply { generateFunctions(metaClassName) }
-            .apply {
-                if (metaClass.isInterface) {
-                    generateProxy(metaClass)
-                }
+        .superclass(KOTLIN_META_CLASS_CLASS_NAME.parameterizedBy(metaClassName.typeName))
+        .addFunction(
+            constructorBuilder()
+                .addModifiers(INTERNAL)
+                .callSuperConstructor(kotlinMetaClassSuperStatement(metaClass))
+                .build()
+        )
+        .apply { generateSelf(metaClassName) }
+        .apply { if (!metaClass.modifiers.contains(Modifier.ABSTRACT)) generateConstructors(metaClassName) }
+        .apply { generateProperties(metaClassName) }
+        .apply { generateFunctions(metaClassName) }
+        .apply {
+            if (metaClass.isInterface) {
+                generateProxy(metaClass)
             }
-            .apply {
-                metaClass.innerClasses
-                        .values
-                        .filter(KotlinMetaClass::couldBeGenerated)
-                        .forEach { inner -> generateClass(inner, nameFactory) }
-            }
-            .build()
-            .apply(::addType)
+        }
+        .apply {
+            metaClass.innerClasses
+                .values
+                .filter(KotlinMetaClass::couldBeGenerated)
+                .forEach { inner -> generateClass(inner, nameFactory) }
+        }
+        .build()
+        .apply(::addType)
     PropertySpec.builder(className, metaClassName.metaName)
-            .addModifiers(PRIVATE)
-            .initializer(kotlinRegisterClass(metaClassName.metaName))
-            .build()
-            .apply(::addProperty)
+        .addModifiers(PRIVATE)
+        .initializer(kotlinRegisterClass(metaClassName.metaName))
+        .build()
+        .apply(::addProperty)
     FunSpec.builder(className)
-            .returns(metaClassName.metaName)
-            .addCode(kotlinReturnStatement(className))
-            .build()
-            .let(::addFunction)
+        .returns(metaClassName.metaName)
+        .addCode(kotlinReturnStatement(className))
+        .build()
+        .let(::addFunction)
 }
 
 private fun TypeSpec.Builder.generateSelf(metaClassName: KotlinMetaClassName) {
     val type = KOTLIN_LAZY_CLASS_NAME.parameterizedBy(metaClassName.metaName)
     TypeSpec.companionObjectBuilder().apply {
         PropertySpec.builder(SELF_NAME, type, PRIVATE, FINAL)
-                .initializer(kotlinMetaClassSelfMethodCall(metaClassName.typeName))
-                .build()
-                .apply(::addProperty)
+            .initializer(kotlinMetaClassSelfMethodCall(metaClassName.typeName))
+            .build()
+            .apply(::addProperty)
         FunSpec.builder(decapitalize(metaClassName.type.type.className))
-                .addModifiers(PUBLIC)
-                .returns(metaClassName.metaName)
-                .addCode(kotlinReturnLazyGetStatement(SELF_NAME))
-                .build()
-                .let(::addFunction)
+            .addModifiers(PUBLIC)
+            .returns(metaClassName.metaName)
+            .addCode(kotlinReturnLazyGetStatement(SELF_NAME))
+            .build()
+            .let(::addFunction)
     }.build().apply(::addType)
 }

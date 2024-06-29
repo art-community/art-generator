@@ -1,5 +1,6 @@
 package io.art.generator.producer;
 
+import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.MemberName.Companion.member
@@ -40,7 +41,7 @@ internal fun TypeSpec.Builder.generateProperty(property: KotlinMetaProperty, met
             .addCode(kotlinReturnStatement(propertyName))
             .build()
             .let(::addFunction)
-    if (property.visibility.delegate != Visibilities.Public) return
+    if (!property.modifiers.contains(Modifier.PUBLIC)) return
     property.getter
             ?.takeIf(KotlinMetaPropertyFunction::couldBeGenerated)
             ?.apply { generateGetter(metaClassName, property) }

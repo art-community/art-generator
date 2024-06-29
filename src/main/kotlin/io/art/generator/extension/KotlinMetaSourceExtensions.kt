@@ -18,6 +18,7 @@
 
 package io.art.generator.extension
 
+import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.WildcardTypeName.Companion.consumerOf
@@ -77,11 +78,11 @@ fun KotlinMetaType.extractClass(): TypeName = when (kind) {
     UNKNOWN_KIND -> STAR
 }
 
-fun KotlinMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && visibility.delegate == Public
+fun KotlinMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && modifiers.contains(Modifier.PUBLIC)
 
-fun KotlinMetaFunction.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) && visibility.delegate == Public
+fun KotlinMetaFunction.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) && modifiers.contains(Modifier.PUBLIC)
 
-fun KotlinMetaPropertyFunction.couldBeGenerated() = visibility.delegate == Public
+fun KotlinMetaPropertyFunction.couldBeGenerated() = modifiers.contains(Modifier.PUBLIC)
 
 fun KotlinMetaClass.superFunctions(): List<KotlinMetaFunction> {
     val parentFunctions = (parent?.functions ?: emptyList()) + (parent?.superFunctions() ?: emptyList())

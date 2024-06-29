@@ -22,6 +22,9 @@ import com.google.devtools.ksp.isInternal
 import com.google.devtools.ksp.isLocal
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
+import com.google.devtools.ksp.symbol.ClassKind.ANNOTATION_CLASS
+import com.google.devtools.ksp.symbol.ClassKind.ENUM_ENTRY
+import com.google.devtools.ksp.symbol.Modifier.*
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.symbolProcessorProviders
@@ -40,16 +43,19 @@ data class KotlinAnalyzingRequest(
     val metaClassName: String,
 )
 
+object KotlinAnalyzerBuiltins {
+    lateinit var builtins: KSBuiltIns
+}
+
 fun analyzeKotlinSources(request: KotlinAnalyzingRequest) = KotlinAnalyzingService().analyzeKotlinSources(request)
 
 private class KotlinAnalyzingProcessor(private val processor: (files: List<KSFile>) -> Unit) : SymbolProcessor {
     var invoked = false
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        if (invoked) {
-            return emptyList()
-        }
+        if (invoked) return emptyList()
         processor(resolver.getAllFiles().toList())
         invoked = true
+        KotlinAnalyzerBuiltins.builtins = resolver.builtIns
         return emptyList()
     }
 }
@@ -62,18 +68,13 @@ private class KotlinAnalyzingProcessorProvider(private val processor: (files: Li
 private class KotlinAnalyzingService : KotlinDescriptorParser() {
     fun analyzeKotlinSources(request: KotlinAnalyzingRequest): List<KotlinMetaClass> {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
-
         val roots = request.configuration.sources.toSet()
-        lateinit var processed: List<KSFile>
-        val compilation = KotlinCompilation().apply {
+        val processed = mutableSetOf<KSFile>()
+        KotlinCompilation().apply {
             sources = roots.map { path -> SourceFile.fromPath(path.toFile(), false) }
-            symbolProcessorProviders = listOf(KotlinAnalyzingProcessorProvider { files ->
-                processed = files
-            })
+            symbolProcessorProviders = listOf(KotlinAnalyzingProcessorProvider(processed::addAll))
+            compile()
         }
-
-        compilation.compile()
-
         return request.configuration.root.toFile().listFiles()!!
             .map { file -> file.name }
             .flatMap { packageName -> collectClasses(processed, packageName) }
@@ -81,9 +82,9 @@ private class KotlinAnalyzingService : KotlinDescriptorParser() {
             .filter { descriptor -> !descriptor.containingFile?.fileName?.kotlinPath.isNullOrBlank() }
             .filter { descriptor -> descriptor.included(request) }
             .filter { descriptor -> descriptor.qualifiedName?.asString() != request.metaClassName }
-            .filter { descriptor -> descriptor.classKind != ClassKind.ENUM_ENTRY }
-            .filter { descriptor -> descriptor.classKind != ClassKind.ANNOTATION_CLASS }
-            .filter { descriptor -> !descriptor.modifiers.contains(Modifier.INNER) }
+            .filter { descriptor -> descriptor.classKind != ENUM_ENTRY }
+            .filter { descriptor -> descriptor.classKind != ANNOTATION_CLASS }
+            .filter { descriptor -> !descriptor.modifiers.contains(INNER) }
             .filter { descriptor -> !descriptor.isLocal() }
             .filter { descriptor -> !descriptor.isInternal() }
             .filter { descriptor -> descriptor.parentDeclaration !is KSClassDeclaration }
@@ -100,7 +101,7 @@ private class KotlinAnalyzingService : KotlinDescriptorParser() {
                     && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion.kotlinPath, path) })
         }
 
-    private fun collectClasses(processed: List<KSFile>, packageName: String): List<KSClassDeclaration> = processed
+    private fun collectClasses(processed: Set<KSFile>, packageName: String): List<KSClassDeclaration> = processed
         .filter { declaration -> declaration.packageName.asString() == packageName }
         .flatMap { declaration -> declaration.declarations }
         .filterIsInstance<KSClassDeclaration>()
