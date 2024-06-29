@@ -61,6 +61,7 @@ private class KotlinAnalyzingProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         if (invoked) return emptyList()
         val resolved = resolver.getAllFiles().toSet()
+        KotlinAnalyzerBuiltins.builtins = resolver.builtIns
         request.configuration.root.toFile().listFiles()!!
             .asSequence()
             .map { file -> file.name }
@@ -81,7 +82,6 @@ private class KotlinAnalyzingProcessor(
             .toList()
             .let(processor)
         invoked = true
-        KotlinAnalyzerBuiltins.builtins = resolver.builtIns
         return emptyList()
     }
 

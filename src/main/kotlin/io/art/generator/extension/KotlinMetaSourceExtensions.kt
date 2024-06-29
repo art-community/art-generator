@@ -35,8 +35,8 @@ import org.jetbrains.kotlin.descriptors.Visibilities.Public
 fun KotlinMetaType.asPoetType(): TypeName {
     val rawType = when (kind) {
         ARRAY_KIND -> ARRAY
-                .parameterizedBy(arrayComponentType!!.asPoetType())
-                .copy(nullable = nullable)
+            .parameterizedBy(arrayComponentType!!.asPoetType())
+            .copy(nullable = nullable)
 
         ENUM_KIND -> asClassName().copy(nullable = nullable)
 
@@ -52,8 +52,8 @@ fun KotlinMetaType.asPoetType(): TypeName {
         WILDCARD_KIND -> STAR
 
         FUNCTION_KIND -> LambdaTypeName.get(
-                parameters = lambdaArgumentTypes.map { argument -> argument.asPoetType() }.toTypedArray(),
-                returnType = lambdaResultType?.asPoetType() ?: UNIT
+            parameters = lambdaArgumentTypes.map { argument -> argument.asPoetType() }.toTypedArray(),
+            returnType = lambdaResultType?.asPoetType() ?: UNIT
         ).copy(nullable = nullable)
 
         UNKNOWN_KIND -> throw MetaGeneratorException("$UNKNOWN_KIND: $this")
@@ -78,11 +78,11 @@ fun KotlinMetaType.extractClass(): TypeName = when (kind) {
     UNKNOWN_KIND -> STAR
 }
 
-fun KotlinMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && modifiers.contains(Modifier.PUBLIC)
+fun KotlinMetaClass.couldBeGenerated() = type.kind != ENUM_KIND && !modifiers.contains(Modifier.PRIVATE) && !modifiers.contains(Modifier.INTERNAL) && !modifiers.contains(Modifier.PROTECTED)
 
-fun KotlinMetaFunction.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) && modifiers.contains(Modifier.PUBLIC)
+fun KotlinMetaFunction.couldBeGenerated() = !META_METHOD_EXCLUSIONS.contains(name) && !modifiers.contains(Modifier.PRIVATE) && !modifiers.contains(Modifier.INTERNAL) && !modifiers.contains(Modifier.PROTECTED)
 
-fun KotlinMetaPropertyFunction.couldBeGenerated() = modifiers.contains(Modifier.PUBLIC)
+fun KotlinMetaPropertyFunction.couldBeGenerated() = modifiers.contains(Modifier.PRIVATE) && !modifiers.contains(Modifier.INTERNAL) && !modifiers.contains(Modifier.PROTECTED)
 
 fun KotlinMetaClass.superFunctions(): List<KotlinMetaFunction> {
     val parentFunctions = (parent?.functions ?: emptyList()) + (parent?.superFunctions() ?: emptyList())
@@ -96,8 +96,8 @@ fun KotlinMetaClass.superProperties(): Map<String, KotlinMetaProperty> {
 
 private fun KotlinMetaType.asClassName(): ClassName {
     val classes = classFullName!!.substringAfter(classPackageName!!)
-            .split(DOT)
-            .filter { part -> part.isNotBlank() }
-            .toTypedArray()
+        .split(DOT)
+        .filter { part -> part.isNotBlank() }
+        .toTypedArray()
     return ClassName(classPackageName, *classes)
 }

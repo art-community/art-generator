@@ -73,7 +73,7 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass
 
     metaClass.properties.values
         .asSequence()
-        .filter { property -> property.modifiers.contains(Modifier.PUBLIC) }
+        .filter { property -> !(property.modifiers.contains(Modifier.PRIVATE) || property.modifiers.contains(Modifier.INTERNAL) || property.modifiers.contains(Modifier.PROTECTED)) }
         .forEach { property ->
             addProperty(
                 PropertySpec.builder(property.name, property.type.asPoetType())

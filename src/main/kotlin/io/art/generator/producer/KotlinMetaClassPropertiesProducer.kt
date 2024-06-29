@@ -41,7 +41,7 @@ internal fun TypeSpec.Builder.generateProperty(property: KotlinMetaProperty, met
             .addCode(kotlinReturnStatement(propertyName))
             .build()
             .let(::addFunction)
-    if (!property.modifiers.contains(Modifier.PUBLIC)) return
+    if (property.modifiers.contains(Modifier.PRIVATE) || property.modifiers.contains(Modifier.INTERNAL) || property.modifiers.contains(Modifier.PROTECTED)) return
     property.getter
             ?.takeIf(KotlinMetaPropertyFunction::couldBeGenerated)
             ?.apply { generateGetter(metaClassName, property) }

@@ -15,7 +15,9 @@ open class KotlinTypeParser {
     protected fun KSTypeReference.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = resolve().asMetaType(variance)
 
     protected fun KSType.asMetaType(variance: KotlinTypeVariance? = null): KotlinMetaType = putIfAbsent(cache, this) {
-        if (isError) return@putIfAbsent KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
+        if (isError) {
+            return@putIfAbsent KotlinMetaType(originalType = this, kind = UNKNOWN_KIND, typeName = toString())
+        }
         return@putIfAbsent when {
             (declaration is KSClassDeclaration && (declaration as KSClassDeclaration).classKind == ClassKind.ENUM_CLASS) -> {
                 val declaration = (declaration as KSClassDeclaration)
