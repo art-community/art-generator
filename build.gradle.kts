@@ -90,7 +90,16 @@ executable {
                 .toFile()
                 .absolutePath
             dependsOn(WRITE_CONFIGURATION_TASK)
-            jvmArgs("-Dconfiguration=$configurationPath")
+            jvmArgs("-Xms2g", "-Xmx2g")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
+            jvmArgs("-Dconfiguration=/home/anton/development/art-environment/local/projects/art-example/build/generator/module.yml")
         }
     }
     main("io.art.generator.Generator")

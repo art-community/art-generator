@@ -21,13 +21,16 @@ package io.art.generator.service.analyzing
 import com.google.devtools.ksp.isInternal
 import com.google.devtools.ksp.isLocal
 import com.google.devtools.ksp.processing.*
-import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.symbol.ClassKind.ANNOTATION_CLASS
 import com.google.devtools.ksp.symbol.ClassKind.ENUM_ENTRY
-import com.google.devtools.ksp.symbol.Modifier.*
+import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFile
+import com.google.devtools.ksp.symbol.Modifier.INNER
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.symbolProcessorProviders
+import io.art.core.constants.StringConstants.DOT
 import io.art.core.matcher.PathMatcher.matches
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZING_MESSAGE
@@ -37,6 +40,7 @@ import io.art.generator.model.KotlinMetaClass
 import io.art.generator.parser.KotlinDescriptorParser
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import java.nio.file.Paths.get
+import kotlin.io.path.exists
 
 data class KotlinAnalyzingRequest(
     val configuration: SourceConfiguration,
@@ -49,37 +53,18 @@ object KotlinAnalyzerBuiltins {
 
 fun analyzeKotlinSources(request: KotlinAnalyzingRequest) = KotlinAnalyzingService().analyzeKotlinSources(request)
 
-private class KotlinAnalyzingProcessor(private val processor: (files: List<KSFile>) -> Unit) : SymbolProcessor {
+private class KotlinAnalyzingProcessor(
+    private val request: KotlinAnalyzingRequest,
+    private val processor: (files: List<KotlinMetaClass>) -> Unit
+) : SymbolProcessor, KotlinDescriptorParser() {
     var invoked = false
     override fun process(resolver: Resolver): List<KSAnnotated> {
         if (invoked) return emptyList()
-        println("test")
-        processor(resolver.getAllFiles().toList())
-        invoked = true
-        KotlinAnalyzerBuiltins.builtins = resolver.builtIns
-        return emptyList()
-    }
-}
-
-private class KotlinAnalyzingProcessorProvider(private val processor: (files: List<KSFile>) -> Unit) : SymbolProcessorProvider {
-    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor = KotlinAnalyzingProcessor(processor)
-}
-
-@OptIn(ExperimentalCompilerApi::class)
-private class KotlinAnalyzingService : KotlinDescriptorParser() {
-    fun analyzeKotlinSources(request: KotlinAnalyzingRequest): List<KotlinMetaClass> {
-        KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
-        val roots = request.configuration.sources.toSet()
-        val processed = mutableSetOf<KSFile>()
-        KotlinCompilation().apply {
-            sources = roots.map { path -> SourceFile.fromPath(path.toFile(), false) }
-            symbolProcessorProviders = listOf(KotlinAnalyzingProcessorProvider(processed::addAll))
-            compile()
-        }
-        return request.configuration.root.toFile().listFiles()!!
-            .map { file -> file.name }
-            .flatMap { packageName -> collectClasses(processed, packageName) }
+        val resolved = resolver.getAllFiles().toSet()
+        request.configuration.root.toFile().listFiles()!!
             .asSequence()
+            .map { file -> file.name }
+            .flatMap { packageName -> collectClasses(resolved, packageName) }
             .filter { descriptor -> !descriptor.containingFile?.fileName?.kotlinPath.isNullOrBlank() }
             .filter { descriptor -> descriptor.included(request) }
             .filter { descriptor -> descriptor.qualifiedName?.asString() != request.metaClassName }
@@ -89,10 +74,15 @@ private class KotlinAnalyzingService : KotlinDescriptorParser() {
             .filter { descriptor -> !descriptor.isLocal() }
             .filter { descriptor -> !descriptor.isInternal() }
             .filter { descriptor -> descriptor.parentDeclaration !is KSClassDeclaration }
-            .filter { descriptor -> descriptor.primaryConstructor?.parameters?.isEmpty() == true }
+            .filter { descriptor -> descriptor.typeParameters.isEmpty() }
+            .toList()
             .map { descriptor -> descriptor.asMetaClass() }
             .distinctBy { metaClass -> metaClass.type.typeName }
             .toList()
+            .let(processor)
+        invoked = true
+        KotlinAnalyzerBuiltins.builtins = resolver.builtIns
+        return emptyList()
     }
 
     private fun KSClassDeclaration.included(request: KotlinAnalyzingRequest) = get(containingFile!!.filePath)
@@ -103,8 +93,33 @@ private class KotlinAnalyzingService : KotlinDescriptorParser() {
         }
 
     private fun collectClasses(processed: Set<KSFile>, packageName: String): List<KSClassDeclaration> = processed
-        .filter { declaration -> declaration.packageName.asString() == packageName }
+        .filter { declaration -> declaration.packageName.asString().substringBefore(DOT) == packageName }
         .flatMap { declaration -> declaration.declarations }
         .filterIsInstance<KSClassDeclaration>()
         .toList()
+}
+
+private class KotlinAnalyzingProcessorProvider(
+    private val request: KotlinAnalyzingRequest,
+    private val processor: (files: List<KotlinMetaClass>) -> Unit
+) : SymbolProcessorProvider {
+    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor = KotlinAnalyzingProcessor(request, processor)
+}
+
+@OptIn(ExperimentalCompilerApi::class)
+private class KotlinAnalyzingService {
+    fun analyzeKotlinSources(request: KotlinAnalyzingRequest): List<KotlinMetaClass> {
+        KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
+        val roots = request.configuration.sources.toSet()
+        val processed = mutableListOf<KotlinMetaClass>()
+        KotlinCompilation().apply {
+            sources = roots.filter { path -> path.exists() }
+                .flatMap { path -> path.toFile().walkTopDown().toList() }
+                .filter { path -> path.isFile }
+                .map { path -> SourceFile.fromPath(path, false) }
+            symbolProcessorProviders = listOf(KotlinAnalyzingProcessorProvider(request, processed::addAll))
+            compile()
+        }
+        return processed
+    }
 }

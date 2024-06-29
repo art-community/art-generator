@@ -65,7 +65,7 @@ open class KotlinDescriptorParser : KotlinTypeParser() {
                     ?.takeIf { declaration -> declaration.classKind != ANNOTATION_CLASS }
                     ?.takeIf { declaration -> declaration.isInternal() }
                     ?.takeIf { declaration -> declaration.isLocal() }
-                    ?.takeIf { declaration -> declaration.primaryConstructor?.parameters?.isEmpty() == true }
+                    ?.takeIf { declaration -> declaration.typeParameters.isEmpty() }
                     ?.asMetaClass()
             )
         }
@@ -78,7 +78,7 @@ open class KotlinDescriptorParser : KotlinTypeParser() {
                 .filter { declaration -> declaration.classKind != ANNOTATION_CLASS }
                 .filter { declaration -> !declaration.isInternal() }
                 .filter { declaration -> !declaration.isLocal() }
-                .filter { declaration -> declaration.primaryConstructor?.parameters?.isEmpty() == true }
+                .filter { declaration -> declaration.typeParameters.isEmpty() }
                 .associate { declaration -> declaration.simpleName.asString() to cache.getOrElse(declaration) { declaration.asMetaClass() } }
             metaClass.innerClasses.putAll(innerClasses)
         }
@@ -91,7 +91,7 @@ open class KotlinDescriptorParser : KotlinTypeParser() {
                 .filter { declaration -> declaration.classKind != ANNOTATION_CLASS }
                 .filter { declaration -> !declaration.isInternal() }
                 .filter { declaration -> !declaration.isLocal() }
-                .filter { declaration -> declaration.primaryConstructor?.parameters?.isEmpty() == true }
+                .filter { declaration -> declaration.typeParameters.isEmpty() }
                 .map { declaration -> cache.getOrElse(declaration) { declaration.asMetaClass() } }
                 .toList()
             metaClass.interfaces.addAll(interfaces)
