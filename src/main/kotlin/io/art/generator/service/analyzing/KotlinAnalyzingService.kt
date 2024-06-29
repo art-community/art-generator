@@ -53,6 +53,7 @@ private class KotlinAnalyzingProcessor(private val processor: (files: List<KSFil
     var invoked = false
     override fun process(resolver: Resolver): List<KSAnnotated> {
         if (invoked) return emptyList()
+        println("test")
         processor(resolver.getAllFiles().toList())
         invoked = true
         KotlinAnalyzerBuiltins.builtins = resolver.builtIns
