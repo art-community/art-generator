@@ -19,6 +19,8 @@
 
 package io.art.generator.test
 
+import com.tschuchort.compiletesting.KotlinCompilation
+import com.tschuchort.compiletesting.SourceFile
 import io.art.configurator.kotlin.configurator
 import io.art.core.extensions.FileExtensions.recursiveDelete
 import io.art.core.extensions.StringExtensions.capitalize
@@ -34,18 +36,13 @@ import io.art.generator.extension.normalizeToClassSuffix
 import io.art.generator.loader.PathClassLoader
 import io.art.generator.provider.JavaCompilerConfiguration
 import io.art.generator.provider.JavaCompilerProvider.useJavaCompiler
-import io.art.generator.provider.KotlinCompilerConfiguration
-import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
 import io.art.generator.service.common.SourceScanningService.scanSources
 import io.art.generator.service.common.initialize
 import io.art.generator.templates.metaModuleClassFullName
 import io.art.launcher.kotlin.activator
 import io.art.logging.Logging.logger
-import io.art.logging.kotlin.error
 import io.art.logging.kotlin.logging
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.analyzeAndGenerate
-import org.jetbrains.kotlin.cli.jvm.compiler.messageCollector
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -74,6 +71,7 @@ class GeneratorTest {
         generatedFiles().forEach { file -> file.delete() }
     }
 
+    @OptIn(ExperimentalCompilerApi::class)
     @Test
     fun testMetaGeneration(@TempDir tempDirectory: Path) {
         initialize()
@@ -119,15 +117,14 @@ class GeneratorTest {
                 val roots = configuration.sources
                     .filter { configuration -> configuration.languages.contains(KOTLIN) }
                     .map { configuration -> configuration.root }
+                    .flatMap { path -> path.toFile().walkTopDown().toList().filter { file -> file.isFile && (file.extension == "kt" || file.extension == "java") } }
                     .toSet()
-                useKotlinCompiler(KotlinCompilerConfiguration(roots, source.classpath, tempDirectory)) {
-                    runCatching { analyzeAndGenerate(this) }.onFailure { error ->
-                        if (messageCollector.hasErrors()) {
-                            throw AssertionError(messageCollector.error())
-                        }
-                        throw error
-                    }
-                }
+                val result = KotlinCompilation().apply {
+                    sources = roots.map { path -> SourceFile.fromPath(path) }.toList()
+                    inheritClassPath = true
+                    messageOutputStream = System.out
+                    javacArguments = mutableListOf("-proc:full")
+                }.compile()
                 logger.info("[${source.root.name}]: Kotlin sources compiled")
 
                 var name = source.module + source.root.toFile().name.normalizeToClassSuffix()
@@ -135,7 +132,7 @@ class GeneratorTest {
                     name += KOTLIN.suffix
                 }
                 val generatedClassName = metaModuleClassFullName(source.metaPackage, name)
-                assertNotNull(PathClassLoader(tempDirectory).loadClass(generatedClassName).apply {
+                assertNotNull(result.classLoader.loadClass(generatedClassName).apply {
                     logger.info("[${source.root.name}]: Loaded Kotlin class: $generatedClassName")
                 })
             }

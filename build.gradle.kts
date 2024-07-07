@@ -1,6 +1,5 @@
 import io.art.gradle.common.constants.BUILD_JAR_EXECUTABLE_TASK
 import io.art.gradle.common.constants.WRITE_CONFIGURATION_TASK
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
@@ -23,9 +22,11 @@ dependencies {
     val javaPoetVersion: String by project
     val kotlinPoetVersion: String by project
     val artKotlinVersion: String by project
+    val kotlinCompilerVersion: String by project
+    val kotlinCompilingTestingVersion: String by project
 
     embedded(kotlin("stdlib-jdk8"))
-    embedded(kotlin("compiler-embeddable"))
+    embedded(kotlin("compiler-embeddable", kotlinCompilerVersion))
     embedded(kotlin("reflect"))
 
     embedded("io.art.kotlin:core:$artKotlinVersion")
@@ -39,7 +40,7 @@ dependencies {
     embedded("com.squareup", "kotlinpoet", kotlinPoetVersion)
 
     testImplementation(kotlin("stdlib-jdk8"))
-    testImplementation(kotlin("compiler-embeddable"))
+    testImplementation(kotlin("compiler-embeddable", kotlinCompilerVersion))
     testImplementation(kotlin("reflect"))
 
     testImplementation("io.art.kotlin:core:$artKotlinVersion")
@@ -48,8 +49,9 @@ dependencies {
     testImplementation("io.art.kotlin:scheduler:$artKotlinVersion")
     testImplementation("io.art.kotlin:logging:$artKotlinVersion")
     testImplementation("io.art.kotlin:meta:$artKotlinVersion")
+    testImplementation("dev.zacsweers.kctfork:core:$kotlinCompilingTestingVersion")
+    testImplementation("org.projectlombok", "lombok", lombokVersion)
 
-    testCompileOnly("org.projectlombok", "lombok", lombokVersion)
     annotationProcessor("org.projectlombok", "lombok", lombokVersion)
     testAnnotationProcessor("org.projectlombok", "lombok", lombokVersion)
 
@@ -74,6 +76,7 @@ generator {
         sourcesPattern { exclude("**/main/*", "**/kotlin/*") }
     }
     main {
+        consoleLogging()
         disableRunning()
     }
 }
@@ -86,6 +89,15 @@ executable {
                 .toFile()
                 .absolutePath
             dependsOn(WRITE_CONFIGURATION_TASK)
+            jvmArgs("-Xms2g", "-Xmx2g")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED")
+            jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
             jvmArgs("-Dconfiguration=$configurationPath")
         }
     }
@@ -93,7 +105,7 @@ executable {
 }
 
 tasks.build {
-    dependsOn("build-jar-executable")
+    dependsOn(BUILD_JAR_EXECUTABLE_TASK)
 }
 
 afterEvaluate {
@@ -101,6 +113,9 @@ afterEvaluate {
 }
 
 tasks.test {
+    testLogging {
+        showStandardStreams = true
+    }
     val configurationPath = generator.mainConfiguration.workingDirectory
         .resolve("module.yml")
         .toFile()

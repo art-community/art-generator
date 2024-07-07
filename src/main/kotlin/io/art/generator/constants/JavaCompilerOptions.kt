@@ -19,3 +19,4 @@
 package io.art.generator.constants
 
 const val PARAMETERS_OPTION = "-parameters"
+const val PROCFULL_OPTION = "-proc:full"

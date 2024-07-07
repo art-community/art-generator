@@ -153,28 +153,28 @@ fun kotlinCallInvocationStatement(method: KotlinMetaFunction, invocationName: St
     if (method.parameters.isEmpty()) {
         val returnType = method.returnType?.asPoetType() ?: UNIT
         if (returnType == UNIT) {
-            return "%L.apply(null)".asCode(invocationName)
+            return "run(%L)".asCode(invocationName)
         }
-        return "return %L.apply(null) as %T".asCode(invocationName, returnType)
+        return "return get<%T>(%L)".asCode(returnType, invocationName)
     }
     if (method.parameters.size == 1) {
         val returnType = method.returnType?.asPoetType() ?: UNIT
         if (returnType == UNIT) {
-            return "%L.apply(%L)".asCode(invocationName, method.parameters.values.first().name)
+            return "single<Any>(%L, %L)".asCode(invocationName, method.parameters.values.first().name)
         }
-        return "return %L.apply(%L) as %T".asCode(invocationName, method.parameters.values.first().name, returnType)
+        return "return single<%T>(%L, %L)".asCode(returnType, invocationName, method.parameters.values.first().name)
     }
     val returnType = method.returnType?.asPoetType() ?: UNIT
     if (returnType == UNIT) {
-        return "%L.apply(arrayOf("
+        return "multiple<Any>(%L, arrayOf("
                 .asCode(invocationName)
                 .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
-                .join("));")
+                .join(");")
     }
-    return "return (%L.apply(arrayOf("
-            .asCode(invocationName)
+    return "return multiple<%T>(%L, arrayOf("
+            .asCode(returnType, invocationName)
             .join(joinByComma(*method.parameters.keys.map { name -> name.asCode() }.toTypedArray()))
-            .join("))) as %T".asCode(returnType))
+            .join("))")
 }
 
 fun kotlinNotImplementedStatement() = "TODO(\"Not yet implemented\")"
@@ -184,8 +184,8 @@ fun kotlinMetaClassSelfMethodCall(target: TypeName): CodeBlock = "%T.self(%T::cl
 fun FunSpec.Builder.addLines(vararg code: CodeBlock) = addCode(listOf(*code).joinToCode(NEW_LINE))
 
 
-private fun metaEnumBlock(type: KotlinMetaType) = "$META_ENUM_METHOD_NAME(%T::class.java, %T::valueOf)"
-        .asCode(type.extractClass(), type.extractClass())
+private fun metaEnumBlock(type: KotlinMetaType) = "$META_ENUM_METHOD_NAME<%T>(%T::class.java, %T::valueOf)"
+        .asCode(type.extractClass(), type.extractClass(), type.extractClass())
 
 private fun metaTypeBlock(type: KotlinMetaType, vararg parameters: KotlinMetaType): CodeBlock = "$META_TYPE_METHOD_NAME<%T>(%T::class.java"
         .asCode(type.asPoetType(), type.extractClass())

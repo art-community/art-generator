@@ -70,7 +70,8 @@ data class KotlinMetaType(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        if (originalType != (other as KotlinMetaType).originalType) return false
+        other as KotlinMetaType
+        if (originalType != other.originalType) return false
         return true
     }
 

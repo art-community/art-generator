@@ -29,6 +29,7 @@ import com.sun.tools.javac.util.Options
 import io.art.generator.constants.JAVA
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
 import io.art.generator.constants.PARAMETERS_OPTION
+import io.art.generator.constants.PROCFULL_OPTION
 import io.art.generator.logging.LoggingDiagnosticListener
 import io.art.generator.logging.LoggingWriter
 import io.art.generator.model.JavaCompilerContext
@@ -59,7 +60,7 @@ object JavaCompilerProvider {
             context.put(JavaFileManager::class.java, this)
         }
 
-        val options = listOf(PARAMETERS_OPTION)
+        val options = listOf(PARAMETERS_OPTION, PROCFULL_OPTION)
         val sources = compilerConfiguration
                 .roots
                 .flatMap { root -> root.toFile().walkTopDown().filter { file -> file.extension == JAVA } }

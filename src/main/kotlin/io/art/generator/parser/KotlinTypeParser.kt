@@ -113,6 +113,7 @@ open class KotlinTypeParser {
             Variance.INVARIANT -> KotlinTypeVariance.INVARIANT
             Variance.IN_VARIANCE -> KotlinTypeVariance.IN
             Variance.OUT_VARIANCE -> KotlinTypeVariance.OUT
+
         })
     }
 }

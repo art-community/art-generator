@@ -49,16 +49,16 @@ class GeneratorControllerTest {
         }
         reconfigure()
         configuration.sources
-                .map { source -> source.root.resolve(META_NAME).toFile() }
-                .forEach { path -> if (path.exists()) path.deleteRecursively() }
+            .map { source -> source.root.resolve(META_NAME).toFile() }
+            .forEach { path -> if (path.exists()) path.deleteRecursively() }
         configuration.controller.toFile().apply { if (exists()) delete() }
     }
 
     @AfterEach
     fun cleanup() {
         configuration.sources
-                .map { source -> source.root.resolve(META_NAME).toFile() }
-                .forEach { path -> if (path.exists()) path.deleteRecursively() }
+            .map { source -> source.root.resolve(META_NAME).toFile() }
+            .forEach { path -> if (path.exists()) path.deleteRecursively() }
     }
 
     @AfterAll
@@ -78,21 +78,30 @@ class GeneratorControllerTest {
 
     private fun runGenerator(): Process {
         val executable = context().configuration()
-                .javaHomeDirectory
-                .resolve("bin")
-                .resolve(buildString {
-                    append("java")
-                    if (isWindows()) {
-                        append(".exe")
-                    }
-                })
+            .javaHomeDirectory
+            .resolve("bin")
+            .resolve(buildString {
+                append("java")
+                if (isWindows()) {
+                    append(".exe")
+                }
+            })
 
-        return getRuntime().exec(
-                arrayOf(
-                        executable.toFile().absolutePath,
-                        "-Dconfiguration=${getProperty("configuration")}",
-                        "-jar", getProperty("jar")
-                )
-        )
+        return ProcessBuilder().command(
+            arrayOf(
+                executable.toFile().absolutePath,
+                "-Xms2g", "-Xmx2g",
+                "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+                "--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+                "--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+                "--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+                "--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+                "--add-exports", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
+                "--add-exports", "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED",
+                "--add-exports", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+                "-Dconfiguration=${getProperty("configuration")}",
+                "-jar", getProperty("jar")
+            ).toList()
+        ).inheritIO().start()
     }
 }

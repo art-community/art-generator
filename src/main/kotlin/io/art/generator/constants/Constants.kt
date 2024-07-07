@@ -34,6 +34,7 @@ const val JAR = "jar"
 const val JAVA_MODULE_SUPPRESSION = "JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE"
 
 val META_METHOD_EXCLUSIONS = setOf(
+        "<init>",
         "builder",
         "toString",
         "equals",
