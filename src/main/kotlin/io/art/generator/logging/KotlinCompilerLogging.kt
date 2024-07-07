@@ -30,7 +30,7 @@ import java.io.PrintStream
 
 class LoggingMessageCollector(
         private val logger: Logger = KOTLIN_LOGGER,
-        private val stream: PrintStream = LoggerPrintStream(logger, Logger::info),
+        private val stream: PrintStream = LoggerPrintStream(logger, Logger::trace),
         private val printer: MessageCollector = object : MessageCollector {
             override fun clear() {}
 
