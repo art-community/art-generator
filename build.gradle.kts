@@ -25,9 +25,9 @@ dependencies {
     val kotlinCompilerVersion: String by project
     val kotlinCompilingTestingVersion: String by project
 
-    embedded(kotlin("stdlib-jdk8"))
+    embedded(kotlin("stdlib-jdk8", kotlinCompilerVersion))
     embedded(kotlin("compiler-embeddable", kotlinCompilerVersion))
-    embedded(kotlin("reflect"))
+    embedded(kotlin("reflect", kotlinCompilerVersion))
 
     embedded("io.art.kotlin:core:$artKotlinVersion")
     embedded("io.art.kotlin:launcher:$artKotlinVersion")
@@ -39,9 +39,9 @@ dependencies {
     embedded("com.squareup", "javapoet", javaPoetVersion)
     embedded("com.squareup", "kotlinpoet", kotlinPoetVersion)
 
-    testImplementation(kotlin("stdlib-jdk8"))
+    testImplementation(kotlin("stdlib-jdk8", kotlinCompilerVersion))
     testImplementation(kotlin("compiler-embeddable", kotlinCompilerVersion))
-    testImplementation(kotlin("reflect"))
+    testImplementation(kotlin("reflect", kotlinCompilerVersion))
 
     testImplementation("io.art.kotlin:core:$artKotlinVersion")
     testImplementation("io.art.kotlin:launcher:$artKotlinVersion")
