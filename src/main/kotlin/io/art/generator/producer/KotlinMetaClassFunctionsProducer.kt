@@ -13,7 +13,6 @@ import io.art.generator.model.KotlinMetaClass
 import io.art.generator.model.KotlinMetaClassName
 import io.art.generator.model.KotlinMetaFunction
 import io.art.generator.model.KotlinMetaType
-import io.art.generator.service.analyzing.KotlinAnalyzerBuiltins
 import io.art.generator.templates.*
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import java.util.*
@@ -143,7 +142,7 @@ private fun TypeSpec.Builder.generateFunctionInvocations(ownerClass: KotlinMetaC
         }
         when {
             Objects.isNull(function.returnType) -> addLines(invoke, kotlinReturnNullStatement())
-            function.returnType!!.originalType == KotlinAnalyzerBuiltins.builtins.unitType -> addLines(invoke, kotlinReturnNullStatement())
+            KotlinBuiltIns.isUnit(function.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
             else -> addCode(kotlinReturnStatement(invoke))
         }
         addParameter(ARGUMENTS_NAME, ARRAY.parameterizedBy(ANY))
@@ -157,7 +156,7 @@ private fun TypeSpec.Builder.generateFunctionInvocations(ownerClass: KotlinMetaC
             }
             when {
                 Objects.isNull(function.returnType) -> addLines(invoke, kotlinReturnNullStatement())
-                function.returnType!!.originalType == KotlinAnalyzerBuiltins.builtins.unitType -> addLines(invoke, kotlinReturnNullStatement())
+                KotlinBuiltIns.isUnit(function.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
                 else -> addCode(kotlinReturnStatement(invoke))
             }
             addFunction(build())
@@ -170,7 +169,7 @@ private fun TypeSpec.Builder.generateFunctionInvocations(ownerClass: KotlinMetaC
             }
             when {
                 Objects.isNull(function.returnType) -> addLines(invoke, kotlinReturnNullStatement())
-                function.returnType!!.originalType == KotlinAnalyzerBuiltins.builtins.unitType -> addLines(invoke, kotlinReturnNullStatement())
+                KotlinBuiltIns.isUnit(function.returnType!!.originalType) -> addLines(invoke, kotlinReturnNullStatement())
                 else -> addCode(kotlinReturnStatement(invoke))
             }
             addFunction(build())

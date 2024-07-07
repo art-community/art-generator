@@ -1,6 +1,5 @@
 package io.art.generator.producer
 
-import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.jvm.throws
@@ -44,7 +43,7 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass
     metaClass
         .functions
         .asSequence()
-        .filter { method -> method.couldBeGenerated() && method.modifiers.contains(Modifier.ABSTRACT) }
+        .filter { method -> method.couldBeGenerated() && method.modality == Modality.ABSTRACT }
         .groupBy { method -> method.name }
         .forEach { grouped ->
             grouped.value.forEachIndexed { methodIndex, method ->
@@ -73,7 +72,7 @@ private fun TypeSpec.Builder.generateProxyInvocations(metaClass: KotlinMetaClass
 
     metaClass.properties.values
         .asSequence()
-        .filter { property -> !(property.modifiers.contains(Modifier.PRIVATE) || property.modifiers.contains(Modifier.INTERNAL) || property.modifiers.contains(Modifier.PROTECTED)) }
+        .filter { property -> property.visibility.delegate == Visibilities.Public }
         .forEach { property ->
             addProperty(
                 PropertySpec.builder(property.name, property.type.asPoetType())

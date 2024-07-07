@@ -20,11 +20,12 @@
 
 package io.art.generator.model
 
-import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeName
 import io.art.generator.constants.JAVA_MODULE_SUPPRESSION
+import org.jetbrains.kotlin.descriptors.DescriptorVisibility
+import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.types.KotlinType
 
 enum class KotlinMetaTypeKind {
     CLASS_KIND,
@@ -47,29 +48,30 @@ enum class KotlinTypeVariance {
 }
 
 data class KotlinMetaType(
-    val originalType: KSType,
+        val originalType: KotlinType,
 
-    val typeName: String,
-    val kind: KotlinMetaTypeKind,
-    val nullable: Boolean = false,
+        val typeName: String,
+        val kind: KotlinMetaTypeKind,
+        val nullable: Boolean = false,
 
-    val classFullName: String? = null,
-    val className: String? = null,
-    val classPackageName: String? = null,
+        val classFullName: String? = null,
+        val className: String? = null,
+        val classPackageName: String? = null,
 
-    val arrayComponentType: KotlinMetaType? = null,
+        val arrayComponentType: KotlinMetaType? = null,
 
-    val typeParameters: MutableList<KotlinMetaType> = mutableListOf(),
+        val typeParameters: MutableList<KotlinMetaType> = mutableListOf(),
 
-    val lambdaArgumentTypes: MutableList<KotlinMetaType> = mutableListOf(),
-    val lambdaResultType: KotlinMetaType? = null,
+        val lambdaArgumentTypes: MutableList<KotlinMetaType> = mutableListOf(),
+        val lambdaResultType: KotlinMetaType? = null,
 
-    val typeVariance: KotlinTypeVariance? = null,
+        val typeVariance: KotlinTypeVariance? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        if (originalType != (other as KotlinMetaType).originalType) return false
+        other as KotlinMetaType
+        if (originalType != other.originalType) return false
         return true
     }
 
@@ -77,16 +79,17 @@ data class KotlinMetaType(
 }
 
 data class KotlinMetaClass(
-    val type: KotlinMetaType,
-    val properties: Map<String, KotlinMetaProperty>,
-    val constructors: List<KotlinMetaFunction>,
-    val functions: List<KotlinMetaFunction>,
-    val modifiers: Set<Modifier>,
-    val parent: KotlinMetaClass? = null,
-    val interfaces: MutableList<KotlinMetaClass> = mutableListOf(),
-    val innerClasses: MutableMap<String, KotlinMetaClass> = mutableMapOf(),
-    val isObject: Boolean = false,
-    val isInterface: Boolean = false,
+        val type: KotlinMetaType,
+        val properties: Map<String, KotlinMetaProperty>,
+        val constructors: List<KotlinMetaFunction>,
+        val functions: List<KotlinMetaFunction>,
+        val visibility: DescriptorVisibility,
+        val modality: Modality,
+        val parent: KotlinMetaClass? = null,
+        val interfaces: MutableList<KotlinMetaClass> = mutableListOf(),
+        val innerClasses: MutableMap<String, KotlinMetaClass> = mutableMapOf(),
+        val isObject: Boolean = false,
+        val isInterface: Boolean = false,
 ) {
     override fun hashCode(): Int = type.hashCode()
 
@@ -99,49 +102,50 @@ data class KotlinMetaClass(
 }
 
 data class KotlinMetaProperty(
-    val name: String,
-    val type: KotlinMetaType,
-    val modifiers: Set<Modifier>,
-    val getter: KotlinMetaPropertyFunction?,
-    val setter: KotlinMetaPropertyFunction?,
+        val name: String,
+        val type: KotlinMetaType,
+        val visibility: DescriptorVisibility,
+        val getter: KotlinMetaPropertyFunction?,
+        val setter: KotlinMetaPropertyFunction?,
 )
 
 data class KotlinMetaPropertyFunction(
-    val kind: KotlinMetaPropertyFunctionKind,
-    val modifiers: Set<Modifier>,
+        val kind: KotlinMetaPropertyFunctionKind,
+        val visibility: DescriptorVisibility,
 )
 
 data class KotlinMetaParameter(
-    val name: String,
-    val type: KotlinMetaType,
-    val modifiers: Set<Modifier>,
-    val varargs: Boolean,
+        val name: String,
+        val type: KotlinMetaType,
+        val visibility: DescriptorVisibility,
+        val varargs: Boolean,
 )
 
 data class KotlinMetaFunction(
-    val name: String,
-    val returnType: KotlinMetaType?,
-    val throws: Set<KotlinMetaType>,
-    val parameters: Map<String, KotlinMetaParameter>,
-    val modifiers: Set<Modifier>,
+        val name: String,
+        val returnType: KotlinMetaType?,
+        val throws: Set<KotlinMetaType>,
+        val parameters: Map<String, KotlinMetaParameter>,
+        val visibility: DescriptorVisibility,
+        val modality: Modality,
 ) {
     fun withoutModifiers(): KotlinMetaFunctionWithoutModifiers = KotlinMetaFunctionWithoutModifiers(
-        name,
-        returnType,
-        throws,
-        parameters
+            name,
+            returnType,
+            throws,
+            parameters
     )
 }
 
 data class KotlinMetaFunctionWithoutModifiers(
-    val name: String,
-    val returnType: KotlinMetaType?,
-    val throws: Set<KotlinMetaType>,
-    val parameters: Map<String, KotlinMetaParameter>,
+        val name: String,
+        val returnType: KotlinMetaType?,
+        val throws: Set<KotlinMetaType>,
+        val parameters: Map<String, KotlinMetaParameter>,
 )
 
 data class KotlinMetaClassName(
-    val metaName: ClassName,
-    val type: KotlinMetaClass,
-    val typeName: TypeName
+        val metaName: ClassName,
+        val type: KotlinMetaClass,
+        val typeName: TypeName
 )

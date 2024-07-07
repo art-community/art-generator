@@ -18,11 +18,12 @@
 
 package io.art.generator.producer
 
-import com.google.devtools.ksp.symbol.Modifier
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder
 import com.squareup.kotlinpoet.KModifier.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder
 import io.art.core.extensions.StringExtensions.decapitalize
 import io.art.generator.constants.KOTLIN_LAZY_CLASS_NAME
@@ -52,7 +53,7 @@ fun TypeSpec.Builder.generateClass(metaClass: KotlinMetaClass, nameFactory: Name
                 .build()
         )
         .apply { generateSelf(metaClassName) }
-        .apply { if (!metaClass.modifiers.contains(Modifier.ABSTRACT)) generateConstructors(metaClassName) }
+        .apply { if (metaClass.modality != ABSTRACT) generateConstructors(metaClassName) }
         .apply { generateProperties(metaClassName) }
         .apply { generateFunctions(metaClassName) }
         .apply {

@@ -34,9 +34,7 @@ import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.USE_FIR_EXTENDED_CHECKERS
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
-import org.jetbrains.kotlin.config.JvmTarget
 import org.jetbrains.kotlin.config.JvmTarget.JVM_11
-import org.jetbrains.kotlin.config.JvmTarget.JVM_21
 import java.nio.file.Path
 
 
@@ -52,7 +50,7 @@ object KotlinCompilerProvider {
         compilerConfiguration.put(MESSAGE_COLLECTOR_KEY, loggingMessageCollector)
         compilerConfiguration.put(MODULE_NAME, KOTLIN_ANALYZER_MODULE_NAME)
         compilerConfiguration.put(REPORT_OUTPUT_FILES, false)
-        compilerConfiguration.put(JVM_TARGET, JVM_21)
+        compilerConfiguration.put(JVM_TARGET, JVM_11)
         compilerConfiguration.put(RETAIN_OUTPUT_IN_MEMORY, true)
         compilerConfiguration.put(DISABLE_INLINE, true)
         compilerConfiguration.put(DISABLE_CALL_ASSERTIONS, true)

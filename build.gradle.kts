@@ -1,6 +1,5 @@
 import io.art.gradle.common.constants.BUILD_JAR_EXECUTABLE_TASK
 import io.art.gradle.common.constants.WRITE_CONFIGURATION_TASK
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
@@ -23,11 +22,11 @@ dependencies {
     val javaPoetVersion: String by project
     val kotlinPoetVersion: String by project
     val artKotlinVersion: String by project
-    val kspVersion: String by project
-    val kotlinCompileTestingVersion: String by project
+    val kotlinCompilerVersion: String by project
+    val kotlinCompilingTestingVersion: String by project
 
     embedded(kotlin("stdlib-jdk8"))
-    embedded(kotlin("compiler-embeddable"))
+    embedded(kotlin("compiler-embeddable", kotlinCompilerVersion))
     embedded(kotlin("reflect"))
 
     embedded("io.art.kotlin:core:$artKotlinVersion")
@@ -35,15 +34,13 @@ dependencies {
     embedded("io.art.kotlin:configurator:$artKotlinVersion")
     embedded("io.art.kotlin:logging:$artKotlinVersion")
     embedded("io.art.kotlin:meta:$artKotlinVersion")
-    embedded("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
-    embedded("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
 
     embedded("org.projectlombok", "lombok", lombokVersion)
     embedded("com.squareup", "javapoet", javaPoetVersion)
     embedded("com.squareup", "kotlinpoet", kotlinPoetVersion)
 
     testImplementation(kotlin("stdlib-jdk8"))
-    testImplementation(kotlin("compiler-embeddable"))
+    testImplementation(kotlin("compiler-embeddable", kotlinCompilerVersion))
     testImplementation(kotlin("reflect"))
 
     testImplementation("io.art.kotlin:core:$artKotlinVersion")
@@ -52,8 +49,9 @@ dependencies {
     testImplementation("io.art.kotlin:scheduler:$artKotlinVersion")
     testImplementation("io.art.kotlin:logging:$artKotlinVersion")
     testImplementation("io.art.kotlin:meta:$artKotlinVersion")
+    testImplementation("dev.zacsweers.kctfork:core:$kotlinCompilingTestingVersion")
+    testImplementation("org.projectlombok", "lombok", lombokVersion)
 
-    testCompileOnly("org.projectlombok", "lombok", lombokVersion)
     annotationProcessor("org.projectlombok", "lombok", lombokVersion)
     testAnnotationProcessor("org.projectlombok", "lombok", lombokVersion)
 
@@ -78,6 +76,7 @@ generator {
         sourcesPattern { exclude("**/main/*", "**/kotlin/*") }
     }
     main {
+        consoleLogging()
         disableRunning()
     }
 }
@@ -99,7 +98,7 @@ executable {
             jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
             jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED")
             jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
-            jvmArgs("-Dconfiguration=/home/anton/development/art-environment/local/projects/art-example/build/generator/module.yml")
+            jvmArgs("-Dconfiguration=$configurationPath")
         }
     }
     main("io.art.generator.Generator")

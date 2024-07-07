@@ -1,135 +1,151 @@
 package io.art.generator.parser
 
-import com.google.devtools.ksp.getAllSuperTypes
-import com.google.devtools.ksp.getConstructors
-import com.google.devtools.ksp.isInternal
-import com.google.devtools.ksp.isLocal
-import com.google.devtools.ksp.symbol.*
-import com.google.devtools.ksp.symbol.ClassKind.*
-import com.google.devtools.ksp.symbol.Modifier.SUSPEND
 import io.art.core.extensions.CollectionExtensions.putIfAbsent
 import io.art.generator.model.*
-import io.art.generator.model.KotlinMetaPropertyFunctionKind.*
+import org.jetbrains.kotlin.backend.common.descriptors.isSuspend
+import org.jetbrains.kotlin.codegen.coroutines.isSuspendLambdaOrLocalFunction
+import org.jetbrains.kotlin.coroutines.isSuspendLambda
+import org.jetbrains.kotlin.descriptors.*
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.resolve.DescriptorUtils
+import org.jetbrains.kotlin.resolve.calls.tower.isSynthesized
+import org.jetbrains.kotlin.resolve.constants.KClassValue
+import org.jetbrains.kotlin.resolve.descriptorUtil.classId
+import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassNotAny
+import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperInterfaces
+import org.jetbrains.kotlin.resolve.descriptorUtil.module
 import java.util.*
 
 open class KotlinDescriptorParser : KotlinTypeParser() {
-    private val cache = mutableMapOf<KSClassDeclaration, KotlinMetaClass>()
+    private val descriptorCache = mutableMapOf<ClassDescriptor, KotlinMetaClass>()
 
-    protected fun KSClassDeclaration.asMetaClass(): KotlinMetaClass {
-        val metaClass = putIfAbsent(cache, this) {
+    protected fun ClassDescriptor.asMetaClass(): KotlinMetaClass {
+        val metaClass = putIfAbsent(descriptorCache, this) {
             KotlinMetaClass(
-                type = asStarProjectedType().asMetaType(),
+                    type = defaultType.asMetaType(),
 
-                modifiers = modifiers,
+                    visibility = visibility,
 
-                isObject = classKind == OBJECT,
+                    modality = modality,
 
-                isInterface = classKind == INTERFACE,
+                    isObject = DescriptorUtils.isObject(this),
 
-                properties = getAllProperties()
-                    .filter { declaration -> declaration.type.resolve().resolved() }
-                    .filter { declaration -> !declaration.type.resolve().isSuspend() }
-                    .filter { declaration -> declaration.type.resolve().declaration.typeParameters.none { parameter -> parameter.modifiers.contains(SUSPEND) } }
-                    .filter { declaration -> declaration.typeParameters.isEmpty() }
-                    .filter { declaration -> Objects.isNull(declaration.extensionReceiver) }
-                    .associate { declaration -> declaration.type.resolve().declaration.simpleName.asString() to declaration.asMetaProperty() },
+                    isInterface = DescriptorUtils.isInterface(this),
 
-                constructors = getConstructors()
-                    .filter { declaration -> declaration.returnType!!.resolve().resolved() }
-                    .filter { declaration -> !declaration.returnType!!.resolve().isSuspend() }
-                    .filter { declaration -> declaration.returnType!!.resolve().declaration.typeParameters.none { parameter -> parameter.modifiers.contains(SUSPEND) } }
-                    .filter { declaration -> declaration.typeParameters.isEmpty() }
-                    .filter { declaration -> Objects.isNull(declaration.extensionReceiver) }
-                    .filter { declaration -> declaration.parameters.none { parameter -> parameter.type.resolve().isSuspend() } }
-                    .filter { declaration -> declaration.typeParameters.isEmpty() }
-                    .map { declaration -> declaration.asMetaFunction() }
-                    .toList(),
+                    properties = DescriptorUtils.getAllDescriptors(defaultType.memberScope)
+                            .asSequence()
+                            .filterIsInstance<PropertyDescriptor>()
+                            .filter { descriptor -> descriptor.type.resolved() }
+                            .filter { descriptor -> !descriptor.isSynthesized }
+                            .filter { descriptor -> !descriptor.isSuspend }
+                            .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
+                            .filter { descriptor -> descriptor.typeParameters.isEmpty() }
+                            .filter { descriptor -> Objects.isNull(descriptor.extensionReceiverParameter) }
+                            .associate { descriptor -> descriptor.name.toString() to descriptor.asMetaProperty() },
 
-                functions = getAllFunctions()
-                    .filter { declaration -> declaration.returnType!!.resolve().resolved() }
-                    .filter { declaration -> !declaration.returnType!!.resolve().isSuspend() }
-                    .filter { declaration -> declaration.returnType!!.resolve().declaration.typeParameters.none { parameter -> parameter.modifiers.contains(SUSPEND) } }
-                    .filter { declaration -> declaration.parameters.none { parameter -> parameter.type.resolve().isSuspend() } }
-                    .filter { declaration -> declaration.typeParameters.isEmpty() }
-                    .filter { declaration -> Objects.isNull(declaration.extensionReceiver) }
-                    .map { declaration -> declaration.asMetaFunction() }
-                    .toList(),
+                    constructors = constructors
+                            .asSequence()
+                            .filter { descriptor -> descriptor.returnType.resolved() && descriptor.valueParameters.all { parameter -> parameter.type.resolved() } }
+                            .filter { descriptor -> !descriptor.isSuspendLambdaOrLocalFunction() }
+                            .filter { descriptor -> !descriptor.isSynthesized }
+                            .filter { descriptor -> descriptor.typeParameters.isEmpty() }
+                            .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
+                            .filter { descriptor -> descriptor.typeParameters.isEmpty() }
+                            .map { descriptor -> descriptor.asMetaFunction() }
+                            .toList(),
+
+                    functions = DescriptorUtils.getAllDescriptors(defaultType.memberScope)
+                            .asSequence()
+                            .filterIsInstance<FunctionDescriptor>()
+                            .filter { descriptor -> descriptor.returnType?.resolved() ?: true }
+                            .filter { descriptor -> descriptor.valueParameters.all { parameter -> parameter.type.resolved() } }
+                            .filter { descriptor -> !descriptor.isSuspendLambdaOrLocalFunction() }
+                            .filter { descriptor -> !descriptor.isSynthesized }
+                            .filter { descriptor -> !descriptor.isSuspend }
+                            .filter { descriptor -> descriptor.valueParameters.none { parameter -> parameter.isSuspend || parameter.isSuspendLambda } }
+                            .filter { descriptor -> descriptor.typeParameters.isEmpty() }
+                            .filter { descriptor -> Objects.isNull(descriptor.extensionReceiverParameter) }
+                            .map { descriptor -> descriptor.asMetaFunction() }
+                            .toList(),
 
 
-                parent = getAllSuperTypes()
-                    .firstOrNull()
-                    ?.takeIf { declaration -> declaration.resolved() }
-                    ?.takeIf { declaration -> declaration.declaration is KSClassDeclaration }
-                    ?.let { declaration -> (declaration.declaration as KSClassDeclaration) }
-                    ?.takeIf { declaration -> declaration.classKind != ENUM_ENTRY }
-                    ?.takeIf { declaration -> declaration.classKind != ANNOTATION_CLASS }
-                    ?.takeIf { declaration -> declaration.isInternal() }
-                    ?.takeIf { declaration -> declaration.isLocal() }
-                    ?.takeIf { declaration -> declaration.typeParameters.isEmpty() }
-                    ?.asMetaClass()
+                    parent = getSuperClassNotAny()
+                            ?.takeIf { descriptor -> descriptor.defaultType.resolved() }
+                            ?.takeIf { descriptor -> descriptor.kind != ClassKind.ENUM_ENTRY }
+                            ?.takeIf { descriptor -> descriptor.kind != ClassKind.ANNOTATION_CLASS }
+                            ?.takeIf { descriptor -> !descriptor.isInner }
+                            ?.takeIf { descriptor -> !descriptor.classId!!.isLocal }
+                            ?.takeIf { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
+                            ?.asMetaClass()
             )
         }
 
         if (metaClass.innerClasses.isEmpty()) {
-            val innerClasses = declarations
-                .filterIsInstance<KSClassDeclaration>()
-                .filter { declaration -> declaration.asStarProjectedType().resolved() }
-                .filter { declaration -> declaration.classKind != ENUM_ENTRY }
-                .filter { declaration -> declaration.classKind != ANNOTATION_CLASS }
-                .filter { declaration -> !declaration.isInternal() }
-                .filter { declaration -> !declaration.isLocal() }
-                .filter { declaration -> declaration.typeParameters.isEmpty() }
-                .associate { declaration -> declaration.simpleName.asString() to cache.getOrElse(declaration) { declaration.asMetaClass() } }
+            val innerClasses = DescriptorUtils.getAllDescriptors(defaultType.memberScope)
+                    .asSequence()
+                    .filterIsInstance<ClassDescriptor>()
+                    .filter { descriptor -> descriptor.defaultType.resolved() }
+                    .filter { descriptor -> descriptor.kind != ClassKind.ENUM_ENTRY }
+                    .filter { descriptor -> descriptor.kind != ClassKind.ANNOTATION_CLASS }
+                    .filter { descriptor -> !descriptor.isInner }
+                    .filter { descriptor -> !descriptor.classId!!.isLocal }
+                    .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
+                    .associate { descriptor -> descriptor.name.toString() to descriptorCache.getOrElse(descriptor) { descriptor.asMetaClass() } }
             metaClass.innerClasses.putAll(innerClasses)
         }
 
         if (metaClass.interfaces.isEmpty()) {
-            val interfaces = getAllSuperTypes()
-                .filterIsInstance<KSClassDeclaration>()
-                .filter { declaration -> declaration.asStarProjectedType().resolved() }
-                .filter { declaration -> declaration.classKind != ENUM_ENTRY }
-                .filter { declaration -> declaration.classKind != ANNOTATION_CLASS }
-                .filter { declaration -> !declaration.isInternal() }
-                .filter { declaration -> !declaration.isLocal() }
-                .filter { declaration -> declaration.typeParameters.isEmpty() }
-                .map { declaration -> cache.getOrElse(declaration) { declaration.asMetaClass() } }
-                .toList()
+            val interfaces = getSuperInterfaces()
+                    .asSequence()
+                    .filter { descriptor -> descriptor.defaultType.resolved() }
+                    .filter { descriptor -> descriptor.kind != ClassKind.ENUM_ENTRY }
+                    .filter { descriptor -> descriptor.kind != ClassKind.ANNOTATION_CLASS }
+                    .filter { descriptor -> !descriptor.isInner }
+                    .filter { descriptor -> !descriptor.classId!!.isLocal }
+                    .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
+                    .map { descriptor -> descriptorCache.getOrElse(descriptor) { descriptor.asMetaClass() } }
+                    .toList()
             metaClass.interfaces.addAll(interfaces)
         }
 
         return metaClass
     }
 
-    private fun KSFunctionDeclaration.asMetaFunction() = KotlinMetaFunction(
-        name = simpleName.asString(),
-        returnType = returnType?.asMetaType(),
-        parameters = parameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
-        modifiers = modifiers,
-        throws = extractThrows()
+    private fun FunctionDescriptor.asMetaFunction() = KotlinMetaFunction(
+            name = name.toString(),
+            returnType = returnType?.asMetaType(),
+            parameters = valueParameters.associate { parameter -> parameter.name.toString() to parameter.asMetaParameter() },
+            visibility = visibility,
+            modality = modality,
+            throws = extractThrows()
     )
 
-    private fun KSFunctionDeclaration.extractThrows(): Set<KotlinMetaType> {
-        val annotation = annotations.find { annotation -> annotation.shortName.asString() == Throws::class.qualifiedName!! }
-        val values = annotation?.arguments ?: emptyList()
+    private fun FunctionDescriptor.extractThrows(): Set<KotlinMetaType> {
+        val annotation = annotations.findAnnotation(FqName(Throws::class.qualifiedName!!)) ?: return emptySet()
+        val values = annotation.allValueArguments.values
         if (values.isEmpty()) return emptySet()
-        val classes = values.first()
-        return emptySet()
+        if (values.first() !is List<*>) return emptySet()
+        val classes = values.first() as List<*>
+        return classes
+                .asSequence()
+                .map { value -> value as? KClassValue }
+                .filterNotNull()
+                .map { classValue -> classValue.getArgumentType(this.module).asMetaType() }
+                .toSet()
     }
 
-    private fun KSPropertyDeclaration.asMetaProperty() = KotlinMetaProperty(
-        name = simpleName.asString(),
-        type = type.asMetaType(),
-        modifiers = modifiers,
-        getter = getter?.let { function -> KotlinMetaPropertyFunction(kind = GETTER, modifiers = function.modifiers) },
-        setter = setter?.let { function -> KotlinMetaPropertyFunction(kind = SETTER, modifiers = function.modifiers) },
+    private fun PropertyDescriptor.asMetaProperty() = KotlinMetaProperty(
+            name = name.toString(),
+            type = type.asMetaType(),
+            visibility = visibility,
+            getter = getter?.let { function -> KotlinMetaPropertyFunction(kind = KotlinMetaPropertyFunctionKind.GETTER, visibility = function.visibility) },
+            setter = setter?.let { function -> KotlinMetaPropertyFunction(kind = KotlinMetaPropertyFunctionKind.SETTER, visibility = function.visibility) },
     )
 
-    private fun KSValueParameter.asMetaParameter() = KotlinMetaParameter(
-        name = name.toString(),
-        type = type.asMetaType(),
-        modifiers = setOf(),
-        varargs = isVararg,
+    private fun ValueParameterDescriptor.asMetaParameter() = KotlinMetaParameter(
+            name = name.toString(),
+            type = type.asMetaType(),
+            visibility = visibility,
+            varargs = Objects.nonNull(varargElementType)
     )
 }
-
-fun KSType.isSuspend() = isSuspendFunctionType || declaration.modifiers.contains(SUSPEND)

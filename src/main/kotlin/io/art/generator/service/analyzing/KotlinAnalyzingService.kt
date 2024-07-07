@@ -18,108 +18,82 @@
 
 package io.art.generator.service.analyzing
 
-import com.google.devtools.ksp.isInternal
-import com.google.devtools.ksp.isLocal
-import com.google.devtools.ksp.processing.*
-import com.google.devtools.ksp.symbol.ClassKind.ANNOTATION_CLASS
-import com.google.devtools.ksp.symbol.ClassKind.ENUM_ENTRY
-import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSFile
-import com.google.devtools.ksp.symbol.Modifier.INNER
-import com.tschuchort.compiletesting.KotlinCompilation
-import com.tschuchort.compiletesting.SourceFile
-import com.tschuchort.compiletesting.symbolProcessorProviders
-import io.art.core.constants.StringConstants.DOT
 import io.art.core.matcher.PathMatcher.matches
+import io.art.core.wrapper.ExceptionWrapper.ignoreException
 import io.art.generator.configuration.SourceConfiguration
 import io.art.generator.constants.ANALYZING_MESSAGE
 import io.art.generator.constants.KOTLIN_LOGGER
 import io.art.generator.extension.kotlinPath
 import io.art.generator.model.KotlinMetaClass
 import io.art.generator.parser.KotlinDescriptorParser
-import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
+import io.art.generator.provider.KotlinCompilerConfiguration
+import io.art.generator.provider.KotlinCompilerProvider.useKotlinCompiler
+import org.jetbrains.kotlin.analyzer.AnalysisResult
+import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler
+import org.jetbrains.kotlin.descriptors.ClassDescriptor
+import org.jetbrains.kotlin.descriptors.ClassKind.ANNOTATION_CLASS
+import org.jetbrains.kotlin.descriptors.ClassKind.ENUM_ENTRY
+import org.jetbrains.kotlin.descriptors.SourceFile.NO_SOURCE_FILE
+import org.jetbrains.kotlin.load.java.descriptors.JavaClassDescriptor
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.resolve.DescriptorUtils.getAllDescriptors
+import org.jetbrains.kotlin.resolve.descriptorUtil.classId
+import org.jetbrains.kotlin.resolve.source.KotlinSourceElement
 import java.nio.file.Paths.get
-import kotlin.io.path.exists
 
 data class KotlinAnalyzingRequest(
-    val configuration: SourceConfiguration,
-    val metaClassName: String,
+        val configuration: SourceConfiguration,
+        val metaClassName: String,
 )
-
-object KotlinAnalyzerBuiltins {
-    lateinit var builtins: KSBuiltIns
-}
 
 fun analyzeKotlinSources(request: KotlinAnalyzingRequest) = KotlinAnalyzingService().analyzeKotlinSources(request)
 
-private class KotlinAnalyzingProcessor(
-    private val request: KotlinAnalyzingRequest,
-    private val processor: (files: List<KotlinMetaClass>) -> Unit
-) : SymbolProcessor, KotlinDescriptorParser() {
-    var invoked = false
-    override fun process(resolver: Resolver): List<KSAnnotated> {
-        if (invoked) return emptyList()
-        val resolved = resolver.getAllFiles().toSet()
-        KotlinAnalyzerBuiltins.builtins = resolver.builtIns
-        request.configuration.root.toFile().listFiles()!!
-            .asSequence()
-            .map { file -> file.name }
-            .flatMap { packageName -> collectClasses(resolved, packageName) }
-            .filter { descriptor -> !descriptor.containingFile?.fileName?.kotlinPath.isNullOrBlank() }
-            .filter { descriptor -> descriptor.included(request) }
-            .filter { descriptor -> descriptor.qualifiedName?.asString() != request.metaClassName }
-            .filter { descriptor -> descriptor.classKind != ENUM_ENTRY }
-            .filter { descriptor -> descriptor.classKind != ANNOTATION_CLASS }
-            .filter { descriptor -> !descriptor.modifiers.contains(INNER) }
-            .filter { descriptor -> !descriptor.isLocal() }
-            .filter { descriptor -> !descriptor.isInternal() }
-            .filter { descriptor -> descriptor.parentDeclaration !is KSClassDeclaration }
-            .filter { descriptor -> descriptor.typeParameters.isEmpty() }
-            .toList()
-            .map { descriptor -> descriptor.asMetaClass() }
-            .distinctBy { metaClass -> metaClass.type.typeName }
-            .toList()
-            .let(processor)
-        invoked = true
-        return emptyList()
-    }
-
-    private fun KSClassDeclaration.included(request: KotlinAnalyzingRequest) = get(containingFile!!.filePath)
-        .let { path ->
-            path.startsWith(request.configuration.root)
-                    && request.configuration.exclusions.none { exclusion -> matches(exclusion.kotlinPath, path) }
-                    && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion.kotlinPath, path) })
-        }
-
-    private fun collectClasses(processed: Set<KSFile>, packageName: String): List<KSClassDeclaration> = processed
-        .filter { declaration -> declaration.packageName.asString().substringBefore(DOT) == packageName }
-        .flatMap { declaration -> declaration.declarations }
-        .filterIsInstance<KSClassDeclaration>()
-        .toList()
-}
-
-private class KotlinAnalyzingProcessorProvider(
-    private val request: KotlinAnalyzingRequest,
-    private val processor: (files: List<KotlinMetaClass>) -> Unit
-) : SymbolProcessorProvider {
-    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor = KotlinAnalyzingProcessor(request, processor)
-}
-
-@OptIn(ExperimentalCompilerApi::class)
-private class KotlinAnalyzingService {
+private class KotlinAnalyzingService : KotlinDescriptorParser() {
     fun analyzeKotlinSources(request: KotlinAnalyzingRequest): List<KotlinMetaClass> {
         KOTLIN_LOGGER.info(ANALYZING_MESSAGE(request.configuration.root))
+
         val roots = request.configuration.sources.toSet()
-        val processed = mutableListOf<KotlinMetaClass>()
-        KotlinCompilation().apply {
-            sources = roots.filter { path -> path.exists() }
-                .flatMap { path -> path.toFile().walkTopDown().toList() }
-                .filter { path -> path.isFile }
-                .map { path -> SourceFile.fromPath(path, false) }
-            symbolProcessorProviders = listOf(KotlinAnalyzingProcessorProvider(request, processed::addAll))
-            compile()
-        }
-        return processed
+
+        val analysisResult = useKotlinCompiler(KotlinCompilerConfiguration(roots, request.configuration.classpath), KotlinToJVMBytecodeCompiler::analyze)
+                ?.apply { ignoreException(this::throwIfError, KOTLIN_LOGGER::error) }
+                ?: return emptyList()
+
+        return request.configuration.root.toFile().listFiles()!!
+                .map { file -> file.name }
+                .flatMap { packageName -> collectClasses(analysisResult, packageName) }
+                .asSequence()
+                .filter { descriptor -> descriptor.source.containingFile != NO_SOURCE_FILE }
+                .filter { descriptor -> !descriptor.source.containingFile.name.isNullOrBlank() }
+                .filter { descriptor -> descriptor.source is KotlinSourceElement }
+                .filter { descriptor -> descriptor.included(request) }
+                .filter { descriptor -> descriptor.defaultType.resolved() }
+                .filter { descriptor -> descriptor.classId?.asSingleFqName()?.asString() != request.metaClassName }
+                .filter { descriptor -> descriptor.kind != ENUM_ENTRY }
+                .filter { descriptor -> descriptor.kind != ANNOTATION_CLASS }
+                .filter { descriptor -> !descriptor.isInner }
+                .filter { descriptor -> !descriptor.classId!!.isNestedClass }
+                .filter { descriptor -> !descriptor.classId!!.isLocal }
+                .filter { descriptor -> descriptor.defaultType.constructor.parameters.isEmpty() }
+                .map { descriptor -> descriptor.asMetaClass() }
+                .distinctBy { metaClass -> metaClass.type.typeName }
+                .toList()
+    }
+
+    private fun ClassDescriptor.included(request: KotlinAnalyzingRequest) = get((source as KotlinSourceElement).psi.containingKtFile.virtualFilePath)
+            .let { path ->
+                path.startsWith(request.configuration.root)
+                        && request.configuration.exclusions.none { exclusion -> matches(exclusion.kotlinPath, path) }
+                        && (request.configuration.inclusions.isEmpty() || request.configuration.inclusions.any { exclusion -> matches(exclusion.kotlinPath, path) })
+            }
+
+    private fun collectClasses(analysisResult: AnalysisResult, packageName: String): List<ClassDescriptor> {
+        val name = FqName(packageName)
+        val packageView = analysisResult.moduleDescriptor.getPackage(name).memberScope
+        val classes = getAllDescriptors(packageView)
+                .filterIsInstance<ClassDescriptor>()
+                .filter { descriptor -> descriptor !is JavaClassDescriptor }
+        return classes + analysisResult.moduleDescriptor
+                .getSubPackagesOf(name) { true }
+                .flatMap { nested -> collectClasses(analysisResult, nested.asString()) }
     }
 }
