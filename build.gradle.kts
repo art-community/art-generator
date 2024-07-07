@@ -105,7 +105,7 @@ executable {
 }
 
 tasks.build {
-    dependsOn("build-jar-executable")
+    dependsOn(BUILD_JAR_EXECUTABLE_TASK)
 }
 
 afterEvaluate {
@@ -113,6 +113,9 @@ afterEvaluate {
 }
 
 tasks.test {
+    testLogging {
+        showStandardStreams = true
+    }
     val configurationPath = generator.mainConfiguration.workingDirectory
         .resolve("module.yml")
         .toFile()
@@ -120,8 +123,6 @@ tasks.test {
     dependsOn(BUILD_JAR_EXECUTABLE_TASK)
     dependsOn(WRITE_CONFIGURATION_TASK)
     useJUnitPlatform()
-    logging.captureStandardOutput(LogLevel.INFO)
-    logging.captureStandardError(LogLevel.ERROR)
     jvmArgs("-Xms2g", "-Xmx2g")
     jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
     jvmArgs("--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
