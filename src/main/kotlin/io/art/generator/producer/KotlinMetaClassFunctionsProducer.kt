@@ -21,7 +21,7 @@ internal fun TypeSpec.Builder.generateConstructors(metaClassName: KotlinMetaClas
     metaClassName.type.constructors
             .filter(KotlinMetaFunction::couldBeGenerated)
             .mapIndexed { index, constructor ->
-                var name = (metaClassName.type.type.className ?: CONSTRUCTOR_NAME)
+                var name = CONSTRUCTOR_NAME
                 if (index > 0) name += "_$index"
                 val constructorClassName = metaConstructorClassName(name)
                 TypeSpec.classBuilder(constructorClassName)
